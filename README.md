@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/dellemc-symphony/dne-paqx-parent.svg?branch=master)](https://travis-ci.org/dellemc-symphony/dne-paqx-parent)
 # dne-paqx-parent
 ## Description
-This repository provides the service to add a new server to an existing system in the scope of the Dell EMC VxRackFlex node expansion functionality of Project Symphony.  
+This repository provides the service to add a new server to an existing system in the scope of the Dell EMC VxRack Flex node expansion functionality of Project Symphony.  
 ## Documentation
 You can find additional documentation for Project Symphony at [dellemc-symphony.readthedocs.io][documentation].
 
@@ -14,7 +14,7 @@ Verify that the following tools are installed:
 * Apache Maven 3.0.5+
 * Docker 1.12+
 * Docker Compose 1.8.0+
-* Java Development Kit(version 8)
+* Java Development Kit (version 8)
 * RabbitMQ  3.6.6
 ## Building
 Run the following command to build this project:
