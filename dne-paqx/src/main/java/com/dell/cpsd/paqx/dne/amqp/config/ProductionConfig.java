@@ -26,8 +26,8 @@ public class ProductionConfig {
     @Bean
     @Qualifier("rabbitConnectionFactory")
     public ConnectionFactory productionCachingConnectionFactory() {
-        LOGGER.info("rabbit Connection properties:  sslenabled:{}, host:{}, port:{}, tlsVersion:{}", propertiesConfig.isSslEnabled(),
-                propertiesConfig.keyStorePassPhrase(), propertiesConfig.rabbitHostname(),
+        LOGGER.info("rabbit Connection properties:  sslenabled:{}, host:{}, port:{}, tlsVersion:{}",
+                propertiesConfig.isSslEnabled(),propertiesConfig.rabbitHostname(),
                 propertiesConfig.rabbitPort(), propertiesConfig.tlsVersion());
         final com.rabbitmq.client.ConnectionFactory connectionFactory = new TLSConnectionFactory(propertiesConfig);
         return new RabbitMQCachingConnectionFactory(connectionFactory, propertiesConfig);

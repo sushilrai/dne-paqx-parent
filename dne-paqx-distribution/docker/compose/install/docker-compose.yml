@@ -11,6 +11,7 @@ services:
     network_mode: "host"
     command: --spring.cloud.consul.host=${HOSTNAME}
     volumes:
+      -  /opt/dell/cpsd/dne-paqx/logs/:/opt/dell/cpsd/dne-paqx/logs
       -  /etc/rabbitmq/:/etc/rabbitmq
     environment:
       -  CREDENTIALS=${CREDENTIALS}
