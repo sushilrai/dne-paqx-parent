@@ -11,7 +11,14 @@ services:
     network_mode: "host"
     command: --spring.cloud.consul.host=${HOSTNAME}
     volumes:
-      - /opt/dell/cpsd/rcm-fitness/conf/:/opt/dell/cpsd/dne-paqx/conf/
+      -  /etc/rabbitmq/:/etc/rabbitmq
+    environment:
+      -  CREDENTIALS=${CREDENTIALS}
+      -  PASSPHRASES=${PASSPHRASES}
+      -  remote.dell.amqp.rabbitKeyStorePath=${KEYSTOREPATH}
+      -  remote.dell.amqp.rabbitTrustStorePath=${TRUSTSTOREPATH}
+
+
 
 # it has dependency on consul container.
 # has to connect to same network as consul.
