@@ -491,7 +491,7 @@ def verifyEidsMessage():
     return uuid
 
 
-def rest_queue_list(user=rmq_username, password=rmq_password, host=ipaddress, port=15672, virtual_host=None, exchange=None):
+def rest_queue_list(user=None, password=None, host=None, port=15672, virtual_host=None, exchange=None):
     url = 'http://%s:%s/api/exchanges/%s/%s/bindings/source' % (host, port, virtual_host, exchange)
     response = requests.get(url, auth=(user, password))
     queues = [q['destination'] for q in response.json()]
