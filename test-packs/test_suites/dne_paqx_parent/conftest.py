@@ -2,13 +2,6 @@ import pytest
 from . import globals as gbl
 import af_support_tools
 
-try:
-    env_file = 'env.ini'
-    host = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='hostname')
-    print(host)
-except:
-    print('Failed to read env variables')
-
 my_data = {'dne_base_url': '',
            'add_node_url': '',
            'add_node_resp': '',
@@ -16,11 +9,15 @@ my_data = {'dne_base_url': '',
            'workflow_id': '',
            'uuid': ''}
 
-@pytest.fixture(scope='session', autouse=True)
+# Get vars from env ini file
+env_file = 'env.ini'
+host = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='hostname')
+
+@pytest.fixture(scope='module', autouse=True)
 def populate_globals():
     gbl.my_data = my_data  # Assign the master value to the global before each test
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='module', autouse=True)
 def dne_paqx_base_url():
     protocol = 'http://'
     port = '8071'
@@ -29,13 +26,14 @@ def dne_paqx_base_url():
     my_data['dne_base_url'] = url
     return url
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='module', autouse=True)
 def add_node_url(dne_paqx_base_url):
     endpoint = '/nodes'
     url = dne_paqx_base_url + endpoint
     my_data['add_node_url'] = url
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='module', autouse=True)
 def restart_dne_paqx_log():
     # TBD
     pass
+
