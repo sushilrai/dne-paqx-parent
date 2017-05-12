@@ -1,34 +1,41 @@
-import os
-import time
+import af_support_tools
+from . import globals as gbl
 import json
+import os
 import pytest
 import requests
 import requests.exceptions
-import af_support_tools
-from . import globals as gbl
+import time
 
-try:
+@pytest.fixture(scope="module", autouse=True)
+def load_test_data():
+    # Set config ini file name
+    global config_file
+    config_file = 'dne_paqx_parent/core_config.ini'
+    global env_file
     env_file = 'env.ini'
+
+    # Set Vars
+    global ipaddress
     ipaddress = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='hostname')
-    ssh_user = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='username')
-    ssh_pass = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='password')
+    global ssh_user
+    username = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='username')
+    global sshpass
+    sshpass = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='password')
 
-except:
-    print('Failed to read env variables from ' + env_file)
-    assert False
-
-try:
-    conf_file = 'dne_paqx_parent/core_config.ini'
-    port = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='port')
-    rmq_username = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='rmq_username')
-    rmq_password = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='rmq_password')
+    global node_id
     node_id = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='node_id')
+    global rackhd_ip
     rackhd_ip = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='rackhd_ip')
+    global mac_address
     mac_address = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='mac_address')
 
-except:
-    print('Failed to read env variables from ' + conf_file)
-    assert False
+    global rmq_username
+    rmq_username = 'guest'
+    global rmq_password
+    rmq_password = 'guest'
+    global port
+    port = 5672
 
 #####################################################################
 # These are the main tests.
@@ -93,8 +100,8 @@ def test_DellNodeExp():
     time.sleep(3)
 
     # Step 1: Verify the rackhd.node.discovered.event exchange is bound to paqx.node.discovery.request queue.
-    # Test will fail is this isnt done. Format: test_queues_on_exchange(exchange, expected queue)
-    test_queues_on_exchange('exchange.dell.cpsd.adapter.rackhd.node.discovered.event', 'queue.dell.cpsd.paqx.node.discovery.event')
+    # Test will fail is this isnt done. Format: validate_queues_on_exchange(exchange, expected queue)
+    validate_queues_on_exchange('exchange.dell.cpsd.adapter.rackhd.node.discovered.event', 'queue.dell.cpsd.paqx.node.discovery.event')
 
     # Step 2: Verify the api list is empty
     currentNodes = listDellNodesAPI()
@@ -167,7 +174,7 @@ def preprocess():
         request_body = json.loads(fixture.read())
         endpoint = "/preprocess"
         url = gbl.my_data['dne_base_url'] + endpoint
-        response = requests.post(gbl.my_data['add_node_url'], json=request_body, headers=headers)
+        response = requests.post(url, json=request_body, headers=headers)
         # verify the status_code
         assert response.status_code == 200
 
@@ -183,10 +190,9 @@ def preprocess():
 def preprocess_status():
     endpoint = "/preprocess/" + gbl.my_data['preprocess_workflow_id']
     url = gbl.my_data['dne_base_url'] + endpoint
-    response = requests.get(gbl.my_data['add_node_url'])
+    response = requests.get(url)
     # verify the status_code
     assert response.status_code == 200
-
     data = response.json()
     # Assert
     task_list = ['Find VCluster', 'Find ProtectionDomain', 'Find SystemData', 'Assign Default HostName', 'Assign Default Credentials']
@@ -485,14 +491,14 @@ def verifyEidsMessage():
     return uuid
 
 
-def rest_queue_list(user=rmq_username, password=rmq_password, host=ipaddress, port=15672, virtual_host=None, exchange = None):
+def rest_queue_list(user=None, password=None, host=None, port=15672, virtual_host=None, exchange=None):
     url = 'http://%s:%s/api/exchanges/%s/%s/bindings/source' % (host, port, virtual_host, exchange)
     response = requests.get(url, auth=(user, password))
     queues = [q['destination'] for q in response.json()]
     return queues
 
 
-def test_queues_on_exchange(suppliedExchange, suppliedQueue):
+def validate_queues_on_exchange(suppliedExchange, suppliedQueue):
     queues = rest_queue_list(user=rmq_username, password=rmq_password, host=ipaddress, port=15672, virtual_host='%2f', exchange =suppliedExchange )
     queues = json.dumps(queues)
 
@@ -541,4 +547,3 @@ def consulBypassMsg():
                                          headers={
                                              '__TypeId__': 'com.dell.cpsd.endpoint-registry.endpointsdiscoveredevent'},
                                          payload=the_payload)
-
