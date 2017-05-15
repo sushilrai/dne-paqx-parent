@@ -34,7 +34,7 @@ pipeline {
                 }
             }
             steps {
-                sh "mvn deploy -P buildDockerImageOnJenkins -DdockerImage.tag=dne-paqx-parent_develop.${env.BUILD_NUMBER} -Ddocker.registry=docker-dev-local.art.local -DdeleteDockerImages=true -DskipTests=true -DskipITs"
+                sh "mvn deploy -P buildDockerImageOnJenkins -DdockerImage.tag=dne-paqx-parent-develop.${env.BUILD_NUMBER} -Ddocker.registry=docker-dev-local.art.local -DdeleteDockerImages=true -DskipTests=true -DskipITs"
             }
         }
         stage('SonarQube Analysis') {
