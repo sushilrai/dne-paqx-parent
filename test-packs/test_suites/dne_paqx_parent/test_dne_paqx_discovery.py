@@ -10,8 +10,8 @@ import time
 @pytest.fixture(scope="module", autouse=True)
 def load_test_data():
     # Set config ini file name
-    global config_file
-    config_file = 'dne_paqx_parent/core_config.ini'
+    global conf_file
+    conf_file = 'dne_paqx_parent/core_config.ini'
     global env_file
     env_file = 'env.ini'
 
