@@ -22,7 +22,7 @@ fi
 cp -r build/install/* target/temp_deployment/
 
 sed -i -- 's/IMAGE_NAME_STANDIN/'${IMAGE_NAME}'/g' target/temp_deployment/docker-compose.yml
-sed -i -- 's/IMAGE_TAG_STANDIN/'${IMAGE_TAG}'/g' target/temp_deployment/docker-compose.yml
+sed -i -- 's/IMAGE_TAG_STANDIN/'latest'/g' target/temp_deployment/docker-compose.yml
 
 #copy contents of deployment directory into temp directory
 cp -r resources/deployment/* target/temp_deployment
@@ -37,7 +37,7 @@ sed -i -- 's/IMAGE_NAME_STANDIN/'${IMAGE_NAME}'/g' install.sh
 
 chmod 755 remove.sh
 sed -i -- 's/IMAGE_NAME_STANDIN/'${IMAGE_NAME}'/g' remove.sh
-sed -i -- 's/IMAGE_TAG_STANDIN/'${IMAGE_TAG}'/g' remove.sh
+sed -i -- 's/IMAGE_TAG_STANDIN/'latest'/g' remove.sh
 
 
 chmod 755 ${IMAGE_NAME}.tar
