@@ -9,13 +9,27 @@
 # Start from base image with Java 8
 FROM java:8-jre-alpine
 
-RUN mkdir -p /opt/dell/cpsd/dne-paqx/bin /opt/dell/cpsd/dne-paqx/logs /opt/dell/cpsd/dne-paqx/lib /opt/dell/cpsd/dne-paqx/install
+# Install the service file(s) to run
+WORKDIR /opt/dell/cpsd/dne-paqx/
 
-COPY target/dependency/lib/dne-paqx-web*.jar /opt/dell/cpsd/dne-paqx/lib/dne-paqx-web.jar
-COPY docker/image/bin/run.sh /opt/dell/cpsd/dne-paqx/bin/
+COPY target/dependency/lib/dne-paqx-web*.jar ./lib/dne-paqx-web.jar
+COPY build/conf/* ./conf/
+COPY build/service/run.sh ./bin/
 
-RUN chmod 755 /opt/dell/cpsd/dne-paqx/bin/run.sh
+ARG DELL_JAVA_VERSION=unknown
+ARG BUILD_NUMBER=unknown
+ARG GIT_COMMIT=unknown
+ARG BUILD_TYPE=dev
+ARG CPSD_SOFTWARE_VERSION=unknown
 
+LABEL   com.dell.cpsd.version=$CPSD_SOFTWARE_VERSION\
+        com.dell.cpsd.git_revision=$GIT_COMMIT\
+        com.dell.cpsd.build_number=$BUILD_NUMBER\
+        com.dell.cpsd.build_type=$BUILD_TYPE\
+        com.dell.cpsd.java=$DELL_JAVA_VERSION
+RUN mkdir ./logs \
+&& chmod 755 ./bin/run.sh
+      
 EXPOSE 8071
 
-ENTRYPOINT ["/opt/dell/cpsd/dne-paqx/bin/run.sh"]
+ENTRYPOINT ["./bin/run.sh"]

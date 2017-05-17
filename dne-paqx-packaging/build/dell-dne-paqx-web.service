@@ -1,0 +1,22 @@
+# Copyright © 2017 Dell Inc. or its subsidiaries.  All Rights Reserved
+[Unit]
+Description=DNE PAQX Web Application
+
+# When systemd stops or restarts the dell-dne-paqx.service, the action is propagated to this unit
+PartOf=dell-dne-paqx.service
+
+# Start this unit after the dell-dne-paqx.service start
+After=dell-dne-paqx.service
+After=dell-dne-paqx-ess.service
+
+[Service]
+Environment=HOSTNAME=%H
+ExecStart=/usr/bin/env /usr/bin/docker-compose -f /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/docker-compose.yml up
+ExecStop=/usr/bin/env /usr/bin/docker-compose -f /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/docker-compose.yml down
+
+# Restart the service on non-zero exit code when terminated by a signal other than SIGHUP, SIGINT, SIGTERM or SIGPIPE
+Restart=on-failure
+
+[Install]
+# This unit should start when dell-dne-paqx.service is starting
+WantedBy=dell-dne-paqx.service

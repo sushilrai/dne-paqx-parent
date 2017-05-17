@@ -1,0 +1,17 @@
+# Copyright © 2017 Dell Inc. or its subsidiaries.  All Rights Reserved
+[Unit]
+Description=DNE PAQX
+
+# Start this unit after the dne-paqx.service start
+After=network.target docker.service rabbitmq-server.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+
+# This service shall be considered active after start
+RemainAfterExit=yes
+
+[Install]
+# Components of this application should be started at boot time
+WantedBy=multi-user.target

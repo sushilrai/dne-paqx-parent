@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright © 2017 Dell Inc. or its subsidiaries.  All Rights Reserved -->
+<!--Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.-->
+<!--Dell EMC Confidential/Proprietary Information-->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -36,12 +37,21 @@
     </scm>
 
     <properties>
-        <docker.registry>docker-dev-local.art.local</docker.registry>
         <dockerDirectory>${project.basedir}</dockerDirectory>
         <dockerImage.org>cpsd</dockerImage.org>
-        <dockerImage.tag>${project.version}</dockerImage.tag>
+        <dockerImage.tag>latest</dockerImage.tag>
         <dockerImage.service>dne-paqx</dockerImage.service>
     </properties>
+    
+    <profiles>
+        <profile>
+            <id>locallyBuildDockerImage</id>
+            <properties>
+                <skipDocker>false</skipDocker>
+                <dockerImage.tag>latest</dockerImage.tag>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -50,6 +60,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
                 <executions>
+               
                     <execution>
                         <id>copy-dependencies-for-distribution</id>
                         <phase>package</phase>
@@ -61,31 +72,84 @@
                                 <artifactItem>
                                     <groupId>com.dell.cpsd.paqx.dne</groupId>
                                     <artifactId>dne-paqx-web</artifactId>
-                                    <version>${parent.version}</version>
+                                    <version>${project.parent.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependency/lib</outputDirectory>
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>
                     </execution>
+  
                 </executions>
             </plugin>
+            
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>${docker-maven-plugin.version}</version>
                 <configuration>
-                    <dockerDirectory>${project.basedir}</dockerDirectory>
+                    <buildArgs>
+                        <DELL_JAVA_VERSION>1.8</DELL_JAVA_VERSION>
+                        <BUILD_NUMBER>N/A</BUILD_NUMBER>
+                        <GIT_COMMIT>a</GIT_COMMIT>
+                        <BUILD_TYPE>dev</BUILD_TYPE>
+                        <CPSD_SOFTWARE_VERSION>${project.version}</CPSD_SOFTWARE_VERSION>
+                    </buildArgs>
                 </configuration>
             </plugin>
+            
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>Service Packaging</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <environmentVariables>
+                                <IMAGE_NAME>${dockerImage.org}-${dockerImage.service}</IMAGE_NAME>
+                                <IMAGE_TAG>${dockerImage.tag}</IMAGE_TAG>
+                            </environmentVariables>
+                            <executable>/bin/sh</executable>
+                            <arguments>
+                                <argument>resources/packaging/docker_image_packaging.sh</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>   
+            
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-5</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-gpg-plugin</artifactId>
-	    </plugin>
+            
+		    <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+		    </plugin>
         </plugins>
     </build>
 

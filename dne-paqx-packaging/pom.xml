@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.-->
+<!--Dell EMC Confidential/Proprietary Information-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.dell.cpsd.paqx.dne</groupId>
+        <artifactId>dne-paqx-parent</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+    
+    <groupId>com.dell.cpsd.paqx.dne</groupId>
+    <artifactId>dne-paqx-packaging</artifactId>
+    <packaging>pom</packaging>
+    
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 1.0</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>
+    
+    <properties>
+        <com.dell.cpsd.ess.version>1.0-SNAPSHOT</com.dell.cpsd.ess.version>
+    </properties>
+    
+    <dependencies>
+    
+        <dependency>
+            <groupId>com.dell.cpsd.ess</groupId>
+            <artifactId>engineering-standards-service-distribution</artifactId>
+            <version>${com.dell.cpsd.ess.version}</version>
+            <type>tar</type>
+            <classifier>service-tar</classifier>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.dell.cpsd.paqx.dne</groupId>
+            <artifactId>dne-paqx-distribution</artifactId>
+            <version>${project.parent.version}</version>
+            <type>tar</type>
+            <classifier>service-tar</classifier>
+        </dependency>
+        
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- extract tar dependencies into directory structure-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                
+                    <execution>
+                        <id>unpack-ess-service-tar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.dell.cpsd.ess</includeGroupIds>
+                            <includeArtifactIds>engineering-standards-service-distribution</includeArtifactIds>
+                            <includes>**</includes>
+                        </configuration>
+                    </execution>
+                    
+                    <execution>
+                        <id>unpack-dne-paqx-service-tar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.dell.cpsd.paqx.dne</includeGroupIds>
+                            <includeArtifactIds>dne-paqx-distribution</includeArtifactIds>
+                            <includes>**</includes>
+                        </configuration>
+                    </execution>
+                    
+                </executions>
+            </plugin>
+
+
+            <!--run rpm.sh to create RPM, based on parameters described in spec file-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>rpmbuild</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>/bin/sh</executable>
+                    <arguments>
+                        <argument>build/build_rpm.sh</argument>
+                        <argument>1.0.0.0</argument>
+                        <argument>1</argument>
+                    </arguments>
+                    <workingDirectory>${basedir}</workingDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-5</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
