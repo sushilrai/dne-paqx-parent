@@ -3,14 +3,14 @@
 # Dell EMC Confidential/Proprietary Information
 #
 Summary: Dell Inc. DNE PAQX
-Name: cpsd-dne-paqx-services
+Name: cpsd-node-expansion-services
 Version: %_version
 Release: %_revision
 License: Commercial
 Vendor: Dell Inc.
 Group: System Environment/Dell Inc. Applications
 URL: http://www.dell.com
-Requires: rcm-fitness-common
+Requires: jre >= 1.8.0 cpsd-capability-registry-service cpsd-node-discovery-service
 
 %define _use_internal_dependency_generator 0
 %define __find_requires %{nil}
