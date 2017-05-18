@@ -37,6 +37,11 @@ pipeline {
                 sh "mvn deploy -P buildDockerImageOnJenkins -DdockerImage.tag=dne-paqx-parent-develop.${env.BUILD_NUMBER} -Ddocker.registry=docker-dev-local.art.local -DdeleteDockerImages=true -DskipTests=true -DskipITs"
             }
         }
+        stage('ArchiveArtifacts') {
+            steps {
+                archiveArtifacts artifacts: '**/*.rpm', fingerprint: true 
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') { 
