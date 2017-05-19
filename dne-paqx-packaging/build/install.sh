@@ -28,12 +28,14 @@ if [ ! -f "$RABBITMQ_ENV" ]; then
 
     touch "$RABBITMQ_ENV"
 
-    /usr/bin/env echo "CREDENTIALS=$CREDENTIALS" >> "$RABBITMQ_ENV"
-    /usr/bin/env echo "PASSPHRASES=$PASSPHRASES" >>  "$RABBITMQ_ENV"
-    /usr/bin/env echo "KEYSTOREPATH=$KEYSTOREPATH" >> "$RABBITMQ_ENV"
-    /usr/bin/env echo "TRUSTSTOREPATH=$TRUSTSTOREPATH" >> "$RABBITMQ_ENV"
+    /usr/bin/env echo "CREDENTIALS=/etc/rabbitmq/credentials.properties" >> "$RABBITMQ_ENV"
+    /usr/bin/env echo "PASSPHRASES=/etc/rabbitmq/client/passphrases.properties" >>  "$RABBITMQ_ENV"
+    /usr/bin/env echo "KEYSTOREPATH=/etc/rabbitmq/certs/client/keycert.p12" >> "$RABBITMQ_ENV"
+    /usr/bin/env echo "TRUSTSTOREPATH=/etc/rabbitmq/certs/rabbitstore" >> "$RABBITMQ_ENV"
 
     chmod a+r "$RABBITMQ_ENV"
+else
+    echo "Found $RABBITMQ_ENV"
 fi
 
 systemctl enable dell-dne-paqx
