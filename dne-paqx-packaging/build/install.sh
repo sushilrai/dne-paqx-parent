@@ -22,6 +22,20 @@ usermod -aG docker dnepx
 /bin/sh /opt/dell/cpsd/dne-paqx/image/engineering-standards-service/install.sh -s
 /bin/sh /opt/dell/cpsd/dne-paqx/image/dne-paqx-web/install.sh -s
 
+RABBITMQ_ENV=/etc/rabbitmq/cpsd-rabbitmq-env.conf
+
+if [ ! -f "$RABBITMQ_ENV" ]; then
+
+    touch "$RABBITMQ_ENV"
+
+    /usr/bin/env echo "CREDENTIALS=$CREDENTIALS" >> "$RABBITMQ_ENV"
+    /usr/bin/env echo "PASSPHRASES=$PASSPHRASES" >>  "$RABBITMQ_ENV"
+    /usr/bin/env echo "KEYSTOREPATH=$KEYSTOREPATH" >> "$RABBITMQ_ENV"
+    /usr/bin/env echo "TRUSTSTOREPATH=$TRUSTSTOREPATH" >> "$RABBITMQ_ENV"
+
+    chmod a+r "$RABBITMQ_ENV"
+fi
+
 systemctl enable dell-dne-paqx
 systemctl enable dell-dne-paqx-ess
 systemctl enable dell-dne-paqx-web

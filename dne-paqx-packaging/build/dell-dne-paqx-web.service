@@ -6,8 +6,7 @@ Description=DNE PAQX Web Application
 PartOf=dell-dne-paqx.service
 
 # Start this unit after the dell-dne-paqx.service start
-After=dell-dne-paqx.service
-After=dell-dne-paqx-ess.service
+After=dell-dne-paqx.service dell-dne-paqx-ess.service
 
 [Service]
 Environment=HOSTNAME=%H
