@@ -36,21 +36,19 @@ def load_test_data():
     rmq_username = 'guest'
     global rmq_password
     rmq_password = 'guest'
-    global port
-    port = 5672
+
 
 ##############################################################################################
 
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-def test_dne_paqx_config():
+def test_dne_servicerunning():
 
     print('\n* * * Testing the DNE PAQX on system:', ipaddress, '* * *\n')
 
     service_name = 'symphony-dne-paqx'
 
 
-    # 1. Test the service is running
     sendCommand = "docker ps --filter name=" + service_name + "  --format '{{.Status}}' | awk '{print $1}'"
     my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password, command=sendCommand, return_output=True)
     my_return_status=my_return_status.strip()
@@ -58,18 +56,36 @@ def test_dne_paqx_config():
     assert my_return_status == 'Up', (service_name + " not running")
 
 
-    # 2. Verify the DNE related Exchanges are bound to the correct queues
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_reg_in_Consul():
+    verifyServiceInConsulAPI('dne-paqx')
+
+
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_rmq_bindings_response():
     validate_queues_on_exchange('exchange.dell.cpsd.paqx.node.discovery.response',
                           'queue.dell.cpsd.dne-paqx.response.dne-paqx')
 
+
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_rmq_bindings_cr_event():
     validate_queues_on_exchange('exchange.dell.cpsd.hdp.capability.registry.event',
                           'queue.dell.cpsd.hdp.capability.registry.event.dne-paqx')
 
+
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_rmq_bindings_request():
     validate_queues_on_exchange('exchange.dell.cpsd.hdp.capability.registry.response',
                           'queue.dell.cpsd.hdp.capability.registry.response.dne-paqx')
 
 
-    # 3. Verify the log files
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_log_files():
 
     # Verify the log files exist
     sendCommand = 'ls /opt/dell/cpsd/dne-paqx/logs'
@@ -112,6 +128,77 @@ def validate_queues_on_exchange(suppliedExchange, suppliedQueue):
 
     assert suppliedQueue in queues, 'The queue "' + suppliedQueue + '" is not bound to the exchange "' + suppliedExchange + '"'
     print(suppliedExchange, '\nis bound to\n', suppliedQueue, '\n')
+
+
+def verifyServiceInConsulAPI(service):
+
+    url_body = ':8500/v1/agent/services'
+    my_url = 'http://' + ipaddress + url_body
+
+    print('GET:', my_url)
+
+    try:
+        url_response = requests.get(my_url)
+        url_response.raise_for_status()
+
+    except requests.exceptions.HTTPError as err:
+        # Return code error (e.g. 404, 501, ...)
+        print(err)
+        print('\n')
+        assert False
+
+    except requests.exceptions.Timeout as err:
+        # Not an HTTP-specific error (e.g. connection refused)
+        print(err)
+        print('\n')
+        assert False
+
+    else:
+        # 200
+        print(url_response)
+
+        the_response = url_response.text
+
+        serviceToCheck = '"Service": "'+service+'"'
+        assert serviceToCheck in the_response, ('ERROR:', service, 'is not in Consul\n')
+        print(service, 'Registered in consul')
+
+        if serviceToCheck in the_response:
+            verifyServiceStatusInConsulAPI(service)
+
+
+def verifyServiceStatusInConsulAPI(service):
+
+    url_body = ':8500/v1/health/checks/'+service
+    my_url = 'http://' + ipaddress + url_body
+
+    print('GET:', my_url)
+
+    try:
+        url_response = requests.get(my_url)
+        url_response.raise_for_status()
+
+    except requests.exceptions.HTTPError as err:
+        # Return code error (e.g. 404, 501, ...)
+        print(err)
+        print('\n')
+        assert False
+
+    except requests.exceptions.Timeout as err:
+        # Not an HTTP-specific error (e.g. connection refused)
+        print(err)
+        print('\n')
+        assert False
+
+    else:
+        # 200
+        print(url_response)
+
+        the_response = url_response.text
+
+        serviceStatus = '"Status": "passing"'
+        assert serviceStatus in the_response, ('ERROR:', service, 'is not Passing in Consul\n')
+        print(service, 'Status = Passing in consul\n\n')
 
 
 #######################################################################################################################
