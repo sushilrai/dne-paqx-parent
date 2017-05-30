@@ -1,9 +1,33 @@
-pipeline {    
+UPSTREAM_JOBS_LIST = [
+    "vce-symphony/common-dependencies/${env.BRANCH_NAME}",
+    "vce-symphony/common-client-parent/${env.BRANCH_NAME}",
+    "vce-symphony/hdp-capability-registry-client/${env.BRANCH_NAME}",
+    "vce-symphony/common-messaging-parent/${env.BRANCH_NAME}",
+    "dellemc-symphony/engineering-standards-service-parent/${env.BRANCH_NAME}",
+    "dellemc-symphony/compute-capabilities-api/${env.BRANCH_NAME}",
+    "dellemc-symphony/virtualization-capabilities-api/${env.BRANCH_NAME}"
+]
+UPSTREAM_JOBS = UPSTREAM_JOBS_LIST.join(',')
+
+MAVEN_PHASE = "install"
+if (env.BRANCH_NAME ==~ /master|develop|release\/.*/) {
+    MAVEN_PHASE = "deploy"
+}
+
+pipeline { 
+    parameters {
+        string(name: 'dockerImagesDel', defaultValue: 'true')
+        string(name: 'dockerRegistry',  defaultValue: 'docker-dev-local.art.local')
+        string(name: 'dockerImageTag',  defaultValue: '${BRANCH_NAME}.${BUILD_NUMBER}')
+    }
+    triggers {
+        upstream(upstreamProjects: UPSTREAM_JOBS, threshold: hudson.model.Result.SUCCESS)
+    }
     agent {
-        node{
+        node {
             label 'maven-builder'
             customWorkspace "workspace/${env.JOB_NAME}"
-            }
+        }
     }
     environment {
         GITHUB_TOKEN = credentials('github-02')
@@ -11,33 +35,24 @@ pipeline {
     options { 
         buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '5', daysToKeepStr: '30', numToKeepStr: '5'))
         timestamps()
+        disableConcurrentBuilds()
     }
     tools {
         maven 'linux-maven-3.3.9'
         jdk 'linux-jdk1.8.0_102'
     }
     stages {
-        stage('Compile') {
+        stage("Build") {
             steps {
-                sh "mvn install -DskipTests=true -DskipITs"
+                sh "mvn clean ${MAVEN_PHASE} -Dmaven.repo.local=.repo -DskipDocker=false -PbuildDockerImageOnJenkins -Ddocker.registry=${params.dockerRegistry} -DdockerImage.tag=${params.dockerImageTag} -DdeleteDockerImages=${params.dockerImagesDel}"
             }
         }
-        stage('Unit Testing') {
+        stage('Record Test Results') {
             steps {
-                sh "mvn test"
+                junit '**/target/*-reports/*.xml'
             }
         }
-        stage('Deploy') {
-            when {
-                expression {
-                    return env.BRANCH_NAME ==~ /develop|release\/.*/
-                }
-            }
-            steps {
-                sh "mvn deploy -P buildDockerImageOnJenkins -DdockerImage.tag=dne-paqx-parent-develop.${env.BUILD_NUMBER} -Ddocker.registry=docker-dev-local.art.local -DdeleteDockerImages=true -DskipTests=true -DskipITs"
-            }
-        }
-        stage('ArchiveArtifacts') {
+        stage('Archive Artifacts') {
             steps {
                 archiveArtifacts artifacts: '**/*.rpm', fingerprint: true 
             }
@@ -61,13 +76,14 @@ pipeline {
         }
         stage('NexB Scan') {
             steps {
+                sh 'rm -rf .repo'
                 doNexbScanning()
             }
-        }
+        }        
     }
     post {
         always{
-            step([$class: 'WsCleanup'])   
+            cleanWorkspace()   
         }
         success {
             emailext attachLog: true, 
