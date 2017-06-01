@@ -69,6 +69,11 @@ pipeline {
                 doThirdPartyAudit()
             }
         }
+        stage('PasswordScan') {
+		    steps {
+			    doPwScan()
+		    }
+	    }
         stage('Github Release') {
             steps {
                 githubRelease()
