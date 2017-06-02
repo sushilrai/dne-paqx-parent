@@ -14,6 +14,9 @@ package com.dell.cpsd.paqx.dne.service.model;
 public class NodeExpansionRequest {
 
     private String idracIpAddress;
+    private String idracGatewayIpAddress;
+    private String idracSubnetMask;
+
     private String managementIpAddress;
     private String esxiKernelIpAddress1;
     private String esxiKernelIpAddress2;
@@ -24,8 +27,10 @@ public class NodeExpansionRequest {
     public NodeExpansionRequest() {
     }
 
-    public NodeExpansionRequest(String idracIpAddress, String managementIpAddress, String esxiKernelIpAddress1, String esxiKernelIpAddress2, String scaleIOSVMDataIpAddress1, String scaleIOSVMDataIpAddress2, String scaleIOSVMManagementIpAddress) {
+    public NodeExpansionRequest(String idracIpAddress, String idracGatewayIpAddress, String idracSubnetMask, String managementIpAddress, String esxiKernelIpAddress1, String esxiKernelIpAddress2, String scaleIOSVMDataIpAddress1, String scaleIOSVMDataIpAddress2, String scaleIOSVMManagementIpAddress) {
         this.idracIpAddress = idracIpAddress;
+        this.idracGatewayIpAddress = idracGatewayIpAddress;
+        this.idracSubnetMask = idracSubnetMask;
         this.managementIpAddress = managementIpAddress;
         this.esxiKernelIpAddress1 = esxiKernelIpAddress1;
         this.esxiKernelIpAddress2 = esxiKernelIpAddress2;
@@ -39,6 +44,22 @@ public class NodeExpansionRequest {
 
     public void setIdracIpAddress(String idracIpAddress) {
         this.idracIpAddress = idracIpAddress;
+    }
+
+    public String getIdracSubnetMask() {
+        return idracSubnetMask;
+    }
+
+    public void setIdracSubnetMask(String idracSubnetMask) {
+        this.idracSubnetMask = idracSubnetMask;
+    }
+
+    public String getIdracGatewayIpAddress() {
+        return idracGatewayIpAddress;
+    }
+
+    public void setIdracGatewayIpAddress(String idracGatewayIpAddress) {
+        this.idracGatewayIpAddress = idracGatewayIpAddress;
     }
 
     public String getManagementIpAddress() {

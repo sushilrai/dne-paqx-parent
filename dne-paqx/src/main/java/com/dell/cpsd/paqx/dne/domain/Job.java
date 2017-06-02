@@ -7,6 +7,7 @@ package com.dell.cpsd.paqx.dne.domain;
 
 import java.util.*;
 
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -57,6 +58,7 @@ public class Job
         return initialStep;
     }
 
+    private NodeExpansionRequest inputParams;
     /**
      * Job constructor.
      * 
@@ -86,7 +88,6 @@ public class Job
         this.step = currentStep;
         this.initialStep = currentStep;
 
-        
         // NOTE : The statusDetails is expected to change to a Status object.
         this.stateDetails = currentStatus;
 
@@ -202,6 +203,13 @@ public class Job
         return taskResponseList;
     }
 
+    public NodeExpansionRequest getInputParams() {
+        return inputParams;
+    }
+
+    public void setInputParams(NodeExpansionRequest inputParams) {
+        this.inputParams = inputParams;
+    }
 
     /**
      * {@inheritDoc}

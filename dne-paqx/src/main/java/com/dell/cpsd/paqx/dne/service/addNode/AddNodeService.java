@@ -2,13 +2,11 @@ package com.dell.cpsd.paqx.dne.service.addNode;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
-import com.dell.cpsd.paqx.dne.log.DneMessageCode;
 import com.dell.cpsd.paqx.dne.service.BaseService;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigIdracTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AddNodeService extends BaseService implements IAddNodeService {
@@ -52,12 +47,18 @@ public class AddNodeService extends BaseService implements IAddNodeService {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
+        workflowTasks.put("configIdrac", configIdracTask());
         return workflowTasks;
     }
 
     @Bean("findDiscoveredNodesTask")
     private WorkflowTask findDiscoveredNodesTask(){
         return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(nodeService));
+    }
+
+    @Bean("configIdracTask")
+    private WorkflowTask configIdracTask(){
+        return createTask("configIdracTask", new ConfigIdracTaskHandler());
     }
 
     //////////////////////////////////////////////////////////////////////

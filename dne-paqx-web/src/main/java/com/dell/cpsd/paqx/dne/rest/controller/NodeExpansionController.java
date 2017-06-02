@@ -110,6 +110,7 @@ public class NodeExpansionController
     {
         Job job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow",
                 "PreProcess request has been Submitted successfully");
+        job.setInputParams(params);
         orchestrationService.orchestrateWorkflow(job, preProcessService );
 
         return new ResponseEntity<>(preProcessService.makeNodeExpansionResponse(job), HttpStatus.OK);
@@ -146,7 +147,7 @@ public class NodeExpansionController
     {
         Job job = addNodeService.createWorkflow("addNode", "startAddNodeWorkflow",
                 "AddNode request has been Submitted successfully");
-
+        job.setInputParams(params);
         orchestrationService.orchestrateWorkflow(job, addNodeService );
 
         return new ResponseEntity<>(addNodeService.makeNodeExpansionResponse(job), HttpStatus.OK);
