@@ -73,8 +73,10 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
                     long timeout) throws ServiceTimeoutException
             {
+                // default status of discovered
                 com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode node =
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode(nodeId, convergedUuid);
+                        new com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode(nodeId, convergedUuid, 
+                                com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode.AllocationStatus.DISCOVERED);
 
                 com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties =
                         new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties(Calendar.getInstance().getTime(),
