@@ -8,8 +8,11 @@ services:
   dne-paqx:
     image: IMAGE_NAME_STANDIN:IMAGE_TAG_STANDIN
     container_name: symphony-dne-paqx
-    network_mode: "host"
-    command: --spring.cloud.consul.host=${HOSTNAME}
+    ports:
+      - "8071:8071"
+    extra_hosts:
+      - "amqp:${AMQP_HOST}"
+      - "consul:${CONSUL_HOST}"
     volumes:
       - /opt/dell/cpsd/dne-paqx/logs/:/opt/dell/cpsd/dne-paqx/logs
       - /etc/rabbitmq:/etc/rabbitmq
@@ -18,6 +21,7 @@ services:
       -  PASSPHRASES=${PASSPHRASES}
       -  remote.dell.amqp.rabbitKeyStorePath=${KEYSTOREPATH}
       -  remote.dell.amqp.rabbitTrustStorePath=${TRUSTSTOREPATH}
+      -  spring.cloud.consul.host=consul
       
 # it has dependency on consul container.
 # has to connect to same network as consul.

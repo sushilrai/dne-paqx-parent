@@ -70,10 +70,13 @@ cp -r ${RPM_SOURCE_DIR}/target/dependency/engineering-standards-service/* ${SERV
 ##############################################################################
 # copy the scripts to the install directory
 ##############################################################################
+echo "rpm source dir ${RPM_SOURCE_DIR}"
+echo "service build dir ${SERVICE_BUILD_ROOT}"
 cp -rf ${RPM_SOURCE_DIR}/build/install.sh ${SERVICE_BUILD_ROOT}/install
 cp -rf ${RPM_SOURCE_DIR}/build/remove.sh ${SERVICE_BUILD_ROOT}/install
 cp -rf ${RPM_SOURCE_DIR}/build/upgrade.sh ${SERVICE_BUILD_ROOT}/install
-
+cp -riv ${RPM_SOURCE_DIR}/../dne-paqx-distribution/build/install/.env ${SERVICE_BUILD_ROOT}/install/dell-dne-paqx-web/.env
+cp -riv ${RPM_SOURCE_DIR}/../dne-paqx-distribution/build/install/.env ${SERVICE_BUILD_ROOT}/install/dell-dne-paqx-ess/.env
 
 ##############################################################################
 # copy the unit file

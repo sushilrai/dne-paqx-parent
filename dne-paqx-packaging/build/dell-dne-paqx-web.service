@@ -10,6 +10,8 @@ After=dell-dne-paqx.service dell-dne-paqx-ess.service
 
 [Service]
 Environment=HOSTNAME=%H
+Environment=/opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/.env
+WorkingDirectory=/opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/
 EnvironmentFile=/etc/rabbitmq/cpsd-rabbitmq-env.conf
 ExecStart=/usr/bin/env /usr/bin/docker-compose -f /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/docker-compose.yml up
 ExecStop=/usr/bin/env /usr/bin/docker-compose -f /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/docker-compose.yml down
