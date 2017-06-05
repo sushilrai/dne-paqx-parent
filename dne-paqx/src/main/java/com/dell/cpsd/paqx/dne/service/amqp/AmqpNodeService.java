@@ -71,7 +71,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         ListNodes request = new ListNodes(messageProperties, Collections.emptyList());
-        ServiceResponse<?> response = processRequest(10000l, new ServiceRequestCallback()
+        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()
@@ -92,7 +92,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             if (nodes.getDiscoveredNodes() != null)
             {
                 return nodes.getDiscoveredNodes().stream()
-                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getNodeId()))
+                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getNodeId(), d.getAllocationStatus()))
                         .collect(Collectors.toList());
             }
         }
@@ -109,7 +109,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         DiscoverClusterRequestInfoMessage request = new DiscoverClusterRequestInfoMessage(messageProperties, new Credentials());
-        ServiceResponse<?> response = processRequest(10000l, new ServiceRequestCallback()
+        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()

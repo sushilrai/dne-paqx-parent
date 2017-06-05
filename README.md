@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/dellemc-symphony/dne-paqx-parent.svg?branch=master)](https://travis-ci.org/dellemc-symphony/dne-paqx-parent)
 # dne-paqx-parent
 ## Description
-This repository provides the service to add a new server to an existing system in the scope of the Flex Node Expansion functionality of Project Symphony.  
+This repository provides the service to add a new server to an existing system in the scope of the Flex Node Expansion functionality of Project Symphony.
 ## Documentation
 You can find additional documentation for Project Symphony at [dellemc-symphony.readthedocs.io](https://dellemc-symphony.readthedocs.io).
 

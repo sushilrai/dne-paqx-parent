@@ -3,10 +3,7 @@ package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNodesResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
-import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by laddhv on 5/4/2017.
- */
 public class FindDiscoveredNodesTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FindDiscoveredNodesTaskHandler.class);
@@ -37,7 +31,7 @@ public class FindDiscoveredNodesTaskHandler extends BaseTaskHandler implements I
 
             if (discoveredNodesResponse != null) {
                 final List<NodeInfo> nodeInfo = discoveredNodesResponse.stream().
-                        map(n -> new NodeInfo(n.getConvergedUuid(), n.getNodeId())).
+                        map(n -> new NodeInfo(n.getConvergedUuid(), n.getNodeId(), NodeStatus.valueOf(n.getNodeStatus().toString()))).
                         collect(Collectors.toList());
 
                 LOGGER.info("Found available nodes : " + nodeInfo);

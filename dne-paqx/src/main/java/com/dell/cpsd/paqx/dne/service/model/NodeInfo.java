@@ -15,10 +15,12 @@ public class NodeInfo {
 
     private String symphonyUuid;
     private String nodeId;
+    private NodeStatus nodeStatus;
 
-    public NodeInfo(String symphonyUuid, String nodeId) {
-        this.symphonyUuid = symphonyUuid;
+    public NodeInfo(String symphonyUuid, String nodeId, NodeStatus nodeStatus) {
         this.nodeId = nodeId;
+        this.nodeStatus = nodeStatus;
+        this.symphonyUuid = symphonyUuid;
     }
 
     public String getSymphonyUuid() {
@@ -28,8 +30,11 @@ public class NodeInfo {
     public String getNodeId() {
         return nodeId;
     }
-    
-    
+
+    public NodeStatus getNodeStatus() {
+        return nodeStatus;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -42,6 +47,7 @@ public class NodeInfo {
         
         builder.append("symphonyUuid=").append(this.symphonyUuid);
         builder.append(", nodeId=").append(this.nodeId);
+        builder.append(", nodeStatus=").append(this.nodeStatus);
         
         builder.append("}");
         
