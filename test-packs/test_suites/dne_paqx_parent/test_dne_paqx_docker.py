@@ -1,13 +1,13 @@
 import af_support_tools
 import os
 import pytest
-　
+
 @pytest.fixture(scope="module", autouse=True)
 def load_test_data():
     # Set config ini file name
     global env_file
     env_file = 'env.ini'
-　
+
     # Set Vars
     global ipaddress
     ipaddress = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='hostname')
@@ -15,7 +15,7 @@ def load_test_data():
     username = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='username')
     global password
     password = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS', property='password')
-　
+
 #####################################################################
 # These are the main tests.
 #####################################################################
@@ -24,7 +24,7 @@ def load_test_data():
 @pytest.mark.parametrize("container_name", [
 	("symphony-dne-paqx")
 ])
-　
+
 def test_verify_docker_container(container_name):
     """
     Description        :       This method tests docker service for a container
@@ -36,7 +36,7 @@ def test_verify_docker_container(container_name):
     """
     
     assert verify_docker_network(container_name), 'test failed: ' + container_name + ' docker service is not running'
-　
+
 def verify_docker_network(container_name):
     """
     Description 	:       This method will check docker network inspect bridge and host commands to verify if the container is using docker networking service
@@ -48,8 +48,7 @@ def verify_docker_network(container_name):
     output = af_support_tools.send_ssh_command(host=ipaddress, username=username, password=password, command=cmd, return_output=True).strip()
     if (container_name not in output):
         test_status = "fail"
-    
-　
+
     cmd = 'docker network inspect host |  grep ' + str(container_name)
     output = af_support_tools.send_ssh_command(host=ipaddress, username=username, password=password, command=cmd, return_output=True).strip()
     if (container_name in output):
@@ -58,4 +57,3 @@ def verify_docker_network(container_name):
         return 0
     else:
         return 1
-　
