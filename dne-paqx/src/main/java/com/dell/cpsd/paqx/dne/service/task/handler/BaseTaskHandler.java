@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by madenb on 4/27/2017.
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
  */
 public class BaseTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTaskHandler.class);

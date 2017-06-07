@@ -11,7 +11,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
 public abstract class BaseService {
 
     public NodeExpansionResponse makeNodeExpansionResponse(final Job job, final WorkflowService workflowService)

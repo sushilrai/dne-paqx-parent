@@ -5,7 +5,10 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import java.util.List;
 
 /**
- * Created by madenb on 5/3/2017.
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
  */
 public class VClusterTaskResponse extends TaskResponse {
     private List<ClusterInfo> clusterInfo;

@@ -1,7 +1,10 @@
 package com.dell.cpsd.paqx.dne.service.model;
 
 /**
- * Created by madenb on 4/26/2017.
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
  */
 public enum Status {
     UNKNOWN,

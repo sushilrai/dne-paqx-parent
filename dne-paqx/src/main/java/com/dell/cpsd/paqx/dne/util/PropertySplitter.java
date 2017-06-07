@@ -5,7 +5,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
 @Component("PropertySplitter")
 public class PropertySplitter {
     public Map<String, String> map(String property) {
