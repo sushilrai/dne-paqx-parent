@@ -9,6 +9,10 @@ import time
 
 @pytest.fixture(scope="module", autouse=True)
 def load_test_data():
+
+    import cpsd
+    global cpsd
+
     # Set config ini file name
     global conf_file
     conf_file = 'dne_paqx_parent/core_config.ini'
@@ -31,11 +35,11 @@ def load_test_data():
     mac_address = af_support_tools.get_config_file_property(config_file=conf_file, heading='dne_paqx_parent', property='mac_address')
 
     global rmq_username
-    rmq_username = 'guest'
+    rmq_username = cpsd.props.rmq_username
     global rmq_password
-    rmq_password = 'guest'
+    rmq_password = cpsd.props.rmq_password
     global port
-    port = 5672
+    port = cpsd.props.rmq_port
 
 #####################################################################
 # These are the main tests.

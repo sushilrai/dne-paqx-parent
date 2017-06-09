@@ -11,16 +11,17 @@ import time
 import requests
 import os
 
-
 ##############################################################################################
 
 @pytest.fixture(scope="module", autouse=True)
 def load_test_data():
 
+    import cpsd
+    global cpsd
+
     # Set config ini file name
     global env_file
     env_file = 'env.ini'
-
 
     # Test VM Details
     global ipaddress
@@ -33,9 +34,9 @@ def load_test_data():
 
     # RMQ Details
     global rmq_username
-    rmq_username = 'guest'
+    rmq_username = cpsd.props.rmq_username
     global rmq_password
-    rmq_password = 'guest'
+    rmq_password = cpsd.props.rmq_password
 
 
 ##############################################################################################

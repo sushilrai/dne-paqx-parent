@@ -37,11 +37,11 @@ def load_test_data():
 
      # RMQ Details
      global rmq_username
-     rmq_username = 'guest'
+     rmq_username = cpsd.props.rmq_username
      global rmq_password
-     rmq_password = 'guest'
+     rmq_password = cpsd.props.rmq_password
      global port
-     port = 5672
+     port = cpsd.props.rmq_port
 
 ##############################################################################################
 
