@@ -5,16 +5,19 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
-import java.util.Map;
-
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
-import com.dell.cpsd.paqx.dne.service.*;
+import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.repository.JobRepository;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.WorkflowService;
+import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.addNode.AddNodeService;
 import com.dell.cpsd.paqx.dne.service.addNode.AddNodeTaskConfig;
 import com.dell.cpsd.paqx.dne.service.addNode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.AmqpNodeService;
+import com.dell.cpsd.paqx.dne.service.model.Step;
 import com.dell.cpsd.paqx.dne.service.orchestration.IOrchestrationService;
 import com.dell.cpsd.paqx.dne.service.orchestration.OrchestrationService;
 import com.dell.cpsd.paqx.dne.service.preProcess.IPreProcessService;
@@ -29,18 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.dell.cpsd.paqx.dne.repository.JobRepository;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import java.util.Map;
 
-import com.dell.cpsd.paqx.dne.service.model.Step;
-
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * @author Connor Goulding
- */
 @Configuration
 @Import({RabbitConfig.class, ConsumerConfig.class, ProducerConfig.class, AddNodeTaskConfig.class, PreProcessTaskConfig.class, PropertySplitter.class})
 public class ServiceConfig

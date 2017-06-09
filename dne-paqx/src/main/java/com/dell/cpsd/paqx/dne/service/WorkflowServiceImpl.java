@@ -1,33 +1,20 @@
 /**
+ * This is a service that manages the steps in a workflow.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * VCE Confidential/Proprietary Information
  */
 
 package com.dell.cpsd.paqx.dne.service;
 
-import java.util.Iterator;
+import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
+import com.dell.cpsd.paqx.dne.repository.JobRepository;
+import com.dell.cpsd.paqx.dne.service.model.Step;
+import org.springframework.stereotype.Service;
+
 import java.util.Map;
 import java.util.UUID;
 
-import com.dell.cpsd.paqx.dne.domain.Job;
-
-import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
-import com.dell.cpsd.paqx.dne.service.model.Step;
-
-import org.springframework.stereotype.Service;
-
-import com.dell.cpsd.paqx.dne.repository.JobRepository;
-
-/**
- * This is a service that manages the steps in a workflow.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
-  */
 @Service
 public class WorkflowServiceImpl implements WorkflowService
 {

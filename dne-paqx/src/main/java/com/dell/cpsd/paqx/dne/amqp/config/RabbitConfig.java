@@ -32,13 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Configuration for the RabbitMQ artifacts used by the service.
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- */
 @Configuration
 @Import({ProductionConfig.class, PropertiesConfig.class})
 public class RabbitConfig

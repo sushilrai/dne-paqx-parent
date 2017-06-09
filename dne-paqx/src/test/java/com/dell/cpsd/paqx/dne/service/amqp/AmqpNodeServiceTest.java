@@ -30,13 +30,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * @author Connor Goulding
- */
 public class AmqpNodeServiceTest
 {
     @Test(expected = ServiceTimeoutException.class)

@@ -12,12 +12,6 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 
 import java.util.List;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- */
 public interface NodeService
 {
     /**

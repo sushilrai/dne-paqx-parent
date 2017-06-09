@@ -5,31 +5,14 @@
 
 package com.dell.cpsd.paqx.dne.repository;
 
-import java.util.Map;
-import java.util.HashMap;
+import com.dell.cpsd.paqx.dne.domain.Job;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.UUID;
 
-import com.dell.cpsd.paqx.dne.domain.Job;
+import static org.junit.Assert.*;
 
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
-
-import org.junit.Test;
-import org.junit.Before;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-
-/**
- * This tests the in memory job repository.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- * 
- * @since   1.0
- */
 public class InMemoryJobRepositoryTest
 {
     /*

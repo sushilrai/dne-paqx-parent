@@ -1,20 +1,11 @@
 /**
+ * This is the node expansion base exception.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * VCE Confidential/Proprietary Information
  */
 
 package com.dell.cpsd.paqx.dne.rest.exception;
 
-/**
- * This is the node expansion base exception.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
- */
 public class NodeExpansionException extends Exception
 {
     /*

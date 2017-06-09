@@ -1,28 +1,25 @@
-package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
-
-import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
-import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.VClusterTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
-import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
+package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
+
+import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
+import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.VClusterTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
+import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
+import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
 

@@ -1,3 +1,10 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
+
 package com.dell.cpsd.paqx.dne.service.addNode;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
@@ -19,12 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-/**
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- */
+
 @Service
 public class AddNodeService extends BaseService implements IAddNodeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeService.class);

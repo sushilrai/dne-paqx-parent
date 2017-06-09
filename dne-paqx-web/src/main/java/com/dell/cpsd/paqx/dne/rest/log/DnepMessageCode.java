@@ -1,4 +1,5 @@
 /**
+ * This is the message code enum for the DNE PAQX web service.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
@@ -11,16 +12,6 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-/**
- * This is the message code enum for the DNE PAQX web service.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
- * 
- * @since   1.0
- */
 public enum DnepMessageCode
 {
     WORKFLOW_NOT_FOUND_E(3000,            "DNEP3000E"),

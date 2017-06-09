@@ -28,13 +28,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.Collection;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * @author Connor Goulding
- */
 @Configuration
 @Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class})
 public class CapabilityConfig

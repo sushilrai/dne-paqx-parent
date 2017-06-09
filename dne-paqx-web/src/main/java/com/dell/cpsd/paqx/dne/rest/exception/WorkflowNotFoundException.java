@@ -7,16 +7,6 @@ package com.dell.cpsd.paqx.dne.rest.exception;
 
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * This exception is thrown when the workflow does not exist.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
- */
 @ResponseStatus(value = org.springframework.http.HttpStatus.NOT_FOUND, reason = "No workflow found.")
 public class WorkflowNotFoundException extends NodeExpansionException
 {

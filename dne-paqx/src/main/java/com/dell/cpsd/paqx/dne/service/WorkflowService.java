@@ -13,16 +13,6 @@ import com.dell.cpsd.paqx.dne.service.model.Step;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * This interface should be implemented by a workflow service.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
-  */
 public interface WorkflowService
 {
     /**

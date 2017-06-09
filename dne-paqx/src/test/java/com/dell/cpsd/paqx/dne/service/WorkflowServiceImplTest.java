@@ -5,33 +5,16 @@
 
 package com.dell.cpsd.paqx.dne.service;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.UUID;
-
 import com.dell.cpsd.paqx.dne.domain.Job;
-
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
-
 import com.dell.cpsd.paqx.dne.service.model.Step;
-
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import static org.junit.Assert.*;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-
-/**
- * This tests the workflow service.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- * 
- * @since   1.0
- */
 public class WorkflowServiceImplTest
 {
     /*

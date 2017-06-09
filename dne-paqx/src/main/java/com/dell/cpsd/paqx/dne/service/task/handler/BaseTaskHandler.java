@@ -1,3 +1,10 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
+
 package com.dell.cpsd.paqx.dne.service.task.handler;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
@@ -6,12 +13,6 @@ import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- */
 public class BaseTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTaskHandler.class);
 

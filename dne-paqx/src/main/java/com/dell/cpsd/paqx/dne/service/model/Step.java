@@ -1,4 +1,5 @@
 /**
+ * This contains the information for a step in the workflow.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * VCE Confidential/Proprietary Information
  */
@@ -8,16 +9,6 @@ package com.dell.cpsd.paqx.dne.service.model;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-/**
- * This contains the information for a step in the workflow.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
-  */
 public class Step
 {
     /*

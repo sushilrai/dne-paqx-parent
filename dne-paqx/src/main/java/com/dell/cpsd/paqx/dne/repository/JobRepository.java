@@ -9,18 +9,6 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 
 import java.util.UUID;
 
-/**
- * This interface should be implemented by a repository of workflow jobs.
- * 
- * Note: This is to enable initial integration and is expected to be replaced.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- *
- * @since   1.0
-  */
 public interface JobRepository
 {
     /**

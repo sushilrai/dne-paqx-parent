@@ -19,13 +19,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Collection;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * @author Connor Goulding
- */
 public class AmqpDneProducer implements DneProducer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpDneProducer.class);

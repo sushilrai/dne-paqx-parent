@@ -1,4 +1,5 @@
 /**
+ * This is the logging manager for the DNE PAQX web service.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
@@ -7,21 +8,9 @@ package com.dell.cpsd.paqx.dne.rest.log;
 
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.common.logging.LoggingManager;
-
 import com.dell.cpsd.paqx.dne.rest.i18n.DnepMessageBundle;
-
 import java.util.ResourceBundle;
 
-/**
- * This is the logging manager for the DNE PAQX web service.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
- *
- * @since 1.0
- */
 public class DnepLoggingManager
 {
     /*

@@ -11,13 +11,6 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 
-/**
- * Handles incoming DatacenterClustersListed response message.
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * </p>
- */
 public class ClustersListedResponseAdapter implements ServiceCallbackAdapter<DiscoverClusterResponseInfoMessage, ServiceResponse<DiscoverClusterResponseInfoMessage>>
 {
     private ServiceCallbackRegistry serviceCallbackRegistry;

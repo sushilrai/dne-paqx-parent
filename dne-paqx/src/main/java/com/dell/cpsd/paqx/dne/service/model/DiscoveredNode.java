@@ -5,13 +5,6 @@
 
 package com.dell.cpsd.paqx.dne.service.model;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * @author Connor Goulding
- */
 public class DiscoveredNode
 {
     private final String convergedUuid;

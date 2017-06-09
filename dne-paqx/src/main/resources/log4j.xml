@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.-->
+<!--Dell EMC Confidential/Proprietary Information-->
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration>
 

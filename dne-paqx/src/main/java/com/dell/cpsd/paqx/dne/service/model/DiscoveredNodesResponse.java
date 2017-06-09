@@ -1,12 +1,14 @@
-package com.dell.cpsd.paqx.dne.service.model;
-
-import java.util.List;
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
+package com.dell.cpsd.paqx.dne.service.model;
+
+import java.util.List;
+
 public class DiscoveredNodesResponse extends TaskResponse {
     private List<NodeInfo> nodesInfo;
 

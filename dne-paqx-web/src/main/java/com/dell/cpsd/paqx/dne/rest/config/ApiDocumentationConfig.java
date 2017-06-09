@@ -14,13 +14,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 import static springfox.documentation.builders.PathSelectors.regex;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * Created by fuvce1 on 3/15/2017.
- */
 @Configuration
 public class ApiDocumentationConfig {
     @Bean

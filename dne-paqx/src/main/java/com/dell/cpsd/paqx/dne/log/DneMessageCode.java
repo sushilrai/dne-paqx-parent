@@ -11,16 +11,6 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-/**
- * This is the message code enum for the service client.
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
- *
- * @version 1.0
- * 
- */
 public enum DneMessageCode
 {
     YYY_W(1001, "DNEP1001W"),

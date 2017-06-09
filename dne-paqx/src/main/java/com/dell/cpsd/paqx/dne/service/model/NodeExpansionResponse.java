@@ -9,13 +9,6 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 
 import java.util.*;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * Created by fuvce1 on 3/14/2017.
- */
 public class NodeExpansionResponse {
     private String details;
     

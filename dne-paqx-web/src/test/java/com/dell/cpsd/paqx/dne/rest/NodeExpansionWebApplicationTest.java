@@ -4,54 +4,25 @@
  */
 package com.dell.cpsd.paqx.dne.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.spy;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import com.dell.cpsd.paqx.dne.service.model.Step;
-import org.junit.Test;
+import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
+import com.dell.cpsd.paqx.dne.rest.controller.NodeExpansionController;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.WorkflowService;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.UUID;
+import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import org.mockito.MockitoAnnotations;
-
-import com.dell.cpsd.paqx.dne.rest.controller.NodeExpansionController;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-
-import org.springframework.http.ResponseEntity;
-
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-
-import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
-
-import com.dell.cpsd.paqx.dne.service.NodeService;
-import org.springframework.mock.web.MockHttpServletRequest;
-
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- */
 @RunWith(MockitoJUnitRunner.class)
 public class NodeExpansionWebApplicationTest 
 {

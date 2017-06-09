@@ -7,16 +7,6 @@ package com.dell.cpsd.paqx.dne.i18n;
 
 import java.util.ListResourceBundle;
 
-/**
- * This is the resource bundle for service client.
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
- *
- * @version 1.0
- * 
- */
 public class DneMessageBundle extends ListResourceBundle
 {
     /*

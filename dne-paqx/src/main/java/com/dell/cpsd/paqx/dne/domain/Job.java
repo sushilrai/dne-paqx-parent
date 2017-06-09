@@ -5,24 +5,14 @@
 
 package com.dell.cpsd.paqx.dne.domain;
 
-import java.util.*;
-
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-/**
- * This contains the information for a workflow step.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
- * <p/>
- * 
- * @since   1.0
- */
+import java.util.*;
+
 public class Job
 {
     /*

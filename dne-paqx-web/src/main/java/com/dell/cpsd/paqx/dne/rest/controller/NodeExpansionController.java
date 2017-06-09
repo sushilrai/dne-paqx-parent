@@ -32,13 +32,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-/**
- *
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- *
- * Created by fuvce1 on 3/14/2017.
- */
 @EnableAsync
 @RestController
 @RequestMapping("/dne")

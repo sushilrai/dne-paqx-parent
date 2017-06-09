@@ -1,4 +1,5 @@
 /**
+ * This is the resource bundle for DNE PAQX web service.
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
@@ -7,16 +8,6 @@ package com.dell.cpsd.paqx.dne.rest.i18n;
 
 import java.util.ListResourceBundle;
 
-/**
- * This is the resource bundle for DNE PAQX web service.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
- * 
- * @since   1.0
- */
 public class DnepMessageBundle extends ListResourceBundle
 {
     /*
