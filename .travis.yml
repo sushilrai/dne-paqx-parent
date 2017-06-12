@@ -1,9 +1,9 @@
 language: java
 services:
- - docker
+  - docker
 jdk:
- - oraclejdk8
+  - oraclejdk8
 script:
- - mvn clean compile
- - mvn test
- - bash <(curl -s https://codecov.io/bash)
+  - mvn clean compile
+  - mvn test
+  - bash <(curl -s https://codecov.io/bash)
