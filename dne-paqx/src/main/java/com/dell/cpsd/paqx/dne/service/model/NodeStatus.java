@@ -8,7 +8,8 @@ package com.dell.cpsd.paqx.dne.service.model;
 public enum NodeStatus {
     DISCOVERED("DISCOVERED"),
     ADDED("ADDED"),
-    FAILED("FAILED");
+    FAILED("FAILED"),
+    RESERVED("RESERVED");
 
     private String stateMessage;
     NodeStatus(String stateMsg) {
