@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/badge/License-EPL%201.0-red.svg)](https://opensource.org/licenses/EPL-1.0)
 [![Build Status](https://travis-ci.org/dellemc-symphony/dne-paqx-parent.svg?branch=master)](https://travis-ci.org/dellemc-symphony/dne-paqx-parent)
+[![codecov](https://codecov.io/gh/dellemc-symphony/dne-paqx-parent/branch/develop/graph/badge.svg)](https://codecov.io/gh/dellemc-symphony/dne-paqx-parent)
 # dne-paqx-parent
 ## Description
 This repository provides the service to add a new server to an existing system in the scope of the Flex Node Expansion functionality of Project Symphony.
