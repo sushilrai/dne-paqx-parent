@@ -22,7 +22,7 @@ def load_test_data():
 @pytest.mark.dne_paqx_parent
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.parametrize("container_name,expected", [
-	("symphony-credential-service",'Up'),
+	("cpsd-credentials-service",'Up'),
 	("symphony-identity-service",'Up'),
 	("symphony-hal-orchestrator-service",'Up'),
 	("symphony-system-definition-service",'Up'),
