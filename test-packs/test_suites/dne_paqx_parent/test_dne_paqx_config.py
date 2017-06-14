@@ -22,6 +22,10 @@ def load_test_data():
     import cpsd
     global cpsd
 
+    # Update config ini files at runtime
+    my_data_file = os.environ.get('AF_RESOURCES_PATH') + '/continuous-integration-deploy-suite/symphony-sds.properties'
+    af_support_tools.set_config_file_property_by_data_file(my_data_file)
+
     # Set config ini file name
     global env_file
     env_file = 'env.ini'
@@ -81,6 +85,7 @@ def test_dne_servicerunning():
 @pytest.mark.dne_paqx_parent_mvp_extended
 def test_dne_registered_in_Consul():
     """
+    Test Case Title :
     Description     :       This method tests that dne-paqx is registered in the Consul API http://{SymphonyIP}:8500/v1/agent/services
                             It will fail if :
                                 The line 'Service: "dne-paqx"' is not present
@@ -99,21 +104,6 @@ def test_dne_registered_in_Consul():
         url_response = requests.get(my_url)
         url_response.raise_for_status()
 
-    # Error check the response
-    except requests.exceptions.HTTPError as err:
-        # Return code error (e.g. 404, 501, ...)
-        print(err)
-        print('\n')
-        assert False
-
-    # Error check the response
-    except requests.exceptions.Timeout as err:
-        # Not an HTTP-specific error (e.g. connection refused)
-        print(err)
-        print('\n')
-        assert False
-
-    else:
         # A 200 has been received
         print(url_response)
 
@@ -126,10 +116,18 @@ def test_dne_registered_in_Consul():
 
         print(service, 'Registered in Consul')
 
+    # Error check the response
+    except Exception as err:
+        # Return code error (e.g. 404, 501, ...)
+        print(err)
+        print('\n')
+        raise Exception(err)
+
+
 
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-def test_dne_status_in_Consul():
+def test_dne_passing_status_in_Consul():
     """
     Description     :       This method tests that dne-paqx has a passing status in the Consul API http://{SymphonyIP}:8500/v1/health/checks/dne-paqx
                             It will fail if :
@@ -148,21 +146,6 @@ def test_dne_status_in_Consul():
         url_response = requests.get(my_url)
         url_response.raise_for_status()
 
-    # Error check the response
-    except requests.exceptions.HTTPError as err:
-        # Return code error (e.g. 404, 501, ...)
-        print(err)
-        print('\n')
-        assert False
-
-    # Error check the response
-    except requests.exceptions.Timeout as err:
-        # Not an HTTP-specific error (e.g. connection refused)
-        print(err)
-        print('\n')
-        assert False
-
-    else:
         # A 200 has been received
         print(url_response)
         the_response = url_response.text
@@ -171,11 +154,19 @@ def test_dne_status_in_Consul():
         assert serviceStatus in the_response, ('ERROR:', service, 'is not Passing in Consul\n')
         print(service, 'Status = Passing in consul\n\n')
 
+    # Error check the response
+    except Exception as err:
+        # Return code error (e.g. 404, 501, ...)
+        print(err)
+        print('\n')
+        raise Exception(err)
+
+
 
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-def test_dne_rmq_bindings_response(suppliedExchange='exchange.dell.cpsd.paqx.node.discovery.response',
-                                   suppliedQueue='queue.dell.cpsd.dne-paqx.response.dne-paqx'):
+def test_dne_rmq_bindings_response_1(suppliedExchange='exchange.dell.cpsd.paqx.node.discovery.response',
+                                     suppliedQueue='queue.dell.cpsd.dne-paqx.response.dne-paqx'):
     """
     Description     :       This method tests that a binding exists between a RMQ Exchange & a RMQ Queue.
                             It uses the RMQ API to check.
@@ -195,8 +186,8 @@ def test_dne_rmq_bindings_response(suppliedExchange='exchange.dell.cpsd.paqx.nod
 
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-def test_dne_rmq_bindings_request(suppliedExchange='exchange.dell.cpsd.hdp.capability.registry.response',
-                                  suppliedQueue='queue.dell.cpsd.hdp.capability.registry.response.dne-paqx'):
+def test_dne_rmq_bindings_response_2(suppliedExchange='exchange.dell.cpsd.hdp.capability.registry.response',
+                                     suppliedQueue='queue.dell.cpsd.hdp.capability.registry.response.dne-paqx'):
     """
     Description     :       This method tests that a binding exists between a RMQ Exchange & a RMQ Queue.
                             It uses the RMQ API to check.
@@ -236,7 +227,7 @@ def test_dne_rmq_bindings_cap_reg_event(suppliedExchange='exchange.dell.cpsd.hdp
 
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-def test_dne_log_files():
+def test_dne_log_files_exist():
     """
     Description     :       This method tests that the ESS log files exist and contain no Exceptions.
                             It will fail:
@@ -254,27 +245,72 @@ def test_dne_log_files():
     sendCommand = 'ls ' + filePath
     my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password,
                                                          command=sendCommand, return_output=True)
-    assert errorLogFile in my_return_status, 'Error: ' + errorLogFile + ' does not exist'
-    assert infoLogFile in my_return_status, 'Error: ' + infoLogFile + ' does not exist'
+    error_list = []
+
+    if (errorLogFile not in my_return_status):
+        error_list.append(errorLogFile)
+
+    if (infoLogFile not in my_return_status):
+        error_list.append(infoLogFile)
+
+    assert not error_list, 'Log file missing'
+
     print('Valid log files exist')
 
+
+
+@pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
+def test_dne_log_files_free_of_exceptions():
+    """
+    Description     :       This method tests that the ESS log files exist and contain no Exceptions.
+                            It will fail:
+                                If the the error and/or info log files do not exists
+                                If the error log file contains AuthenticationFailureException, RuntimeException or NullPointerException.
+    Parameters      :       None
+    Returns         :       None
+    """
+
+    filePath = '/opt/dell/cpsd/dne-paqx/logs/'
+    errorLogFile = 'dne-paqx-error.log'
+    infoLogFile = 'dne-paqx-info.log'
+
+    excep1 = 'AuthenticationFailureException'
+    excep2 = 'RuntimeException'
+    excep3 = 'NullPointerException'
+    excep4 = 'BeanCreationException'
+
+    error_list = []
+
     # Verify there are no Authentication errors
-    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'com.rabbitmq.client.AuthenticationFailureException\''
+    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'' + excep1 + '\''
     my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password,
                                                          command=sendCommand, return_output=True)
-    assert 'AuthenticationFailureException' not in my_return_status, 'AuthenticationFailureException in log files, Review the ' + errorLogFile + ' file'
+    if (excep1 in my_return_status):
+        error_list.append(excep1)
 
     # Verify there are no RuntimeException errors
-    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'RuntimeException\''
+    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'' + excep2 + '\''
     my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password,
                                                          command=sendCommand, return_output=True)
-    assert 'RuntimeException' not in my_return_status, 'RuntimeException in log files, Review the ' + errorLogFile + ' file'
+    if (excep2 in my_return_status):
+        error_list.append(excep2)
 
     # Verify there are no NullPointerException errors
-    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'NullPointerException\''
+    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'' + excep3 + '\''
     my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password,
                                                          command=sendCommand, return_output=True)
-    assert 'NullPointerException' not in my_return_status, 'NullPointerException in log files, Review the ' + errorLogFile + ' file'
+    if (excep3 in my_return_status):
+        error_list.append(excep3)
+
+    # Verify there are no BeanCreationException errors
+    sendCommand = 'cat ' + filePath + errorLogFile + ' | grep \'' + excep4 + '\''
+    my_return_status = af_support_tools.send_ssh_command(host=ipaddress, username=cli_username, password=cli_password,
+                                                         command=sendCommand, return_output=True)
+    if (excep4 in my_return_status):
+        error_list.append(excep4)
+
+    assert not error_list, 'Exceptions in log files, Review the ' + errorLogFile + ' file'
 
     print('No Authentication, RuntimeException or NullPointerException in log files\n')
 
