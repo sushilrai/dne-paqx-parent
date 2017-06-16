@@ -56,7 +56,7 @@ def test_dnePAQX_container_using_AMQP_over_TLS():
         # and use this ip address with the 'netstat' command to find the dne-rabbitmq port-pairing.
         # example return text would be :
         # tcp6       0      0 172.17.0.1:5671         172.21.0.2:47338        ESTABLISHED 987/beam.smp
-        connectionPorts = getDockerNetworkConnectionPorts('dnepaqxweb')
+        connectionPorts = getDockerNetworkConnectionPorts('symphony-dne-paqx')
 
         # shouldn't be more then 1 line returned, but just in case we split them
         connectionsText = connectionPorts.splitlines()
@@ -90,12 +90,12 @@ def test_DNEpaqx_AMQP_data_is_encrypted():
 
     # use the getDockerNetworkConnectionPorts fucntion , with the 'processId' flag, to indicate the
     # processID should be returned.
-    processId = getDockerNetworkConnectionPorts('dnepaqxweb', "processId")
+    processId = getDockerNetworkConnectionPorts('symphony-dne-paqx', "processId")
     assert processId, "There was no PID found for the DNE PAQX"
     # use the getDockerNetworkConnectionPorts function , without a specific flag, to indicate the
     # connection ports should be returned. This is returned in the form :
     # tcp6       0      0 172.17.0.1:5671         172.21.0.2:47338        ESTABLISHED 987/beam.smp
-    connectionPortText = getDockerNetworkConnectionPorts('dnepaqxweb')
+    connectionPortText = getDockerNetworkConnectionPorts('symphony-dne-paqx')
     assert connectionPortText, "There was no rabbitmq connection found for the DNE PAQX"
 
     # split the dne-port out of the returned text, to be used in the follwoing 'lsof' command
@@ -174,16 +174,19 @@ def getDockerNetworkConnectionPorts(containerName, label="ports"):
     Eg. from the sample data below, the process ID = 987 would be returned
     tcp6       0      0 172.17.0.1:5671         172.21.0.2:47338        ESTABLISHED 987/beam.smp"""
 
-    commandGetNetworkId = "docker network list | grep " + containerName + " |cut -f1 -d ' '"
-    networkId = af_support_tools.send_ssh_command(
-                host=ipaddress,
-                username=cli_username,
-                password=cli_password,
-                command=commandGetNetworkId,
-                return_output=True)
+    # commandGetNetworkId = "docker network list | grep " + containerName + " |cut -f1 -d ' '"
+    # networkId = af_support_tools.send_ssh_command(
+    #             host=ipaddress,
+    #             username=cli_username,
+    #             password=cli_password,
+    #             command=commandGetNetworkId,
+    #             return_output=True)
 
-    commandGetContainerIPAddress = "docker network inspect " + networkId.rstrip() +\
-                                   " | grep IPv4 | awk '{print $2}'  | cut -f2 -d '\"' | cut -f1 -d '/' "
+    # commandGetContainerIPAddress = "docker network inspect " + networkId.rstrip() +\
+    #                                " | grep IPv4 | awk '{print $2}'  | cut -f2 -d '\"' | cut -f1 -d '/' "
+
+    commandGetContainerIPAddress = "docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + containerName
+
     ipAddressText = af_support_tools.send_ssh_command(
                 host=ipaddress,
                 username=cli_username,
