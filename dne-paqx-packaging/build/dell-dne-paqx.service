@@ -11,7 +11,6 @@ After=network.target docker.service rabbitmq-server.service
 
 [Service]
 Type=oneshot
-Environment=/opt/dell/cpsd/dne-paqx/install/.env
 WorkingDirectory=/opt/dell/cpsd/dne-paqx/install/
 ExecStart=/bin/true
 
