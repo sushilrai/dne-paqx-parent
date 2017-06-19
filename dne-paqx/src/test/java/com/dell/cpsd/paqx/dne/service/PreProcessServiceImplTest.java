@@ -10,7 +10,7 @@ package com.dell.cpsd.paqx.dne.service;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.model.Step;
-import com.dell.cpsd.paqx.dne.service.preProcess.PreProcessService;
+import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import org.junit.Before;
 import org.junit.Test;
 

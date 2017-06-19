@@ -5,7 +5,7 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service.preProcess;
+package com.dell.cpsd.paqx.dne.service.workflow.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;

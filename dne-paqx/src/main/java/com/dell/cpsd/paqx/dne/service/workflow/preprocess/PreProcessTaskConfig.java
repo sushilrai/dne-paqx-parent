@@ -5,7 +5,7 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service.preProcess;
+package com.dell.cpsd.paqx.dne.service.workflow.preprocess;
 
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,9 @@ public class PreProcessTaskConfig {
     public Map<String, Step> preProcessWorkflowSteps(){
         final Map<String, Step> workflowSteps = new HashMap<>();
 
-        workflowSteps.put("startPreProcessWorkflow", new Step("findVCluster"));
+        workflowSteps.put("startPreProcessWorkflow", new Step("findAvailableNodes"));
+        workflowSteps.put("findAvailableNodes", new Step("configIdrac"));
+        workflowSteps.put("configIdrac", new Step("findVCluster"));
         workflowSteps.put("findVCluster", new Step("findProtectionDomain"));
         workflowSteps.put("findProtectionDomain", new Step("findSystemData"));
         workflowSteps.put("findSystemData", new Step("assignDefaultHostName"));
