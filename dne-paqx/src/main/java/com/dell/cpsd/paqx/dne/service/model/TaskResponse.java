@@ -39,7 +39,6 @@ public class TaskResponse {
     }
 
     public String getWorkFlowTaskName() {
-
         return workFlowTaskName;
     }
 
@@ -55,5 +54,11 @@ public class TaskResponse {
         this.workFlowTaskStatus = workFlowTaskStatus;
     }
 
+    public Map<String, String> getResults() {
+        return results;
+    }
 
+    public void setResults(Map<String, String> results) {
+        this.results = results;
+    }
 }
