@@ -5,7 +5,7 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service.addNode;
+package com.dell.cpsd.paqx.dne.service.workflow.addnode;
 
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import org.springframework.context.annotation.Bean;

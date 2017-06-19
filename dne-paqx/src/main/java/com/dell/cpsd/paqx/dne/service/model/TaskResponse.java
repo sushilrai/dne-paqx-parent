@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TaskResponse {
 
@@ -16,6 +17,7 @@ public class TaskResponse {
     private Status workFlowTaskStatus;
     private List<String> errors;
     private List<String> warnings;
+    private Map<String, String> results;
 
     public TaskResponse() {
         errors = new ArrayList<>();
@@ -37,7 +39,6 @@ public class TaskResponse {
     }
 
     public String getWorkFlowTaskName() {
-
         return workFlowTaskName;
     }
 
@@ -53,5 +54,11 @@ public class TaskResponse {
         this.workFlowTaskStatus = workFlowTaskStatus;
     }
 
+    public Map<String, String> getResults() {
+        return results;
+    }
 
+    public void setResults(Map<String, String> results) {
+        this.results = results;
+    }
 }

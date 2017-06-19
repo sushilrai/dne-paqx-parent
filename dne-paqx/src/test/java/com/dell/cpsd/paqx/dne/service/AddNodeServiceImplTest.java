@@ -9,7 +9,7 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
-import com.dell.cpsd.paqx.dne.service.addNode.AddNodeService;
+import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeService;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import org.junit.Assert;
 import org.junit.Before;
