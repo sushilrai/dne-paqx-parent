@@ -13,6 +13,8 @@ import com.dell.cpsd.paqx.dne.service.BaseService;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigIdracTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,6 +38,16 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     @Autowired
     private NodeService nodeService;
+
+    @Bean("findDiscoveredNodesTask")
+    private WorkflowTask findDiscoveredNodesTask(){
+        return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(nodeService));
+    }
+
+    @Bean("configIdracTask")
+    private WorkflowTask configIdracTask(){
+        return createTask("configIdracTask", new ConfigIdracTaskHandler());
+    }
 
     @Bean("findVClusterTask")
     public WorkflowTask createVClusterTask(){
@@ -66,6 +78,8 @@ public class PreProcessService extends BaseService implements IPreProcessService
     public Map<String, WorkflowTask> preProcessWorkflowTasks(){
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
+        workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
+        workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         workflowTasks.put("findSystemData", findSystemDataTask());
