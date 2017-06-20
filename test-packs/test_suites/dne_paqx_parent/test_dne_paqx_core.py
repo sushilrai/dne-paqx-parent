@@ -21,6 +21,7 @@ def load_test_data():
 #####################################################################
 @pytest.mark.dne_paqx_parent
 @pytest.mark.dne_paqx_parent_mvp
+@pytest.mark.dne_paqx_parent_mvp_extended
 @pytest.mark.parametrize("container_name,expected", [
 	("cpsd-credentials-service",'Up'),
 	("symphony-identity-service",'Up'),
