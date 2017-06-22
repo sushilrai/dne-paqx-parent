@@ -116,6 +116,6 @@ public class RabbitConfig
 
     @Bean (name="nodeExpansionResponseQueue")
     Queue nodeExpansionResponseQueue() {
-        return new Queue(QUEUE_GENERAL_RESPONSE + "." + replyTo());
+        return new Queue(QUEUE_GENERAL_RESPONSE);
     }
 }
