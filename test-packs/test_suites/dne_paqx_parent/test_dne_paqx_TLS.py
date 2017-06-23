@@ -35,7 +35,6 @@ def load_test_data():
      cli_password = af_support_tools.get_config_file_property(config_file=env_file, heading='Base_OS',
                                                               property='password')
 
-
 ##############################################################################################
 
 @pytest.mark.dne_paqx_parent_mvp
@@ -72,8 +71,11 @@ def test_dnePAQX_container_using_AMQP_over_TLS():
     except Exception as err:
 
         # Return code error (e.g. 404, 501, ...)
+
         print(err)
+
         print('\n')
+
         raise Exception(err)
 
 #####################################################################################################
@@ -83,9 +85,9 @@ def test_dnePAQX_container_using_AMQP_over_TLS():
 def test_DNEpaqx_AMQP_data_is_encrypted():
     """ Verify DNE-PAQX network status reads amqps.
 
-    1. Get the processId associated with the DNE paqx
-    2. Use the returned processId to filter the output of the 'lsof' utility
-    3. Check that the listed AMQP connection is secure by checking for the phrase 'amqps' in the listing"""
+    1. get the processId associated with the DNE paqx
+    2. use the returned processId to filter the output of the 'lsof' utility
+    3. check that the listed AMQP connection is secure by checking for the phrase 'amqps' in the listing"""
     #
 
     # use the getDockerNetworkConnectionPorts fucntion , with the 'processId' flag, to indicate the
@@ -167,31 +169,27 @@ def getPeerPortFromNetstatOutput(netstatText):
 def getDockerNetworkConnectionPorts(containerName, label="ports"):
     """ A function to determine the docker network ipaddress of a PAQX container.
 
-    The docker network commands are used to determine the IP Address of the PAQX container.
+    Docker commands are used to determine the IP Address of the PAQX container.
     'netstat' is then used to return the connection details for that IP Address.
     If a second parameter is  passed to this function, and is equal to 'processId', then the connection details
     are further broken down to return just the processID.
     Eg. from the sample data below, the process ID = 987 would be returned
     tcp6       0      0 172.17.0.1:5671         172.21.0.2:47338        ESTABLISHED 987/beam.smp"""
 
-    # commandGetNetworkId = "docker network list | grep " + containerName + " |cut -f1 -d ' '"
-    # networkId = af_support_tools.send_ssh_command(
-    #             host=ipaddress,
-    #             username=cli_username,
-    #             password=cli_password,
-    #             command=commandGetNetworkId,
-    #             return_output=True)
+    commandGetContainerId = "docker ps | grep " + containerName + " | awk '{print $1}' "
+    containerId = af_support_tools.send_ssh_command(
+                host=ipaddress,
+                username=cli_username,
+                password=cli_password,
+                command=commandGetContainerId,
+                return_output=True)
 
-    # commandGetContainerIPAddress = "docker network inspect " + networkId.rstrip() +\
-    #                                " | grep IPv4 | awk '{print $2}'  | cut -f2 -d '\"' | cut -f1 -d '/' "
-
-    commandGetContainerIPAddress = "docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + containerName
-
+    commandGetIPAddress = "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' " + containerId.rstrip()
     ipAddressText = af_support_tools.send_ssh_command(
                 host=ipaddress,
                 username=cli_username,
                 password=cli_password,
-                command=commandGetContainerIPAddress,
+                command=commandGetIPAddress,
                 return_output=True)
 
     commandGetContainerConnectionPort = "netstat -tupn | grep " + ipAddressText.rstrip() + " | grep -v 8500"
@@ -210,4 +208,5 @@ def getDockerNetworkConnectionPorts(containerName, label="ports"):
     else:
         return connectionPorts
 
+#####################################################################################################
 
