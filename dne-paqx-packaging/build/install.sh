@@ -33,16 +33,29 @@ if [ ! -f "$RABBITMQ_ENV" ]; then
     /usr/bin/env echo "KEYSTOREPATH=/etc/rabbitmq/certs/client/keycert.p12" >> "$RABBITMQ_ENV"
     /usr/bin/env echo "TRUSTSTOREPATH=/etc/rabbitmq/certs/rabbitstore" >> "$RABBITMQ_ENV"
 
+
     chmod a+r "$RABBITMQ_ENV"
 else
     echo "Found $RABBITMQ_ENV"
 fi
 
-systemctl enable dell-dne-paqx
-systemctl enable dell-dne-paqx-ess
-systemctl enable dell-dne-paqx-web
+export HOSTNAME=$(hostname -f)
+export CREDENTIALS=/etc/rabbitmq/credentials.properties
+export PASSPHRASES=/etc/rabbitmq/client/passphrases.properties
+export KEYSTOREPATH=/etc/rabbitmq/certs/client/keycert.p12
+export TRUSTSTOREPATH=/etc/rabbitmq/certs/rabbitstore
 
-systemctl start dell-dne-paqx
+
+pushd /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-web/
+docker-compose create
+docker start symphony-dne-paqx
+popd
+
+pushd /opt/dell/cpsd/dne-paqx/install/dell-dne-paqx-ess/
+docker-compose create
+docker start symphony-engineering-standards-service
+popd
+
 
 echo "Dell Inc. DNE PAQX components install has completed successfully."
 
