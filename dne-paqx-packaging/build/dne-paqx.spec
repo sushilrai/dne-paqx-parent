@@ -32,12 +32,6 @@ init_dir ()
 }
 
 ##############################################################################
-# check and create the common directories
-##############################################################################
-init_dir ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-
-
-##############################################################################
 # check and create the root directory
 ##############################################################################
 init_dir ${RPM_BUILD_ROOT}/opt/dell
@@ -81,9 +75,7 @@ cp -riv ${RPM_SOURCE_DIR}/../dne-paqx-distribution/build/install/.env ${SERVICE_
 ##############################################################################
 # copy the unit file
 ##############################################################################
-cp ${RPM_SOURCE_DIR}/build/dell-dne-paqx.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-cp ${RPM_SOURCE_DIR}/build/dell-dne-paqx-web.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-cp ${RPM_SOURCE_DIR}/build/dell-dne-paqx-ess.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
+
 
 cp -r ${RPM_SOURCE_DIR}/target/dependency/dne-paqx/docker-compose.yml ${SERVICE_BUILD_ROOT}/install/dell-dne-paqx-web/docker-compose.yml
 cp -r ${RPM_SOURCE_DIR}/target/dependency/engineering-standards-service/docker-compose.yml ${SERVICE_BUILD_ROOT}/install/dell-dne-paqx-ess/docker-compose.yml
@@ -125,10 +117,6 @@ exit 0
 # configure directory and file permissions
 ##############################################################################
 %files
-
-%attr(644,root,root) /usr/lib/systemd/system/dell-dne-paqx.service
-%attr(644,root,root) /usr/lib/systemd/system/dell-dne-paqx-web.service
-%attr(644,root,root) /usr/lib/systemd/system/dell-dne-paqx-ess.service
 
 %attr(0754,dnepx,dell) /opt/dell/cpsd/dne-paqx
 %attr(0755,dnepx,dell) /opt/dell/cpsd/dne-paqx/install
