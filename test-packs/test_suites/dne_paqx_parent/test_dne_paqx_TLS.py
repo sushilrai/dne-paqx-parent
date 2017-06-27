@@ -192,7 +192,7 @@ def getDockerNetworkConnectionPorts(containerName, label="ports"):
                 command=commandGetIPAddress,
                 return_output=True)
 
-    commandGetContainerConnectionPort = "netstat -tupn | grep " + ipAddressText.rstrip() + " | grep -v 8500 | grep -v 8071"
+    commandGetContainerConnectionPort = "netstat -tupn | grep " + ipAddressText.rstrip() + ": | grep -v 8500 | grep -v 8071"
     connectionPorts = af_support_tools.send_ssh_command(
                 host=ipaddress,
                 username=cli_username,
