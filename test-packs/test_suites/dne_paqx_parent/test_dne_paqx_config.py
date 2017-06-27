@@ -166,7 +166,7 @@ def test_dne_passing_status_in_Consul():
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
 def test_dne_rmq_bindings_response_1(suppliedExchange='exchange.dell.cpsd.paqx.node.discovery.response',
-                                     suppliedQueue='queue.dell.cpsd.dne-paqx.response.dne-paqx'):
+                                     suppliedQueue='queue.dell.cpsd.dne-paqx.response'):
     """
     Description     :       This method tests that a binding exists between a RMQ Exchange & a RMQ Queue.
                             It uses the RMQ API to check.
