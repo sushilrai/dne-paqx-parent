@@ -136,7 +136,7 @@ public class NodeExpansionController
     @CrossOrigin
     @RequestMapping(path = "/nodes", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<NodeExpansionResponse> addNode(@RequestBody NodeExpansionRequest params, 
-            HttpServletRequest servletRequest) throws InterruptedException, ExecutionException 
+            HttpServletRequest servletRequest) throws InterruptedException, ExecutionException
     {
         Job job = addNodeService.createWorkflow("addNode", "startAddNodeWorkflow",
                 "AddNode request has been Submitted successfully");
@@ -179,7 +179,12 @@ public class NodeExpansionController
     {
         final Job job = addNodeService.findJob(jobId);
 
+        if ( job == null )
+            throw new WorkflowNotFoundException();
+
         return new ResponseEntity<>(addNodeService.makeNodeExpansionResponse(job), HttpStatus.OK);
+
+
     }
 
     @CrossOrigin
@@ -190,7 +195,11 @@ public class NodeExpansionController
     {
         final Job job = preProcessService.findJob(jobId);
 
+        if ( job == null )
+            throw new WorkflowNotFoundException();
+
         return new ResponseEntity<>(preProcessService.makeNodeExpansionResponse(job), HttpStatus.OK);
+
     }
 
     public void setWorkflowService(WorkflowService workflowService){

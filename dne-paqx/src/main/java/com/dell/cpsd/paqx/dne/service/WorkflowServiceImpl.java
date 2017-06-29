@@ -101,7 +101,22 @@ public class WorkflowServiceImpl implements WorkflowService
     @Override 
     public Job findJob(final UUID jobId)
     {
-        return jobRepository.find(jobId);
+        Job foundJob = jobRepository.find(jobId);
+
+        // still need check if this job belongs to this workflow.
+        // eg. job from proprocess is stored in the same repository but has wrong steps, we should not return that job.
+        if ( foundJob != null)
+        {
+            String stepName = foundJob.getInitialStep();
+            Map<String, Step>stepMap = getWorkflowSteps();
+            Step step = stepMap.get(stepName);
+            // current workflow assumes there are more than 1 step in the workflow.
+            // so if next step for initial step is null, the initial step is invalid for this workflow.
+            if(step == null){
+                return null;
+            }
+        }
+        return foundJob;
     }
 
 //    @Override
