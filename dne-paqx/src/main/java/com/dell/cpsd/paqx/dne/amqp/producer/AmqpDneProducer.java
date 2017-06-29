@@ -11,13 +11,22 @@ import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
-
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Collection;
+
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
 
 public class AmqpDneProducer implements DneProducer
 {
@@ -32,9 +41,27 @@ public class AmqpDneProducer implements DneProducer
     }
 
     @Override
+    public void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request)
+    {
+        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
+        LOGGER.info("publishIdracNetwokSettings: found list of capablities with size {}", capabilityDatas.size());
+        for (CapabilityData capabilityData : capabilityDatas)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(IdracNetworkSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish idrac network settings request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+            }
+        }
+    }
+
+    @Override
     public void publishListNodes(ListNodes request)
     {
         Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
+        LOGGER.info("publishListNodes: found list of capablities with size {}", capabilityDatas.size());
         for (CapabilityData capabilityData : capabilityDatas)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
@@ -51,7 +78,7 @@ public class AmqpDneProducer implements DneProducer
     public void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request)
     {
         Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("found list of capablities with size {}", capabilityDatas.size());
+        LOGGER.info("publishDiscoverClusters: found list of capablities with size {}", capabilityDatas.size());
         for (CapabilityData capabilityData : capabilityDatas)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();

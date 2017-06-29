@@ -4,6 +4,15 @@
  */
 package com.dell.cpsd.paqx.dne.service.model;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 public class NodeInfo {
 
     private String symphonyUuid;
@@ -37,11 +46,9 @@ public class NodeInfo {
         final StringBuilder builder = new StringBuilder();
         
         builder.append("NodeInfo {");
-        
         builder.append("symphonyUuid=").append(this.symphonyUuid);
         builder.append(", nodeId=").append(this.nodeId);
         builder.append(", nodeStatus=").append(this.nodeStatus);
-        
         builder.append("}");
         
         return builder.toString();

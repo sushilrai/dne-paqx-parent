@@ -32,6 +32,15 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 @EnableAsync
 @RestController
 @RequestMapping("/dne")
@@ -91,7 +100,9 @@ public class NodeExpansionController
         List<DiscoveredNode> discoveredNodes = nodeService.listDiscoveredNodes();
         if (discoveredNodes != null)
         {
-            return discoveredNodes.stream().map(n -> new NodeInfo(n.getConvergedUuid(), n.getNodeId(), NodeStatus.valueOf(n.getNodeStatus().toString()))).collect(Collectors.toList());
+            return discoveredNodes.stream().map(n -> new NodeInfo(
+                    n.getConvergedUuid(), n.getNodeId(), NodeStatus.valueOf(
+                            n.getNodeStatus().toString()))).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
@@ -210,5 +221,20 @@ public class NodeExpansionController
         }
 
         return new ArrayList<>();
+    }
+
+    @RequestMapping(path = "/idrackNetworkSettings", method = RequestMethod.POST, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public IdracInfo setIdracNetworkSettings(@RequestBody IdracNetworkSettingsRequest idracNetworkSettingsRequest,
+                                             HttpServletRequest servletRequest) throws ServiceTimeoutException, ServiceExecutionException {
+
+        IdracInfo idracInfo = nodeService.idracNetworkSettings(idracNetworkSettingsRequest);
+        if (idracInfo != null )
+        {
+            LOGGER.info("Return idracInfo " + idracInfo);
+            return idracInfo;
+        }
+
+        return idracInfo;
     }
 }

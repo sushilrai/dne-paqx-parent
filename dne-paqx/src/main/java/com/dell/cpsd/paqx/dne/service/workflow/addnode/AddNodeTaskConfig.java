@@ -21,11 +21,6 @@ public class AddNodeTaskConfig {
     public Map<String, Step> addNodeWorkflowSteps(){
         final Map<String, Step> workflowSteps = new HashMap<>();
 
-        workflowSteps.put("startAddNodeWorkflow", new Step("findAvailableNodes"));
-        workflowSteps.put("findAvailableNodes", new Step("configIdrac"));
-        workflowSteps.put("configIdrac", new Step("completed", true));
-        workflowSteps.put("completed", null);
-
         return workflowSteps;
     }
 }

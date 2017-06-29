@@ -13,8 +13,6 @@ import com.dell.cpsd.paqx.dne.service.BaseService;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigIdracTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,22 +51,9 @@ public class AddNodeService extends BaseService implements IAddNodeService {
     public Map<String, WorkflowTask> addNodeWorkflowTasks(){
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-        workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
-        workflowTasks.put("configIdrac", configIdracTask());
         return workflowTasks;
     }
 
-    @Bean("findDiscoveredNodesTask")
-    private WorkflowTask findDiscoveredNodesTask(){
-        return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(nodeService));
-    }
-
-    @Bean("configIdracTask")
-    private WorkflowTask configIdracTask(){
-        return createTask("configIdracTask", new ConfigIdracTaskHandler());
-    }
-
-    //////////////////////////////////////////////////////////////////////
     public Job findJob(UUID jobId){
         final Job job = workflowService.findJob(jobId);
 
@@ -79,14 +64,10 @@ public class AddNodeService extends BaseService implements IAddNodeService {
         return makeNodeExpansionResponse(job, workflowService);
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////
-    //
     public String findPathFromStep(final String step)
     {
         return propertyAsMap.get(step);
     }
-
     public WorkflowService getWorkflowService() {
         return workflowService;
     }

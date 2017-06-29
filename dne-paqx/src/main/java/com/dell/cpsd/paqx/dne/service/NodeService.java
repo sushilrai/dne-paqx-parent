@@ -6,6 +6,8 @@
 package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
+import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
@@ -31,4 +33,7 @@ public interface NodeService
      * @throws ServiceExecutionException
      */
     List<VirtualizationCluster> listClusters() throws ServiceTimeoutException, ServiceExecutionException;
+
+    IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
+            throws ServiceTimeoutException, ServiceExecutionException;
 }

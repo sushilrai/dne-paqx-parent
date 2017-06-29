@@ -28,6 +28,15 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.Collection;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 @Configuration
 @Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class})
 public class CapabilityConfig
@@ -51,7 +60,10 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("list-discovered-nodes"),
                 new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("vcenter-discover-cluster")
+                        .withProfile("vcenter-discover-cluster"),
+        new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                .withProfile("rackhd-configure-idrac-network")
+
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

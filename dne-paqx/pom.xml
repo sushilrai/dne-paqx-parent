@@ -56,6 +56,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.dell.cpsd</groupId>
+            <artifactId>rackhd-adapter-service</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.dell.converged.capabilities.compute</groupId>
             <artifactId>discovered-nodes-capabilities-api</artifactId>
             <classifier>schemas</classifier>
@@ -136,6 +142,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
         </dependency>
 
     </dependencies>
