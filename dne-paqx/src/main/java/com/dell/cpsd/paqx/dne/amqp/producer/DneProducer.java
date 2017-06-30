@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
@@ -33,6 +34,13 @@ public interface DneProducer
      * @param request
      */
     void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request);
+
+    /**
+     * Complete node allocation
+     * 
+     * @param request
+     */
+    void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request);
 
     /**
      * list the idrac network settings

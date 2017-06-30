@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
@@ -88,6 +89,31 @@ public class AmqpDneProducer implements DneProducer
                 LOGGER.info("Send discover cluster request message from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
             }
+        }
+    }
+
+    /**
+     * Send the <code>CompleteNodeAllocationRequestMessage</code> to the node 
+     * discovery service.
+     * 
+     * @param request - The <code>CompleteNodeAllocationRequestMessage</code> instance
+     */
+    @Override
+    public void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request)
+    {
+        CapabilityData capabilityData = capabilityBinder.getCurrentCapabilities()
+                .stream()
+                .filter((data) -> "manage-node-allocation".equals(data.getCapability().getProfile()))
+                .findFirst()
+                .orElse(null);
+        
+        if (capabilityData != null) 
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+                    
+            LOGGER.info("Send complete node allocation request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 

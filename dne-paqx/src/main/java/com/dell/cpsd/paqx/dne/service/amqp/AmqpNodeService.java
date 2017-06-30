@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
@@ -12,6 +14,7 @@ import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
@@ -31,6 +34,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,20 +46,43 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
- *
+ * 
  * @since 1.0
  */
-
 public class AmqpNodeService extends AbstractServiceClient implements NodeService
 {
+    /*
+     * The logger instance
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpNodeService.class);
+    
+    /*
+     * The <code>DelegatingMessageConsumer</code>
+     */
     private final DelegatingMessageConsumer consumer;
+    
+    /*
+     * The <code>DneProducer</code>
+     */
     private final DneProducer producer;
+    
+    /*
+     * The replyTo queue name
+     */
     private final String replyTo;
 
+    /**
+     * AmqpNodeService constructor.
+     * 
+     * @param logger - The logger instance.
+     * @param consumer - The <code>DelegatingMessageConsumer</code> instance.
+     * @param producer - The <code>DneProducer</code> instance.
+     * @param replyTo - The replyTo queue name.
+     * 
+     * @since 1.0
+     */
     public AmqpNodeService(ILogger logger, DelegatingMessageConsumer consumer, DneProducer producer, String replyTo)
     {
         super(logger);
@@ -67,9 +94,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         initCallbacks();
     }
 
-    private void initCallbacks() {
+    /*
+     * Initialize message consumer adapters.
+     * 
+     * @since 1.0
+     */
+    private void initCallbacks()
+    {
         this.consumer.addAdapter(new NodesListedResponseAdapter(this));
         this.consumer.addAdapter(new ClustersListedResponseAdapter(this));
+        this.consumer.addAdapter(new CompleteNodeAllocationResponseAdapter(this));
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
     }
 
@@ -134,7 +168,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         else
                         {
                             LOGGER.error("Error response from configure idrac settings: " + resp.getIdracNetworkSettingsResponse().getMessage());
-                        }
+    					}
                         idracInfo.setMessage(resp.getIdracNetworkSettingsResponse().getMessage());
                     }
                 }
@@ -147,6 +181,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return idracInfo;
     }
 
+    /**
+     * List the discovered nodes.
+     * 
+     * @throws ServiceTimeoutException.
+     * @throws ServiceExecutionException.
+     * 
+     * @return <code>List<DiscoveredNode></code>.
+     * 
+     * @since 1.0
+     */
     @Override
     public List<DiscoveredNode> listDiscoveredNodes() throws ServiceTimeoutException, ServiceExecutionException
     {
@@ -185,6 +229,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return Collections.emptyList();
     }
 
+    /**
+     * List the virtualization clusters.
+     * 
+     * @throws ServiceTimeoutException.
+     * @throws ServiceExecutionException.
+     * 
+     * @return <code>List<VirtualizationCluster></code>.
+     * 
+     * @since 1.0
+     */
     @Override
     public List<VirtualizationCluster> listClusters() throws ServiceTimeoutException, ServiceExecutionException
     {
@@ -230,6 +284,57 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return Collections.emptyList();
     }
 
+    /**
+     * Send a <code>CompleteNodeAllocationRequestMessage</code> to the node discovery service.
+     * 
+     * @param elementIdentifier - THe element identifier.
+     * 
+     * @throws ServiceTimeoutException.
+     * @throws ServiceExecutionException.
+     * 
+     * @since 1.0
+     */
+    @Override
+    public void notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException
+    {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier);
+
+        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                producer.publishCompleteNodeAllocation(request);
+            }
+        });
+
+        // TODO: Not sure what to do with the response, if anything...
+        processResponse(response, CompleteNodeAllocationResponseMessage.class);
+    }
+
+    /**
+     * Process a RPC response message.
+     * 
+     * @param response - The <code>ServiceResponse</code> to process.
+     * @param expectedResponse - The expected response <code>Class</code>
+     * 
+     * @throws ServiceExecutionException
+     * 
+     * @return The response.
+     * 
+     * @since 1.0
+     */
     private <R> R processResponse(ServiceResponse<?> response, Class<R> expectedResponse) throws ServiceExecutionException
     {
         Object responseMessage = response.getResponse();

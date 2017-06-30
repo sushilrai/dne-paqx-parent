@@ -14,6 +14,7 @@ hs_err_pid*
 .classpath
 .project
 .directory
+.pydevproject
 nb-configuration.xml
 nbactions.xml
 # Specific Maven Content

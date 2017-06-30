@@ -5,15 +5,6 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
-import com.dell.cpsd.hdp.capability.registry.client.CapabilityRegistryException;
-import com.dell.cpsd.hdp.capability.registry.client.ICapabilityRegistryLookupManager;
-import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
-import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBindingService;
-import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
-import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityMatcher;
-import com.dell.cpsd.hdp.capability.registry.client.binder.rpc.AmqpRpcCapabilityBindingService;
-import com.dell.cpsd.hdp.capability.registry.client.lookup.config.CapabilityRegistryLookupManagerConfig;
-import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -26,7 +17,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.util.Collection;
+import com.dell.cpsd.hdp.capability.registry.client.CapabilityRegistryException;
+import com.dell.cpsd.hdp.capability.registry.client.ICapabilityRegistryLookupManager;
+import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
+import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBindingService;
+import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityMatcher;
+import com.dell.cpsd.hdp.capability.registry.client.binder.rpc.AmqpRpcCapabilityBindingService;
+import com.dell.cpsd.hdp.capability.registry.client.lookup.config.CapabilityRegistryLookupManagerConfig;
+import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 
 /**
  * <p>
@@ -59,11 +57,12 @@ public class CapabilityConfig
         CapabilityBinder binder = new CapabilityBinder(bindingService,
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("list-discovered-nodes"),
-                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("vcenter-discover-cluster"),
-        new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                .withProfile("rackhd-configure-idrac-network")
-
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("rackhd-configure-idrac-network"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("manage-node-allocation")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

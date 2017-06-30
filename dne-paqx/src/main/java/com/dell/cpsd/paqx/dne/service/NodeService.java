@@ -34,6 +34,15 @@ public interface NodeService
      */
     List<VirtualizationCluster> listClusters() throws ServiceTimeoutException, ServiceExecutionException;
 
+    /**
+     * Notify the Node Discovery Service that node allocation is complete
+     * 
+     * @param elementIdentifier - The node identifier
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    void notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException;
+
     IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
             throws ServiceTimeoutException, ServiceExecutionException;
 }
