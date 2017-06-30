@@ -19,6 +19,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -113,11 +115,15 @@ public class NodeExpansionController
     @RequestMapping(path = "/preprocess/step/{stepName}", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<NodeExpansionResponse> preProcessStep(@PathVariable String stepName,
                                                                         @RequestBody NodeExpansionRequest params,
-                                                                        HttpServletRequest servletRequest) throws InterruptedException, ExecutionException
-    {
+                                                                        HttpServletRequest servletRequest) throws InterruptedException, ExecutionException, WorkflowNotFoundException {
         Job job = preProcessService.createWorkflow("preprocess", stepName,
                 "Preprocess request has been Submitted successfully");
 
+        if ( job == null ) {
+            String errMsg = "Can not find the workflow with step name " + stepName;
+            LOGGER.error( errMsg);
+            throw new WorkflowNotFoundException(HttpStatus.NOT_FOUND.value(), errMsg);
+        }
         orchestrationService.orchestrateWorkflow(job, preProcessService);
 
         return new ResponseEntity<>(preProcessService.makeNodeExpansionResponse(job), HttpStatus.OK);
@@ -151,10 +157,16 @@ public class NodeExpansionController
     @RequestMapping(path = "/nodes/step/{stepName}", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<NodeExpansionResponse> dontKnowWhatToCallThis(@PathVariable String stepName,
                                                                         @RequestBody NodeExpansionRequest params,
-                                                                        HttpServletRequest servletRequest) throws InterruptedException, ExecutionException
-    {
+                                                                        HttpServletRequest servletRequest) throws InterruptedException, ExecutionException, WorkflowNotFoundException {
         Job job = addNodeService.createWorkflow("addNode", stepName,
                 "AddNode request has been Submitted successfully");
+
+        if ( job == null )
+        {
+            String errMsg = "Can not find the workflow with step name " + stepName;
+            LOGGER.error( errMsg);
+            throw new WorkflowNotFoundException(HttpStatus.NOT_FOUND.value(), errMsg);
+        }
 
         orchestrationService.orchestrateWorkflow(job, addNodeService);
 
@@ -179,8 +191,11 @@ public class NodeExpansionController
     {
         final Job job = addNodeService.findJob(jobId);
 
-        if ( job == null )
-            throw new WorkflowNotFoundException();
+        if ( job == null ) {
+            String errMsg = "Can not find the workflow with jobId " + jobId;
+            LOGGER.error(errMsg);
+            throw new WorkflowNotFoundException(HttpStatus.NOT_FOUND.value(), errMsg);
+        }
 
         return new ResponseEntity<>(addNodeService.makeNodeExpansionResponse(job), HttpStatus.OK);
 
@@ -196,7 +211,11 @@ public class NodeExpansionController
         final Job job = preProcessService.findJob(jobId);
 
         if ( job == null )
-            throw new WorkflowNotFoundException();
+        {
+            String errMsg = "Can not find the workflow with jobId " + jobId;
+            LOGGER.error(errMsg);
+            throw new WorkflowNotFoundException(HttpStatus.NOT_FOUND.value(), errMsg);
+        }
 
         return new ResponseEntity<>(preProcessService.makeNodeExpansionResponse(job), HttpStatus.OK);
 
@@ -219,5 +238,12 @@ public class NodeExpansionController
         }
 
         return new ArrayList<>();
+    }
+
+    //to hide the exception class name from http response
+    @ExceptionHandler(WorkflowNotFoundException.class)
+    void handleWorkflowNotFoundException(WorkflowNotFoundException e, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setAttribute(DefaultErrorAttributes.class.getName() + ".ERROR", null);
+        response.sendError(e.getCode(), e.getMessage());
     }
 }
