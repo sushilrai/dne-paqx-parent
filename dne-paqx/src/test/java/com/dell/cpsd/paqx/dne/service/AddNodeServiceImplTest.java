@@ -43,7 +43,7 @@ public class AddNodeServiceImplTest {
     {
 
         Job initialJob = addNodeServiceUnderTest.createWorkflow(
-                "PreProcess", "startPreProcessWorkflow", "status1");
+                "addNode", "startAddNodeWorkflow", "status1");
 
         Assert.assertNotNull(initialJob);
         Assert.assertNotNull(initialJob.getId());
@@ -53,7 +53,7 @@ public class AddNodeServiceImplTest {
     public void testFindJob()
     {
         Job initialJob = addNodeServiceUnderTest.createWorkflow(
-                "PreProcess", "startPreProcessWorkflow", "status1");
+                "addNode", "startAddNodeWorkflow", "status1");
 
         Job foundJob = addNodeServiceUnderTest.findJob(initialJob.getId());
         Assert.assertNotNull(initialJob);
