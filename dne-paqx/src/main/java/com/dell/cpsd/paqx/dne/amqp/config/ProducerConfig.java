@@ -13,6 +13,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 @Configuration
 @Import(CapabilityConfig.class)
 public class ProducerConfig

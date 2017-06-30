@@ -26,6 +26,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 @Service
 public class PreProcessService extends BaseService implements IPreProcessService {
 
@@ -46,7 +55,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     @Bean("configIdracTask")
     private WorkflowTask configIdracTask(){
-        return createTask("configIdracTask", new ConfigIdracTaskHandler());
+        return createTask("configIdracTask", new ConfigIdracTaskHandler(nodeService));
     }
 
     @Bean("findVClusterTask")

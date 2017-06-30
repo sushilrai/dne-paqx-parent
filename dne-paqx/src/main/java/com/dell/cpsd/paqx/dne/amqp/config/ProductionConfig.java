@@ -14,6 +14,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 @Configuration
 public class ProductionConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductionConfig.class);

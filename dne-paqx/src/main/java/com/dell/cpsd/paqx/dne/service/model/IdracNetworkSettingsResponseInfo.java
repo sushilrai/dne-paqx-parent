@@ -5,10 +5,7 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service.orchestration;
-
-import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.service.IBaseService;
+package com.dell.cpsd.paqx.dne.service.model;
 
 /**
  * <p>
@@ -19,6 +16,11 @@ import com.dell.cpsd.paqx.dne.service.IBaseService;
  * @since 1.0
  */
 
-public interface IOrchestrationService {
-    void orchestrateWorkflow(Job job, IBaseService jobService);
+public class IdracNetworkSettingsResponseInfo extends TaskResponse {
+
+    private IdracInfo idracInfo;
+
+    public IdracInfo getIdracInfo(){ return idracInfo; }
+    public void setIdracInfo(IdracInfo idracInfo) { this.idracInfo = idracInfo; }
+
 }

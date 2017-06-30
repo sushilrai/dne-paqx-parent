@@ -13,6 +13,15 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.*;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 public class Job
 {
     /*

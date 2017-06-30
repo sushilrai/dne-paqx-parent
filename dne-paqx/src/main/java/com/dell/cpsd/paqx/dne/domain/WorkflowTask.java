@@ -8,6 +8,15 @@ package com.dell.cpsd.paqx.dne.domain;
 
 import java.util.UUID;
 
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+
 public class WorkflowTask {
     IWorkflowTaskHandler taskHandler;
     String taskName;
