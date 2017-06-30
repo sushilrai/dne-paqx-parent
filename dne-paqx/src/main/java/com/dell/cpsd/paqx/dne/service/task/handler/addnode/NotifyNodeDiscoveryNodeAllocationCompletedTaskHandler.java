@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNodesResponse;
+import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
@@ -72,9 +71,8 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler extends BaseT
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            DiscoveredNodesResponse findNodesTask = (DiscoveredNodesResponse)responseMap.get("findAvailableNodes");
-            List<NodeInfo> nodeInfos = findNodesTask.getNodesInfo();
-            NodeInfo nodeInfo = nodeInfos.get(0);
+            FirstAvailableDiscoveredNodeResponse findNodesTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
+            NodeInfo nodeInfo = findNodesTask.getNodeInfo();
             
             this.nodeService.notifyNodeAllocationComplete(nodeInfo.getNodeId());
             

@@ -27,7 +27,7 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNodesResponse;
+import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
@@ -80,8 +80,8 @@ public class AddNodeToSystemDefinitionTaskHandlerTest {
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", 
                 "scaleIOSVMDataIpAddress1", "scaleIOSVMDataIpAddress2", "scaleIOSVMManagementIpAddress"));
         
-        DiscoveredNodesResponse response = new DiscoveredNodesResponse();
-        response.setNodesInfo(Arrays.asList(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED)));
+        FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
+        response.setNodeInfo(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED));
         this.job.addTaskResponse("findAvailableNodes", response);
         
         this.job.changeToNextStep("updateSystemDefinition");
@@ -125,8 +125,8 @@ public class AddNodeToSystemDefinitionTaskHandlerTest {
     @Test
     public void testExecuteTask_no_discovered_node() {
         Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
-        DiscoveredNodesResponse response = (DiscoveredNodesResponse)taskResponse.get("findAvailableNodes");
-        response.setNodesInfo(new ArrayList<>());
+        FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse)taskResponse.get("findAvailableNodes");
+        response.setNodeInfo(null);
                 
         AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
         boolean expectedResult = false;

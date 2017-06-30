@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNodesResponse;
+import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
@@ -80,9 +80,8 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            DiscoveredNodesResponse findNodesTask = (DiscoveredNodesResponse)responseMap.get("findAvailableNodes");
-            List<NodeInfo> nodeInfos = findNodesTask.getNodesInfo();
-            NodeInfo nodeInfo = nodeInfos.get(0);
+            FirstAvailableDiscoveredNodeResponse findNodesTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
+            NodeInfo nodeInfo = findNodesTask.getNodeInfo();
             //nodeInfo.getIdentity().setAddress(job.getInputParams().getIdracIpAddress());
             
             List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();

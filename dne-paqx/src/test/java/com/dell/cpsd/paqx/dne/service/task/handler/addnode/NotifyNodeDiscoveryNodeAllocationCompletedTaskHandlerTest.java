@@ -9,8 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
@@ -25,7 +23,7 @@ import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNodesResponse;
+import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
@@ -74,8 +72,8 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
         
         this.job = addNodeService.createWorkflow("addNode", "startAddNodeWorkflow", "submitted");
         
-        DiscoveredNodesResponse response = new DiscoveredNodesResponse();
-        response.setNodesInfo(Arrays.asList(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED)));
+        FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
+        response.setNodeInfo(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED));
         this.job.addTaskResponse("findAvailableNodes", response);
         
         this.job.changeToNextStep("notifyNodeDiscovery");
@@ -113,8 +111,8 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
     @Test
     public void testExecuteTask_no_discovered_node() throws ServiceTimeoutException, ServiceExecutionException {
         Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
-        DiscoveredNodesResponse response = (DiscoveredNodesResponse)taskResponse.get("findAvailableNodes");
-        response.setNodesInfo(new ArrayList<>());
+        FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse)taskResponse.get("findAvailableNodes");
+        response.setNodeInfo(null);
                 
         NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler instance = new NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler(this.nodeService);
         boolean expectedResult = false;
