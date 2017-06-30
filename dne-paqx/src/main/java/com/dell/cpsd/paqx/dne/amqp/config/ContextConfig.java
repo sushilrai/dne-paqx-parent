@@ -27,7 +27,7 @@ public class ContextConfig extends ConsumerContextConfig {
      * @since 1.0
      */
     public ContextConfig() {
-        super(CONSUMER_NAME, false);
+        super(CONSUMER_NAME, true);
     }
 
 }
