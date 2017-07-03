@@ -100,7 +100,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToUpdate.getGroups()));
             systemToUpdate.getComponents().add(newNode);
             
-            ConvergedSystemAddition result = this.sdkAMQPClient.createOrUpdateConvergedSystem(systemToUpdate);
+            ConvergedSystemAddition result = this.sdkAMQPClient.createOrUpdateConvergedSystem(systemToUpdate, null);
             
             ObjectMapper mapper = new ObjectMapper();
             LOGGER.info("Successfully updated converged system: " + mapper.writeValueAsString(result));

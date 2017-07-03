@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,13 +108,13 @@ public class AddNodeToSystemDefinitionTaskHandlerTest {
         when(this.client.getConvergedSystems()).thenReturn(Arrays.asList(cs));
         when(this.client.getComponents(filter)).thenReturn(Arrays.asList(systemToUpdate));
         
-        ArgumentCaptor<ConvergedSystem> savedCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
         AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
         boolean expectedResult = true;
         boolean actualResult = instance.executeTask(this.job);
         
         assertEquals(expectedResult, actualResult);
-        verify(this.client, times(1)).createOrUpdateConvergedSystem(savedCaptor.capture());
+        verify(this.client, times(1)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
     }
     
     /**
@@ -133,8 +134,8 @@ public class AddNodeToSystemDefinitionTaskHandlerTest {
         boolean actualResult = instance.executeTask(this.job);
         assertEquals(expectedResult, actualResult);
         
-        ArgumentCaptor<ConvergedSystem> savedCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
-        verify(this.client, times(0)).createOrUpdateConvergedSystem(savedCaptor.capture());
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
     }
     
     /**
@@ -152,7 +153,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest {
         boolean actualResult = instance.executeTask(this.job);
         assertEquals(expectedResult, actualResult);
         
-        ArgumentCaptor<ConvergedSystem> savedCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
-        verify(this.client, times(0)).createOrUpdateConvergedSystem(savedCaptor.capture());
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
     }
 }
