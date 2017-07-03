@@ -36,20 +36,41 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
     @Override
     public boolean executeTask(Job job) {
         LOGGER.info("Execute ConfigIdracTaskHandler task");
+
         IdracNetworkSettingsResponseInfo response = initializeResponse(job);
 
-        String nodeId = ((FirstAvailableDiscoveredNodeResponse)job.getTaskResponseMap().get("findAvailableNodes")).getNodeInfo().getNodeId();
-        String ipAddress = job.getInputParams().getIdracIpAddress();
-        String gatewayIpAddress = job.getInputParams().getIdracGatewayIpAddress();
-        String subnetMask = job.getInputParams().getIdracSubnetMask();
-
-        LOGGER.info("Idrac input parameters are:");
-        LOGGER.info("NodeId:" + nodeId);
-        LOGGER.info("Idrac IP Address:" + ipAddress);
-        LOGGER.info("Idrac Gateway Address:" + gatewayIpAddress);
-        LOGGER.info("Idrac Subnet Mask:" + subnetMask);
-
         try {
+//            String nodeId = ((FirstAvailableDiscoveredNodeResponse)job.getTaskResponseMap().get("findAvailableNodes")).getNodeInfo().getNodeId();
+            String nodeId = "";
+            if (job.getTaskResponseMap() != null) {
+                FirstAvailableDiscoveredNodeResponse taskResponse = (FirstAvailableDiscoveredNodeResponse)job.getTaskResponseMap().get("findAvailableNodes");
+                if (taskResponse != null && taskResponse.getNodeInfo() != null && taskResponse.getNodeInfo().getNodeId() != null) {
+                    nodeId = taskResponse.getNodeInfo().getNodeId();
+                }
+                else
+                {
+                    LOGGER.info("Node id not found in the task response map.");
+                    response.setWorkFlowTaskStatus(Status.FAILED);
+                    response.addError("Node id not found in the task response.");
+                    return false;
+                }
+            }
+            else
+            {
+                LOGGER.info("Node id not found in the task response.");
+                response.setWorkFlowTaskStatus(Status.FAILED);
+                response.addError("Node id not found in the task response.");
+                return false;
+            }
+
+            String ipAddress = job.getInputParams().getIdracIpAddress();
+            String gatewayIpAddress = job.getInputParams().getIdracGatewayIpAddress();
+            String subnetMask = job.getInputParams().getIdracSubnetMask();
+
+            LOGGER.info("NodeId:" + nodeId);
+            LOGGER.info("Idrac input request parameters: " + job.getInputParams().toString());
+
+
             IdracNetworkSettingsRequest idracNetworkSettingsRequest = new IdracNetworkSettingsRequest();
             idracNetworkSettingsRequest.setNodeId(nodeId);
             idracNetworkSettingsRequest.setIdracIpAddress(ipAddress);
@@ -62,10 +83,10 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
               response.setWorkFlowTaskStatus(Status.SUCCEEDED);
 
               return true;
-          }
+            }
         }
         catch(Exception e) {
-                LOGGER.info("", e);
+            LOGGER.error("Error configuring idrac network settings: ", e);
             response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }

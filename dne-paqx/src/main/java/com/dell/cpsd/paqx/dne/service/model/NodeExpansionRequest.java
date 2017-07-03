@@ -102,4 +102,19 @@ public class NodeExpansionRequest {
     public void setScaleIOSVMManagementIpAddress(String scaleIOSVMManagementIpAddress) {
         this.scaleIOSVMManagementIpAddress = scaleIOSVMManagementIpAddress;
     }
+
+    @Override
+    public String toString() {
+        return "NodeExpansionRequest{" +
+                "idracIpAddress='" + idracIpAddress + '\'' +
+                ", idracGatewayIpAddress='" + idracGatewayIpAddress + '\'' +
+                ", idracSubnetMask='" + idracSubnetMask + '\'' +
+                ", managementIpAddress='" + managementIpAddress + '\'' +
+                ", esxiKernelIpAddress1='" + esxiKernelIpAddress1 + '\'' +
+                ", esxiKernelIpAddress2='" + esxiKernelIpAddress2 + '\'' +
+                ", scaleIOSVMDataIpAddress1='" + scaleIOSVMDataIpAddress1 + '\'' +
+                ", scaleIOSVMDataIpAddress2='" + scaleIOSVMDataIpAddress2 + '\'' +
+                ", scaleIOSVMManagementIpAddress='" + scaleIOSVMManagementIpAddress + '\'' +
+                '}';
+    }
 }
