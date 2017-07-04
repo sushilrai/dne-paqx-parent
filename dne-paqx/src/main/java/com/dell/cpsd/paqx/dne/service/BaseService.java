@@ -59,7 +59,7 @@ public abstract class BaseService {
 
         final Step nextStep =
                 workflowService.findNextStep(job.getWorkflow(), job.getStep());
-        final String path = findPathFromStep(nextStep.getNextStep());
+        final String path = nextStep.getNextStep(); //findPathFromStep(nextStep.getNextStep());
         final String type = findTypeFromStep(nextStep.getNextStep());
         final String method = findMethodFromStep(nextStep.getNextStep());
 
@@ -68,7 +68,7 @@ public abstract class BaseService {
         return new LinkRepresentation("step-next", uriInfo, type, method);
     }
 
-    public abstract String findPathFromStep(String nextStep);
+    //public abstract String findPathFromStep(String nextStep);
 
     private String findTypeFromStep(final String step)
     {
