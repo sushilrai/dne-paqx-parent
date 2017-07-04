@@ -38,8 +38,8 @@ import java.util.UUID;
 @Service
 public class PreProcessService extends BaseService implements IPreProcessService {
 
-    @Value("#{PropertySplitter.map('${preprocess.map.step.to.map}')}")
-    private Map<String, String> propertyAsMap;
+//    @Value("#{PropertySplitter.map('${preprocess.map.step.to.map}')}")
+//    private Map<String, String> propertyAsMap;
 
     @Autowired
     @Qualifier("preProcessWorkflowService")
@@ -121,10 +121,10 @@ public class PreProcessService extends BaseService implements IPreProcessService
     ///////////////////////////////////
     //
 
-    public String findPathFromStep(final String step)
-    {
-        return propertyAsMap.get(step);
-    }
+//    public String findPathFromStep(final String step)
+//    {
+//        return propertyAsMap.get(step);
+//    }
 
     public WorkflowService getWorkflowService() {
         return workflowService;

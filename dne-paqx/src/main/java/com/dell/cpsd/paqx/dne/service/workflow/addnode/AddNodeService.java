@@ -36,8 +36,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeService.class);
 
-    @Value("#{PropertySplitter.map('${addnode.map.step.to.map}')}")
-    private Map<String, String> propertyAsMap;
+//    @Value("#{PropertySplitter.map('${addnode.map.step.to.map}')}")
+//    private Map<String, String> propertyAsMap;
 
     @Autowired
     private NodeService nodeService;
@@ -105,10 +105,10 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return makeNodeExpansionResponse(job, workflowService);
     }
 
-    public String findPathFromStep(final String step)
-    {
-        return propertyAsMap.get(step);
-    }
+//    public String findPathFromStep(final String step)
+//    {
+//        return propertyAsMap.get(step);
+//    }
 
     public WorkflowService getWorkflowService()
     {
