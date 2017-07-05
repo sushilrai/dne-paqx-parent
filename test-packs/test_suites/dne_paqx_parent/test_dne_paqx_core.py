@@ -32,7 +32,7 @@ def load_test_data():
 	("symphony-capability-registry-service",'Up'),
 	("symphony-endpoint-registration-service", 'Up'),
 	("symphony-rackhd-adapter-service",'Up'),
-	("symphony-coprhd-adapter-service",'Up'),
+	("cpsd-coprhd-adapter-service",'Up'),
 	("symphony-vcenter-adapter-service",'Up'),
 ])
 

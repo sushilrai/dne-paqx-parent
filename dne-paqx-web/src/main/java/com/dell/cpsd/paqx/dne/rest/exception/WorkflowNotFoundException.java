@@ -1,70 +1,82 @@
 /**
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
- * VCE Confidential/Proprietary Information
+ * Dell EMC Confidential/Proprietary Information
  */
 
 package com.dell.cpsd.paqx.dne.rest.exception;
 
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
-@ResponseStatus(value = org.springframework.http.HttpStatus.NOT_FOUND, reason = "No workflow found.")
-public class WorkflowNotFoundException extends NodeExpansionException
-{
+public class WorkflowNotFoundException extends Exception {
     /*
-     * The serial version uuid
-     */
-    private static final long serialVersionUID = 8678731346050136776L;
+    * The serial version uuid
+    */
+    private static final long serialVersionUID = 965046523232760658L;
 
-    
+    /*
+     * The error code.
+     */
+    private int code;
+
+
     /**
      * WorkflowNotFoundException constructor.
-     * 
-     * @since   1.0
+     *
+     * @param code    The error code
+     * @param message The message
+     * @since 1.0
      */
-    public WorkflowNotFoundException()
-    {
-        this("NOT_FOUND", "No workflow found.");
+    public WorkflowNotFoundException(final int code, final String message) {
+        super(message);
+        this.code = code;
     }
 
 
     /**
      * WorkflowNotFoundException constructor.
-     * 
-     * @param   message The message
-     * 
-     * @since   1.0
+     *
+     * @param code    The error code
+     * @param message The message
+     * @param cause   The cause
+     * @since 1.0
      */
-    public WorkflowNotFoundException(final String message)
-    {
-        this("NOT_FOUND", message);
+    public WorkflowNotFoundException(final int code, final String message, final Throwable cause) {
+        super(message, cause);
+        this.code = code;
     }
 
-    
     /**
-     * WorkflowNotFoundException constructor.
-     * 
-     * @param   code    The error code
-     * @param   message The message
-     * 
-     * @since   1.0
+     * This returns the error code.
+     *
+     * @return The error code.
+     * @since 1.0
      */
-    public WorkflowNotFoundException(final String code, final String message)
-    {
-        super(code, message);
+    public int getCode() {
+        return code;
     }
 
-    
+
     /**
-     * WorkflowNotFoundException constructor.
-     * 
-     * @param   code    The error code
-     * @param   message The message
-     * @param   cause   The cause
-     * 
-     * @since   1.0
+     * This sets the error code.
+     *
+     * @param code The error code.
+     * @since 1.0
      */
-    public WorkflowNotFoundException(final String code, final String message, final Throwable cause)
-    {
-        super(code, message, cause);
+    public void setCode(final int code) {
+        this.code = code;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("WorkflowNotFoundException [").append(code).append("]");
+        builder.append(" : ").append(this.getMessage());
+
+        return builder.toString();
     }
 }

@@ -67,6 +67,15 @@ public class WorkflowServiceImpl implements WorkflowService
     @Override 
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus, Map<String, WorkflowTask>taskMap)
     {
+        // need check if step is valid or not
+        Map<String, Step>stepMap = getWorkflowSteps();
+        Step step = stepMap.get(startingStep);
+        // current workflow assumes there are more than 1 step in the workflow.
+        // so if next step for initial step is null, the initial step is invalid for this workflow.
+        if(step == null){
+            return null;
+        }
+
         final Job job = new Job(UUID.randomUUID(), workflowType, startingStep, currentStatus, taskMap);
         //set the job correlationId to each task.
         taskMap.forEach((k,v) -> v.setJobCorrelationId(job.getId()));
@@ -101,7 +110,22 @@ public class WorkflowServiceImpl implements WorkflowService
     @Override 
     public Job findJob(final UUID jobId)
     {
-        return jobRepository.find(jobId);
+        Job foundJob = jobRepository.find(jobId);
+
+        // still need check if this job belongs to this workflow.
+        // eg. job from proprocess is stored in the same repository but has wrong steps, we should not return that job.
+        if ( foundJob != null)
+        {
+            String stepName = foundJob.getInitialStep();
+            Map<String, Step>stepMap = getWorkflowSteps();
+            Step step = stepMap.get(stepName);
+            // current workflow assumes there are more than 1 step in the workflow.
+            // so if next step for initial step is null, the initial step is invalid for this workflow.
+            if(step == null){
+                return null;
+            }
+        }
+        return foundJob;
     }
 
 //    @Override

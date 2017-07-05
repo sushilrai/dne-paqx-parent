@@ -5,6 +5,14 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
@@ -13,26 +21,22 @@ import com.dell.cpsd.paqx.dne.repository.JobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeService;
-import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeTaskConfig;
-import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.AmqpNodeService;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import com.dell.cpsd.paqx.dne.service.orchestration.IOrchestrationService;
 import com.dell.cpsd.paqx.dne.service.orchestration.OrchestrationService;
+import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeService;
+import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeTaskConfig;
+import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.paqx.dne.util.PropertySplitter;
+import com.dell.cpsd.sdk.AMQPClient;
+import com.dell.cpsd.sdk.SystemDefinitionMessenger;
+import com.dell.cpsd.sdk.config.SDKConfiguration;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.google.common.base.Splitter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
-import java.util.Map;
 
 /**
  * <p>
@@ -44,7 +48,17 @@ import java.util.Map;
  */
 
 @Configuration
-@Import({RabbitConfig.class, ConsumerConfig.class, ProducerConfig.class, AddNodeTaskConfig.class, PreProcessTaskConfig.class, PropertySplitter.class})
+@Import({
+    RabbitConfig.class, 
+    ConsumerConfig.class, 
+    ProducerConfig.class, 
+    AddNodeTaskConfig.class, 
+    PreProcessTaskConfig.class, 
+    PropertySplitter.class,
+    SDKConfiguration.class,
+    SystemDefinitionMessenger.class, 
+    AMQPClient.class,
+})
 public class ServiceConfig
 {
     private static ILogger LOGGER = DneLoggingManager.getLogger(ServiceConfig.class);

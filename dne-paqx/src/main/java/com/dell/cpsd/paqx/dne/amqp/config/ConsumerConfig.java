@@ -44,15 +44,15 @@ public class ConsumerConfig
     @Bean
     SimpleMessageListenerContainer requestListenerContainer(
             @Autowired DelegatingMessageConsumer delegatingMessageConsumer,
-            @Autowired MessageConverter messageConverter)
+            @Autowired MessageConverter dneMessageConverter)
     {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(rabbitConnectionFactory);
         container.setAcknowledgeMode(AcknowledgeMode.AUTO);
         container.setQueues(responseQueue);
         container.setAdviceChain(new Advice[]{dneListenerRetryPolicy()});
-        container.setMessageConverter(messageConverter);
-        container.setMessageListener(new MessageListenerAdapter(delegatingMessageConsumer, messageConverter));
+        container.setMessageConverter(dneMessageConverter);
+        container.setMessageListener(new MessageListenerAdapter(delegatingMessageConsumer, dneMessageConverter));
         container.setErrorHandler(new DefaultContainerErrorHandler("dneRequestListenerContainer"));
         return container;
     }
