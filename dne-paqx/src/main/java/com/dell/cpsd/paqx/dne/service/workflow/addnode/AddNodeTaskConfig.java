@@ -24,9 +24,8 @@ public class AddNodeTaskConfig
         final Map<String, Step> workflowSteps = new HashMap<>();
 
         workflowSteps.put("startAddNodeWorkflow", new Step("findAvailableNodes"));
-        workflowSteps.put("findAvailableNodes", new Step("configIdrac"));
-        workflowSteps.put("configIdrac", new Step("updateSystemDefinition", true));
-        workflowSteps.put("updateSystemDefinition", new Step("notifyNodeDiscovery", true));
+        workflowSteps.put("findAvailableNodes", new Step("updateSystemDefinition"));
+        workflowSteps.put("updateSystemDefinition", new Step("notifyNodeDiscovery"));
         workflowSteps.put("notifyNodeDiscovery", new Step("completed", true));
         workflowSteps.put("completed", null);
 

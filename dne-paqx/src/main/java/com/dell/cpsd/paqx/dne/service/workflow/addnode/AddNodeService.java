@@ -14,7 +14,6 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigIdracTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler;
 import com.dell.cpsd.sdk.AMQPClient;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +60,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
-        workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscovery", notifyNodeDiscoveryNodeAllocationCompletedTask());
         return workflowTasks;
@@ -72,12 +69,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
     private WorkflowTask findDiscoveredNodesTask()
     {
         return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(this.nodeService));
-    }
-
-    @Bean("configIdracTask")
-    private WorkflowTask configIdracTask()
-    {
-        return createTask("configIdracTask", new ConfigIdracTaskHandler(this.nodeService));
     }
 
     @Bean("updateSystemDefinitionTask")
