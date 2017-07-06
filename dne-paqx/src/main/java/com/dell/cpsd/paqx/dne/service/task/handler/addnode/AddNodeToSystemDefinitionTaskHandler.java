@@ -54,9 +54,10 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
     /**
      * AddNodeToSystemDefinitionTaskHandler constructor.
      * 
-     * @param sdkAMQPClient - The <code>AMQPClient</code> instance.
+     * @param sdkAMQPClient
+     *            - The <code>AMQPClient</code> instance.
      * 
-     * @since   1.0
+     * @since 1.0
      */
     public AddNodeToSystemDefinitionTaskHandler(AMQPClient sdkAMQPClient)
     {
@@ -80,8 +81,8 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            FirstAvailableDiscoveredNodeResponse findNodesTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
-            NodeInfo nodeInfo = findNodesTask.getNodeInfo();
+            FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
+            NodeInfo nodeInfo = findNodeTask.getNodeInfo();
             
             List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
             ConvergedSystem system = allConvergedSystems.get(0);
@@ -105,16 +106,15 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             LOGGER.info("Successfully updated converged system: " + mapper.writeValueAsString(result));
             
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
-            
             return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Error adding node to the system definition", e);
-            response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }
 
+        response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
     }
     

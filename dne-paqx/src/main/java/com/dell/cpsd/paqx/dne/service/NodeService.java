@@ -43,6 +43,15 @@ public interface NodeService
      */
     void notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException;
 
+    /**
+     * Configure the iDRAC network settings.
+     * 
+     * @param idracNetworkSettingsRequest - The <code>IdracNetworkSettingsRequest</code> instance.
+     * 
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
     IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
             throws ServiceTimeoutException, ServiceExecutionException;
 }

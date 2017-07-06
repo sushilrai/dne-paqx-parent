@@ -168,13 +168,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         else
                         {
                             LOGGER.error("Error response from configure idrac settings: " + resp.getIdracNetworkSettingsResponse().getMessage());
-    					}
+                        }
                         idracInfo.setMessage(resp.getIdracNetworkSettingsResponse().getMessage());
                     }
                 }
             }
         }
-        catch(Exception e) {
+        catch(Exception e)
+        {
             LOGGER.error("Exception in idracNetworkSettings: ", e);
         }
 

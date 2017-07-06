@@ -46,7 +46,10 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandler extends BaseTaskHandle
     /**
      * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
      * 
-     * @param nodeService - The <code>NodeService</code> instance.
+     * @param nodeService
+     *            - The <code>NodeService</code> instance.
+     * 
+     * @since 1.0
      */
     public NotifyNodeDiscoveryToUpdateStatusTaskHandler(NodeService nodeService)
     {
@@ -71,8 +74,8 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandler extends BaseTaskHandle
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            FirstAvailableDiscoveredNodeResponse findNodesTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
-            NodeInfo nodeInfo = findNodesTask.getNodeInfo();
+            FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
+            NodeInfo nodeInfo = findNodeTask.getNodeInfo();
             
             this.nodeService.notifyNodeAllocationComplete(nodeInfo.getNodeId());
             
@@ -82,10 +85,10 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandler extends BaseTaskHandle
         catch (Exception e)
         {
             LOGGER.error("Error notifying node discovery service", e);
-            response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }
 
+        response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
     }
 }
