@@ -82,7 +82,6 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
             FirstAvailableDiscoveredNodeResponse findNodesTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
             NodeInfo nodeInfo = findNodesTask.getNodeInfo();
-            //nodeInfo.getIdentity().setAddress(job.getInputParams().getIdracIpAddress());
             
             List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
             ConvergedSystem system = allConvergedSystems.get(0);
@@ -111,7 +110,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
         }
         catch (Exception e)
         {
-            LOGGER.info(" ", e);
+            LOGGER.error("Error adding node to the system definition", e);
             response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }

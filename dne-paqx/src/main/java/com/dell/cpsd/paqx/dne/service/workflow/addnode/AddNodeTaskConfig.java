@@ -25,8 +25,8 @@ public class AddNodeTaskConfig
 
         workflowSteps.put("startAddNodeWorkflow", new Step("findAvailableNodes"));
         workflowSteps.put("findAvailableNodes", new Step("updateSystemDefinition"));
-        workflowSteps.put("updateSystemDefinition", new Step("notifyNodeDiscovery"));
-        workflowSteps.put("notifyNodeDiscovery", new Step("completed", true));
+        workflowSteps.put("updateSystemDefinition", new Step("notifyNodeDiscoveryToUpdateStatus"));
+        workflowSteps.put("notifyNodeDiscoveryToUpdateStatus", new Step("completed", true));
         workflowSteps.put("completed", null);
 
         return workflowSteps;

@@ -33,7 +33,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 
 /**
- * The tests for the notify node discovery service node allocation complete task handler
+ * The tests for the NotifyNodeDiscoveryToUpdateStatusTaskHandler.
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -42,7 +42,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
+public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest {
     
     /**
      * The <code>NodeService</code> instance
@@ -76,11 +76,11 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
         response.setNodeInfo(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED));
         this.job.addTaskResponse("findAvailableNodes", response);
         
-        this.job.changeToNextStep("notifyNodeDiscovery");
+        this.job.changeToNextStep("notifyNodeDiscoveryToUpdateStatus");
     }
 
     /**
-     * Test successful execution of NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler.executeTask() method
+     * Test successful execution of NotifyNodeDiscoveryToUpdateStatusTaskHandler.executeTask() method
      * 
      * @throws ServiceExecutionException 
      * @throws ServiceTimeoutException 
@@ -91,7 +91,7 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException {
         ArgumentCaptor<String> savedCaptor = ArgumentCaptor.forClass(String.class);
         
-        NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler instance = new NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler(this.nodeService);
+        NotifyNodeDiscoveryToUpdateStatusTaskHandler instance = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService);
         boolean expectedResult = true;
         boolean actualResult = instance.executeTask(this.job);
         
@@ -100,7 +100,7 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
     }
     
     /**
-     * Test error execution of NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler.executeTask() method
+     * Test error execution of NotifyNodeDiscoveryToUpdateStatusTaskHandler.executeTask() method
      *  - test error case where no discovered node instance is present.
      *  
      * @throws ServiceExecutionException 
@@ -114,7 +114,7 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandlerTest {
         FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse)taskResponse.get("findAvailableNodes");
         response.setNodeInfo(null);
                 
-        NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler instance = new NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler(this.nodeService);
+        NotifyNodeDiscoveryToUpdateStatusTaskHandler instance = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService);
         boolean expectedResult = false;
         boolean actualResult = instance.executeTask(this.job);
         assertEquals(expectedResult, actualResult);

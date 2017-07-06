@@ -22,7 +22,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 
 /**
  * Task responsible for notifying the node discovery service that node
- * allocation has completed.
+ * allocation has completed and to update its status.
  * 
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -30,13 +30,13 @@ import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
  * 
  * @since 1.0
  */
-public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+public class NotifyNodeDiscoveryToUpdateStatusTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
     /*
      * The logger instance
      */
     private static final Logger LOGGER = 
-            LoggerFactory.getLogger(NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler.class);
+            LoggerFactory.getLogger(NotifyNodeDiscoveryToUpdateStatusTaskHandler.class);
 
     /*
      * The <code>NodeService</code> instance
@@ -44,18 +44,18 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler extends BaseT
     private final NodeService nodeService;
     
     /**
-     * NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler constructor.
+     * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
      * 
      * @param nodeService - The <code>NodeService</code> instance.
      */
-    public NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler(NodeService nodeService)
+    public NotifyNodeDiscoveryToUpdateStatusTaskHandler(NodeService nodeService)
     {
         this.nodeService = nodeService;
     }
 
     /**
      * Perform the task of notifying the node discovery service that node
-     * allocation has completed.
+     * allocation has completed and to update its status.
      * 
      * @param job - The <code>Job</code> this task is part of.
      * 
@@ -64,7 +64,7 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler extends BaseT
     @Override
     public boolean executeTask(Job job)
     {
-        LOGGER.info("Execute NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler task");
+        LOGGER.info("Execute NotifyNodeDiscoveryToUpdateStatusTaskHandler task");
 
         TaskResponse response = initializeResponse(job);
 
@@ -81,7 +81,7 @@ public class NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler extends BaseT
         }
         catch (Exception e)
         {
-            LOGGER.info(" ", e);
+            LOGGER.error("Error notifying node discovery service", e);
             response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }

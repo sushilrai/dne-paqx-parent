@@ -15,7 +15,7 @@ import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryToUpdateStatusTaskHandler;
 import com.dell.cpsd.sdk.AMQPClient;
 
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
 
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
-        workflowTasks.put("notifyNodeDiscovery", notifyNodeDiscoveryNodeAllocationCompletedTask());
+        workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
         return workflowTasks;
     }
 
@@ -77,11 +77,11 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return createTask("updateSystemDefinitionTaskHandler", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient));
     }
 
-    @Bean("notifyNodeDiscoveryNodeAllocationCompletedTask")
-    private WorkflowTask notifyNodeDiscoveryNodeAllocationCompletedTask()
+    @Bean("notifyNodeDiscoveryToUpdateStatusTask")
+    private WorkflowTask notifyNodeDiscoveryToUpdateStatusTask()
     {
-        return createTask("notifyNodeDiscoveryNodeAllocationCompletedTaskHandler",
-                new NotifyNodeDiscoveryNodeAllocationCompletedTaskHandler(this.nodeService));
+        return createTask("notifyNodeDiscoveryToUpdateStatusTaskHandler",
+                new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService));
     }
 
     public Job findJob(UUID jobId)
