@@ -9,7 +9,12 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
 
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
+import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;
 import com.dell.cpsd.service.common.client.callback.ServiceError;
 import com.dell.cpsd.service.common.client.callback.ServiceResponse;
@@ -181,5 +186,55 @@ public class AmqpNodeServiceTest
         };
 
         nodeService.listDiscoveredNodes();
+    }
+    
+    @Test
+    public void testIdracNetworkSettingsSuccess() throws ServiceTimeoutException, ServiceExecutionException {
+    	DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        IdracNetworkSettingsRequest idracNetworkSettingsRequest = new IdracNetworkSettingsRequest("nodeId", "idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask");
+        
+    	AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe") {
+    		@Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                    long timeout) throws ServiceTimeoutException
+            {
+    			IdracNetworkSettingsResponse idracNetworkSettingsResponse = new IdracNetworkSettingsResponse("SUCCESS", "nodeId", "idracIpAddress", "netmask", "gateway");
+    			com.dell.cpsd.rackhd.adapter.rabbitmq.MessageProperties messageProperties = new com.dell.cpsd.rackhd.adapter.rabbitmq.MessageProperties();
+	            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+    			   			  
+    			IdracNetworkSettingsResponseMessage responseMessage = new IdracNetworkSettingsResponseMessage(messageProperties, idracNetworkSettingsResponse);
+    			
+    			serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+    	};
+    	
+    	IdracInfo idracInfo = nodeService.idracNetworkSettings(idracNetworkSettingsRequest);
+    	
+    	Assert.assertNotNull(idracInfo);
+    	Assert.assertEquals("SUCCESS", idracInfo.getMessage());
+    	Assert.assertEquals("nodeId", idracInfo.getNodeId());
+    	
+    	Mockito.verify(dneProducer,Mockito.times(1)).publishIdracNetwokSettings(Mockito.any());
+    }
+    
+    @Test
+    public void testNetworkSettingsError() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        IdracNetworkSettingsRequest idracNetworkSettingsRequest = new IdracNetworkSettingsRequest("nodeId", "idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask");
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe")
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                    long timeout) throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+        
+       	nodeService.idracNetworkSettings(idracNetworkSettingsRequest);       
+       	Mockito.verify(dneProducer,Mockito.times(1)).publishIdracNetwokSettings(Mockito.any());
     }
 }
