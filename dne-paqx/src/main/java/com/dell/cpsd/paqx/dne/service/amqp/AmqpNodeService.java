@@ -107,6 +107,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest) throws ServiceTimeoutException, ServiceExecutionException
     {
@@ -183,14 +186,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     /**
-     * List the discovered nodes.
-     * 
-     * @throws ServiceTimeoutException.
-     * @throws ServiceExecutionException.
-     * 
-     * @return <code>List<DiscoveredNode></code>.
-     * 
-     * @since 1.0
+     * {@inheritDoc}
      */
     @Override
     public List<DiscoveredNode> listDiscoveredNodes() throws ServiceTimeoutException, ServiceExecutionException
@@ -231,14 +227,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     /**
-     * List the virtualization clusters.
-     * 
-     * @throws ServiceTimeoutException.
-     * @throws ServiceExecutionException.
-     * 
-     * @return <code>List<VirtualizationCluster></code>.
-     * 
-     * @since 1.0
+     * {@inheritDoc}
      */
     @Override
     public List<VirtualizationCluster> listClusters() throws ServiceTimeoutException, ServiceExecutionException
@@ -286,17 +275,10 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     /**
-     * Send a <code>CompleteNodeAllocationRequestMessage</code> to the node discovery service.
-     * 
-     * @param elementIdentifier - THe element identifier.
-     * 
-     * @throws ServiceTimeoutException.
-     * @throws ServiceExecutionException.
-     * 
-     * @since 1.0
+     * {@inheritDoc}
      */
     @Override
-    public void notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException
+    public boolean notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException
     {
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
@@ -320,8 +302,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             }
         });
 
-        // TODO: Not sure what to do with the response, if anything...
-        processResponse(response, CompleteNodeAllocationResponseMessage.class);
+        CompleteNodeAllocationResponseMessage responseInfo = processResponse(response, CompleteNodeAllocationResponseMessage.class);
+
+        if (CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        {
+            LOGGER.error("Error response from notify node allocation complete: " + responseInfo.getNodeAllocationErrors());
+        }
+        
+        return CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
     /**

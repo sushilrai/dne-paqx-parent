@@ -77,10 +77,13 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandler extends BaseTaskHandle
             FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
             NodeInfo nodeInfo = findNodeTask.getNodeInfo();
             
-            this.nodeService.notifyNodeAllocationComplete(nodeInfo.getNodeId());
+            boolean result = this.nodeService.notifyNodeAllocationComplete(nodeInfo.getSymphonyUuid());
             
-            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
-            return true;
+            if (result)
+            {
+                response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+                return true;
+            }
         }
         catch (Exception e)
         {

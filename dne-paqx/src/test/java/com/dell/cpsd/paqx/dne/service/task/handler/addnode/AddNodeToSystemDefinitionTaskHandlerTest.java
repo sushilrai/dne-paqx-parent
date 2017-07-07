@@ -42,7 +42,7 @@ import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
 import com.dell.cpsd.service.system.definition.api.Group;
 
 /**
- * The tests for add node to system definition task handler
+ * The tests for the AddNodeToSystemDefinitionTaskHandler class.
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>

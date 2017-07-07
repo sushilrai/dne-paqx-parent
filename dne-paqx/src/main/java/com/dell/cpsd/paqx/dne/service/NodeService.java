@@ -38,10 +38,11 @@ public interface NodeService
      * Notify the Node Discovery Service that node allocation is complete
      * 
      * @param elementIdentifier - The node identifier
+     * @return true if the node allocation completed successfully, false otherwise.
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    void notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException;
+    boolean notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException;
 
     /**
      * Configure the iDRAC network settings.
