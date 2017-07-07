@@ -7,6 +7,7 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +104,29 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     }
 
     /**
+     * Test error execution of NotifyNodeDiscoveryToUpdateStatusTaskHandler.executeTask() method - test error case where no 
+     * findAvailableNodes task response was set.
+     * 
+     * @throws ServiceExecutionException
+     * @throws ServiceTimeoutException
+     * 
+     * @since 1.0
+     */
+    @Test
+    public void testExecuteTask_no_find_nodes_response() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
+        taskResponse.remove("findAvailableNodes");
+
+        NotifyNodeDiscoveryToUpdateStatusTaskHandler instance = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService);
+        boolean expectedResult = false;
+        boolean actualResult = instance.executeTask(this.job);
+
+        assertEquals(expectedResult, actualResult);
+        verify(this.nodeService, times(0)).notifyNodeAllocationComplete(any());
+    }
+
+    /**
      * Test error execution of NotifyNodeDiscoveryToUpdateStatusTaskHandler.executeTask() method - test error case where no discovered node
      * instance is present.
      * 
@@ -118,14 +142,12 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
         FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse) taskResponse.get("findAvailableNodes");
         response.setNodeInfo(null);
 
-        ArgumentCaptor<String> elementIdentifierCaptor = ArgumentCaptor.forClass(String.class);
-
         NotifyNodeDiscoveryToUpdateStatusTaskHandler instance = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService);
         boolean expectedResult = false;
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(0)).notifyNodeAllocationComplete(elementIdentifierCaptor.capture());
+        verify(this.nodeService, times(0)).notifyNodeAllocationComplete(any());
     }
 
     /**
@@ -140,14 +162,13 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     @Test
     public void testExecuteTask_node_discovery_service_error() throws ServiceTimeoutException, ServiceExecutionException
     {
-        ArgumentCaptor<String> elementIdentifierCaptor = ArgumentCaptor.forClass(String.class);
-        when(this.nodeService.notifyNodeAllocationComplete(elementIdentifierCaptor.capture())).thenReturn(false);
+        when(this.nodeService.notifyNodeAllocationComplete(any())).thenReturn(false);
 
         NotifyNodeDiscoveryToUpdateStatusTaskHandler instance = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService);
         boolean expectedResult = false;
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).notifyNodeAllocationComplete(elementIdentifierCaptor.capture());
+        verify(this.nodeService, times(1)).notifyNodeAllocationComplete(any());
     }
 }

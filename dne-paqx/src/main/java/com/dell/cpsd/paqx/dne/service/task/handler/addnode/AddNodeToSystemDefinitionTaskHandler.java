@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,14 +83,33 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
             FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
+            if (findNodeTask == null)
+            {
+                throw new IllegalStateException("No discovered node task found.");
+            }
+            
             NodeInfo nodeInfo = findNodeTask.getNodeInfo();
+            if (nodeInfo == null)
+            {
+                throw new IllegalStateException("No discovered node info found.");
+            }
             
             List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
+            if (CollectionUtils.isEmpty(allConvergedSystems))
+            {
+                throw new IllegalStateException("No converged systems found.");
+            }
+            
             ConvergedSystem system = allConvergedSystems.get(0);
             
             ComponentsFilter componentsFilter = new ComponentsFilter();
             componentsFilter.setSystemUuid(system.getUuid());
             List<ConvergedSystem> systemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
+            if (CollectionUtils.isEmpty(systemDetails))
+            {
+                throw new IllegalStateException("No converged system found.");
+            }
+            
             ConvergedSystem systemToUpdate = systemDetails.get(0);
             
             Component newNode = new Component();

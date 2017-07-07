@@ -78,7 +78,17 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
             FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse) responseMap
                     .get("findAvailableNodes");
+            if (findNodeTask == null)
+            {
+                throw new IllegalStateException("No discovered node task found.");
+            }
+            
             NodeInfo nodeInfo = findNodeTask.getNodeInfo();
+            if (nodeInfo == null)
+            {
+                throw new IllegalStateException("No discovered node info found.");
+            }
+
             String nodeId = nodeInfo.getNodeId();
 
             String ipAddress = job.getInputParams().getIdracIpAddress();

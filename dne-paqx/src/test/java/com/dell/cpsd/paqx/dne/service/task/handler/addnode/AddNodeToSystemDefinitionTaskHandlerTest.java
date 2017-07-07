@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +38,8 @@ import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeTaskConfig;
 import com.dell.cpsd.sdk.AMQPClient;
+import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
+import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
 import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
 import com.dell.cpsd.service.system.definition.api.Group;
@@ -121,6 +124,30 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     }
 
     /**
+     * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no 
+     * findAvailableNodes task response was set.
+     * 
+     * @throws ServiceExecutionException
+     * @throws ServiceTimeoutException
+     * 
+     * @since 1.0
+     */
+    @Test
+    public void testExecuteTask_no_find_nodes_response() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
+        taskResponse.remove("findAvailableNodes");
+
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
+        boolean expectedResult = false;
+        boolean actualResult = instance.executeTask(this.job);
+
+        assertEquals(expectedResult, actualResult);
+        verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
+    }
+
+    /**
      * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no discovered node instance
      * is present.
      * 
@@ -132,6 +159,26 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
         FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse) taskResponse.get("findAvailableNodes");
         response.setNodeInfo(null);
+
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
+        boolean expectedResult = false;
+        boolean actualResult = instance.executeTask(this.job);
+
+        assertEquals(expectedResult, actualResult);
+        verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
+    }
+    
+    /**
+     * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no converged systems 
+     * are present.
+     * 
+     * @since 1.0
+     */
+    @Test
+    public void testExecuteTask_no_converged_systems()
+    {
+        when(this.client.getConvergedSystems()).thenReturn(Collections.emptyList());
 
         ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
         AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
