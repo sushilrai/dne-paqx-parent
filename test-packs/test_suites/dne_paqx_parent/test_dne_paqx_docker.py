@@ -19,15 +19,13 @@ def load_test_data():
 #####################################################################
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
-@pytest.mark.parametrize("container_name", [
-	("symphony-dne-paqx")
-])
+@pytest.mark.parametrize("container_name", [("symphony-dne-paqx")])
 def test_verify_docker_container(container_name):
     """
     Description        :       This method tests docker service for a container
-				it will asserts if :
-				Docker service is not running for the container
-				Container is not having docker0 
+    it will asserts if :
+    Docker service is not running for the container
+    Container is not having docker0 
     Parameters  	:       1. container_name       -       Name of the container(STRING)
     Returns             :       None
     """
