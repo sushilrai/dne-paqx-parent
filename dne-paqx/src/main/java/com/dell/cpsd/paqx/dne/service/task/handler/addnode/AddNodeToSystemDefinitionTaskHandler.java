@@ -118,7 +118,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             newNode.setDefinition(nodeInfo.getDefinition());
             newNode.setEndpoints(this.mapEndpointNamestoUUIDs(nodeInfo.getEndpoints(), systemToUpdate.getEndpoints()));
             newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToUpdate.getGroups()));
-            systemToUpdate.getComponents().add(newNode);
+            this.addNewNode(systemToUpdate, newNode);
             
             ConvergedSystemAddition result = this.sdkAMQPClient.createOrUpdateConvergedSystem(systemToUpdate, null);
             
@@ -180,5 +180,36 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             }
         });
         return endpointUuids;
+    }
+    
+    /**
+     * Add a <code>Component</code> node instance to the <code>ConvergedSystem</code>.
+     * Only adds the node if it is not already part of the system.
+     * 
+     * @param system - The <code>ConvergedSystem</code> to which the new node will be added.
+     * @param newNode - The <code>Component</code> node to be added.
+     * 
+     * @since   1.0
+     */
+    private void addNewNode(ConvergedSystem system, Component newNode)
+    {
+        boolean okToAdd = true;
+        
+        for (Component component : system.getComponents())
+        {
+            if (component.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier()))
+            {
+                LOGGER.info("Discovered node already exists in system definition: " + newNode.getIdentity());
+                okToAdd = false;
+                break;
+                
+            }
+        }
+        
+        if (okToAdd)
+        {
+            LOGGER.info("Discovered node does not exist in system definition - adding it");
+            system.getComponents().add(newNode);
+        }
     }
 }

@@ -40,6 +40,7 @@ import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeTaskConfig;
 import com.dell.cpsd.sdk.AMQPClient;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.service.system.definition.api.Component;
 import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
 import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
 import com.dell.cpsd.service.system.definition.api.Group;
@@ -207,5 +208,41 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
 
         assertEquals(expectedResult, actualResult);
         verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
+    }
+    
+    /**
+     * Test execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test case where a node that
+     * already exists in the system definition is attempted to be added again.
+     * 
+     * @since 1.0
+     */
+    @Test
+    public void testExecuteTask_no_duplicate_nodes()
+    {
+        ConvergedSystem cs = new ConvergedSystem();
+        cs.setUuid(UUID.randomUUID().toString());
+
+        NodeInfo nodeInfo = ((FirstAvailableDiscoveredNodeResponse)this.job.getTaskResponseMap().get("findAvailableNodes")).getNodeInfo();
+        Component node = new Component();
+        node.setIdentity(nodeInfo.getIdentity());
+
+        ConvergedSystem system = new ConvergedSystem();
+        system.setUuid(UUID.randomUUID().toString());
+        system.getComponents().add(node);
+
+        ComponentsFilter filter = new ComponentsFilter();
+        filter.setSystemUuid(cs.getUuid());
+
+        when(this.client.getConvergedSystems()).thenReturn(Arrays.asList(cs));
+        when(this.client.getComponents(filter)).thenReturn(Arrays.asList(system));
+
+        ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
+        AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
+        boolean expectedResult = true;
+        boolean actualResult = instance.executeTask(this.job);
+
+        assertEquals(expectedResult, actualResult);
+        verify(this.client, times(1)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
+        assertEquals(1, csCaptor.getValue().getComponents().size());// Components list should be unaltered...
     }
 }
