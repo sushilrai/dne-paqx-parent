@@ -35,7 +35,7 @@ public class NodeInfo
         this.nodeStatus = nodeStatus;
         this.symphonyUuid = symphonyUuid;
 
-        // TODO: need to decide how we actually get this info...
+        // TODO: need to decide how we actually get all this info...
         // Specifically, need to get the MAC address from somwhere...for
         // now will use the symphonyUuid.
         // What about the IP address and the serial number??
@@ -44,8 +44,10 @@ public class NodeInfo
         this.definition = new Definition("POWEREDGE", "POWEREDGE", "630", "R630");
         this.parentGroups = new ArrayList<>();
         this.parentGroups.add("SystemCompute");
+        // Using Endpoint type as the matcher for an endpoint for now...
         this.endpoints = new ArrayList<>();
-        this.endpoints.add("RACKHD-EP");
+        this.endpoints.add("RACKHD");
+        this.endpoints.add("COMMON");
     }
 
     public String getSymphonyUuid()
