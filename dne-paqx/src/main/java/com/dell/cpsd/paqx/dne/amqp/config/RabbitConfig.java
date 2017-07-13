@@ -4,16 +4,11 @@
  */
 package com.dell.cpsd.paqx.dne.amqp.config;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNodeError;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
-import com.dell.cpsd.common.rabbitmq.MessageAnnotationProcessor;
-import com.dell.cpsd.common.rabbitmq.message.DefaultMessageConverterFactory;
-import com.dell.cpsd.common.rabbitmq.retrypolicy.DefaultRetryPolicyFactory;
-import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
-import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -29,10 +24,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.support.RetryTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNodeError;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
+import com.dell.cpsd.common.rabbitmq.MessageAnnotationProcessor;
+import com.dell.cpsd.common.rabbitmq.message.DefaultMessageConverterFactory;
+import com.dell.cpsd.common.rabbitmq.retrypolicy.DefaultRetryPolicyFactory;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 
 /**
  * This is the configuration for the RabbitMQ artifacts used by the service.
@@ -175,6 +178,8 @@ public class RabbitConfig
         messageClasses.add(CompleteNodeAllocationRequestMessage.class);
         messageClasses.add(CompleteNodeAllocationResponseMessage.class);
         
+        messageClasses.add(ChangeIdracCredentialsRequestMessage.class);
+        messageClasses.add(ChangeIdracCredentialsResponseMessage.class);
         
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);

@@ -7,16 +7,9 @@
 
 package com.dell.cpsd.paqx.dne.service.workflow.addnode;
 
-import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
-import com.dell.cpsd.paqx.dne.service.BaseService;
-import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryToUpdateStatusTaskHandler;
-import com.dell.cpsd.sdk.AMQPClient;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +18,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
+import com.dell.cpsd.paqx.dne.service.BaseService;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.WorkflowService;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ChangeIdracCredentialsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryToUpdateStatusTaskHandler;
+import com.dell.cpsd.sdk.AMQPClient;
 
 @Service
 public class AddNodeService extends BaseService implements IAddNodeService
@@ -60,6 +61,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
+		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
         return workflowTasks;
@@ -76,7 +78,13 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         return createTask("updateSystemDefinitionTaskHandler", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient));
     }
-
+    
+    @Bean("changeIdracCredentialsTask")
+    private WorkflowTask changeIdracCredentialsTask()
+    {
+        return createTask("changeIdracCredentialsTaskHandler", new ChangeIdracCredentialsTaskHandler(this.nodeService));
+    }
+    
     @Bean("notifyNodeDiscoveryToUpdateStatusTask")
     private WorkflowTask notifyNodeDiscoveryToUpdateStatusTask()
     {

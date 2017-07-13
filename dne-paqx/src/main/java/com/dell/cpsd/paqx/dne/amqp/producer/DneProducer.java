@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
@@ -48,4 +49,11 @@ public interface DneProducer
      * @param request
      */
     void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request);
+    
+    /**
+     * change idrac credentials
+     * 
+     * @param request
+     */
+    void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request);
 }

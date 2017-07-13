@@ -5,14 +5,15 @@
 
 package com.dell.cpsd.paqx.dne.service;
 
+import java.util.List;
+
+import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
-
-import java.util.List;
 
 public interface NodeService
 {
@@ -55,4 +56,16 @@ public interface NodeService
      */
     IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
             throws ServiceTimeoutException, ServiceExecutionException;
+    
+    /**
+     * Change Idrac credentials
+     * 
+     * @param configureBootDeviceIdracRequest - The <code>ChangeIdracCredentialsRequest</code> instance.
+     * 
+     * @return
+     * 
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    ChangeIdracCredentialsResponse changeIdracCredentials(String nodeId) throws ServiceTimeoutException, ServiceExecutionException;
 }

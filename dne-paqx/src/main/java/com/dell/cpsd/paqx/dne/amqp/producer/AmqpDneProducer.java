@@ -5,6 +5,13 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
+import java.util.Collection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
@@ -14,11 +21,6 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import java.util.Collection;
 
 /**
  * <p>
@@ -121,5 +123,28 @@ public class AmqpDneProducer implements DneProducer
     {
         Message messageAnnotation = (Message)messageClass.getAnnotation(Message.class);
         return messageAnnotation.value();
+    }
+
+    @Override
+    /**
+     * Send the <code>ChangeIdracCredentialsRequestMessage</code> to the node 
+     * discovery service.
+     * 
+     * @param request - The <code>ChangeIdracCredentialsRequestMessage</code> instance
+     */
+    public void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request)
+    {
+        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
+        LOGGER.info("publishChangeIdracCrdentials: found list of capablities with size {}", capabilityDatas.size());
+        for (CapabilityData capabilityData : capabilityDatas)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(ChangeIdracCredentialsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish change idrac credentials request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+            }
+        }
     }
 }
