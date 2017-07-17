@@ -73,10 +73,15 @@ public class OrchestrationService implements IOrchestrationService {
                     return;
                 }
             }
-
-            job = workflowService.advanceToNextStep(job, job.getStep(), "Inprogress");
+            if (job.getStatus()!= Status.COMPLETED) {
+                job = workflowService.advanceToNextStep(job, job.getStep(), "Inprogress");
+            }
+            else{
+                job.setStatus(Status.SUCCEEDED);
+                LOGGER.info("Finished Orchestration on job:" + job);
+                return;
+            }
         }
-
         job.setStatus(Status.SUCCEEDED);
         LOGGER.info("Finished Orchestration on job:" + job);
         return;

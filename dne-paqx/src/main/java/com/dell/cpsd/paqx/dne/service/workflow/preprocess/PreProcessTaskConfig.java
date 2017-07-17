@@ -31,7 +31,8 @@ public class PreProcessTaskConfig {
 
         workflowSteps.put("startPreProcessWorkflow", new Step("findAvailableNodes"));
         workflowSteps.put("findAvailableNodes", new Step("configIdrac"));
-        workflowSteps.put("configIdrac", new Step("findVCluster"));
+        workflowSteps.put("configIdrac", new Step("configureBootDeviceIdrac"));
+        workflowSteps.put("configureBootDeviceIdrac", new Step("findVCluster"));
         workflowSteps.put("findVCluster", new Step("findProtectionDomain"));
         workflowSteps.put("findProtectionDomain", new Step("findSystemData"));
         workflowSteps.put("findSystemData", new Step("assignDefaultHostName"));

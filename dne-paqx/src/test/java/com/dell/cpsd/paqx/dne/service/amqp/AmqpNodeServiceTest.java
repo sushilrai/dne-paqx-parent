@@ -5,16 +5,12 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.*;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo.AllocationStatus;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
 
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;
@@ -32,11 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The tests for AmqpNodeService class.
@@ -356,4 +348,70 @@ public class AmqpNodeServiceTest
         nodeService.notifyNodeAllocationComplete("elementIdentifier");
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(Mockito.any());
     }
+
+    /**
+     * Test that the bootOrderStatus method can execute successfully.
+     *
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    @Test
+    public void testBootOrderStatusSuccess() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        ConfigureBootDeviceIdracRequest bootOrderSequenceRequest = new ConfigureBootDeviceIdracRequest("nodeId", "idracIpAddress");
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe")
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties =
+                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties(Calendar.getInstance().getTime(),
+                                UUID.randomUUID().toString(), "replyToMe");
+
+                List<ConfigureBootDeviceIdracError> configureBootDeviceIdracErrors = new ArrayList<ConfigureBootDeviceIdracError>();
+                ConfigureBootDeviceIdracResponseMessage responseMessage = new ConfigureBootDeviceIdracResponseMessage(messageProperties, ConfigureBootDeviceIdracResponseMessage.Status.SUCCESS, configureBootDeviceIdracErrors );
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        BootDeviceIdracStatus bootOrderStatus = nodeService.bootDeviceIdracStatus(bootOrderSequenceRequest);
+
+        Assert.assertNotNull(bootOrderStatus);
+        Assert.assertEquals("SUCCESS", bootOrderStatus.getStatus());
+//        Assert.assertEquals("", bootOrderStatus.getMessage());
+
+        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(Mockito.any());
+    }
+
+    /**
+     * Test that the bootOrderStatus method can handle any errors.
+     *
+     * @throws ServiceTimeoutException
+     */
+    @Test
+    public void testBootOrderStatusError() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        ConfigureBootDeviceIdracRequest bootOrderSequenceRequest = new ConfigureBootDeviceIdracRequest("nodeId", "idracIpAddress");
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe")
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                                                  long timeout) throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.bootDeviceIdracStatus(bootOrderSequenceRequest);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(Mockito.any());
+    }
+
+
 }

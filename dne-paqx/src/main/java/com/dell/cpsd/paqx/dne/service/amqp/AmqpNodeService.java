@@ -5,35 +5,13 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.*;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.*;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
@@ -47,6 +25,12 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -110,6 +94,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new CompleteNodeAllocationResponseAdapter(this));
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
+        this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this));
     }
 
     /**
@@ -412,5 +397,66 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return responseMessage;
+    }
+
+    @Override
+    public BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest) throws ServiceTimeoutException, ServiceExecutionException{
+
+        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
+
+        try{
+            ConfigureBootDeviceIdracRequestMessage configureBootDeviceIdracRequestMessage = new ConfigureBootDeviceIdracRequestMessage();
+
+            MessageProperties messageProperties = new MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+            configureBootDeviceIdracRequestMessage.setMessageProperties(messageProperties);
+
+            configureBootDeviceIdracRequestMessage.setNodeID(configureBootDeviceIdracRequest.getNodeId());
+            configureBootDeviceIdracRequestMessage.setIpAddress(configureBootDeviceIdracRequest.getIdracIpAddress());
+
+            ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishConfigureBootDeviceIdrac(configureBootDeviceIdracRequestMessage);
+                }
+            });
+
+            ConfigureBootDeviceIdracResponseMessage resp = processResponse(response, ConfigureBootDeviceIdracResponseMessage.class);
+            if (resp != null)
+            {
+                if (resp.getMessageProperties() != null)
+                {
+                    if (resp.getStatus() != null)
+                    {
+                        LOGGER.info("Response message is: " + resp.getStatus().toString());
+
+                        bootDeviceIdracStatus.setStatus(resp.getStatus().toString());
+                        List<ConfigureBootDeviceIdracError> errors = resp.getConfigureBootDeviceIdracErrors();
+                        if(!CollectionUtils.isEmpty(errors)) {
+                            List<String> errorMsgs = new ArrayList<String>();
+                            for (ConfigureBootDeviceIdracError error : errors) {
+                                errorMsgs.add(error.getMessage());
+                            }
+                            bootDeviceIdracStatus.setErrors(errorMsgs);
+                        }
+                    }
+                }
+
+            }
+        }
+        catch (Exception e){
+            LOGGER.error("Exception in boot order sequence: ", e);
+        }
+        return bootDeviceIdracStatus;
     }
 }

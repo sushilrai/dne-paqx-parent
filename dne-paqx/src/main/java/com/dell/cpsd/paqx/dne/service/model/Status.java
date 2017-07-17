@@ -11,6 +11,7 @@ public enum Status {
     UNKNOWN,
     NEW,
     SUBMITTED,
+    COMPLETED,
     IN_PROGRESS,
     REJECTED,
     SUCCEEDED,

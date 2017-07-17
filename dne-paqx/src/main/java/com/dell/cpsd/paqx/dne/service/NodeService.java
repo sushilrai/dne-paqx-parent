@@ -7,11 +7,7 @@ package com.dell.cpsd.paqx.dne.service;
 
 import java.util.List;
 
-import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 
@@ -68,4 +64,17 @@ public interface NodeService
      * @throws ServiceExecutionException
      */
     ChangeIdracCredentialsResponse changeIdracCredentials(String nodeId) throws ServiceTimeoutException, ServiceExecutionException;
+
+    /**
+     * Configure the Boot Device Idrac.
+     *
+     * @param configureBootDeviceIdracRequest - The <code>ConfigureBootDeviceIdracRequest</code> instance.
+     *
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+
+    BootDeviceIdracStatus bootDeviceIdracStatus (ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
+            throws ServiceTimeoutException, ServiceExecutionException;
 }

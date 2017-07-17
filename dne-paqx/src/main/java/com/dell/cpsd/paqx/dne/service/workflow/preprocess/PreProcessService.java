@@ -17,7 +17,6 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTa
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +56,11 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("configIdracTask", new ConfigIdracTaskHandler(nodeService));
     }
 
+    @Bean("configureBootDeviceIdrac")
+    private WorkflowTask configureBootDeviceIdrac(){
+        return createTask("Configure Boot Device Idrac", new ConfigureBootDeviceIdracTaskHandler(nodeService));
+    }
+
     @Bean("findVClusterTask")
     public WorkflowTask createVClusterTask(){
         return createTask("Find VCluster", new FindVClusterTaskHandler(nodeService));
@@ -88,6 +92,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
         workflowTasks.put("configIdrac", configIdracTask());
+        workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         workflowTasks.put("findSystemData", findSystemDataTask());

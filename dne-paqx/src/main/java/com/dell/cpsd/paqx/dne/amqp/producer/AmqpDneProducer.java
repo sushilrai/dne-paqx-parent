@@ -5,14 +5,9 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import java.util.Collection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
@@ -21,6 +16,11 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.util.Collection;
 
 /**
  * <p>
@@ -55,6 +55,23 @@ public class AmqpDneProducer implements DneProducer
             if (messageType(IdracNetworkSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish idrac network settings request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+            }
+        }
+    }
+
+    @Override
+    public void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request)
+    {
+        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
+        LOGGER.info("publishConfigureBootDeviceIdrac: found list of capablities with size {}", capabilityDatas.size());
+        for (CapabilityData capabilityData : capabilityDatas)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(ConfigureBootDeviceIdracRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish configure boot device idrac request message from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
             }
         }
