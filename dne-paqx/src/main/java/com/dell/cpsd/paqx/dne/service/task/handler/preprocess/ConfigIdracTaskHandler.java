@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,11 +15,9 @@ import org.slf4j.LoggerFactory;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsResponseInfo;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
@@ -71,25 +70,28 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
     {
         LOGGER.info("Execute ConfigIdracTaskHandler task");
 
-        IdracNetworkSettingsResponseInfo response = initializeResponse(job);
+        TaskResponse response = initializeResponse(job);
 
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse) responseMap
-                    .get("findAvailableNodes");
+            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
             if (findNodeTask == null)
             {
                 throw new IllegalStateException("No discovered node task found.");
             }
-            
-            NodeInfo nodeInfo = findNodeTask.getNodeInfo();
-            if (nodeInfo == null)
+
+            if (findNodeTask.getResults() == null)
+            {
+                throw new IllegalStateException("No results found.");
+            }
+
+            if (findNodeTask.getResults().get("nodeID") == null)
             {
                 throw new IllegalStateException("No discovered node info found.");
             }
 
-            String nodeId = nodeInfo.getNodeId();
+            String nodeId = findNodeTask.getResults().get("nodeID").toString();
 
             String ipAddress = job.getInputParams().getIdracIpAddress();
             String gatewayIpAddress = job.getInputParams().getIdracGatewayIpAddress();
@@ -107,7 +109,7 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
             IdracInfo idracInfo = nodeService.idracNetworkSettings(idracNetworkSettingsRequest);
             if (idracInfo != null)
             {
-                response.setIdracInfo(idracInfo);
+                response.setResults(buildResponseResult(idracInfo));
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
@@ -120,6 +122,36 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
 
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
+    }
+
+    /*
+     * This method add all the node information to the response object
+     */
+    private Map<String, String> buildResponseResult(IdracInfo idracInfo)
+    {
+        Map<String, String> result = new HashMap<>();
+
+        if (idracInfo == null)
+        {
+            return result;
+        }
+
+        if (idracInfo.getIdracIpAddress() != null)
+        {
+            result.put("idracIpAddress", idracInfo.getIdracIpAddress());
+        }
+
+        if (idracInfo.getIdracGatewayIpAddress() != null)
+        {
+            result.put("idracGatewayIpAddress", idracInfo.getIdracGatewayIpAddress());
+        }
+
+        if (idracInfo.getIdracSubnetMask() != null)
+        {
+            result.put("idracSubnetMask", idracInfo.getIdracSubnetMask());
+        }
+
+        return result;
     }
 
     /**

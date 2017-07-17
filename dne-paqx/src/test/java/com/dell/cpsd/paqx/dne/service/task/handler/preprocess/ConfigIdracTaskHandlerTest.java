@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
@@ -25,7 +26,6 @@ import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
@@ -36,6 +36,7 @@ import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigIdracTaskHandler;
 
 /**
  * The tests for ConfigIdracTaskHandler.
@@ -82,9 +83,16 @@ public class ConfigIdracTaskHandlerTest
                 "scaleIOSVMDataIpAddress2", "scaleIOSVMManagementIpAddress");
         this.job.setInputParams(nodeExpansionRequest);
 
-        FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
+        TaskResponse response = new TaskResponse();
         NodeInfo nodeInfo = new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED);
-        response.setNodeInfo(nodeInfo);
+        Map<String, String> results = new HashMap<>();
+
+        results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
+        results.put("nodeID", nodeInfo.getNodeId());
+        results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
+
+        response.setResults(results);
+
         this.job.addTaskResponse("findAvailableNodes", response);
 
         this.job.changeToNextStep("configIdrac");
@@ -150,8 +158,9 @@ public class ConfigIdracTaskHandlerTest
     public void testExecuteTask_no_discovered_node() throws ServiceTimeoutException, ServiceExecutionException
     {
         Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
-        FirstAvailableDiscoveredNodeResponse response = (FirstAvailableDiscoveredNodeResponse) taskResponse.get("findAvailableNodes");
-        response.setNodeInfo(null);
+        TaskResponse response = taskResponse.get("findAvailableNodes");
+        Map<String, String> results = new HashMap<>();
+        response.setResults(results);
 
         ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
         ConfigIdracTaskHandler instance = new ConfigIdracTaskHandler(this.nodeService);
