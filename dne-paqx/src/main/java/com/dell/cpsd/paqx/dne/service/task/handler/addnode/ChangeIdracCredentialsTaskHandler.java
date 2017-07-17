@@ -73,7 +73,7 @@ public class ChangeIdracCredentialsTaskHandler  extends BaseTaskHandler implemen
                 throw new IllegalStateException("No discovered node info found.");
             }
             
-            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials("DUMMYID");//nodeInfo.getNodeId()
+            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials(nodeInfo.getNodeId());
             
             if ("SUCCESS".equalsIgnoreCase(responseMessage.getMessage()))
             {
