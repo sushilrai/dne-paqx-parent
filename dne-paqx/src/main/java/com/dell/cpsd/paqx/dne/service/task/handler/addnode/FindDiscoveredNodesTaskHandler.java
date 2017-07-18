@@ -84,6 +84,9 @@ public class FindDiscoveredNodesTaskHandler extends BaseTaskHandler implements I
                     NodeInfo nodeInfo = (NodeInfo) nodeInfoList.get(0);
                     LOGGER.info("Found first available node : " + nodeInfo);
                     LOGGER.info("Building task response based on the node info.");
+                    
+                    ((FirstAvailableDiscoveredNodeResponse)response).setNodeInfo(nodeInfo);
+                    
                     response.setResults(buildResponseResult(nodeInfo));
                     response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 }
