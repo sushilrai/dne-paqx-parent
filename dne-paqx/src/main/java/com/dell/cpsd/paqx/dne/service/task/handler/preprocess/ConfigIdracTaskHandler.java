@@ -6,21 +6,16 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsResponseInfo;
-import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Task responsible for configuring the iDRAC network settings.
@@ -91,7 +86,7 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
                 throw new IllegalStateException("No discovered node info found.");
             }
 
-            String nodeId = findNodeTask.getResults().get("nodeID").toString();
+            String nodeId = findNodeTask.getResults().get("nodeID");
 
             String ipAddress = job.getInputParams().getIdracIpAddress();
             String gatewayIpAddress = job.getInputParams().getIdracGatewayIpAddress();

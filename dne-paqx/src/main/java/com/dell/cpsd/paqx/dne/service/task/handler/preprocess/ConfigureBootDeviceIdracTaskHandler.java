@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -62,23 +63,27 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     @Override
     public boolean executeTask(Job job)
     {   LOGGER.info("Execute BootOrderSequence Task");
-        ConfigureBootDeviceIdracResponse response = initializeResponse(job);
+        TaskResponse response = initializeResponse(job);
 
         try
         {
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse) responseMap
-                    .get("findAvailableNodes");
+            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
             if (findNodeTask == null)
             {
                 throw new IllegalStateException("No discovered node task found.");
             }
-            NodeInfo nodeInfo = findNodeTask.getNodeInfo();
-            if (nodeInfo == null)
+            if (findNodeTask.getResults() == null)
+            {
+                throw new IllegalStateException("No results found.");
+            }
+
+            if (findNodeTask.getResults().get("nodeID") == null)
             {
                 throw new IllegalStateException("No discovered node info found.");
             }
-            String nodeId = nodeInfo.getNodeId();
+
+            String nodeId = findNodeTask.getResults().get("nodeID");
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
             LOGGER.info("NodeId:" + nodeId);
@@ -91,7 +96,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
             BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.bootDeviceIdracStatus(configureBootDeviceIdracRequest);
             if (bootDeviceIdracStatus != null)
             {
-                response.setBootOrderStatus(bootDeviceIdracStatus);
+                response.setResults(buildResponseResult(bootDeviceIdracStatus));
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
@@ -102,6 +107,31 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
         }
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
+    }
+
+    /*
+     * This method add all the node information to the response object
+     */
+    private Map<String, String> buildResponseResult(BootDeviceIdracStatus bootDeviceIdracStatus)
+    {
+        Map<String, String> result = new HashMap<>();
+
+        if (bootDeviceIdracStatus == null)
+        {
+            return result;
+        }
+
+        if (bootDeviceIdracStatus.getStatus() != null)
+        {
+            result.put("bootDeviceIdracStatus", bootDeviceIdracStatus.getStatus());
+        }
+
+        if (bootDeviceIdracStatus.getErrors() != null)
+        {
+            result.put("bootDeviceIdracErrorsList", bootDeviceIdracStatus.getErrors().toString());
+        }
+
+        return result;
     }
 
     /**
