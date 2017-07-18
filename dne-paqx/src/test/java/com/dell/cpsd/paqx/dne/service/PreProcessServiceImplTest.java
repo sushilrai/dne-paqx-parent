@@ -8,9 +8,12 @@
 package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +27,7 @@ public class PreProcessServiceImplTest {
 
     private WorkflowServiceImpl workflowServiceUnderTest;
     private PreProcessService   preProcessServiceUnderTest;
+    private Map<String, WorkflowTask> workFlowTasks;
     @Before
     public void setUp() throws Exception
     {
@@ -39,6 +43,8 @@ public class PreProcessServiceImplTest {
 
         this.preProcessServiceUnderTest = new PreProcessService();
         preProcessServiceUnderTest.setWorkflowService(workflowServiceUnderTest);
+        
+        workFlowTasks = preProcessServiceUnderTest.preProcessWorkflowTasks();
     }
 
     @Test
@@ -62,6 +68,50 @@ public class PreProcessServiceImplTest {
         assertNotNull(initialJob);
         assertNotNull(foundJob);
         assertEquals(initialJob, foundJob);
+    }
+    
+    @Test
+    public void testPreProcessWorkFlowTask_setup() 
+    {
+        Assert.assertNotNull(workFlowTasks);
+        Assert.assertEquals(8, workFlowTasks.size());
+    }
+    
+    @Test
+    public void testTaskName_findAvailableNodes()
+    {
+        Assert.assertEquals("Finding discovered Nodes", workFlowTasks.get("findAvailableNodes").getTaskName());
+    }
+    
+    @Test
+    public void testTaskName_configIdrac() 
+    {
+    	Assert.assertEquals("Configuring Out of Band Management", workFlowTasks.get("configIdrac").getTaskName());
+    }
+    
+    @Test
+    public void testTaskName_findVCluster() {
+    	Assert.assertEquals("Find VCluster", workFlowTasks.get("findVCluster").getTaskName());
+    }
+    
+    @Test
+    public void testTaskName_findProtectionDomain() {
+    	Assert.assertEquals("Find ProtectionDomain", workFlowTasks.get("findProtectionDomain").getTaskName());
+    }
+    
+    @Test
+    public void testTaskName_findSystemData() {
+    	Assert.assertEquals("Find SystemData", workFlowTasks.get("findSystemData").getTaskName());
+    }  
+    
+    @Test
+    public void testTaskName_assignDefaultHostName() {
+    	Assert.assertEquals("Assign Default HostName", workFlowTasks.get("assignDefaultHostName").getTaskName());
+    }
+    
+    @Test
+    public void testTaskName_assignDefaultCredentials() {
+    	Assert.assertEquals("Assign Default Credentials", workFlowTasks.get("assignDefaultCredentials").getTaskName());
     }
 
 }

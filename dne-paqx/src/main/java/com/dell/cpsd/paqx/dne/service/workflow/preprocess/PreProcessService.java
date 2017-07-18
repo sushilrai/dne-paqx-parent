@@ -48,12 +48,12 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     @Bean("findDiscoveredNodesTask")
     private WorkflowTask findDiscoveredNodesTask(){
-        return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(nodeService));
+        return createTask("Finding discovered Nodes", new FindDiscoveredNodesTaskHandler(nodeService));
     }
 
     @Bean("configIdracTask")
     private WorkflowTask configIdracTask(){
-        return createTask("configIdracTask", new ConfigIdracTaskHandler(nodeService));
+        return createTask("Configuring Out of Band Management", new ConfigIdracTaskHandler(nodeService));
     }
 
     @Bean("configureBootDeviceIdrac")

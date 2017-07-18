@@ -70,25 +70,25 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("findDiscoveredNodesTask")
     private WorkflowTask findDiscoveredNodesTask()
     {
-        return createTask("findDiscoveredNodesTaskHandler", new FindDiscoveredNodesTaskHandler(this.nodeService));
+        return createTask("Finding discovered Nodes", new FindDiscoveredNodesTaskHandler(this.nodeService));
     }
 
     @Bean("updateSystemDefinitionTask")
     private WorkflowTask updateSystemDefinitionTask()
     {
-        return createTask("updateSystemDefinitionTaskHandler", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient));
+        return createTask("Update System Definition", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient));
     }
     
     @Bean("changeIdracCredentialsTask")
     private WorkflowTask changeIdracCredentialsTask()
     {
-        return createTask("changeIdracCredentialsTaskHandler", new ChangeIdracCredentialsTaskHandler(this.nodeService));
+        return createTask("Change Out of Band Management Credentials", new ChangeIdracCredentialsTaskHandler(this.nodeService));
     }
     
     @Bean("notifyNodeDiscoveryToUpdateStatusTask")
     private WorkflowTask notifyNodeDiscoveryToUpdateStatusTask()
     {
-        return createTask("notifyNodeDiscoveryToUpdateStatusTaskHandler",
+        return createTask("Notify Node Discovery To Update Status",
                 new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService));
     }
 
