@@ -228,6 +228,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         DiscoverClusterRequestInfoMessage request = new DiscoverClusterRequestInfoMessage();
+        request.setMessageProperties(messageProperties);
         ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
         {
             @Override
