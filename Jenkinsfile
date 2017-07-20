@@ -63,6 +63,11 @@ pipeline {
                 archiveArtifacts artifacts: '**/*.rpm', fingerprint: true 
             }
         }
+	stage('Upload to Repo') {
+            steps {
+                uploadArtifactsToArtifactory()
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') { 
