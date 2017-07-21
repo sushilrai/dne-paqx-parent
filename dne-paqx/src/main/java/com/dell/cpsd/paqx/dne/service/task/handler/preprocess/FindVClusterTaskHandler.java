@@ -74,7 +74,7 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
 
             if (cInfo.getName() != null)
             {
-                result.put("name", cInfo.getName());
+                result.put("clusterName", cInfo.getName());
             }
 
             if (cInfo.getNumberOfHosts() != null)
