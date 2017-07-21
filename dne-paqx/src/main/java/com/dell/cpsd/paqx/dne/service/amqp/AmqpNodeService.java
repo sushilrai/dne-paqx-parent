@@ -45,7 +45,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * The logger instance
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpNodeService.class);
-    
     /*
      * The <code>DelegatingMessageConsumer</code>
      */
@@ -60,6 +59,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * The replyTo queue name
      */
     private final String replyTo;
+    private final long timeout = 600000L;
+
 
     /**
      * AmqpNodeService constructor.
@@ -123,7 +124,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             idracNetworkSettingsRequestMessage.setIdracNetworkSettings(idracNetworkSettings);
 
-            ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
                 @Override
                 public String getRequestId()
@@ -187,7 +188,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         ListNodes request = new ListNodes(messageProperties, Collections.emptyList());
-        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()
@@ -229,7 +230,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         DiscoverClusterRequestInfoMessage request = new DiscoverClusterRequestInfoMessage();
         request.setMessageProperties(messageProperties);
-        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()
@@ -278,7 +279,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier);
 
-        ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()
@@ -353,7 +354,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             
             LOGGER.info("Sending Change Idrac Credentials request with correlation id: " + messageProperties.getCorrelationId());
             
-            ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
                 @Override
                 public String getRequestId()
@@ -417,7 +418,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             configureBootDeviceIdracRequestMessage.setNodeID(configureBootDeviceIdracRequest.getNodeId());
             configureBootDeviceIdracRequestMessage.setIpAddress(configureBootDeviceIdracRequest.getIdracIpAddress());
 
-            ServiceResponse<?> response = processRequest(10000L, new ServiceRequestCallback()
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
                 @Override
                 public String getRequestId()

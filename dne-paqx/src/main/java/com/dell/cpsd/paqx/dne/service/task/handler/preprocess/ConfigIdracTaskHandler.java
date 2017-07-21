@@ -102,11 +102,14 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
             idracNetworkSettingsRequest.setIdracSubnetMask(subnetMask);
 
             IdracInfo idracInfo = nodeService.idracNetworkSettings(idracNetworkSettingsRequest);
-            if (idracInfo != null)
+            if ("SUCCESS".equalsIgnoreCase(idracInfo.getMessage()))
             {
                 response.setResults(buildResponseResult(idracInfo));
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
+            }
+            else {
+                response.addError(idracInfo.getMessage());
             }
         }
         catch (Exception e)

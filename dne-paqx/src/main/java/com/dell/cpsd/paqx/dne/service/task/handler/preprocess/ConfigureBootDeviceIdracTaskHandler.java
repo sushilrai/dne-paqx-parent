@@ -94,11 +94,14 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
             configureBootDeviceIdracRequest.setIdracIpAddress(ipAddress);
 
             BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.bootDeviceIdracStatus(configureBootDeviceIdracRequest);
-            if (bootDeviceIdracStatus != null)
+            if ("SUCCESS".equalsIgnoreCase(bootDeviceIdracStatus.getStatus()))
             {
                 response.setResults(buildResponseResult(bootDeviceIdracStatus));
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
+            }
+            else{
+                response.addError(bootDeviceIdracStatus.getErrors().toString());
             }
         }
         catch(Exception e){

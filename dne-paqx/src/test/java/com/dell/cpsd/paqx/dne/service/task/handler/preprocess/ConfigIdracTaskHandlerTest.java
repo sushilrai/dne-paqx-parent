@@ -6,14 +6,16 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.WorkflowService;
+import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
+import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
+import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
+import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,22 +23,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
-import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
-import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
-import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
-import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigIdracTaskHandler;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The tests for ConfigIdracTaskHandler.
@@ -109,7 +100,7 @@ public class ConfigIdracTaskHandlerTest
     @Test
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        IdracInfo idracInfo = new IdracInfo("nodeId", "idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask", "message");
+        IdracInfo idracInfo = new IdracInfo("nodeId", "idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask", "SUCCESS");
         ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
         when(this.nodeService.idracNetworkSettings(requestCaptor.capture())).thenReturn(idracInfo);
 
