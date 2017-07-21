@@ -3,7 +3,6 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
-
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
@@ -19,28 +18,27 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * The tests for FindVClusterTaskHandler.
+ * The tests for ConfigureBootDeviceIdracTaskHandler.
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  *
  * @since 1.0
  */
+
 @RunWith(MockitoJUnitRunner.class)
-public class FindVClusterTaskHandlerTest
-{
+public class ConfigureBootDeviceIdracTaskHandlerTest {
 
     /*
      * The <code>NodeService</code> instance.
@@ -52,24 +50,21 @@ public class FindVClusterTaskHandlerTest
     /*
      * The job running the add node to system definition task handler.
      */
-    private Job         job         = null;
-
+    private Job job         = null;
     /**
      * The test setup.
-     * 
+     *
      * @since 1.0
      */
     @Before
-    public void setUp()
-    {
-        PreProcessTaskConfig preprocessConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preprocessConfig.preProcessWorkflowSteps());
+    public void setUp(){
+        PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
+        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preProcessTaskConfig.preProcessWorkflowSteps());
 
-        PreProcessService preprocessService = new PreProcessService();
-        preprocessService.setWorkflowService(workflowService);
+        PreProcessService preProcessService = new PreProcessService();
+        preProcessService.setWorkflowService(workflowService);
 
-        this.job = preprocessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
-
+        this.job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "scaleIOSVMDataIpAddress1",
                 "scaleIOSVMDataIpAddress2", "scaleIOSVMManagementIpAddress");
@@ -77,62 +72,60 @@ public class FindVClusterTaskHandlerTest
 
         TaskResponse response = new TaskResponse();
         NodeInfo nodeInfo = new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED);
+
         Map<String, String> results = new HashMap<>();
 
         results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
         results.put("nodeID", nodeInfo.getNodeId());
         results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
-
         response.setResults(results);
 
         this.job.addTaskResponse("findAvailableNodes", response);
-
-        this.job.changeToNextStep("findVCluster");
+        this.job.changeToNextStep("configureBootDeviceIdrac");
     }
-
     /**
-     * Test successful execution of FindVClusterTaskHandler.executeTask() method
-     * 
+     * Test successful execution of ConfigureBootDeviceIdracTaskHandler.executeTask() method
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
+     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        VirtualizationCluster vCluster = new VirtualizationCluster("clusterTest1", 2);
-        List<VirtualizationCluster> vClusters = new ArrayList<>();
-        vClusters.add(vCluster);
-        when(this.nodeService.listClusters()).thenReturn(vClusters);
+        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("SUCCESS",null);
+        ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
+        when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
 
-        FindVClusterTaskHandler instance = new FindVClusterTaskHandler(this.nodeService);
+        ConfigureBootDeviceIdracTaskHandler instance = new ConfigureBootDeviceIdracTaskHandler(this.nodeService);
         boolean expectedResult = true;
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
+        verify(this.nodeService, times(1)).bootDeviceIdracStatus(requestCaptor.capture());
     }
 
     /**
-     * Test unsuccessful execution of FindVClusterTaskHandler.executeTask() method
-     * 
+     * Test unsuccessful execution of ConfigureBootDeviceIdracTaskHandler.executeTask() method
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
+     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        VirtualizationCluster vCluster = new VirtualizationCluster("clusterTest1", 2);
-        List<VirtualizationCluster> vClusters = new ArrayList<>();
-        vClusters.add(vCluster);
-        when(this.nodeService.listClusters()).thenThrow(new ServiceExecutionException("Unit Test Exception!"));
+        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("FAILED",null);
+        ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
+        when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
 
-        FindVClusterTaskHandler instance = new FindVClusterTaskHandler(this.nodeService);
+        ConfigureBootDeviceIdracTaskHandler instance = new ConfigureBootDeviceIdracTaskHandler(this.nodeService);
         boolean expectedResult = false;
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
+        verify(this.nodeService, times(1)).bootDeviceIdracStatus(requestCaptor.capture());
     }
 }
