@@ -46,8 +46,10 @@ public class NodeInfo
         this.parentGroups.add("SystemCompute");
         // Using Endpoint type as the matcher for an endpoint for now...
         this.endpoints = new ArrayList<>();
-        this.endpoints.add("RACKHD");
-        this.endpoints.add("COMMON");
+        this.endpoints.add("RACKHD");       // RACKHD-EP
+        this.endpoints.add("COMMON-IDRAC"); // COMMON-DELL-POWEREDGE-IDRAC-EP
+        this.endpoints.add("COMMON-ESXI");  // COMMON-DELL-POWEREDGE-ESXI-HOST-EP
+        this.endpoints.add("COMMON-SVM");   // COMMON-DELL-POWEREDGE-SVM-EP
     }
 
     public String getSymphonyUuid()

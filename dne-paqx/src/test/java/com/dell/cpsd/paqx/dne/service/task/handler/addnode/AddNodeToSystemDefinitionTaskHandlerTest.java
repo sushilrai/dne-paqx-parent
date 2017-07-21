@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.dell.cpsd.credential.model.api.component.credentials.supplied.CredentialElement;
+import com.dell.cpsd.credential.model.api.component.credentials.supplied.Credentials;
+import com.dell.cpsd.service.system.definition.api.CredentialNameId;
+import com.dell.cpsd.service.system.definition.api.Definition;
+import com.dell.cpsd.service.system.definition.api.Identity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,11 +75,11 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     /*
      * The job running the add node to system definition task handler
      */
-    private Job        job    = null;
+    private Job job = null;
 
     /**
      * The test setup.
-     * 
+     *
      * @since 1.0
      */
     @Before
@@ -86,9 +92,10 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         addNodeService.setWorkflowService(workflowService);
 
         this.job = addNodeService.createWorkflow("addNode", "startAddNodeWorkflow", "submitted");
-        this.job.setInputParams(new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "scaleIOSVMDataIpAddress1",
-                "scaleIOSVMDataIpAddress2", "scaleIOSVMManagementIpAddress"));
+        this.job.setInputParams(
+                new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask", "managementIpAddress",
+                        "esxiKernelIpAddress1", "esxiKernelIpAddress2", "scaleIOSVMDataIpAddress1", "scaleIOSVMDataIpAddress2",
+                        "scaleIOSVMManagementIpAddress"));
 
         FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
         response.setNodeInfo(new NodeInfo("symphonyUuid", "nodeId", NodeStatus.DISCOVERED));
@@ -99,7 +106,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
 
     /**
      * Test successful execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method
-     * 
+     *
      * @since 1.0
      */
     @Test
@@ -112,53 +119,46 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         filter.setSystemUuid(cs.getUuid());
 
         ConvergedSystem systemToUpdate = new ConvergedSystem();
-        List<Group> groups = Arrays.asList(new Group("group-uuid1", "SystemCompute", Group.Type.COMPUTE, null, null, null));
+
+        List<Group> groups = new ArrayList<>();
+        groups.add(new Group("group-uuid1", "SystemCompute", Group.Type.COMPUTE, null, null, null));
         systemToUpdate.setGroups(groups);
-        List<Endpoint> endpoints = Arrays.asList(new Endpoint("endpoint-uuid1", "HTTP", "address", 9000, "RACKHD", null),
-                new Endpoint("endpoint-uuid2", "HTTP", "address", 9001, "COMMON", null));
+
+        List<Endpoint> endpoints = new ArrayList<>();
+        List<CredentialNameId> credentials1 = new ArrayList<>();
+        credentials1.add(new CredentialNameId("credential-1", "credential-uuid-1"));
+        credentials1.add(new CredentialNameId("credential-2", "credential-uuid-2"));
+        endpoints.add(new Endpoint("endpoint-uuid1", "HTTP", "address", 9000, "RACKHD", /*"identifier-2",*/ credentials1));
+
+        List<CredentialNameId> credentials2 = new ArrayList<>();
+        credentials2.add(new CredentialNameId("credential-3", "credential-uuid-3"));
+        credentials2.add(new CredentialNameId("credential-4", "credential-uuid-4"));
+        endpoints.add(new Endpoint("endpoint-uuid2", "HTTP", "address", 9001, "COMMON-IDRAC", /*"identifier-2",*/ credentials2));
         systemToUpdate.setEndpoints(endpoints);
+
+        List<Component> components = new ArrayList<>();
+        components.add(new Component("common-server-uuid-1", new Identity("COMMON-SERVER", "identifier", "address", "serialNumber", null),
+                        new Definition(), Arrays.asList("endpoint-uuid1", "endpoint-uuid2"), Arrays.asList("group-uuid1")));
+        systemToUpdate.setComponents(components);
 
         when(this.client.getConvergedSystems()).thenReturn(Arrays.asList(cs));
         when(this.client.getComponents(filter)).thenReturn(Arrays.asList(systemToUpdate));
-
+        
         ArgumentCaptor<ConvergedSystem> csCaptor = ArgumentCaptor.forClass(ConvergedSystem.class);
         AddNodeToSystemDefinitionTaskHandler instance = new AddNodeToSystemDefinitionTaskHandler(this.client);
         boolean expectedResult = true;
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
-        verify(this.client, times(1)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
-        assertEquals(1, csCaptor.getValue().getComponents().size());
-        Component component = csCaptor.getValue().getComponents().get(0);
-        assertNotNull(component);
-        assertNotNull(component.getIdentity());
-        assertEquals("SERVER", component.getIdentity().getElementType());
-        assertEquals("symphonyUuid", component.getIdentity().getIdentifier());
-        assertEquals("nodeId", component.getIdentity().getAddress());
-        assertEquals("nodeId", component.getIdentity().getSerialNumber());
-        assertNull(component.getIdentity().getBusinessKeys());
-        assertNotNull(component.getDefinition());
-        assertEquals("POWEREDGE", component.getDefinition().getProductFamily());
-        assertEquals("POWEREDGE", component.getDefinition().getProduct());
-        assertEquals("630", component.getDefinition().getModelFamily());
-        assertEquals("R630", component.getDefinition().getModel());
-        assertNotNull(component.getDefinition());
-        assertNotNull(component.getParentGroupUuids());
-        assertEquals(1, component.getParentGroupUuids().size());
-        assertEquals("group-uuid1", component.getParentGroupUuids().get(0));
-        assertNotNull(component.getEndpoints());
-        assertEquals(2, component.getEndpoints().size());
-        assertEquals("endpoint-uuid1", component.getEndpoints().get(0));
-        assertEquals("endpoint-uuid2", component.getEndpoints().get(1));
+        verify(this.client, times(1)).addComponent(csCaptor.capture(), any(), any(), any());
     }
 
     /**
      * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no findAvailableNodes task
      * response was set.
-     * 
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
      * @since 1.0
      */
     @Test
@@ -179,7 +179,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     /**
      * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no discovered node instance
      * is present.
-     * 
+     *
      * @since 1.0
      */
     @Test
@@ -201,7 +201,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     /**
      * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no converged systems are
      * present.
-     * 
+     *
      * @since 1.0
      */
     @Test
@@ -221,7 +221,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     /**
      * Test error execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test error case where no converged system
      * instance is present.
-     * 
+     *
      * @since 1.0
      */
     @Test
@@ -241,7 +241,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     /**
      * Test execution of AddNodeToSystemDefinitionTaskHandler.executeTask() method - test case where a node that already exists in the
      * system definition is attempted to be added again.
-     * 
+     *
      * @since 1.0
      */
     @Test
@@ -270,7 +270,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         boolean actualResult = instance.executeTask(this.job);
 
         assertEquals(expectedResult, actualResult);
-        verify(this.client, times(1)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
-        assertEquals(1, csCaptor.getValue().getComponents().size());// Components list should be unaltered...
+        verify(this.client, times(0)).createOrUpdateConvergedSystem(csCaptor.capture(), eq(null));
+        assertEquals(1, system.getComponents().size());// Components list should be unaltered...
     }
 }

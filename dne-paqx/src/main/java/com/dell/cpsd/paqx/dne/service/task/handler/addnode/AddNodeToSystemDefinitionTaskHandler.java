@@ -25,11 +25,7 @@ import com.dell.cpsd.sdk.AMQPClient;
 import com.dell.cpsd.service.system.definition.api.Component;
 import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
 import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
-import com.dell.cpsd.service.system.definition.api.ConvergedSystemAddition;
-import com.dell.cpsd.service.system.definition.api.Endpoint;
 import com.dell.cpsd.service.system.definition.api.Group;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Task responsible for adding a discovered node to the system definition.
@@ -51,6 +47,11 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
      * The <code>AMQPClient</code> instance
      */
     private final AMQPClient    sdkAMQPClient;
+
+    /*
+    * The component on which to base new components.
+    */
+    private static final String COMPONENT_TEMPLATE = "COMMON-SERVER";
 
     /**
      * AddNodeToSystemDefinitionTaskHandler constructor.
@@ -112,7 +113,16 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
                 throw new IllegalStateException("No converged system found.");
             }
 
-            this.addNewNode(systemDetails.get(0), nodeInfo);
+            ConvergedSystem systemToUpdate = systemDetails.get(0);
+
+            Component newNode = new Component();
+            newNode.setUuid(nodeInfo.getSymphonyUuid());
+            newNode.setIdentity(nodeInfo.getIdentity());
+            newNode.setDefinition(nodeInfo.getDefinition());
+            newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToUpdate.getGroups()));
+            newNode.setEndpoints(new ArrayList<>());
+
+            this.sdkAMQPClient.addComponent(systemToUpdate, newNode, nodeInfo.getEndpoints(), COMPONENT_TEMPLATE);
 
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             return true;
@@ -128,65 +138,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
     }
 
     /*
-     * Add a <code>Component</code> instance to the <code>ConvergedSystem</code>.
-     * 
-     * @param systemToUpdate
-     *            - The <code>ConvergedSystem</code> to which the new <code>Component</code> will be added.
-     * @param nodeInfo
-     *            - The <code>NodeInfo</code> from which the new <code>Component</code> will be created.
-     * 
-     * @throws JsonProcessingException
-     * 
-     * @since 1.0
-     */
-    private void addNewNode(ConvergedSystem systemToUpdate, NodeInfo nodeInfo) throws JsonProcessingException
-    {
-        Component newNode = new Component();
-        newNode.setUuid(nodeInfo.getSymphonyUuid());
-        newNode.setIdentity(nodeInfo.getIdentity());
-        newNode.setDefinition(nodeInfo.getDefinition());
-        newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToUpdate.getGroups()));
-        newNode.setEndpoints(this.mapEndpointNamestoUUIDs(nodeInfo.getEndpoints(), systemToUpdate.getEndpoints()));
-
-        boolean okToAdd = true;
-
-        for (Component component : systemToUpdate.getComponents())
-        {
-            if (component.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier()))
-            {
-                okToAdd = false;
-                break;
-
-            }
-        }
-
-        if (okToAdd)
-        {
-            LOGGER.info("Discovered node does not exist in system definition - adding it");
-            systemToUpdate.getComponents().add(newNode);
-        }
-        else
-        {
-            LOGGER.info("Discovered node already exists in system definition: " + newNode.getIdentity());
-        }
-
-        ConvergedSystemAddition result = this.sdkAMQPClient.createOrUpdateConvergedSystem(systemToUpdate, null);
-
-        ObjectMapper mapper = new ObjectMapper();
-        LOGGER.info("Successfully updated converged system: " + mapper.writeValueAsString(result));
-    }
-
-    /*
      * Given a list of group names map each one to its corresponding UUID.
-     * 
-     * @param groupNames
-     *            - The <code>List<String></code> of names to map to UUIDs.
-     * @param groups
-     *            - The <code>List<Group></code> of group objects from which the UUID will be mapped.
-     * 
-     * @return List<String>.
-     * 
-     * @since 1.0
      */
     private List<String> mapGroupNamesToUUIDs(List<String> groupNames, List<Group> groups)
     {
@@ -198,29 +150,5 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             }
         });
         return groupUuids;
-    }
-
-    /*
-     * Given a list of endpoint names map each one to its corresponding UUID.
-     * 
-     * @param endpointNames
-     *            - The <code>List<String></code> of names to map to UUIDs.
-     * @param endpoints
-     *            - The <code>List<Endpoint></code> of group objects from which the UUID will be mapped.
-     * 
-     * @return List<String>.
-     * 
-     * @since 1.0
-     */
-    private List<String> mapEndpointNamestoUUIDs(List<String> endpointNames, List<Endpoint> endpoints)
-    {
-        List<String> endpointUuids = new ArrayList<>();
-        endpoints.forEach(endpoint -> {
-            if (endpointNames.contains(endpoint.getType().toUpperCase()))
-            {
-                endpointUuids.add(endpoint.getUuid());
-            }
-        });
-        return endpointUuids;
     }
 }
