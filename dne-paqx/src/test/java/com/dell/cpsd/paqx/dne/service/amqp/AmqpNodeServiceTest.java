@@ -5,12 +5,32 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.*;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo.AllocationStatus;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracError;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo.AllocationStatus;
+import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
-import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
+import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
+import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
+import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
+import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;
@@ -24,11 +44,6 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.*;
 
 /**
  * The tests for AmqpNodeService class.
@@ -413,5 +428,68 @@ public class AmqpNodeServiceTest
         Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(Mockito.any());
     }
 
+    /**
+     * Test that the changeIdracCredentialsComplete method executes successfully.
+     * 
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    @Test
+    public void testChangeIdracCredentialsCompleteSuccess() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe")
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties = 
+                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties();
+                messageProperties.setCorrelationId(UUID.randomUUID().toString());
+
+                ChangeIdracCredentialsResponse changeCredentialsResponse = new ChangeIdracCredentialsResponse();
+                changeCredentialsResponse.setNodeId("dummyNodeId");
+                changeCredentialsResponse.setMessage("SUCCESS");
+
+                ChangeIdracCredentialsResponseMessage responseMessage = new ChangeIdracCredentialsResponseMessage(messageProperties, 
+                        ChangeIdracCredentialsResponseMessage.Status.SUCCESS, Collections.emptyList());
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        ChangeIdracCredentialsResponse responseInfo = nodeService.changeIdracCredentials("dummyNodeId");
+
+        Assert.assertEquals("SUCCESS", responseInfo.getMessage());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(Mockito.any());
+    }
+    
+    /**
+     * Test that the changeIdracCredentialsComplete method can handle any errors.
+     * 
+     * @throws ServiceTimeoutException
+     */
+    @Test
+    public void testChangeIdracCredentialsCompleteError() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe")
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                    long timeout) throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+        
+        nodeService.changeIdracCredentials("dummyNodeId");
+        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(Mockito.any());
+    }
 
 }
