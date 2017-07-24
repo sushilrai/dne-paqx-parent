@@ -44,12 +44,11 @@ public class NodeInfo
         this.definition = new Definition("POWEREDGE", "POWEREDGE", "630", "R630");
         this.parentGroups = new ArrayList<>();
         this.parentGroups.add("SystemCompute");
-        // Using Endpoint type as the matcher for an endpoint for now...
         this.endpoints = new ArrayList<>();
-        this.endpoints.add("RACKHD");       // RACKHD-EP
-        this.endpoints.add("COMMON-IDRAC"); // COMMON-DELL-POWEREDGE-IDRAC-EP
-        this.endpoints.add("COMMON-ESXI");  // COMMON-DELL-POWEREDGE-ESXI-HOST-EP
-        this.endpoints.add("COMMON-SVM");   // COMMON-DELL-POWEREDGE-SVM-EP
+        this.endpoints.add("RACKHD-EP");
+        this.endpoints.add("COMMON-DELL-POWEREDGE-IDRAC-EP");
+        this.endpoints.add("COMMON-DELL-POWEREDGE-ESXI-HOST-EP");
+        this.endpoints.add("COMMON-DELL-POWEREDGE-SVM-EP");
     }
 
     public String getSymphonyUuid()
