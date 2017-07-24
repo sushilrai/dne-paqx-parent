@@ -128,12 +128,12 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         List<CredentialNameId> credentials1 = new ArrayList<>();
         credentials1.add(new CredentialNameId("credential-1", "credential-uuid-1"));
         credentials1.add(new CredentialNameId("credential-2", "credential-uuid-2"));
-        endpoints.add(new Endpoint("endpoint-uuid1", "HTTP", "address", 9000, "RACKHD", /*"identifier-2",*/ credentials1));
+        endpoints.add(new Endpoint("endpoint-uuid1", "HTTP", "address", 9000, "RACKHD", "identifier-2", credentials1));
 
         List<CredentialNameId> credentials2 = new ArrayList<>();
         credentials2.add(new CredentialNameId("credential-3", "credential-uuid-3"));
         credentials2.add(new CredentialNameId("credential-4", "credential-uuid-4"));
-        endpoints.add(new Endpoint("endpoint-uuid2", "HTTP", "address", 9001, "COMMON-IDRAC", /*"identifier-2",*/ credentials2));
+        endpoints.add(new Endpoint("endpoint-uuid2", "HTTP", "address", 9001, "COMMON-IDRAC", "identifier-2", credentials2));
         systemToUpdate.setEndpoints(endpoints);
 
         List<Component> components = new ArrayList<>();
