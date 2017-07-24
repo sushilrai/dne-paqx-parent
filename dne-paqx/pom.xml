@@ -59,16 +59,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.dell.cpsd</groupId>
-            <artifactId>rackhd-adapter-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.dell.converged.capabilities.compute</groupId>
-            <artifactId>discovered-nodes-capabilities-api</artifactId>
-            <classifier>schemas</classifier>
-            <type>zip</type>
+            <artifactId>discovered-nodes-capabilities-client-java</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
 
@@ -81,8 +73,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
         </dependency>
 
         <dependency>
@@ -217,25 +210,6 @@
                 </dependencies>
                 <executions>
                     <execution>
-                        <id>generate-json-discovered-nodes-capabilities</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirectory>${project.build.directory}/dependency/discovered-nodes-capabilities/schema/json</sourceDirectory>
-                            <targetPackage>com.dell.converged.capabilities.compute.discovered.nodes.api</targetPackage>
-                            <outputDirectory>${project.build.directory}/generated-sources/discovered-nodes-capabilities</outputDirectory>
-                            <removeOldOutput>true</removeOldOutput>
-                            <includeConstructors>true</includeConstructors>
-                            <serializable>false</serializable>
-                            <useCommonsLang3>true</useCommonsLang3>
-                            <includeAdditionalProperties>false</includeAdditionalProperties>
-                            <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
-                            <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-json-virtualization-capabilities</id>
                         <phase>generate-resources</phase>
                         <goals>
@@ -256,6 +230,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

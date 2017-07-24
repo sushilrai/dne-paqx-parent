@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
- * 
+ *
  * @since 1.0
  */
 public class AmqpNodeService extends AbstractServiceClient implements NodeService
@@ -45,31 +45,30 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * The logger instance
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpNodeService.class);
+
     /*
      * The <code>DelegatingMessageConsumer</code>
      */
     private final DelegatingMessageConsumer consumer;
-    
+
     /*
      * The <code>DneProducer</code>
      */
     private final DneProducer producer;
-    
+
     /*
      * The replyTo queue name
      */
     private final String replyTo;
     private final long timeout = 600000L;
 
-
     /**
      * AmqpNodeService constructor.
-     * 
-     * @param logger - The logger instance.
+     *
+     * @param logger   - The logger instance.
      * @param consumer - The <code>DelegatingMessageConsumer</code> instance.
      * @param producer - The <code>DneProducer</code> instance.
-     * @param replyTo - The replyTo queue name.
-     * 
+     * @param replyTo  - The replyTo queue name.
      * @since 1.0
      */
     public AmqpNodeService(ILogger logger, DelegatingMessageConsumer consumer, DneProducer producer, String replyTo)
@@ -85,7 +84,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     /*
      * Initialize message consumer adapters.
-     * 
+     *
      * @since 1.0
      */
     private void initCallbacks()
@@ -102,12 +101,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * {@inheritDoc}
      */
     @Override
-    public IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest) throws ServiceTimeoutException, ServiceExecutionException
+    public IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
+            throws ServiceTimeoutException, ServiceExecutionException
     {
         IdracInfo idracInfo = new IdracInfo();
 
-        try {
-            IdracNetworkSettingsRequestMessage idracNetworkSettingsRequestMessage =new IdracNetworkSettingsRequestMessage();
+        try
+        {
+            IdracNetworkSettingsRequestMessage idracNetworkSettingsRequestMessage = new IdracNetworkSettingsRequestMessage();
             com.dell.cpsd.rackhd.adapter.rabbitmq.MessageProperties messageProperties = new com.dell.cpsd.rackhd.adapter.rabbitmq.MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
@@ -149,7 +150,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         LOGGER.info("Response from amqp ipAddress: " + resp.getIdracNetworkSettingsResponse().getIpAddress());
                         LOGGER.info("Response from amqp subnet: " + resp.getIdracNetworkSettingsResponse().getNetmask());
                         LOGGER.info("Response from amqp gateway: " + resp.getIdracNetworkSettingsResponse().getGateway());
-                        LOGGER.info("Response from amqp nodeId: " +resp.getIdracNetworkSettingsResponse().getNodeId());
+                        LOGGER.info("Response from amqp nodeId: " + resp.getIdracNetworkSettingsResponse().getNodeId());
 
                         if ("SUCCESS".equalsIgnoreCase(resp.getIdracNetworkSettingsResponse().getMessage()))
                         {
@@ -161,14 +162,15 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         }
                         else
                         {
-                            LOGGER.error("Error response from configure idrac settings: " + resp.getIdracNetworkSettingsResponse().getMessage());
+                            LOGGER.error(
+                                    "Error response from configure idrac settings: " + resp.getIdracNetworkSettingsResponse().getMessage());
                         }
                         idracInfo.setMessage(resp.getIdracNetworkSettingsResponse().getMessage());
                     }
                 }
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LOGGER.error("Exception in idracNetworkSettings: ", e);
         }
@@ -255,8 +257,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 List<ClusterInfo> clusters = clusterResponseInfo.getClusters();
                 if (clusters != null)
                 {
-                    return clusters.stream()
-                            .map(c -> new VirtualizationCluster(c.getName(), c.getNumberOfHosts()))
+                    return clusters.stream().map(c -> new VirtualizationCluster(c.getName(), c.getNumberOfHosts()))
                             .collect(Collectors.toList());
                 }
             }
@@ -300,20 +301,17 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             LOGGER.error("Error response from notify node allocation complete: " + responseInfo.getNodeAllocationErrors());
         }
-        
+
         return CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
     /**
      * Process a RPC response message.
-     * 
-     * @param response - The <code>ServiceResponse</code> to process.
+     *
+     * @param response         - The <code>ServiceResponse</code> to process.
      * @param expectedResponse - The expected response <code>Class</code>
-     * 
-     * @throws ServiceExecutionException
-     * 
      * @return The response.
-     * 
+     * @throws ServiceExecutionException
      * @since 1.0
      */
     private <R> R processResponse(ServiceResponse<?> response, Class<R> expectedResponse) throws ServiceExecutionException
@@ -326,14 +324,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         if (expectedResponse.isAssignableFrom(responseMessage.getClass()))
         {
-            return (R)responseMessage;
+            return (R) responseMessage;
         }
         else
         {
             throw new UnsupportedOperationException("Unexpected response message: " + responseMessage);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -342,7 +340,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     {
         ChangeIdracCredentialsResponse responseMessage = new ChangeIdracCredentialsResponse();
 
-        try {
+        try
+        {
             ChangeIdracCredentialsRequestMessage changeIdracCredentialsRequestMessage = new ChangeIdracCredentialsRequestMessage();
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
@@ -351,9 +350,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             changeIdracCredentialsRequestMessage.setMessageProperties(messageProperties);
             changeIdracCredentialsRequestMessage.setNodeID(nodeId);
-            
+
             LOGGER.info("Sending Change Idrac Credentials request with correlation id: " + messageProperties.getCorrelationId());
-            
+
             ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
                 @Override
@@ -368,7 +367,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                     producer.publishChangeIdracCredentials(changeIdracCredentialsRequestMessage);
                 }
             });
-            
+
             ChangeIdracCredentialsResponseMessage resp = processResponse(response, ChangeIdracCredentialsResponseMessage.class);
 
             if (resp != null)
@@ -379,7 +378,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                     {
                         LOGGER.info("Response for Change Idrac Credentials: " + resp.getStatus());
                         responseMessage.setNodeId(nodeId);
-                        
+
                         if ("SUCCESS".equalsIgnoreCase(resp.getStatus().toString()))
                         {
                             responseMessage.setMessage("SUCCESS");
@@ -393,7 +392,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LOGGER.error("Exception in change idrac credentials: ", e);
         }
@@ -402,11 +401,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest) throws ServiceTimeoutException, ServiceExecutionException{
+    public BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
 
         BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
 
-        try{
+        try
+        {
             ConfigureBootDeviceIdracRequestMessage configureBootDeviceIdracRequestMessage = new ConfigureBootDeviceIdracRequestMessage();
 
             MessageProperties messageProperties = new MessageProperties();
@@ -444,9 +446,11 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
                         bootDeviceIdracStatus.setStatus(resp.getStatus().toString());
                         List<ConfigureBootDeviceIdracError> errors = resp.getConfigureBootDeviceIdracErrors();
-                        if(!CollectionUtils.isEmpty(errors)) {
+                        if (!CollectionUtils.isEmpty(errors))
+                        {
                             List<String> errorMsgs = new ArrayList<String>();
-                            for (ConfigureBootDeviceIdracError error : errors) {
+                            for (ConfigureBootDeviceIdracError error : errors)
+                            {
                                 errorMsgs.add(error.getMessage());
                             }
                             bootDeviceIdracStatus.setErrors(errorMsgs);
@@ -456,7 +460,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             }
         }
-        catch (Exception e){
+        catch (Exception e)
+        {
             LOGGER.error("Exception in boot order sequence: ", e);
         }
         return bootDeviceIdracStatus;

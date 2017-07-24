@@ -4,6 +4,10 @@
  */
 package com.dell.cpsd.paqx.dne.amqp.config;
 
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.*;
 import com.dell.cpsd.common.rabbitmq.MessageAnnotationProcessor;
 import com.dell.cpsd.common.rabbitmq.message.DefaultMessageConverterFactory;
@@ -176,7 +180,12 @@ public class RabbitConfig
 
         messageClasses.add(ConfigureBootDeviceIdracRequestMessage.class);
         messageClasses.add(ConfigureBootDeviceIdracResponseMessage.class);
-        
+
+        messageClasses.add(IdracNetworkSettings.class);
+        messageClasses.add(IdracNetworkSettingsRequestMessage.class);
+        messageClasses.add(IdracNetworkSettingsResponse.class);
+        messageClasses.add(IdracNetworkSettingsResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         
