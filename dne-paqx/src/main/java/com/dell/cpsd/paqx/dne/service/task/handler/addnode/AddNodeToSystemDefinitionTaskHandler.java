@@ -51,7 +51,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
     /*
     * The component on which to base new components.
     */
-    private static final String COMPONENT_TEMPLATE = "COMMON-SERVER";
+    private static final String COMPONENT_SERVER_TEMPLATE = "COMMON-DELL-POWEREDGE";
 
     /**
      * AddNodeToSystemDefinitionTaskHandler constructor.
@@ -122,7 +122,7 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
             newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToUpdate.getGroups()));
             newNode.setEndpoints(new ArrayList<>());
 
-            this.sdkAMQPClient.addComponent(systemToUpdate, newNode, nodeInfo.getEndpoints(), COMPONENT_TEMPLATE);
+            this.sdkAMQPClient.addComponent(systemToUpdate, newNode, nodeInfo.getEndpoints(), COMPONENT_SERVER_TEMPLATE);
 
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             return true;
