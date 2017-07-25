@@ -94,10 +94,10 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());
         workflowTasks.put("findVCluster", createVClusterTask());
-        workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
-        workflowTasks.put("findSystemData", findSystemDataTask());
-        workflowTasks.put("assignDefaultHostName", assignDefaultHostNameTask());
-        workflowTasks.put("assignDefaultCredentials", assignDefaultCredentialsTask());
+        //workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
+        //workflowTasks.put("findSystemData", findSystemDataTask());
+        //workflowTasks.put("assignDefaultHostName", assignDefaultHostNameTask());
+        //workflowTasks.put("assignDefaultCredentials", assignDefaultCredentialsTask());
         return workflowTasks;
     }
 
