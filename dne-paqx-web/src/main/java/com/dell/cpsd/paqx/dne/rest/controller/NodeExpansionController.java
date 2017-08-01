@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -256,6 +257,16 @@ public class NodeExpansionController
     void handleWorkflowNotFoundException(WorkflowNotFoundException e, HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setAttribute(DefaultErrorAttributes.class.getName() + ".ERROR", null);
         response.sendError(e.getCode(), e.getMessage());
+    }
+
+    //to hide the exception class name from http response
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    void handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e, HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String errMsg = "Can not find the JobId - "+e.getValue();
+        LOGGER.error(errMsg);
+        request.setAttribute(DefaultErrorAttributes.class.getName() + ".ERROR", null);
+        response.sendError(HttpStatus.NOT_FOUND.value(), errMsg);
     }
 
     @RequestMapping(path = "/idrackNetworkSettings", method = RequestMethod.POST, produces = "application/json")

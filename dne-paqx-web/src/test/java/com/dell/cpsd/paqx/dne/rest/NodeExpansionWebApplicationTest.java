@@ -176,6 +176,21 @@ public class NodeExpansionWebApplicationTest
     }
 
     @Test
+    public void getInvalidNodeJobIdForPreprocess_StringJobId() throws Exception {
+
+        Mockito.when(preProcessService.findJob(Mockito.any(UUID.class))).thenReturn(null);
+        final String jobId = "anyString";
+
+        this.mockMvc.perform(get("/dne/preprocess/{jobId}", jobId)
+                .param("jobId", jobId.toString())
+                .param("servletRequest", ""))
+                .andExpect(status().isNotFound());
+        verify(preProcessService, times(0)).findJob(null);
+        verifyNoMoreInteractions(preProcessService);
+    }
+
+
+    @Test
     public void getGetNodeJobIdForPreprocess() throws Exception {
         Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
         Mockito.when(preProcessService.findJob(Mockito.any(UUID.class))).thenReturn(mockJob);
@@ -245,6 +260,20 @@ public class NodeExpansionWebApplicationTest
     }
 
     @Test
+    public void getInvalidNodeJobIdForNodes_StringJobId() throws Exception {
+
+        Mockito.when(addNodeServiceUnderTest.findJob(Mockito.any(UUID.class))).thenReturn(null);
+        final String jobId = "anyString";
+
+        this.mockMvc.perform(get("/dne/nodes/{jobId}", jobId)
+                .param("jobId", jobId.toString())
+                .param("servletRequest", ""))
+                .andExpect(status().isNotFound());
+        verify(addNodeServiceUnderTest, times(0)).findJob(null);
+        verifyNoMoreInteractions(addNodeServiceUnderTest);
+    }
+
+    @Test
     public void getGetNodeJobIdForNodes() throws Exception {
         Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
         Mockito.when(addNodeServiceUnderTest.findJob(Mockito.any(UUID.class))).thenReturn(mockJob);
@@ -284,6 +313,4 @@ public class NodeExpansionWebApplicationTest
                 .andExpect(status().isNotFound());
 
     }
-
-
 }
