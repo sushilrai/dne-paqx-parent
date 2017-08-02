@@ -2,25 +2,30 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
+
 package com.dell.cpsd.paqx.dne.service.model;
 
-public class NodeExpansionRequest {
-
+public class NodeExpansionRequest
+{
     private String idracIpAddress;
     private String idracGatewayIpAddress;
     private String idracSubnetMask;
-
     private String managementIpAddress;
     private String esxiKernelIpAddress1;
     private String esxiKernelIpAddress2;
     private String scaleIOSVMDataIpAddress1;
     private String scaleIOSVMDataIpAddress2;
     private String scaleIOSVMManagementIpAddress;
+    private String hostname;
 
-    public NodeExpansionRequest() {
+    public NodeExpansionRequest()
+    {
     }
 
-    public NodeExpansionRequest(String idracIpAddress, String idracGatewayIpAddress, String idracSubnetMask, String managementIpAddress, String esxiKernelIpAddress1, String esxiKernelIpAddress2, String scaleIOSVMDataIpAddress1, String scaleIOSVMDataIpAddress2, String scaleIOSVMManagementIpAddress) {
+    public NodeExpansionRequest(String idracIpAddress, String idracGatewayIpAddress, String idracSubnetMask, String managementIpAddress,
+            String esxiKernelIpAddress1, String esxiKernelIpAddress2, String scaleIOSVMDataIpAddress1, String scaleIOSVMDataIpAddress2,
+            String scaleIOSVMManagementIpAddress)
+    {
         this.idracIpAddress = idracIpAddress;
         this.idracGatewayIpAddress = idracGatewayIpAddress;
         this.idracSubnetMask = idracSubnetMask;
@@ -31,90 +36,115 @@ public class NodeExpansionRequest {
         this.scaleIOSVMDataIpAddress2 = scaleIOSVMDataIpAddress2;
         this.scaleIOSVMManagementIpAddress = scaleIOSVMManagementIpAddress;
     }
-    public String getIdracIpAddress() {
+
+    public String getIdracIpAddress()
+    {
         return idracIpAddress;
     }
 
-    public void setIdracIpAddress(String idracIpAddress) {
+    public void setIdracIpAddress(String idracIpAddress)
+    {
         this.idracIpAddress = idracIpAddress;
     }
 
-    public String getIdracSubnetMask() {
+    public String getIdracSubnetMask()
+    {
         return idracSubnetMask;
     }
 
-    public void setIdracSubnetMask(String idracSubnetMask) {
+    public void setIdracSubnetMask(String idracSubnetMask)
+    {
         this.idracSubnetMask = idracSubnetMask;
     }
 
-    public String getIdracGatewayIpAddress() {
+    public String getIdracGatewayIpAddress()
+    {
         return idracGatewayIpAddress;
     }
 
-    public void setIdracGatewayIpAddress(String idracGatewayIpAddress) {
+    public void setIdracGatewayIpAddress(String idracGatewayIpAddress)
+    {
         this.idracGatewayIpAddress = idracGatewayIpAddress;
     }
 
-    public String getManagementIpAddress() {
+    public String getManagementIpAddress()
+    {
         return managementIpAddress;
     }
 
-    public void setManagementIpAddress(String managementIpAddress) {
+    public void setManagementIpAddress(String managementIpAddress)
+    {
         this.managementIpAddress = managementIpAddress;
     }
 
-    public String getEsxiKernelIpAddress1() {
+    public String getEsxiKernelIpAddress1()
+    {
         return esxiKernelIpAddress1;
     }
 
-    public void setEsxiKernelIpAddress1(String esxiKernelIpAddress) {
+    public void setEsxiKernelIpAddress1(String esxiKernelIpAddress)
+    {
         this.esxiKernelIpAddress1 = esxiKernelIpAddress;
     }
 
-    public String getEsxiKernelIpAddress2() {
+    public String getEsxiKernelIpAddress2()
+    {
         return esxiKernelIpAddress2;
     }
 
-    public void setEsxiKernelIpAddress2(String esxiKernelIpAddress) {
+    public void setEsxiKernelIpAddress2(String esxiKernelIpAddress)
+    {
         this.esxiKernelIpAddress2 = esxiKernelIpAddress;
     }
 
-    public String getScaleIOSVMDataIpAddress1() {
+    public String getScaleIOSVMDataIpAddress1()
+    {
         return scaleIOSVMDataIpAddress1;
     }
 
-    public void setScaleIOSVMDataIpAddress1(String scaleIOSVMDataIpAddress) {
+    public void setScaleIOSVMDataIpAddress1(String scaleIOSVMDataIpAddress)
+    {
         this.scaleIOSVMDataIpAddress1 = scaleIOSVMDataIpAddress;
     }
 
-    public String getScaleIOSVMDataIpAddress2() {
+    public String getScaleIOSVMDataIpAddress2()
+    {
         return scaleIOSVMDataIpAddress2;
     }
 
-    public void setScaleIOSVMDataIpAddress2(String scaleIOSVMDataIpAddress) {
+    public void setScaleIOSVMDataIpAddress2(String scaleIOSVMDataIpAddress)
+    {
         this.scaleIOSVMDataIpAddress2 = scaleIOSVMDataIpAddress;
     }
 
-    public String getScaleIOSVMManagementIpAddress() {
+    public String getScaleIOSVMManagementIpAddress()
+    {
         return scaleIOSVMManagementIpAddress;
     }
 
-    public void setScaleIOSVMManagementIpAddress(String scaleIOSVMManagementIpAddress) {
+    public void setScaleIOSVMManagementIpAddress(String scaleIOSVMManagementIpAddress)
+    {
         this.scaleIOSVMManagementIpAddress = scaleIOSVMManagementIpAddress;
     }
 
+    public String getHostname()
+    {
+        return hostname;
+    }
+
+    public void setHostname(final String hostname)
+    {
+        this.hostname = hostname;
+    }
+
     @Override
-    public String toString() {
-        return "NodeExpansionRequest{" +
-                "idracIpAddress='" + idracIpAddress + '\'' +
-                ", idracGatewayIpAddress='" + idracGatewayIpAddress + '\'' +
-                ", idracSubnetMask='" + idracSubnetMask + '\'' +
-                ", managementIpAddress='" + managementIpAddress + '\'' +
-                ", esxiKernelIpAddress1='" + esxiKernelIpAddress1 + '\'' +
-                ", esxiKernelIpAddress2='" + esxiKernelIpAddress2 + '\'' +
-                ", scaleIOSVMDataIpAddress1='" + scaleIOSVMDataIpAddress1 + '\'' +
-                ", scaleIOSVMDataIpAddress2='" + scaleIOSVMDataIpAddress2 + '\'' +
-                ", scaleIOSVMManagementIpAddress='" + scaleIOSVMManagementIpAddress + '\'' +
-                '}';
+    public String toString()
+    {
+        return "NodeExpansionRequest{" + "idracIpAddress='" + idracIpAddress + '\'' + ", idracGatewayIpAddress='" + idracGatewayIpAddress
+                + '\'' + ", idracSubnetMask='" + idracSubnetMask + '\'' + ", managementIpAddress='" + managementIpAddress + '\''
+                + ", esxiKernelIpAddress1='" + esxiKernelIpAddress1 + '\'' + ", esxiKernelIpAddress2='" + esxiKernelIpAddress2 + '\''
+                + ", scaleIOSVMDataIpAddress1='" + scaleIOSVMDataIpAddress1 + '\'' + ", scaleIOSVMDataIpAddress2='"
+                + scaleIOSVMDataIpAddress2 + '\'' + ", scaleIOSVMManagementIpAddress='" + scaleIOSVMManagementIpAddress + '\''
+                + ", hostname='" + hostname + '\'' + '}';
     }
 }

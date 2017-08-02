@@ -77,4 +77,14 @@ public interface NodeService
 
     BootDeviceIdracStatus bootDeviceIdracStatus (ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
             throws ServiceTimeoutException, ServiceExecutionException;
+
+    ListScaleIoComponentsTaskResponse requestScaleIoComponents() throws ServiceTimeoutException, ServiceExecutionException;
+
+    ListVCenterComponentsTaskResponse requestVCenterComponents() throws ServiceTimeoutException, ServiceExecutionException;
+
+    DiscoverScaleIoTaskResponse requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds)
+            throws ServiceTimeoutException, ServiceExecutionException;
+
+    DiscoverVCenterTaskResponse requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds)
+            throws ServiceTimeoutException, ServiceExecutionException;
 }

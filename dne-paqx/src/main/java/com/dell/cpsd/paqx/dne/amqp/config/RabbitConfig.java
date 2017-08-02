@@ -12,8 +12,16 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.*;
 import com.dell.cpsd.common.rabbitmq.MessageAnnotationProcessor;
 import com.dell.cpsd.common.rabbitmq.message.DefaultMessageConverterFactory;
 import com.dell.cpsd.common.rabbitmq.retrypolicy.DefaultRetryPolicyFactory;
+import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListComponentsResponseMessage;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -27,6 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.retry.support.RetryTemplate;
 
 import java.util.ArrayList;
@@ -77,7 +86,7 @@ public class RabbitConfig
      * This returns the RabbitMQ template.
      *
      * @return  The <code>RabbitTemplate</code>.
-     * 
+     *
      * @since   1.0
      */
     @Bean
@@ -185,6 +194,16 @@ public class RabbitConfig
         messageClasses.add(IdracNetworkSettingsRequestMessage.class);
         messageClasses.add(IdracNetworkSettingsResponse.class);
         messageClasses.add(IdracNetworkSettingsResponseMessage.class);
+
+        messageClasses.add(ListComponentRequestMessage.class);
+        messageClasses.add(ListComponentResponseMessage.class);
+        messageClasses.add(ListComponentsRequestMessage.class);
+        messageClasses.add(ListComponentsResponseMessage.class);
+
+        messageClasses.add(ListStorageRequestMessage.class);
+        messageClasses.add(ListStorageResponseMessage.class);
+        messageClasses.add(DiscoveryRequestInfoMessage.class);
+        messageClasses.add(DiscoveryResponseInfoMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
