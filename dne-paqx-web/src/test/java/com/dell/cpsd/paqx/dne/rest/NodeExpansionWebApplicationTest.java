@@ -78,12 +78,12 @@ public class NodeExpansionWebApplicationTest
                 .build();
 
         request = new NodeExpansionRequest();
-        request.setEsxiKernelIpAddress1("1.1.1.1");
-        request.setEsxiKernelIpAddress2("2.2.2.2");
+        request.setEsxiManagementIpAddress("1.1.1.1");
+        request.setEsxiManagementGatewayIpAddress("2.2.2.2");
         request.setIdracGatewayIpAddress("3.3.3.3");
         request.setIdracIpAddress("4.4.4.4");
         request.setIdracSubnetMask("5.55.5.5");
-        request.setManagementIpAddress("6.66.6.6");
+        request.setEsxiManagementSubnetMask("6.66.6.6");
         request.setScaleIOSVMDataIpAddress1("7.7.7.7");
         request.setScaleIOSVMDataIpAddress2("8.88.8.8");
         request.setScaleIOSVMManagementIpAddress("9.99.9.9");
@@ -96,17 +96,17 @@ public class NodeExpansionWebApplicationTest
     public void verifyRequestParams(){
         NodeExpansionRequest params = new NodeExpansionRequest();
 
-        params.setEsxiKernelIpAddress1("1.1.1.1");
-        assertNotNull(params.getEsxiKernelIpAddress1());
+        params.setEsxiManagementIpAddress("1.1.1.1");
+        assertNotNull(params.getEsxiManagementIpAddress());
 
-        params.setEsxiKernelIpAddress2("1.1.1.1");
-        assertNotNull(params.getEsxiKernelIpAddress2());
+        params.setEsxiManagementGatewayIpAddress("1.1.1.1");
+        assertNotNull(params.getEsxiManagementGatewayIpAddress());
 
         params.setIdracIpAddress("1.1.1.1");
         assertNotNull(params.getIdracIpAddress());
 
-        params.setManagementIpAddress("1.1.1.1");
-        assertNotNull(params.getManagementIpAddress());
+        params.setEsxiManagementSubnetMask("1.1.1.1");
+        assertNotNull(params.getEsxiManagementSubnetMask());
 
         params.setScaleIOSVMDataIpAddress1("1.1.1.1");
         assertNotNull(params.getScaleIOSVMDataIpAddress1());
