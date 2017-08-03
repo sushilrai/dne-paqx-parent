@@ -25,6 +25,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListScaleIoComponents
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListVCenterComponentsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassthroughTaskHandler;
+import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Qualifier("addNodeWorkflowService")
     private WorkflowService workflowService;
 
+    @Autowired
+    private HostToInstallEsxiRequestTransformer hostToInstallEsxiRequestTransformer;
+
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
     {
@@ -77,6 +81,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
 		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
 		//TODO: Uncomment this out when integration is done
+        //It's working till discover vcenter step
 		/*workflowTasks.put("listScaleIoComponents", listScaleIoComponentsTask());
 		workflowTasks.put("listVCenterComponents", listVCenterComponentsTask());
         workflowTasks.put("discoverScaleIo", discoverScaleIoTask());
@@ -143,7 +148,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("installEsxiTask")
     private WorkflowTask installEsxiTask()
     {
-        return createTask("Install ESXi", new InstallEsxiTaskHandler(this.nodeService));
+        return createTask("Install ESXi", new InstallEsxiTaskHandler(this.nodeService, hostToInstallEsxiRequestTransformer));
     }
 
     @Bean("addHostToVcenterTask")

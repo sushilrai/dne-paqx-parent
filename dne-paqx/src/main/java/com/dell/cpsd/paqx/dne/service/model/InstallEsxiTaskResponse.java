@@ -9,23 +9,11 @@ package com.dell.cpsd.paqx.dne.service.model;
  * @version 1.0
  * @since 1.0
  */
-public class DiscoverVCenterTaskResponse extends TaskResponse
+public class InstallEsxiTaskResponse extends TaskResponse
 {
-    private String jobId;
-
     private String message;
 
     private String status;
-
-    public String getJobId()
-    {
-        return jobId;
-    }
-
-    public void setJobId(final String jobId)
-    {
-        this.jobId = jobId;
-    }
 
     public String getMessage()
     {
