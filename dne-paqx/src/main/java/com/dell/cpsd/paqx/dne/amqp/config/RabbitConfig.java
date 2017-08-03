@@ -18,6 +18,9 @@ import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
+import org.springframework.amqp.core.*;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
@@ -32,16 +35,14 @@ import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.retry.support.RetryTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is the configuration for the RabbitMQ artifacts used by the service.
@@ -62,6 +63,22 @@ public class RabbitConfig
      */
     public static final String QUEUE_GENERAL_RESPONSE = "queue.dell.cpsd.dne-paqx.response";
 
+    // following envs are for ESS communication. For now, ESS is internal service so no capability registration.
+    // DNE gets exchanges, queue, routing key from properties file.
+    @Value("${ess.req.exchange.name}")
+    private String              essRequestExchange;
+
+    @Value("${ess.req.routing.prefix}")
+    private String              essReqRoutingKeyPrefix;
+
+    @Value("${ess.res.exchange.name}")
+    private String              essResponseExchange;
+
+    @Value("${ess.res.queue}")
+    private String              essResQueue;
+
+    @Value("${ess.res.routing.prefix}")
+    private String              essRespRoutingKeyPrefix;
     /*
      * The RabbitMQ connection factory
      */
@@ -195,6 +212,9 @@ public class RabbitConfig
         messageClasses.add(IdracNetworkSettingsResponse.class);
         messageClasses.add(IdracNetworkSettingsResponseMessage.class);
 
+        messageClasses.add(ValidateVcenterClusterResponseMessage.class);
+        messageClasses.add(ValidateVcenterClusterRequestMessage.class);
+
         messageClasses.add(ListComponentRequestMessage.class);
         messageClasses.add(ListComponentResponseMessage.class);
         messageClasses.add(ListComponentsRequestMessage.class);
@@ -229,4 +249,35 @@ public class RabbitConfig
     Queue nodeExpansionResponseQueue() {
         return new Queue(QUEUE_GENERAL_RESPONSE);
     }
+
+    @Bean
+    public String essRequestExchange()
+    {
+        return essRequestExchange;
+    }
+
+    @Bean
+    public String essReqRoutingKeyPrefix()
+    {
+        return essReqRoutingKeyPrefix;
+    }
+
+    @Bean
+    public TopicExchange essResponseExchange()
+    {
+        return new TopicExchange(essResponseExchange);
+    }
+
+    @Bean
+    public Queue essResponseQueue()
+    {
+        return new Queue(essResQueue);
+    }
+
+    @Bean
+    public Binding essBinding()
+    {
+        return BindingBuilder.bind(essResponseQueue()).to(essResponseExchange()).with(essRespRoutingKeyPrefix + ".#");
+    }
 }
+

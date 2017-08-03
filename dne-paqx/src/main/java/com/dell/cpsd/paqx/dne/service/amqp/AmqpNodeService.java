@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
+import com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
@@ -13,31 +14,12 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBoo
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracResponseMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToDvSwitchResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToVCenterResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ApplyEsxiLicenseResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.DeployScaleIoVmResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverScaleIoResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverVCenterResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.EnablePciPassthroughResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListScaleIoComponentsResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListVCenterComponentsResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.*;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointDetails;
@@ -51,7 +33,6 @@ import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.ListScaleIoComponentsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.ListVCenterComponentsTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
@@ -61,6 +42,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.common.client.rpc.AbstractServiceClient;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.ServiceRequestCallback;
+import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
@@ -159,6 +141,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
         this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this));
+        this.consumer.addAdapter(new ValidateClusterResponseAdapter(this));
         this.consumer.addAdapter(new ListScaleIoComponentsResponseAdapter(this));
         this.consumer.addAdapter(new ListVCenterComponentsResponseAdapter(this));
         this.consumer.addAdapter(new DiscoverScaleIoResponseAdapter(this));
@@ -300,7 +283,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * {@inheritDoc}
      */
     @Override
-    public List<VirtualizationCluster> listClusters() throws ServiceTimeoutException, ServiceExecutionException
+    public List<ClusterInfo> listClusters() throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
@@ -329,19 +312,40 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         if (responseInfo != null)
         {
             DiscoverClusterResponseInfo clusterResponseInfo = responseInfo.getDiscoverClusterResponseInfo();
-            if (clusterResponseInfo != null)
-            {
-                List<ClusterInfo> clusters = clusterResponseInfo.getClusters();
-                if (clusters != null)
-                {
-                    return clusters.stream().map(c -> new VirtualizationCluster(c.getName(), c.getNumberOfHosts()))
-                            .collect(Collectors.toList());
-                }
-            }
-            return Collections.emptyList();
+            return clusterResponseInfo != null? clusterResponseInfo.getClusters(): Collections.emptyList();
         }
 
         return Collections.emptyList();
+    }
+
+    @Override
+    public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList) throws ServiceTimeoutException, ServiceExecutionException {
+        com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        ValidateVcenterClusterRequestMessage request = new ValidateVcenterClusterRequestMessage();
+        request.setMessageProperties(messageProperties);
+        request.setDiscoverClusterResponseInfo(new DiscoverClusterResponseInfo(clusterInfoList));
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                LOGGER.info("publish validate cluster request message");
+                producer.publishValidateClusters(request);
+            }
+        });
+
+        ValidateVcenterClusterResponseMessage responseInfo = processResponse(response, ValidateVcenterClusterResponseMessage.class);
+        return responseInfo;
     }
 
     /**

@@ -10,10 +10,10 @@ import com.dell.cpsd.paqx.dne.rest.controller.NodeExpansionController;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.paqx.dne.service.orchestration.IOrchestrationService;
 import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
+import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -141,7 +141,7 @@ public class NodeExpansionWebApplicationTest
     @Test
     public void testGetClusters() throws  Exception{
         String uuidStr = UUID.randomUUID().toString();
-        VirtualizationCluster cluster = new VirtualizationCluster("TestCluster", 10);
+        ClusterInfo cluster = new ClusterInfo("TestCluster", 10);
         Mockito.when(nodeService.listClusters()).thenReturn(Collections.singletonList(cluster));
         MvcResult result = this.mockMvc.perform(get("/dne/clusters"))
                 .andExpect(status().isAccepted()).andReturn();

@@ -7,7 +7,6 @@ package com.dell.cpsd.paqx.dne.rest.controller;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.rest.exception.WorkflowNotFoundException;
 import com.dell.cpsd.paqx.dne.rest.model.AboutInfo;
-import com.dell.cpsd.paqx.dne.rest.model.ClusterInfo;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
@@ -17,12 +16,12 @@ import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
 import com.dell.cpsd.paqx.dne.service.orchestration.IOrchestrationService;
 import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,12 +255,11 @@ public class NodeExpansionController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<ClusterInfo> listVirtualizationClusters(HttpServletRequest servletRequest) throws ServiceTimeoutException, ServiceExecutionException {
 
-        List<VirtualizationCluster> clusters = nodeService.listClusters();
+        List<ClusterInfo> clusters = nodeService.listClusters();
         if (clusters != null )
         {
             LOGGER.info("Return " + clusters.size() + " clusters information.");
-            return clusters.stream().map(c -> new ClusterInfo(c.getName(), c.getNumberOfHosts()))
-                    .collect(Collectors.toList());
+            return clusters;
         }
 
         return new ArrayList<>();

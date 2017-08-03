@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
+import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -30,9 +32,7 @@ import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
-import com.dell.cpsd.paqx.dne.service.model.VirtualizationCluster;
-import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
-import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
+
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;
 import com.dell.cpsd.service.common.client.callback.ServiceError;
 import com.dell.cpsd.service.common.client.callback.ServiceResponse;
@@ -203,10 +203,10 @@ public class AmqpNodeServiceTest
             }
         };
 
-        List<VirtualizationCluster> discovereds = nodeService.listClusters();
+        List<ClusterInfo> discovereds = nodeService.listClusters();
         Assert.assertEquals(1, discovereds.size());
 
-        VirtualizationCluster discovered = discovereds.get(0);
+        ClusterInfo discovered = discovereds.get(0);
         Assert.assertEquals(clusterName, discovered.getName());
         Assert.assertEquals(numberOfHosts, discovered.getNumberOfHosts());
 

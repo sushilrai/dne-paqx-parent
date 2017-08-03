@@ -39,9 +39,11 @@ import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -57,6 +59,12 @@ import java.util.Objects;
 
 public class AmqpDneProducer implements DneProducer
 {
+    @Autowired
+    private String essRequestExchange;
+
+    @Autowired
+    private String essReqRoutingKeyPrefix;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpDneProducer.class);
     private final RabbitTemplate   rabbitTemplate;
     private final CapabilityBinder capabilityBinder;
@@ -441,6 +449,12 @@ public class AmqpDneProducer implements DneProducer
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
             }
         }
+    }
+
+    @Override
+    public void publishValidateClusters(ValidateVcenterClusterRequestMessage request) {
+        // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
+        rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, request);
     }
 
     /**

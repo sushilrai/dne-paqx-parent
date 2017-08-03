@@ -18,6 +18,7 @@ import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMes
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
@@ -50,6 +51,14 @@ public interface DneProducer
      * @param request
      */
     void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request);
+
+    /**
+     * validate list of clusters
+     *
+     * @param request
+     */
+    void publishValidateClusters(ValidateVcenterClusterRequestMessage request);
+
 
     /**
      * Complete node allocation
