@@ -78,7 +78,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-        workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
 		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
 		//TODO: Uncomment this out when integration is done
         //It's working till discover vcenter step
@@ -101,12 +100,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
         return workflowTasks;
-    }
-
-    @Bean("findDiscoveredNodesTask")
-    private WorkflowTask findDiscoveredNodesTask()
-    {
-        return createTask("Finding discovered Nodes", new FindDiscoveredNodesTaskHandler(this.nodeService));
     }
 
     @Bean("updateSystemDefinitionTask")

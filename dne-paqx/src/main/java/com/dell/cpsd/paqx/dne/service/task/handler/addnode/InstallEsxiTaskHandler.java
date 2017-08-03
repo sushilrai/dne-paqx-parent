@@ -55,32 +55,18 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
 
         try
         {
-            Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-
-            FirstAvailableDiscoveredNodeResponse findNodeTask = (FirstAvailableDiscoveredNodeResponse)responseMap.get("findAvailableNodes");
-            if (findNodeTask == null)
-            {
-                throw new IllegalStateException("No discovered node task found.");
-            }
-
-            final NodeInfo nodeInfo = findNodeTask.getNodeInfo();
-            if (nodeInfo == null)
-            {
-                throw new IllegalStateException("No discovered node info found.");
-            }
-
-            final String nodeId = nodeInfo.getNodeId();
-
-            if (nodeId == null)
-            {
-                throw new IllegalStateException("Node Id is null");
-            }
-
             final NodeExpansionRequest inputParams = job.getInputParams();
 
             if (inputParams == null)
             {
                 throw new IllegalStateException("Job input parameters are null");
+            }
+
+            final String nodeId = inputParams.getNodeId();
+
+            if (nodeId == null)
+            {
+                throw new IllegalStateException("Node Id is null");
             }
 
             final String hostname = inputParams.getHostname();
