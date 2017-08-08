@@ -4,19 +4,16 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.EsxiInstalla
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.DiscoverScaleIoTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * TODO: Document Usage
@@ -32,7 +29,7 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
     /**
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiscoverScaleIoTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstallEsxiTaskHandler.class);
 
     /**
      * The <code>NodeService</code> instance
@@ -107,6 +104,7 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
         return response;
     }
 
+    //TODO: This won't work - not mapped to dns entry
     /*
     * Auto generates the hostname using the ESXI Management IP Address.
     */
