@@ -15,6 +15,8 @@ public class InstallEsxiTaskResponse extends TaskResponse
 
     private String status;
 
+    private String hostname;
+
     public String getMessage()
     {
         return message;
@@ -33,5 +35,15 @@ public class InstallEsxiTaskResponse extends TaskResponse
     public void setStatus(final String status)
     {
         this.status = status;
+    }
+
+    public String getHostname()
+    {
+        return hostname;
+    }
+
+    public void setHostname(final String hostname)
+    {
+        this.hostname = hostname;
     }
 }
