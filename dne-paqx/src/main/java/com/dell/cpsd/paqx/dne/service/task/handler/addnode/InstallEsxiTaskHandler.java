@@ -71,7 +71,7 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
 
             final String hostname = inputParams.getHostname();
 
-            if (StringUtils.isNotEmpty(hostname))
+            if (StringUtils.isEmpty(hostname))
             {
                 throw new IllegalStateException("Hostname is null");
             }
