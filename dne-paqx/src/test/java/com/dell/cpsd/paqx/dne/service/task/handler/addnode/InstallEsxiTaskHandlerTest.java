@@ -102,6 +102,7 @@ public class InstallEsxiTaskHandlerTest
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString());
         verify(this.service).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.response, never()).addError(anyString());
     }
 
     /**
@@ -119,6 +120,7 @@ public class InstallEsxiTaskHandlerTest
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString());
         verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -137,6 +139,7 @@ public class InstallEsxiTaskHandlerTest
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString());
         verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -157,6 +160,7 @@ public class InstallEsxiTaskHandlerTest
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString());
         verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -180,6 +184,7 @@ public class InstallEsxiTaskHandlerTest
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString());
         verify(this.service).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.response, never()).addError(anyString());
     }
 
     /**

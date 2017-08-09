@@ -7,6 +7,7 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,7 +38,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -52,6 +53,9 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
 {
     @Mock
     private AMQPClient client;
+
+    @Mock
+    private WorkflowTask task;
 
     @Mock
     private Job job;
@@ -74,6 +78,8 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     @Mock
     private Identity identity;
 
+    private String taskName = "addNodeTosystemDefinitionTask";
+    private String stepName = "addNodeTosystemDefinitionStep";
     private String nodeId       = "nodeId";
     private String symphonyUuid = "symphonyUuid";
 
@@ -125,8 +131,9 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         doReturn(this.symphonyUuid).when(this.identity).getIdentifier();
 
         assertEquals(true, this.spy.executeTask(this.job));
-        verify(this.client, times(1)).addComponent(any(), any(), any(), any());
+        verify(this.client).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.response, never()).addError(anyString());
     }
 
     /**
@@ -147,6 +154,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.client, never()).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -166,6 +174,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.client, never()).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -186,6 +195,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.client, never()).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -205,6 +215,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.client, never()).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -225,6 +236,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.client, never()).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
     }
 
     /**
@@ -250,7 +262,24 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         doReturn(identifier).when(this.identity).getIdentifier();
 
         assertEquals(false, this.spy.executeTask(this.job));
-        verify(this.client, times(1)).addComponent(any(), any(), any(), any());
+        verify(this.client).addComponent(any(), any(), any(), any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
+    }
+
+    /**
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler#initializeResponse(com.dell.cpsd.paqx.dne.domain.Job)}.
+     */
+    @Test
+    public void testInitializeResponse()
+    {
+        doReturn(this.task).when(this.job).getCurrentTask();
+        doReturn(this.taskName).when(this.task).getTaskName();
+        doReturn(this.stepName).when(this.job).getStep();
+
+        TaskResponse response = this.handler.initializeResponse(this.job);
+        assertNotNull(response);
+        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

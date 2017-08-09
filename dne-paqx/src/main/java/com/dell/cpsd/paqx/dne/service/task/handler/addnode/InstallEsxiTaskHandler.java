@@ -7,13 +7,11 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.DiscoverScaleIoTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * TODO: Document Usage
@@ -61,21 +59,21 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
 
             final String nodeId = inputParams.getNodeId();
 
-            if (nodeId == null)
+            if (StringUtils.isEmpty(nodeId))
             {
                 throw new IllegalStateException("Node Id is null");
             }
 
             final String esxiManagementIpAddress = inputParams.getEsxiManagementIpAddress();
 
-            if (esxiManagementIpAddress == null)
+            if (StringUtils.isEmpty(esxiManagementIpAddress))
             {
                 throw new IllegalStateException("ESXi Management IP Address is null");
             }
 
             String esxiManagementHostname = inputParams.getEsxiManagementHostname();
 
-            if (esxiManagementHostname == null)
+            if (StringUtils.isEmpty(esxiManagementHostname))
             {
                 LOGGER.warn("ESXi Management hostname is null, will auto generate hostname");
 
@@ -97,10 +95,12 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
         }
         catch (Exception e)
         {
-            LOGGER.error("Exception occurred", e);
-            response.setWorkFlowTaskStatus(Status.FAILED);
-            return false;
+            LOGGER.error("Error installing ESXi", e);
+            response.addError(e.toString());
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     @Override
