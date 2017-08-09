@@ -92,7 +92,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         this.job = addNodeService.createWorkflow("addNode", "startAddNodeWorkflow", "submitted");
         this.job.setInputParams(
                 new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask", "managementIpAddress",
-                        "esxiKernelIpAddress1", "esxiKernelIpAddress2", "scaleIOSVMDataIpAddress1", "scaleIOSVMDataIpAddress2",
+                        "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIOSVMDataIpAddress1", "scaleIOSVMDataIpAddress2",
                         "scaleIOSVMManagementIpAddress", "nodeId", "symphonyUuid", "clausterName"));
 
         NodeExpansionRequest request = new NodeExpansionRequest();

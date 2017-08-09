@@ -73,11 +73,21 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
                 throw new IllegalStateException("ESXi Management IP Address is null");
             }
 
-            final String hostname = this.generateHostname(esxiManagementIpAddress);
-            response.setHostname(hostname);
+            String esxiManagementHostname = inputParams.getEsxiManagementHostname();
+
+            if (esxiManagementHostname == null)
+            {
+                LOGGER.warn("ESXi Management hostname is null, will auto generate hostname");
+
+                esxiManagementHostname = this.generateHostname(esxiManagementIpAddress);
+
+                LOGGER.info("Auto generated ESXi Management hostname is " + esxiManagementHostname);
+            }
+
+            response.setHostname(esxiManagementHostname);
 
             final EsxiInstallationInfo esxiInstallationInfo = hostToInstallEsxiRequestTransformer
-                    .transformInstallEsxiData(hostname, nodeId);
+                    .transformInstallEsxiData(esxiManagementHostname, nodeId);
 
             final boolean success = this.nodeService.requestInstallEsxi(esxiInstallationInfo);
 
@@ -104,7 +114,6 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
         return response;
     }
 
-    //TODO: This won't work - not mapped to dns entry
     /*
     * Auto generates the hostname using the ESXI Management IP Address.
     */
