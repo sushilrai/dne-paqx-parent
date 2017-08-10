@@ -2,7 +2,6 @@ package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.AddHostToVCenterResponse;
@@ -53,7 +52,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -95,6 +94,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

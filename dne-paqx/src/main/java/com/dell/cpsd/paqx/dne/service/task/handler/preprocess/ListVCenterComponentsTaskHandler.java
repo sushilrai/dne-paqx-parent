@@ -43,7 +43,7 @@ public class ListVCenterComponentsTaskHandler extends BaseTaskHandler implements
     {
         LOGGER.info("Execute List VCenter Components task");
 
-        final TaskResponse response = initializeResponse(job);
+        final ListVCenterComponentsTaskResponse response = initializeResponse(job);
 
         try
         {

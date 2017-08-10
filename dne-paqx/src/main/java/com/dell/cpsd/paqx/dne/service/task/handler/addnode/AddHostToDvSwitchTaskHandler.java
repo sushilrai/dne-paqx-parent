@@ -53,7 +53,7 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -94,6 +94,7 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

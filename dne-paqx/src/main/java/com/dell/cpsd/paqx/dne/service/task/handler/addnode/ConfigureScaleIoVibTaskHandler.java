@@ -4,7 +4,6 @@ import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOMdmCluster;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -65,7 +64,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -107,6 +106,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

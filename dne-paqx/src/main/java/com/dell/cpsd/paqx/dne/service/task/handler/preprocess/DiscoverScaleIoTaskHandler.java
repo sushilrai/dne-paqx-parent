@@ -45,7 +45,7 @@ public class DiscoverScaleIoTaskHandler extends BaseTaskHandler implements IWork
     {
         LOGGER.info("Execute Discover ScaleIO task");
 
-        final TaskResponse response = initializeResponse(job);
+        final DiscoverScaleIoTaskResponse response = initializeResponse(job);
 
         try
         {
@@ -66,6 +66,7 @@ public class DiscoverScaleIoTaskHandler extends BaseTaskHandler implements IWork
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.getMessage());
             return false;
         }
     }

@@ -20,6 +20,9 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
+import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
+import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
+import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
@@ -27,11 +30,9 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.*;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointDetails;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.EndpointCredentials;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
@@ -301,7 +302,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
         messageProperties.setReplyTo(replyTo);
 
+        final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
         DiscoverClusterRequestInfoMessage request = new DiscoverClusterRequestInfoMessage();
+        if (componentEndpointIds != null)
+        {
+            request.setComponentEndpointIds(
+                    new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
+                            componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
+            request.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
+        }
+
         request.setMessageProperties(messageProperties);
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
@@ -337,6 +347,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         ValidateVcenterClusterRequestMessage request = new ValidateVcenterClusterRequestMessage();
+
+        final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
+        if (componentEndpointIds != null)
+        {
+            request.setComponentEndpointIds(
+                    new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
+                            componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
+            request.setEndpointUrl(componentEndpointIds.getEndpointUrl());
+        }
+
         request.setMessageProperties(messageProperties);
         request.setDiscoverClusterResponseInfo(new DiscoverClusterResponseInfo(clusterInfoList));
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
@@ -562,7 +582,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Override
     public boolean requestScaleIoComponents() throws ServiceTimeoutException, ServiceExecutionException
     {
-        final List<ComponentEndpointDetails> componentEndpointDetailsListResponse = new ArrayList<>();
+        final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
         try
         {
@@ -596,25 +616,37 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 {
                     scaleIOComponentDetailsList.stream().filter(Objects::nonNull).forEach(scaleIOComponentDetails -> {
 
-                        final ComponentEndpointDetails componentEndpointDetails = new ComponentEndpointDetails();
+                        final ComponentDetails componentDetails = new ComponentDetails();
 
-                        componentEndpointDetails.setComponentUuid(scaleIOComponentDetails.getComponentUuid());
-                        componentEndpointDetails.setElementType(scaleIOComponentDetails.getElementType());
+                        componentDetails.setComponentUuid(scaleIOComponentDetails.getComponentUuid());
+                        componentDetails.setElementType(scaleIOComponentDetails.getElementType());
+                        componentDetails.setComponentType("SCALEIO");
+                        componentDetails.setIdentifier("SCALEIO");
 
                         final List<ScaleIoEndpointDetails> endpointDetailsList = scaleIOComponentDetails.getEndpoints();
 
                         if (endpointDetailsList != null)
                         {
                             endpointDetailsList.stream().filter(Objects::nonNull).forEach(scaleIoEndpointDetails -> {
-                                final EndpointCredentials endpointCredentials = new EndpointCredentials();
-                                endpointCredentials.setEndpointUrl(scaleIoEndpointDetails.getEndpointUrl());
-                                endpointCredentials.setEndpointUuid(scaleIoEndpointDetails.getEndpointUuid());
-                                endpointCredentials.setCredentialUuids(scaleIoEndpointDetails.getCredentialUuids());
-                                componentEndpointDetails.getEndpointCredentials().add(endpointCredentials);
+                                final EndpointDetails endpointDetails = new EndpointDetails();
+                                endpointDetails.setEndpointUrl(scaleIoEndpointDetails.getEndpointUrl());
+                                endpointDetails.setEndpointUuid(scaleIoEndpointDetails.getEndpointUuid());
+                                endpointDetails.setIdentifier("SCALEIO");
+                                endpointDetails.setType("SCALEIO");
+                                final List<String> credentialUuids = scaleIoEndpointDetails.getCredentialUuids();
+                                credentialUuids.forEach(credential -> {
+                                    final CredentialDetails credentialDetails = new CredentialDetails();
+                                    credentialDetails.setCredentialName("DEFAULT");
+                                    credentialDetails.setCredentialUuid(credential);
+                                    credentialDetails.setEndpointDetails(endpointDetails);
+                                    endpointDetails.getCredentialDetailsList().add(credentialDetails);
+                                });
+                                endpointDetails.setComponentDetails(componentDetails);
+                                componentDetails.getEndpointDetails().add(endpointDetails);
                             });
                         }
 
-                        componentEndpointDetailsListResponse.add(componentEndpointDetails);
+                        componentEndpointDetailsListResponse.add(componentDetails);
 
                     });
 
@@ -638,7 +670,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Override
     public boolean requestVCenterComponents() throws ServiceTimeoutException, ServiceExecutionException
     {
-        final List<ComponentEndpointDetails> componentEndpointDetailsListResponse = new ArrayList<>();
+        final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
         try
         {
@@ -672,27 +704,40 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 {
                     vCenterComponentDetailsList.stream().filter(Objects::nonNull).forEach(vcenterComponentDetails -> {
 
-                        final ComponentEndpointDetails componentEndpointDetails = new ComponentEndpointDetails();
+                        final ComponentDetails componentDetails = new ComponentDetails();
 
-                        componentEndpointDetails.setComponentUuid(vcenterComponentDetails.getComponentUuid());
-                        componentEndpointDetails.setElementType(vcenterComponentDetails.getElementType());
+                        componentDetails.setComponentUuid(vcenterComponentDetails.getComponentUuid());
+                        componentDetails.setElementType(vcenterComponentDetails.getElementType());
+                        componentDetails.setComponentType("VCENTER");
+                        componentDetails.setIdentifier(vcenterComponentDetails.getIdentifier());
 
                         final List<VCenterEndpointDetails> endpointDetailsList = vcenterComponentDetails.getEndpoints();
 
                         if (endpointDetailsList != null)
                         {
-                            endpointDetailsList.stream().filter(Objects::nonNull).forEach(vcenterEndpointDetails -> {
-                                final EndpointCredentials endpointCredentials = new EndpointCredentials();
-                                endpointCredentials.setEndpointUrl(vcenterEndpointDetails.getEndpointUrl());
-                                endpointCredentials.setEndpointUuid(vcenterEndpointDetails.getEndpointUuid());
-                                endpointCredentials.setCredentialUuids(vcenterEndpointDetails.getCredentialUuids());
-                                componentEndpointDetails.getEndpointCredentials().add(endpointCredentials);
+                            endpointDetailsList.stream().filter(Objects::nonNull).forEach(vCenterEndpointDetails -> {
+                                final EndpointDetails endpointDetails = new EndpointDetails();
+                                endpointDetails.setEndpointUrl(vCenterEndpointDetails.getEndpointUrl());
+                                endpointDetails.setEndpointUuid(vCenterEndpointDetails.getEndpointUuid());
+                                endpointDetails.setIdentifier(vCenterEndpointDetails.getIdentifier());
+                                endpointDetails.setType(vCenterEndpointDetails.getType());
+                                final List<VCenterCredentialDetails> credentialDetailsList = vCenterEndpointDetails.getCredentialDetails();
+                                credentialDetailsList.stream().filter(Objects::nonNull).forEach(credential -> {
+                                    final CredentialDetails credentialDetails = new CredentialDetails();
+                                    credentialDetails.setCredentialName(credential.getCredentialName());
+                                    credentialDetails.setCredentialUuid(credential.getCredentialUuid());
+                                    credentialDetails.setEndpointDetails(endpointDetails);
+                                    endpointDetails.getCredentialDetailsList().add(credentialDetails);
+                                });
+                                endpointDetails.setComponentDetails(componentDetails);
+                                componentDetails.getEndpointDetails().add(endpointDetails);
                             });
                         }
 
-                        componentEndpointDetailsListResponse.add(componentEndpointDetails);
+                        componentEndpointDetailsListResponse.add(componentDetails);
 
                     });
+
 
 
                     return repository.saveVCenterComponentDetails(componentEndpointDetailsListResponse);
@@ -722,7 +767,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             final String correlationId = UUID.randomUUID().toString();
             requestMessage.setMessageProperties(
                     new com.dell.cpsd.storage.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
-            requestMessage.setEndpointURL(componentEndpointIds.getEndpointUrl());
+            requestMessage.setEndpointURL("https://" +componentEndpointIds.getEndpointUrl());
             requestMessage.setComponentUuid(componentEndpointIds.getComponentUuid());
             requestMessage.setEndpointUuid(componentEndpointIds.getEndpointUuid());
             requestMessage.setCredentialUuid(componentEndpointIds.getCredentialUuid());
@@ -774,7 +819,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             final String correlationId = UUID.randomUUID().toString();
             requestMessage.setMessageProperties(
                     new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
-            requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
+            requestMessage.setCredentials(new Credentials("https://" + componentEndpointIds.getEndpointUrl(), null, null));
             requestMessage.setComponentEndpointIds(
                     new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
                             componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));

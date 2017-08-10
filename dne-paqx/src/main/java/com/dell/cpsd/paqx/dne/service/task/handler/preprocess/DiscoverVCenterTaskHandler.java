@@ -6,14 +6,11 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DiscoverVCenterTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.ListVCenterComponentsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * TODO: Document Usage
@@ -48,11 +45,11 @@ public class DiscoverVCenterTaskHandler extends BaseTaskHandler implements IWork
     {
         LOGGER.info("Execute Discover VCenter task");
 
-        final TaskResponse response = initializeResponse(job);
+        final DiscoverVCenterTaskResponse response = initializeResponse(job);
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -68,6 +65,7 @@ public class DiscoverVCenterTaskHandler extends BaseTaskHandler implements IWork
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.getMessage());
             return false;
         }
     }

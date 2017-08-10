@@ -51,7 +51,7 @@ public interface NodeService
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList ) throws ServiceTimeoutException, ServiceExecutionException;
+    ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList) throws ServiceTimeoutException, ServiceExecutionException;
 
 
     /**

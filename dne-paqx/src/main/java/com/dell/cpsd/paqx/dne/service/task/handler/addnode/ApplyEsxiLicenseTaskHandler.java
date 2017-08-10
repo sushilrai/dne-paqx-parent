@@ -8,7 +8,6 @@ import com.dell.cpsd.paqx.dne.service.model.ApplyEsxiLicenseTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
@@ -52,7 +51,7 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -89,6 +88,7 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

@@ -53,7 +53,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -106,6 +106,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

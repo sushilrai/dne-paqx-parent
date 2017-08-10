@@ -52,7 +52,7 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -96,6 +96,7 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.toString());
             return false;
         }
     }

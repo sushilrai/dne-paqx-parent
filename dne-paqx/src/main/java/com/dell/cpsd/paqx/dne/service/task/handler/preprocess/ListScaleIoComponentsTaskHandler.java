@@ -42,7 +42,7 @@ public class ListScaleIoComponentsTaskHandler extends BaseTaskHandler implements
     {
         LOGGER.info("Execute List ScaleIO Components task");
 
-        final TaskResponse response = initializeResponse(job);
+        final ListScaleIoComponentsTaskResponse response = initializeResponse(job);
 
         try
         {

@@ -34,7 +34,7 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
     /**
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
+    private final NodeService           nodeService;
     private final DataServiceRepository repository;
 
     public RebootHostTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
@@ -52,7 +52,7 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("VCENTER");
+            final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
             if (componentEndpointIds == null)
             {
@@ -91,6 +91,7 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
+            response.addError(e.getMessage());
             return false;
         }
     }

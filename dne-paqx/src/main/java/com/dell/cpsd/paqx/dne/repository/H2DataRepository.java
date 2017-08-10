@@ -1,14 +1,14 @@
 package com.dell.cpsd.paqx.dne.repository;
 
-import com.dell.cpsd.paqx.dne.domain.ComponentEndpoint;
+import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
+import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.DneJob;
+import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointDetails;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.paqx.dne.service.model.EndpointCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class H2DataRepository implements DataServiceRepository
 
     @Override
     @Transactional
-    public boolean saveScaleIoComponentDetails(final List<ComponentEndpointDetails> componentEndpointDetailsList)
+    public boolean saveScaleIoComponentDetails(final List<ComponentDetails> componentEndpointDetailsList)
     {
         LOG.info("Persisting ScaleIO Component, Endpoint and Credential UUID");
 
@@ -47,47 +47,21 @@ public class H2DataRepository implements DataServiceRepository
             return false;
         }
 
-        //For MVP Getting the first component - this can be selected from UI later on
-        final ComponentEndpointDetails componentEndpointDetails = componentEndpointDetailsList.get(0);
-        final List<EndpointCredentials> endpointCredentialList = componentEndpointDetails.getEndpointCredentials();
-
-        if (endpointCredentialList.isEmpty())
+        try
         {
-            LOG.error("No Endpoints Found");
+            componentEndpointDetailsList.forEach(entityManager::persist);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LOG.error(" Exception occurred while persisting scaleio data", e);
             return false;
         }
-
-        //For MVP Getting the first endpoint - this can be selected from UI later on
-        final EndpointCredentials endpointCredentials = endpointCredentialList.get(0);
-        final List<String> credentialUuids = endpointCredentials.getCredentialUuids();
-
-        if (credentialUuids.isEmpty())
-        {
-            LOG.error("No Credentials Found");
-            return false;
-        }
-
-        //For MVP Getting the first credential - this can be selected from UI later on
-        final String credentialUuid = credentialUuids.get(0);
-        final String endpointUuid = endpointCredentials.getEndpointUuid();
-        final String endpointUrl = endpointCredentials.getEndpointUrl();
-        final String componentUuid = componentEndpointDetails.getComponentUuid();
-
-        final ComponentEndpoint componentEndpoint = new ComponentEndpoint();
-        componentEndpoint.setComponentUuid(componentUuid);
-        componentEndpoint.setEndpointUuid(endpointUuid);
-        componentEndpoint.setCredentialUuid(credentialUuid);
-        componentEndpoint.setEndpointUrl(endpointUrl);
-        componentEndpoint.setType("SCALEIO");
-
-        entityManager.persist(componentEndpoint);
-
-        return componentEndpoint.getUuid() != null;
     }
 
     @Override
     @Transactional
-    public boolean saveVCenterComponentDetails(final List<ComponentEndpointDetails> componentEndpointDetailsList)
+    public boolean saveVCenterComponentDetails(final List<ComponentDetails> componentEndpointDetailsList)
     {
         LOG.info("Persisting VCenter Component, Endpoint and Credential UUID");
 
@@ -97,65 +71,126 @@ public class H2DataRepository implements DataServiceRepository
             return false;
         }
 
-        //For MVP Getting the first component - this can be selected from UI later on
-        final ComponentEndpointDetails componentEndpointDetails = componentEndpointDetailsList.get(0);
-        final List<EndpointCredentials> endpointCredentialList = componentEndpointDetails.getEndpointCredentials();
-
-        if (endpointCredentialList.isEmpty())
+        try
         {
-            LOG.error("No Endpoints Found");
+            componentEndpointDetailsList.forEach(entityManager::persist);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LOG.error(" Exception occurred while persisting vcenter data", e);
             return false;
         }
-
-        //For MVP Getting the first endpoint - this can be selected from UI later on
-        final EndpointCredentials endpointCredentials = endpointCredentialList.get(0);
-        final List<String> credentialUuids = endpointCredentials.getCredentialUuids();
-
-        if (credentialUuids.isEmpty())
-        {
-            LOG.error("No Credentials Found");
-            return false;
-        }
-
-        //For MVP Getting the first credential - this can be selected from UI later on
-        final String credentialUuid = credentialUuids.get(0);
-        final String endpointUuid = endpointCredentials.getEndpointUuid();
-        final String endpointUrl = endpointCredentials.getEndpointUrl();
-        final String componentUuid = componentEndpointDetails.getComponentUuid();
-
-        final ComponentEndpoint componentEndpoint = new ComponentEndpoint();
-        componentEndpoint.setComponentUuid(componentUuid);
-        componentEndpoint.setEndpointUuid(endpointUuid);
-        componentEndpoint.setCredentialUuid(credentialUuid);
-        componentEndpoint.setEndpointUrl(endpointUrl);
-        componentEndpoint.setType("VCENTER");
-
-        entityManager.persist(componentEndpoint);
-
-        return componentEndpoint.getUuid() != null;
     }
 
     @Override
     public ComponentEndpointIds getComponentEndpointIds(final String componentType)
     {
-        final TypedQuery<ComponentEndpoint> typedQuery = entityManager
-                .createQuery("select ceids from ComponentEndpoint as ceids where ceids.type = :componentType", ComponentEndpoint.class);
+        final TypedQuery<ComponentDetails> typedQuery = entityManager
+                .createQuery("select ceids from ComponentDetails as ceids where ceids.componentType = :componentType",
+                        ComponentDetails.class);
         typedQuery.setParameter("componentType", componentType);
 
-        final List<ComponentEndpoint> componentEndpointList = typedQuery.getResultList();
+        final List<ComponentDetails> componentDetailsList = typedQuery.getResultList();
 
-        if (componentEndpointList != null && !componentEndpointList.isEmpty())
+        if (componentDetailsList != null && !componentDetailsList.isEmpty())
         {
-            //For MVP, fetching the first credential
-            final ComponentEndpoint componentEndpoint = componentEndpointList.get(0);
+            //For MVP, fetching the first component, 1st endpoint, 1st credential
+            final ComponentDetails componentDetails = componentDetailsList.get(0);
 
-            return new ComponentEndpointIds(componentEndpoint.getComponentUuid(), componentEndpoint.getEndpointUuid(),
-                    componentEndpoint.getEndpointUrl(), componentEndpoint.getCredentialUuid());
+            if (componentDetails == null)
+            {
+                return null;
+            }
+
+            final List<EndpointDetails> endpointDetailsList = componentDetails.getEndpointDetails();
+
+            if (endpointDetailsList == null || endpointDetailsList.isEmpty())
+            {
+                return null;
+            }
+
+            final EndpointDetails endpointDetails = endpointDetailsList.get(0);
+
+            if (endpointDetails == null)
+            {
+                return null;
+            }
+
+            final List<CredentialDetails> credentialDetailsList = endpointDetails.getCredentialDetailsList();
+
+            if (credentialDetailsList == null || credentialDetailsList.isEmpty())
+            {
+                return null;
+            }
+
+            final CredentialDetails credentialDetails = credentialDetailsList.get(0);
+
+            if (credentialDetails == null)
+            {
+                return null;
+            }
+
+            return new ComponentEndpointIds(componentDetails.getComponentUuid(), endpointDetails.getEndpointUuid(),
+                    endpointDetails.getEndpointUrl(), credentialDetails.getCredentialUuid());
+
         }
 
         LOG.error("No Component Endpoints found in the database");
 
         return null;
+    }
+
+    @Override
+    public ComponentEndpointIds getVCenterComponentEndpointIdsByEndpointType(final String endpointType)
+    {
+        final TypedQuery<ComponentDetails> typedQuery = entityManager.createQuery(
+                "select endpoint.componentDetails from EndpointDetails as endpoint where endpoint.type = :endpointType and endpoint.componentDetails.componentType = :componentType",
+                ComponentDetails.class);
+        typedQuery.setParameter("endpointType", endpointType);
+        typedQuery.setParameter("componentType", "VCENTER");
+
+        try
+        {
+            final ComponentDetails componentDetails = typedQuery.getSingleResult();
+
+            final List<EndpointDetails> endpointDetailsList = componentDetails.getEndpointDetails();
+
+            if (endpointDetailsList == null || endpointDetailsList.isEmpty())
+            {
+                return null;
+            }
+
+            final EndpointDetails endpointDetails = endpointDetailsList.get(0);
+
+            if (endpointDetails == null)
+            {
+                return null;
+            }
+
+            final List<CredentialDetails> credentialDetailsList = endpointDetails.getCredentialDetailsList();
+
+            if (credentialDetailsList == null || credentialDetailsList.isEmpty())
+            {
+                return null;
+            }
+
+            final CredentialDetails credentialDetails = credentialDetailsList.get(0);
+
+            if (credentialDetails == null)
+            {
+                return null;
+            }
+
+            return new ComponentEndpointIds(componentDetails.getComponentUuid(), endpointDetails.getEndpointUuid(),
+                    endpointDetails.getEndpointUrl(), credentialDetails.getCredentialUuid());
+
+        }
+        catch (Exception e)
+        {
+            LOG.error("Exception occurred while fetching the component details", e);
+            return null;
+        }
     }
 
     @Override
