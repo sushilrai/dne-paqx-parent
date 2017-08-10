@@ -354,7 +354,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             request.setComponentEndpointIds(
                     new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
                             componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-            request.setEndpointUrl(componentEndpointIds.getEndpointUrl());
         }
 
         request.setMessageProperties(messageProperties);
