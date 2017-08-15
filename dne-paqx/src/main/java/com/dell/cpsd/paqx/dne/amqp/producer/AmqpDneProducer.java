@@ -20,7 +20,6 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessa
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
-import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseResponse;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
@@ -211,7 +210,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(InstallESXiResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(InstallESXiRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Install ESXi License request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -233,7 +232,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ClusterOperationResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(ClusterOperationRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Add Host to VCenter request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -255,7 +254,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(SoftwareVIBResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(SoftwareVIBRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Install ScaleIo VIB request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -277,7 +276,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(SoftwareVIBResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(SoftwareVIBConfigureRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Configure ScaleIo VIB request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -299,7 +298,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(AddHostToDvSwitchResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(AddHostToDvSwitchRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Add Host to DV Switch request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -321,7 +320,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(DeployVMFromTemplateResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(DeployVMFromTemplateRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish deploy VM from template request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -343,7 +342,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(EnablePCIPassthroughResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(EnablePCIPassthroughRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish enable PCI pass through request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -365,7 +364,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(HostPowerOperationResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(HostPowerOperationRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish reboot host request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -387,7 +386,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(UpdatePCIPassthruSVMResponseMessage.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(UpdatePCIPassthruSVMRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish Set PCI Pass through request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
@@ -409,7 +408,7 @@ public class AmqpDneProducer implements DneProducer
         capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
             final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(AddEsxiHostVSphereLicenseResponse.class).equals(endpointHelper.getRequestMessageType()))
+            if (messageType(AddEsxiHostVSphereLicenseRequest.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish apply ESXi license request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
