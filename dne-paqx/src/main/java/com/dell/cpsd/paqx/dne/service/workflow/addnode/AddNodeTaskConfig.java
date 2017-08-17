@@ -25,8 +25,7 @@ public class AddNodeTaskConfig
 
         workflowSteps.put("startAddNodeWorkflow", new Step("retrieveEsxiDefaultCredentialDetails"));
         workflowSteps.put("retrieveEsxiDefaultCredentialDetails", new Step("changeIdracCredentials"));
-        workflowSteps.put("changeIdracCredentials", new Step("esxi-credential-details"));
-        workflowSteps.put("esxi-credential-details", new Step("updateSystemDefinition"));
+        workflowSteps.put("changeIdracCredentials", new Step("updateSystemDefinition"));
         //TODO: Add all the steps here once tested
         workflowSteps.put("updateSystemDefinition", new Step("notifyNodeDiscoveryToUpdateStatus"));
         workflowSteps.put("notifyNodeDiscoveryToUpdateStatus", new Step("completed", true));

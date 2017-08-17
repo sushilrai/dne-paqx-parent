@@ -169,7 +169,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
             }
 
             final ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse = (ListESXiCredentialDetailsTaskResponse) job
-                    .getTaskResponseMap().get("esxi-credential-details");
+                    .getTaskResponseMap().get("retrieveEsxiDefaultCredentialDetails");
 
             if (listESXiCredentialDetailsTaskResponse == null)
             {

@@ -80,7 +80,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
 
 		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
         workflowTasks.put("installEsxi", installEsxiTask());//WIP
-        workflowTasks.put("esxi-credential-details", esxiCredentialDetailsTask());
+        workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
         workflowTasks.put("addHostToVcenter", addHostToVcenterTask());//CODING DONE, TESTING PENDING
         workflowTasks.put("installScaleIoVib", installScaleIoVibTask());//VIB URL's SOURCE IS NOT KNOWN
         workflowTasks.put("configureScaleIoVib", configureScaleIoVibTask());//CODING DONE, TESTING PENDING
