@@ -30,6 +30,8 @@ import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequest
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
@@ -269,6 +271,9 @@ public class RabbitConfig
 
         messageClasses.add(UpdatePCIPassthruSVMRequestMessage.class);
         messageClasses.add(UpdatePCIPassthruSVMResponseMessage.class);
+
+        messageClasses.add(ListEsxiCredentialDetailsRequestMessage.class);
+        messageClasses.add(ListEsxiCredentialDetailsResponseMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);

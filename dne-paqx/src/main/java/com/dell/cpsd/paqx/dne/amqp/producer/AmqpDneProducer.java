@@ -33,6 +33,7 @@ import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRespons
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
@@ -412,6 +413,28 @@ public class AmqpDneProducer implements DneProducer
             {
                 LOGGER.info("Publish apply ESXi license request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+            }
+        });
+    }
+
+    @Override
+    public void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage)
+    {
+        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishListExsiCredentialDetails");
+            return;
+        }
+
+        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
+            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(ListEsxiCredentialDetailsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish list esxi credential details request from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
             }
         });
     }

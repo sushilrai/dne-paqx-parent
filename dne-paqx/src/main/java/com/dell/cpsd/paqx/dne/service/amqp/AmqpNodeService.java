@@ -167,6 +167,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new RebootHostResponseAdapter(this));
         this.consumer.addAdapter(new SetPciPassthroughResponseAdapter(this));
         this.consumer.addAdapter(new ApplyEsxiLicenseResponseAdapter(this));
+        this.consumer.addAdapter(new ListESXiCredentialDetailsResponseAdapter(this));
     }
 
     /**
@@ -1291,5 +1292,50 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             LOGGER.error("Exception occurred", e);
         }
         return false;
+    }
+
+    @Override
+    public ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage)
+    {
+        ComponentEndpointIds returnData=null;
+        try
+        {
+            final String correlationId = UUID.randomUUID().toString();
+            requestMessage.setMessageProperties(
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
+
+            ServiceResponse<?> callbackResponse = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return correlationId;
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishListExsiCredentialDetails(requestMessage);
+                }
+            });
+
+            ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse, ListEsxiCredentialDetailsResponseMessage.class);
+
+            if (responseMessage != null && responseMessage.getMessageProperties() != null && responseMessage.getComponentUuid() != null
+                    && responseMessage.getEndpointUuid() != null && responseMessage.getCredentialUuid() != null)
+            {
+                returnData = new ComponentEndpointIds(responseMessage.getComponentUuid(),
+                        responseMessage.getEndpointUuid(),null,responseMessage.getCredentialUuid());
+            }
+            else
+            {
+                LOGGER.error("Response message is null");
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Exception occurred", e);
+        }
+        return returnData;
     }
 }

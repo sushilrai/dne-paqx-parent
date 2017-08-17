@@ -11,8 +11,6 @@ package com.dell.cpsd.paqx.dne.service.model;
  */
 public class ListScaleIoComponentsTaskResponse extends TaskResponse
 {
-    private String message;
-
     private String type;
 
     private ComponentEndpointIds componentEndpointIds;
@@ -25,16 +23,6 @@ public class ListScaleIoComponentsTaskResponse extends TaskResponse
     public void setComponentEndpointIds(final ComponentEndpointIds componentEndpointIds)
     {
         this.componentEndpointIds = componentEndpointIds;
-    }
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setMessage(final String message)
-    {
-        this.message = message;
     }
 
     public String getType()

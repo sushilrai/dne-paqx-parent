@@ -7,6 +7,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.AddHostToVCenterResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.ListESXiCredentialDetailsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
@@ -57,9 +58,11 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
             final ComponentEndpointIds componentEndpointIds = validate.getComponentEndpointIds();
             final String hostname = validate.getHostname();
             final String clusterId = validate.getClusterId();
+            final ListESXiCredentialDetailsTaskResponse esXiCredentialDetailsTaskResponse = validate
+                    .getListESXiCredentialDetailsTaskResponse();
 
             final ClusterOperationRequestMessage requestMessage = getClusterOperationRequestMessage(componentEndpointIds, hostname,
-                    clusterId);
+                    clusterId, esXiCredentialDetailsTaskResponse);
 
             final boolean success = this.nodeService.requestAddHostToVCenter(requestMessage);
 
@@ -77,7 +80,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
     }
 
     private ClusterOperationRequestMessage getClusterOperationRequestMessage(final ComponentEndpointIds componentEndpointIds,
-            final String hostname, final String clusterId)
+            final String hostname, final String clusterId, final ListESXiCredentialDetailsTaskResponse esXiCredentialDetailsTaskResponse)
     {
         final ClusterOperationRequestMessage requestMessage = new ClusterOperationRequestMessage();
 
@@ -87,6 +90,9 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
                         componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
         final ClusterOperationRequest clusterOperationRequest = new ClusterOperationRequest();
         clusterOperationRequest.setHostName(hostname);
+        clusterOperationRequest.setComponentEndpointIds(
+                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(esXiCredentialDetailsTaskResponse.getComponentUuid(),
+                        esXiCredentialDetailsTaskResponse.getEndpointUuid(), esXiCredentialDetailsTaskResponse.getCredentialUuid()));
         clusterOperationRequest.setClusterOperation(ClusterOperationRequest.ClusterOperation.ADD_HOST);
         clusterOperationRequest.setClusterID(clusterId);
         requestMessage.setClusterOperationRequest(clusterOperationRequest);
@@ -106,10 +112,11 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
 
     private class Validate
     {
-        private final Job                  job;
-        private       ComponentEndpointIds componentEndpointIds;
-        private       String               hostname;
-        private       String               clusterId;
+        private final Job                                   job;
+        private       ComponentEndpointIds                  componentEndpointIds;
+        private       String                                hostname;
+        private       String                                clusterId;
+        private       ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse;
 
         public Validate(final Job job)
         {
@@ -160,6 +167,17 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
             {
                 throw new IllegalStateException("Cluster ID is null");
             }
+
+            final ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse = (ListESXiCredentialDetailsTaskResponse) job
+                    .getTaskResponseMap().get("esxi-credential-details");
+
+            if (listESXiCredentialDetailsTaskResponse == null)
+            {
+                throw new IllegalStateException("Default ESXi Host Credential Details are null.");
+            }
+
+            this.listESXiCredentialDetailsTaskResponse = listESXiCredentialDetailsTaskResponse;
+
             return this;
         }
 
@@ -176,6 +194,11 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         String getClusterId()
         {
             return clusterId;
+        }
+
+        public ListESXiCredentialDetailsTaskResponse getListESXiCredentialDetailsTaskResponse()
+        {
+            return listESXiCredentialDetailsTaskResponse;
         }
     }
 }

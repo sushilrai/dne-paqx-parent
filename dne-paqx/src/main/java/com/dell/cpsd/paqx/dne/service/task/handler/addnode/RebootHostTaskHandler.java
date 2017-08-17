@@ -96,6 +96,7 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
         final PowerOperationRequest powerOperationRequest = new PowerOperationRequest();
         powerOperationRequest.setPowerOperation(PowerOperationRequest.PowerOperation.REBOOT);
         powerOperationRequest.setHostName(hostname);
+        requestMessage.setPowerOperationRequest(powerOperationRequest);
         requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
         requestMessage.setComponentEndpointIds(
                 new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),

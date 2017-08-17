@@ -20,6 +20,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHa
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
@@ -79,6 +80,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
 
 		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
         workflowTasks.put("installEsxi", installEsxiTask());//WIP
+        workflowTasks.put("esxi-credential-details", esxiCredentialDetailsTask());
         workflowTasks.put("addHostToVcenter", addHostToVcenterTask());//CODING DONE, TESTING PENDING
         workflowTasks.put("installScaleIoVib", installScaleIoVibTask());//VIB URL's SOURCE IS NOT KNOWN
         workflowTasks.put("configureScaleIoVib", configureScaleIoVibTask());//CODING DONE, TESTING PENDING
@@ -92,7 +94,14 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("addNewHostToScaleIO", null);*/
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
+
         return workflowTasks;
+    }
+
+    @Bean("esxiCredentialDetailsTask")
+    private WorkflowTask esxiCredentialDetailsTask()
+    {
+        return createTask("Retrieve default ESXi host credential details", new ListESXiCredentialDetailsTaskHandler(this.nodeService));
     }
 
     @Bean("updateSystemDefinitionTask")
