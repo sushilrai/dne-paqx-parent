@@ -168,6 +168,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new SetPciPassthroughResponseAdapter(this));
         this.consumer.addAdapter(new ApplyEsxiLicenseResponseAdapter(this));
         this.consumer.addAdapter(new ListESXiCredentialDetailsResponseAdapter(this));
+        this.consumer.addAdapter(new HostMaintenanceModeResponseAdapter(this));
     }
 
     /**
@@ -1337,5 +1338,48 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             LOGGER.error("Exception occurred", e);
         }
         return returnData;
+    }
+
+    @Override
+    public boolean requestExitHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
+    {
+        try
+        {
+            final String correlationId = UUID.randomUUID().toString();
+            requestMessage.setMessageProperties(
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
+
+            ServiceResponse<?> callbackResponse = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return correlationId;
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishEsxiHostExitMaintenanceMode(requestMessage);
+                }
+            });
+
+            HostMaintenanceModeResponseMessage responseMessage = processResponse(callbackResponse,
+                    HostMaintenanceModeResponseMessage.class);
+
+            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            {
+                return responseMessage.getStatus().equals(HostMaintenanceModeResponseMessage.Status.SUCCESS);
+            }
+            else
+            {
+                LOGGER.error("Response message is null");
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Exception occurred", e);
+        }
+        return false;
     }
 }

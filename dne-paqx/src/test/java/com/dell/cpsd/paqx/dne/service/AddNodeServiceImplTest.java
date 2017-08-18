@@ -69,7 +69,7 @@ public class AddNodeServiceImplTest {
     public void testAddNodeWorkFlowTasks_setup() 
     {
         Assert.assertNotNull(workFlowTasks);
-        Assert.assertEquals(14, workFlowTasks.size());
+        Assert.assertEquals(15, workFlowTasks.size());
     }
     
 

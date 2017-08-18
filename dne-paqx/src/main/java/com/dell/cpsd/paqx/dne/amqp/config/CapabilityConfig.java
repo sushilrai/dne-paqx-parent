@@ -96,7 +96,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("vcenter-addhostlicense"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("esxi-credential-details")
+                        .withProfile("esxi-credential-details"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("vcenter-enterMaintenance")
 
         );
 

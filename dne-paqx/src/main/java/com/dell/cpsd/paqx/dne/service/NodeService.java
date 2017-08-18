@@ -21,6 +21,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
@@ -138,5 +139,7 @@ public interface NodeService
 
     boolean requestInstallEsxiLicense(final AddEsxiHostVSphereLicenseRequest requestMessage);
 
-    ComponentEndpointIds listDefaultCredentials(ListEsxiCredentialDetailsRequestMessage requestMessage);
+    ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage);
+
+    boolean requestExitHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
 }

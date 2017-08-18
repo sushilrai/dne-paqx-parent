@@ -30,6 +30,7 @@ import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoM
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
@@ -434,6 +435,28 @@ public class AmqpDneProducer implements DneProducer
             if (messageType(ListEsxiCredentialDetailsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish list esxi credential details request from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+            }
+        });
+    }
+
+    @Override
+    public void publishEsxiHostExitMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
+    {
+        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishEsxiHostExitMaintenanceMode");
+            return;
+        }
+
+        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
+            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(HostMaintenanceModeRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish ESXi host maintenance mode request from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
             }
         });

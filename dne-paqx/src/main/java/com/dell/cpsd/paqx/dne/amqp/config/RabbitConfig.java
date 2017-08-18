@@ -28,6 +28,8 @@ import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoM
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
@@ -274,6 +276,9 @@ public class RabbitConfig
 
         messageClasses.add(ListEsxiCredentialDetailsRequestMessage.class);
         messageClasses.add(ListEsxiCredentialDetailsResponseMessage.class);
+
+        messageClasses.add(HostMaintenanceModeRequestMessage.class);
+        messageClasses.add(HostMaintenanceModeResponseMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);

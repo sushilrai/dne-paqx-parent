@@ -18,6 +18,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskH
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceModeTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
@@ -88,6 +89,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("deploySVM", deploySVMTask());//CODING DONE, TESTING PENDING
         workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());//CODING DONE, TESTING PENDING
         workflowTasks.put("rebootHost", rebootHostTask());//CODING DONE, TESTING DONE
+        workflowTasks.put("exitHostMaintenanceMode", exitHostMaintenanceModeTask());
         workflowTasks.put("setPciPassthroughSioVm", setPciPassthroughSioVmTask());//CODING DONE, TESTING PENDING
         workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());//CODING DONE, TESTING DONE
         /*workflowTasks.put("installScaleIOSDC", null);
@@ -96,6 +98,12 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;
+    }
+
+    @Bean("exitHostMaintenanceModeTask")
+    private WorkflowTask exitHostMaintenanceModeTask()
+    {
+        return createTask("Exit Host Maintenance Mode", new ExitHostMaintenanceModeTaskHandler(nodeService, repository));
     }
 
     @Bean("esxiCredentialDetailsTask")
