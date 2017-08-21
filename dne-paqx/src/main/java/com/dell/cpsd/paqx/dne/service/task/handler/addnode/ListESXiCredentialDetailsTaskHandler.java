@@ -45,7 +45,7 @@ public class ListESXiCredentialDetailsTaskHandler extends BaseTaskHandler implem
     @Override
     public boolean executeTask(final Job job)
     {
-        LOGGER.info("Execute List Esxi Credential Details task");
+        LOGGER.info("Execute List ESXi Credential Details task");
 
         final ListESXiCredentialDetailsTaskResponse response = initializeResponse(job);
 
@@ -55,24 +55,26 @@ public class ListESXiCredentialDetailsTaskHandler extends BaseTaskHandler implem
 
             final ComponentEndpointIds returnData = this.nodeService.listDefaultCredentials(requestMessage);
 
-            boolean success = returnData != null;
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
-
-            if (success)
+            if (returnData == null)
             {
-                response.setComponentUuid(returnData.getComponentUuid());
-                response.setEndpointUuid(returnData.getEndpointUuid());
-                response.setCredentialUuid(returnData.getEndpointUuid());
+                throw new IllegalStateException("List default credentials failed");
             }
 
-            return success;
+            response.setComponentUuid(returnData.getComponentUuid());
+            response.setEndpointUuid(returnData.getEndpointUuid());
+            response.setCredentialUuid(returnData.getEndpointUuid());
+
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
         }
         catch (Exception e)
         {
-            LOGGER.error("Exception occurred", e);
+            LOGGER.error("Error listing ESXi credential details", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private ListEsxiCredentialDetailsRequestMessage getListDefaultCredentialsRequestMessage()
