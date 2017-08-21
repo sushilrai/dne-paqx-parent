@@ -1,3 +1,9 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
+
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
@@ -14,6 +20,7 @@ import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMe
 import com.dell.cpsd.virtualization.capabilities.api.PowerOperationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * TODO: Document Usage
@@ -68,25 +75,31 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
 
             final String hostname = installEsxiTaskResponse.getHostname();
 
-            if (hostname == null)
+            if (StringUtils.isEmpty(hostname))
             {
-                throw new IllegalStateException("Host name is null");
+                throw new IllegalStateException("Hostname is null");
             }
 
             final HostPowerOperationRequestMessage requestMessage = getHostPowerOperationRequestMessage(componentEndpointIds, hostname);
 
-            final boolean success = this.nodeService.requestHostReboot(requestMessage);
+            final boolean succeeded = this.nodeService.requestHostReboot(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Request host reboot failed");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
         }
         catch (Exception e)
         {
-            LOGGER.error("Exception occurred", e);
+            LOGGER.error("Error rebooting host", e);
             response.addError(e.getMessage());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private HostPowerOperationRequestMessage getHostPowerOperationRequestMessage(final ComponentEndpointIds componentEndpointIds,
