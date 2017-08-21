@@ -9,12 +9,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
+import com.dell.cpsd.paqx.dne.transformers.ScaleIORestToScaleIODomainTransformer;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.ScaleIOSystemDataRestRep;
+import com.dell.cpsd.virtualization.capabilities.api.Datacenter;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -45,6 +54,11 @@ import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfo;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * The tests for AmqpNodeService class.
@@ -123,7 +137,7 @@ public class AmqpNodeServiceTest
         Assert.assertEquals(convergedUuid, discovered.getConvergedUuid());
         Assert.assertEquals(nodeId, discovered.getNodeId());
 
-        Mockito.verify(dneProducer, Mockito.times(1)).publishListNodes(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishListNodes(any());
     }
 
     /**
@@ -220,7 +234,7 @@ public class AmqpNodeServiceTest
         Assert.assertEquals(clusterName, discovered.getName());
         Assert.assertEquals(numberOfHosts, discovered.getNumberOfHosts());
 
-        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverClusters(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverClusters(any());
     }
 
     /**
@@ -286,7 +300,7 @@ public class AmqpNodeServiceTest
         Assert.assertEquals("SUCCESS", idracInfo.getMessage());
         Assert.assertEquals("nodeId", idracInfo.getNodeId());
 
-        Mockito.verify(dneProducer, Mockito.times(1)).publishIdracNetwokSettings(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishIdracNetwokSettings(any());
     }
     
     /**
@@ -312,7 +326,7 @@ public class AmqpNodeServiceTest
         };
         
        	nodeService.idracNetworkSettings(idracNetworkSettingsRequest);
-       	Mockito.verify(dneProducer, Mockito.times(1)).publishIdracNetwokSettings(Mockito.any());
+       	Mockito.verify(dneProducer, Mockito.times(1)).publishIdracNetwokSettings(any());
     }
     
     /**
@@ -350,7 +364,7 @@ public class AmqpNodeServiceTest
         Boolean responseInfo = nodeService.notifyNodeAllocationComplete("elementIdentifier");
 
         Assert.assertEquals(true, responseInfo);
-        Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
     }
     
     /**
@@ -376,7 +390,7 @@ public class AmqpNodeServiceTest
         };
         
         nodeService.notifyNodeAllocationComplete("elementIdentifier");
-        Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
     }
 
     /**
@@ -416,7 +430,7 @@ public class AmqpNodeServiceTest
         Assert.assertEquals("SUCCESS", bootOrderStatus.getStatus());
 //        Assert.assertEquals("", bootOrderStatus.getMessage());
 
-        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(any());
     }
 
     /**
@@ -442,7 +456,7 @@ public class AmqpNodeServiceTest
         };
 
         nodeService.bootDeviceIdracStatus(bootOrderSequenceRequest);
-        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(any());
     }
 
     /**
@@ -482,7 +496,7 @@ public class AmqpNodeServiceTest
         ChangeIdracCredentialsResponse responseInfo = nodeService.changeIdracCredentials("dummyNodeId");
 
         Assert.assertEquals("SUCCESS", responseInfo.getMessage());
-        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(any());
     }
     
     /**
@@ -508,7 +522,126 @@ public class AmqpNodeServiceTest
         };
         
         nodeService.changeIdracCredentials("dummyNodeId");
-        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(Mockito.any());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishChangeIdracCredentials(any());
+    }
+
+    @Test
+    public void testDiscoverVCenterFailure() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DiscoveryInfoToVCenterDomainTransformer transformer = Mockito.mock(DiscoveryInfoToVCenterDomainTransformer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds componentEndpointIds = Mockito
+                .mock(com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, transformer, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
+        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverVcenter(any());
+    }
+
+    @Test
+    public void testDiscoverVCenterSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DiscoveryInfoToVCenterDomainTransformer transformer = Mockito.mock(DiscoveryInfoToVCenterDomainTransformer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds componentEndpointIds = Mockito
+                .mock(com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, transformer, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+
+                final DiscoveryResponseInfoMessage responseMessage = new DiscoveryResponseInfoMessage(messageProperties,
+                        Arrays.asList(new Datacenter()));
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        when(transformer.transform(any())).thenReturn(new VCenter());
+        when(repository.saveVCenterData(anyString(), any())).thenReturn(true);
+
+        final boolean success = nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
+
+        assertTrue(success);
+
+        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverVcenter(any());
+    }
+
+    @Test
+    public void testDiscoverScaleIoFailure() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final ScaleIORestToScaleIODomainTransformer transformer = Mockito.mock(ScaleIORestToScaleIODomainTransformer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds componentEndpointIds = Mockito
+                .mock(com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, transformer)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
+        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverScaleIo(any());
+    }
+
+    @Test
+    public void testDiscoverScaleIoSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final ScaleIORestToScaleIODomainTransformer transformer = Mockito.mock(ScaleIORestToScaleIODomainTransformer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds componentEndpointIds = Mockito
+                .mock(com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, transformer)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                final com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties(
+                        new Date(), UUID.randomUUID().toString(), "test");
+
+                final ListStorageResponseMessage responseMessage = new ListStorageResponseMessage(messageProperties,
+                        new ScaleIOSystemDataRestRep());
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        when(transformer.transform(any())).thenReturn(new ScaleIOData());
+        when(repository.saveScaleIoData(anyString(), any())).thenReturn(true);
+
+        final boolean success = nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
+
+        assertTrue(success);
+
+        Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverScaleIo(any());
     }
 
 }

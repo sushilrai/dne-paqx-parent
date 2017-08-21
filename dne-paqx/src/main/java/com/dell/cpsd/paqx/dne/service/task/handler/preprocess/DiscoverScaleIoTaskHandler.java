@@ -58,17 +58,25 @@ public class DiscoverScaleIoTaskHandler extends BaseTaskHandler implements IWork
 
             final boolean success = this.nodeService.requestDiscoverScaleIo(componentEndpointIds, job.getId().toString());
 
-            response.setWorkFlowTaskStatus(success? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Request for Discover ScaleIO failed");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+
+            return true;
 
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
             response.addError(e.getMessage());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+
+        return false;
     }
 
     @Override
