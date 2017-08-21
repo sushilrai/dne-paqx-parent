@@ -47,20 +47,25 @@ public class ListVCenterComponentsTaskHandler extends BaseTaskHandler implements
 
         try
         {
-            final boolean status = this.nodeService.requestVCenterComponents();
+            final boolean succeeded = this.nodeService.requestVCenterComponents();
 
-            response.setWorkFlowTaskStatus(status? Status.SUCCEEDED : Status.FAILED);
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Request for VCenter components failed");
+            }
 
-            return status;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
 
         }
         catch (Exception e)
         {
             LOGGER.error("Error while listing the VCenter components", e);
             response.addError(e.toString());
-            response.setWorkFlowTaskStatus(Status.FAILED);
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     /**

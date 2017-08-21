@@ -46,20 +46,25 @@ public class ListScaleIoComponentsTaskHandler extends BaseTaskHandler implements
 
         try
         {
-            final boolean status = this.nodeService.requestScaleIoComponents();
+            final boolean succeeded = this.nodeService.requestScaleIoComponents();
 
-            response.setWorkFlowTaskStatus(status? Status.SUCCEEDED : Status.FAILED);
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Request for ScaleIO components failed");
+            }
 
-            return status;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
 
         }
         catch (Exception e)
         {
             LOGGER.error("Error while listing the ScaleIO components", e);
             response.addError(e.toString());
-            response.setWorkFlowTaskStatus(Status.FAILED);
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     /**
