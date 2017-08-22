@@ -21,6 +21,7 @@ import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequest
 import com.dell.cpsd.virtualization.capabilities.api.VirtualMachineCloneSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * TODO: Document Usage
@@ -71,19 +72,25 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             final DeployVMFromTemplateRequestMessage requestMessage = getDeployVMFromTemplateRequestMessage(componentEndpointIds, hostname,
                     newScaleIoVmName, dataCenterName);
 
-            final boolean success = this.nodeService.requestDeployScaleIoVm(requestMessage);
+            final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Request deploy ScaleIO VM failed");
+            }
+
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             response.setNewVMName(newScaleIoVmName);
-
-            return success;
+            return true;
         }
         catch (Exception e)
         {
-            LOGGER.error("Exception occurred", e);
+            LOGGER.error("Error deploying ScaleIO VM", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private DeployVMFromTemplateRequestMessage getDeployVMFromTemplateRequestMessage(final ComponentEndpointIds componentEndpointIds,
@@ -147,7 +154,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
             hostname = installEsxiTaskResponse.getHostname();
 
-            if (hostname == null)
+            if (StringUtils.isEmpty(hostname))
             {
                 throw new IllegalStateException("Host name is null");
             }
@@ -161,21 +168,21 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
             final String clusterName = inputParams.getClusterName();
 
-            if (clusterName == null)
+            if (StringUtils.isEmpty(clusterName))
             {
                 throw new IllegalStateException("Cluster Name is null");
             }
 
             dataCenterName = repository.getDataCenterName(clusterName);
 
-            if (dataCenterName == null)
+            if (StringUtils.isEmpty(dataCenterName))
             {
                 throw new IllegalStateException("DataCenter name is null");
             }
 
             final String scaleIOSVMManagementIpAddress = inputParams.getScaleIOSVMManagementIpAddress();
 
-            if (scaleIOSVMManagementIpAddress == null)
+            if (StringUtils.isEmpty(scaleIOSVMManagementIpAddress))
             {
                 throw new IllegalStateException("ScaleIO Management IP Address is null");
             }

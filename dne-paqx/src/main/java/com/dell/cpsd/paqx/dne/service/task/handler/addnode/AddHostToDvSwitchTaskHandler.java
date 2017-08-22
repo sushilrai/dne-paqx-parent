@@ -78,7 +78,7 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
 
             if (hostname == null)
             {
-                throw new IllegalStateException("Host name is null");
+                throw new IllegalStateException("Hostname is null");
             }
 
             final AddHostToDvSwitchRequestMessage requestMessage = new AddHostToDvSwitchRequestMessage();
@@ -92,18 +92,24 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
             requestMessage.setDvsnames(new ArrayList<>());
             requestMessage.setPNicNames(new ArrayList<>());
 
-            final boolean success = this.nodeService.requestAddHostToDvSwitch(requestMessage);
+            final boolean succeeded = this.nodeService.requestAddHostToDvSwitch(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Request add host to DV switch failed");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
         }
         catch (Exception e)
         {
-            LOGGER.error("Exception occurred", e);
+            LOGGER.error("Error adding host to DV switch", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     @Override

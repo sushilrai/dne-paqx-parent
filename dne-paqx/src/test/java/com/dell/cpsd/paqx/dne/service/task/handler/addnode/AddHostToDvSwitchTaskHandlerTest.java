@@ -3,14 +3,13 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
-
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.ApplyEsxiLicenseTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.AddHostToDvSwitchTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
@@ -33,17 +32,16 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
- * Apply ESXi License Task Handler Test
+ * The tests for the AddHostToDvSwitchTaskHandler class.
  *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  *
- * @version 1.0
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ApplyEsxiLicenseTaskHandlerTest
+public class AddHostToDvSwitchTaskHandlerTest
 {
     @Mock
     private WorkflowTask task;
@@ -58,7 +56,7 @@ public class ApplyEsxiLicenseTaskHandlerTest
     private Job job;
 
     @Mock
-    private ApplyEsxiLicenseTaskResponse response;
+    private AddHostToDvSwitchTaskResponse response;
 
     @Mock
     private InstallEsxiTaskResponse installEsxiTaskResponse;
@@ -69,12 +67,12 @@ public class ApplyEsxiLicenseTaskHandlerTest
     @Mock
     private Map<String, TaskResponse> taskResponseMap;
 
-    private String hostname = "hostname_1.2.3.4";
-    private String taskName = "applyEsxiLicenseTask";
-    private String stepName = "applyEsxiLicenseStep";
+    private AddHostToDvSwitchTaskHandler handler;
+    private AddHostToDvSwitchTaskHandler spy;
 
-    private ApplyEsxiLicenseTaskHandler handler;
-    private ApplyEsxiLicenseTaskHandler spy;
+    private String hostname = "hostname_1.2.3.4";
+    private String taskName = "addHostToDvSwitchTask";
+    private String stepName = "addHostToDvSwitchStep";
 
     /**
      * The test setup.
@@ -84,12 +82,14 @@ public class ApplyEsxiLicenseTaskHandlerTest
     @Before
     public void setUp() throws Exception
     {
-        this.handler = new ApplyEsxiLicenseTaskHandler(this.service, this.repository);
+        this.handler = new AddHostToDvSwitchTaskHandler(this.service, this.repository);
         this.spy = spy(this.handler);
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
     public void executeTask_successful_case() throws Exception
@@ -99,7 +99,7 @@ public class ApplyEsxiLicenseTaskHandlerTest
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
-        doReturn(true).when(this.service).requestInstallEsxiLicense(any());
+        doReturn(true).when(this.service).requestAddHostToDvSwitch(any());
 
         assertEquals(true, this.spy.executeTask(this.job));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
@@ -107,12 +107,14 @@ public class ApplyEsxiLicenseTaskHandlerTest
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
     public void executeTask_no_vcenter_components() throws Exception
     {
-        final ComponentEndpointIds nullComponentEndpointIds = null;
+        ComponentEndpointIds nullComponentEndpointIds = null;
 
         doReturn(this.response).when(this.spy).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
@@ -123,12 +125,14 @@ public class ApplyEsxiLicenseTaskHandlerTest
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
     public void executeTask_no_task_response() throws Exception
     {
-        final InstallEsxiTaskResponse nullInstallEsxiTaskResponse = null;
+        InstallEsxiTaskResponse nullInstallEsxiTaskResponse = null;
 
         doReturn(this.response).when(this.spy).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
@@ -141,12 +145,14 @@ public class ApplyEsxiLicenseTaskHandlerTest
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
     public void executeTask_no_hostname() throws Exception
     {
-        final String nullHostname = null;
+        String nullHostname = null;
 
         doReturn(this.response).when(this.spy).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
@@ -160,17 +166,19 @@ public class ApplyEsxiLicenseTaskHandlerTest
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
-    public void executeTask_failed_applyEsxiLicense_request() throws Exception
+    public void executeTask_failed_add_host_to_dv_switch_request() throws Exception
     {
         doReturn(this.response).when(this.spy).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
-        doReturn(false).when(this.service).requestInstallEsxiLicense(any());
+        doReturn(false).when(this.service).requestAddHostToDvSwitch(any());
 
         assertEquals(false, this.spy.executeTask(this.job));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
@@ -178,7 +186,9 @@ public class ApplyEsxiLicenseTaskHandlerTest
     }
 
     /**
-     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#initializeResponse(com.dell.cpsd.paqx.dne.domain.Job)}.
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler#initializeResponse(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
      */
     @Test
     public void initializeResponse() throws Exception
@@ -187,7 +197,7 @@ public class ApplyEsxiLicenseTaskHandlerTest
         doReturn(this.taskName).when(this.task).getTaskName();
         doReturn(this.stepName).when(this.job).getStep();
 
-        ApplyEsxiLicenseTaskResponse response = this.handler.initializeResponse(this.job);
+        AddHostToDvSwitchTaskResponse response = this.handler.initializeResponse(this.job);
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
