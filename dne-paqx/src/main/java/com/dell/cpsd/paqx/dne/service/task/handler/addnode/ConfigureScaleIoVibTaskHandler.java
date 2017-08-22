@@ -96,16 +96,23 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
 
             final boolean success = this.nodeService.requestConfigureScaleIoVib(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Unable to Configure Software VIB");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+
+            return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
-            response.addError(e.toString());
-            return false;
+            response.addError(e.getMessage());
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private SoftwareVIBConfigureRequestMessage getSoftwareVIBConfigureRequestMessage(final ComponentEndpointIds componentEndpointIds,

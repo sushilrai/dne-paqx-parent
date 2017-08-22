@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
  * Add Host to VCenter Task Handler
  *
  * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
  * </p>
  *
  * @version 1.0
@@ -73,17 +74,24 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
 
             final boolean success = this.nodeService.requestAddHostToVCenter(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Request add host to VCenter failed");
+            }
+
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             response.setClusterId(clusterId);
 
-            return success;
+            return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private ClusterOperationRequestMessage getClusterOperationRequestMessage(final ComponentEndpointIds componentEndpointIds,
@@ -117,7 +125,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         return response;
     }
 
-    private class Validate
+    class Validate
     {
         private final Job                                   job;
         private       ComponentEndpointIds                  componentEndpointIds;
@@ -125,12 +133,12 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         private       String                                clusterId;
         private       ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse;
 
-        Validate(final Job job)
+        public Validate(final Job job)
         {
             this.job = job;
         }
 
-        Validate invoke()
+        public Validate invoke()
         {
             componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 

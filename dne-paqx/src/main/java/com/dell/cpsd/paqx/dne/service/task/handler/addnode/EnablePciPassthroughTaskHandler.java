@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * Enable PCI PassThrough Task Handler
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -99,17 +99,24 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
 
             final boolean success = this.nodeService.requestEnablePciPassThrough(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Enable PCI PassThrough Failed");
+            }
+
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             response.setHostPciDeviceId(hostPciDeviceId);
 
-            return success;
+            return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private EnablePCIPassthroughRequestMessage getEnablePCIPassthroughRequestMessage(final ComponentEndpointIds componentEndpointIds,
@@ -139,7 +146,8 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
     private String filterDellPercPciDeviceId(final List<PciDevice> pciDeviceList)
     {
         final PciDevice requiredPciDevice = pciDeviceList.stream()
-                .filter(obj -> Objects.nonNull(obj) && DELL_PCI_REGEX.matches(obj.getDeviceName())).findFirst().orElseGet(null);
+                .filter(obj -> Objects.nonNull(obj) && DELL_PCI_REGEX.matches(obj.getDeviceName()))
+                .findFirst().orElse(null);
 
         if (requiredPciDevice == null)
         {
