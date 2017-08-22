@@ -22,8 +22,12 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.ScaleIOSystemDataRestRep;
+import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
+import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseResponse;
 import com.dell.cpsd.virtualization.capabilities.api.Datacenter;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeResponseMessage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -55,6 +59,7 @@ import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfo
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -644,4 +649,108 @@ public class AmqpNodeServiceTest
         Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverScaleIo(any());
     }
 
+    @Test
+    public void testApplyEsxiLicenseFailure() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final AddEsxiHostVSphereLicenseRequest request = Mockito.mock(AddEsxiHostVSphereLicenseRequest.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.requestInstallEsxiLicense(request);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishApplyEsxiLicense(request);
+    }
+
+    @Test
+    public void testApplyEsxiLicenseSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final AddEsxiHostVSphereLicenseRequest request = Mockito.mock(AddEsxiHostVSphereLicenseRequest.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                final MessageProperties messageProperties = new MessageProperties(
+                        new Date(), UUID.randomUUID().toString(), "test");
+
+                final AddEsxiHostVSphereLicenseResponse responseMessage = new AddEsxiHostVSphereLicenseResponse(messageProperties,
+                        AddEsxiHostVSphereLicenseResponse.Status.SUCCESS);
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        final boolean success = nodeService.requestInstallEsxiLicense(request);
+
+        assertTrue(success);
+
+        Mockito.verify(dneProducer, Mockito.times(1)).publishApplyEsxiLicense(request);
+    }
+
+    @Test
+    public void testExitHostMaintenanceFailure() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final HostMaintenanceModeRequestMessage request = Mockito.mock(HostMaintenanceModeRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.requestExitHostMaintenanceMode(request);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishEsxiHostExitMaintenanceMode(request);
+    }
+
+    @Test
+    public void testExitHostMaintenanceSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = Mockito.mock(DneProducer.class);
+        final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
+        final HostMaintenanceModeRequestMessage request = Mockito.mock(HostMaintenanceModeRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+
+                final HostMaintenanceModeResponseMessage responseMessage = new HostMaintenanceModeResponseMessage(messageProperties,
+                        HostMaintenanceModeResponseMessage.Status.SUCCESS);
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        final boolean success = nodeService.requestExitHostMaintenanceMode(request);
+
+        assertTrue(success);
+
+        Mockito.verify(dneProducer, Mockito.times(1)).publishEsxiHostExitMaintenanceMode(request);
+    }
 }

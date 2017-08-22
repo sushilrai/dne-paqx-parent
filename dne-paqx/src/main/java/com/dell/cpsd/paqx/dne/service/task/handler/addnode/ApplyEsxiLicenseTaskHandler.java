@@ -45,7 +45,7 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
     @Override
     public boolean executeTask(final Job job)
     {
-        LOGGER.info("Execute Add Host to VCenter task");
+        LOGGER.info("Execute Apply Esxi License task");
 
         final ApplyEsxiLicenseTaskResponse response = initializeResponse(job);
 
@@ -76,16 +76,24 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
 
             final boolean success = this.nodeService.requestInstallEsxiLicense(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Apply ESXi Host License Failed");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+
+            return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
             response.addError(e.toString());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+
+        return false;
     }
 
     private AddEsxiHostVSphereLicenseRequest getLicenseRequest(final ComponentEndpointIds componentEndpointIds, final String hostname)

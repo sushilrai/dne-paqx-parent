@@ -18,9 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Document Usage
+ * Add Host to VCenter Task Handler
  * <p/>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
  * <p/>
  *
  * @version 1.0
@@ -118,7 +119,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         private       String                                clusterId;
         private       ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse;
 
-        public Validate(final Job job)
+        Validate(final Job job)
         {
             this.job = job;
         }

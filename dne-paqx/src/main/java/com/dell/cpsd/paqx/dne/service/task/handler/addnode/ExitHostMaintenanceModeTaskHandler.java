@@ -78,16 +78,23 @@ public class ExitHostMaintenanceModeTaskHandler extends BaseTaskHandler implemen
 
             final boolean success = this.nodeService.requestExitHostMaintenanceMode(requestMessage);
 
-            response.setWorkFlowTaskStatus(success ? Status.SUCCEEDED : Status.FAILED);
+            if (!success)
+            {
+                throw new IllegalStateException("Exit Host Maintenance Failed");
+            }
 
-            return success;
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+
+            return true;
         }
         catch (Exception e)
         {
             LOGGER.error("Exception occurred", e);
             response.addError(e.getMessage());
-            return false;
         }
+
+        response.setWorkFlowTaskStatus(Status.FAILED);
+        return false;
     }
 
     private HostMaintenanceModeRequestMessage getHostMaintenanceModeRequestMessage(final ComponentEndpointIds componentEndpointIds,

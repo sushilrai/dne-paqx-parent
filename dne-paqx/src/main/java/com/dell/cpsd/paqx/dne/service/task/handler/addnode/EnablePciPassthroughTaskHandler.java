@@ -2,7 +2,6 @@ package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
@@ -20,9 +19,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * TODO: Document Usage
+ * Enable PCI PassThrough Task Handler
  * <p/>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
  * <p/>
  *
  * @version 1.0
