@@ -1,3 +1,9 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
+
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
@@ -20,10 +26,10 @@ import java.util.Objects;
 
 /**
  * Enable PCI PassThrough Task Handler
- * <p/>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
- * Dell EMC Confidential/Proprietary Information
- * <p/>
+ *
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
  *
  * @version 1.0
  * @since 1.0
