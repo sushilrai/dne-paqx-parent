@@ -71,9 +71,17 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request)
     {
-        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("publishIdracNetwokSettings: found list of capablities with size {}", capabilityDatas.size());
-        for (CapabilityData capabilityData : capabilityDatas)
+        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishIdracNetwokSettings");
+            return;
+        }
+
+        LOGGER.info("publishIdracNetwokSettings: found list of capablities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
@@ -88,9 +96,17 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request)
     {
-        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("publishConfigureBootDeviceIdrac: found list of capablities with size {}", capabilityDatas.size());
-        for (CapabilityData capabilityData : capabilityDatas)
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishConfigureBootDeviceIdrac");
+            return;
+        }
+
+        LOGGER.info("publishConfigureBootDeviceIdrac: found list of capablities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
@@ -457,9 +473,17 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishListNodes(ListNodes request)
     {
-        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("publishListNodes: found list of capablities with size {}", capabilityDatas.size());
-        for (CapabilityData capabilityData : capabilityDatas)
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishListNodes");
+            return;
+        }
+
+        LOGGER.info("publishListNodes: found list of capablities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
@@ -474,9 +498,17 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request)
     {
-        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("publishDiscoverClusters: found list of capablities with size {}", capabilityDatas.size());
-        for (CapabilityData capabilityData : capabilityDatas)
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishDiscoverClusters");
+            return;
+        }
+
+        LOGGER.info("publishDiscoverClusters: found list of capablities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
@@ -503,8 +535,15 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request)
     {
-        CapabilityData capabilityData = capabilityBinder.getCurrentCapabilities()
-                .stream()
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishCompleteNodeAllocation");
+            return;
+        }
+
+        CapabilityData capabilityData = capabilities.stream()
                 .filter((data) -> "manage-node-allocation".equals(data.getCapability().getProfile()))
                 .findFirst()
                 .orElse(null);
@@ -517,12 +556,6 @@ public class AmqpDneProducer implements DneProducer
             LOGGER.info("Send complete node allocation request message from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
-    }
-
-    private String messageType(Class messageClass)
-    {
-        Message messageAnnotation = (Message)messageClass.getAnnotation(Message.class);
-        return messageAnnotation.value();
     }
 
     @Override
@@ -546,5 +579,11 @@ public class AmqpDneProducer implements DneProducer
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
             }
         }
+    }
+
+    private String messageType(Class messageClass)
+    {
+        Message messageAnnotation = (Message)messageClass.getAnnotation(Message.class);
+        return messageAnnotation.value();
     }
 }
