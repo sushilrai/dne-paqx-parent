@@ -1155,7 +1155,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
-                return responseMessage.getStatus().equals(EnablePCIPassthroughResponseMessage.Status.SUCCESS);
+                return responseMessage.getStatus().equals(EnablePCIPassthroughResponseMessage.Status.SUCCESS_REBOOT_REQUIRED);
             }
             else
             {

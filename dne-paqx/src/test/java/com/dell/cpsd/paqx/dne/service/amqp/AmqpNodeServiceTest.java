@@ -1151,7 +1151,7 @@ public class AmqpNodeServiceTest
         };
 
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn(EnablePCIPassthroughResponseMessage.Status.SUCCESS);
+        when(responseMessage.getStatus()).thenReturn(EnablePCIPassthroughResponseMessage.Status.SUCCESS_REBOOT_REQUIRED);
 
         final boolean success = nodeService.requestEnablePciPassThrough(request);
 

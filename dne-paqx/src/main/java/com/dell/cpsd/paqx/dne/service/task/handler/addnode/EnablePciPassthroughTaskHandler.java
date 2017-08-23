@@ -143,15 +143,15 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
         return response;
     }
 
-    private String filterDellPercPciDeviceId(final List<PciDevice> pciDeviceList)
+    private String filterDellPercPciDeviceId(final List<PciDevice> pciDeviceList) throws IllegalStateException
     {
         final PciDevice requiredPciDevice = pciDeviceList.stream()
-                .filter(obj -> Objects.nonNull(obj) && DELL_PCI_REGEX.matches(obj.getDeviceName()))
+                .filter(obj -> Objects.nonNull(obj) && obj.getDeviceName().matches(DELL_PCI_REGEX))
                 .findFirst().orElse(null);
 
         if (requiredPciDevice == null)
         {
-            return PCI_BUS_DEVICE_ID;
+            throw new IllegalStateException("Unable to find matching PCI device");
         }
 
         return requiredPciDevice.getDeviceId();

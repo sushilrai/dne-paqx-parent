@@ -104,7 +104,6 @@ public class EnablePciPassThroughTaskHandlerTest
 
         assertEquals(true, this.spy.executeTask(this.job));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
-        verify(this.response).setHostPciDeviceId("0000:02:00.0");
         verify(this.response, never()).addError(anyString());
     }
 
