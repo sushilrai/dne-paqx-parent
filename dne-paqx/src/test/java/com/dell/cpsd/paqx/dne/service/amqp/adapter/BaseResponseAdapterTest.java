@@ -5,7 +5,6 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp.adapter;
 
-import com.dell.cpsd.common.rabbitmq.message.HasCorrelationId;
 import com.dell.cpsd.common.rabbitmq.message.HasMessageProperties;
 import com.dell.cpsd.common.rabbitmq.message.MessagePropertiesContainer;
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;

@@ -7,14 +7,14 @@ package com.dell.cpsd.paqx.dne.service.amqp.adapter;
 
 import com.dell.cpsd.service.common.client.callback.ServiceResponse;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
-import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseResponse;
 import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
+import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 /**
- * The tests for ApplyEsxiLicenseResponseAdapter class.
+ * The tests for SoftwareVibResponseAdapter class.
  *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -22,18 +22,18 @@ import static org.mockito.Mockito.spy;
  *
  * @since 1.0
  */
-public class ApplyEsxiLicenseResponseAdapterTest extends BaseResponseAdapterTest<AddEsxiHostVSphereLicenseResponse>
+public class SoftwareVibResponseAdapterTest extends BaseResponseAdapterTest<SoftwareVIBResponseMessage>
 {
     @Override
-    protected ServiceCallbackAdapter<AddEsxiHostVSphereLicenseResponse, ServiceResponse<AddEsxiHostVSphereLicenseResponse>> createTestable()
+    protected ServiceCallbackAdapter<SoftwareVIBResponseMessage, ServiceResponse<SoftwareVIBResponseMessage>> createTestable()
     {
-        return new ApplyEsxiLicenseResponseAdapter(this.registry);
+        return new SoftwareVibResponseAdapter(this.registry);
     }
 
     @Override
-    protected AddEsxiHostVSphereLicenseResponse createResponseMessageSpy()
+    protected SoftwareVIBResponseMessage createResponseMessageSpy()
     {
-        AddEsxiHostVSphereLicenseResponse theSpy = spy(AddEsxiHostVSphereLicenseResponse.class);
+        SoftwareVIBResponseMessage theSpy = spy(SoftwareVIBResponseMessage.class);
         theSpy.setMessageProperties(mock(MessageProperties.class));
         return theSpy;
     }
