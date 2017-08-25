@@ -24,6 +24,7 @@ import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
@@ -37,6 +38,7 @@ import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
 import com.dell.cpsd.paqx.dne.transformers.ScaleIORestToScaleIODomainTransformer;
+import com.dell.cpsd.paqx.dne.transformers.StoragePoolEssRequestTransformer;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
@@ -46,6 +48,8 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.common.client.rpc.AbstractServiceClient;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.ServiceRequestCallback;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
@@ -69,6 +73,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -111,22 +116,24 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     private final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer;
     private final ScaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer;
+    private final StoragePoolEssRequestTransformer        storagePoolEssRequestTransformer;
 
     /**
      * AmqpNodeService constructor.
      *
-     * @param logger   - The logger instance.
-     * @param consumer - The <code>DelegatingMessageConsumer</code> instance.
-     * @param producer - The <code>DneProducer</code> instance.
-     * @param replyTo  - The replyTo queue name.
-     * @param repository repository
+     * @param logger                                  - The logger instance.
+     * @param consumer                                - The <code>DelegatingMessageConsumer</code> instance.
+     * @param producer                                - The <code>DneProducer</code> instance.
+     * @param replyTo                                 - The replyTo queue name.
+     * @param repository                              repository
      * @param discoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer
-     * @param scaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer
+     * @param scaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer
      * @since 1.0
      */
     public AmqpNodeService(ILogger logger, DelegatingMessageConsumer consumer, DneProducer producer, String replyTo,
             final DataServiceRepository repository, final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer,
-            final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer)
+            final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer,
+            final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer)
     {
         super(logger);
 
@@ -136,7 +143,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.repository = repository;
         this.discoveryInfoToVCenterDomainTransformer = discoveryInfoToVCenterDomainTransformer;
         this.scaleIORestToScaleIODomainTransformer = scaleIORestToScaleIODomainTransformer;
-
+        this.storagePoolEssRequestTransformer = storagePoolEssRequestTransformer;
         initCallbacks();
     }
 
@@ -154,6 +161,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
         this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this));
         this.consumer.addAdapter(new ValidateClusterResponseAdapter(this));
+        this.consumer.addAdapter(new ValidateStoragePoolResponseAdapter(this));
         this.consumer.addAdapter(new ListScaleIoComponentsResponseAdapter(this));
         this.consumer.addAdapter(new ListVCenterComponentsResponseAdapter(this));
         this.consumer.addAdapter(new DiscoverScaleIoResponseAdapter(this));
@@ -297,7 +305,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * {@inheritDoc}
      */
     @Override
-    public List<ClusterInfo> listClusters() throws ServiceTimeoutException, ServiceExecutionException {
+    public List<ClusterInfo> listClusters() throws ServiceTimeoutException, ServiceExecutionException
+    {
         com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
@@ -335,17 +344,70 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         if (responseInfo.getStatus() == DiscoverClusterResponseInfoMessage.Status.SUCCESS)
         {
             DiscoverClusterResponseInfo clusterResponseInfo = responseInfo.getDiscoverClusterResponseInfo();
-            return clusterResponseInfo != null? clusterResponseInfo.getClusters(): Collections.emptyList();
+            return clusterResponseInfo != null ? clusterResponseInfo.getClusters() : Collections.emptyList();
         }
         else
         {
-            LOGGER.error ( "Failed to get cluster from vcenter");
+            LOGGER.error("Failed to get cluster from vcenter");
             throw new ServiceExecutionException("Failed to get cluster from vcenter");
         }
     }
 
     @Override
-    public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList) throws ServiceTimeoutException, ServiceExecutionException {
+    public List<ScaleIOData> listScaleIOData() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        LOGGER.info("Listing scaleIO data ...");
+
+        ScaleIOData scaleIOData = repository.getScaleIoData();
+
+        return Arrays.asList(scaleIOData);
+    }
+
+    /**
+     * Implementation of storage pool validation
+     *
+     * @param scaleIOStoragePools
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    @Override
+    public EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
+        com.dell.cpsd.service.engineering.standards.MessageProperties messageProperties = new com.dell.cpsd.service.engineering.standards.MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        EssValidateStoragePoolRequestMessage storageRequestMessage = storagePoolEssRequestTransformer.transform(scaleIOStoragePools);
+        storageRequestMessage.setMessageProperties(messageProperties);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                LOGGER.info("publish validate ess storage request message");
+                producer.publishValidateStorage(storageRequestMessage);
+            }
+        });
+
+        EssValidateStoragePoolResponseMessage responseInfo = processResponse(response, EssValidateStoragePoolResponseMessage.class);
+
+        return responseInfo;
+    }
+
+    @Override
+    public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
         com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
@@ -680,8 +742,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             final ListComponentsRequestMessage requestMessage = new ListComponentsRequestMessage();
             final String correlationId = UUID.randomUUID().toString();
-            requestMessage
-                    .setMessageProperties(new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
+            requestMessage.setMessageProperties(
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
 
             ServiceResponse<?> callbackResponse = processRequest(timeout, new ServiceRequestCallback()
             {
@@ -742,8 +804,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
                     });
 
-
-
                     return repository.saveVCenterComponentDetails(componentEndpointDetailsListResponse);
                 }
             }
@@ -769,9 +829,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             final ListStorageRequestMessage requestMessage = new ListStorageRequestMessage();
             final String correlationId = UUID.randomUUID().toString();
-            requestMessage.setMessageProperties(
-                    new com.dell.cpsd.storage.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
-            requestMessage.setEndpointURL("https://" +componentEndpointIds.getEndpointUrl());
+            requestMessage
+                    .setMessageProperties(new com.dell.cpsd.storage.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
+            requestMessage.setEndpointURL("https://" + componentEndpointIds.getEndpointUrl());
             requestMessage.setComponentUuid(componentEndpointIds.getComponentUuid());
             requestMessage.setEndpointUuid(componentEndpointIds.getEndpointUuid());
             requestMessage.setCredentialUuid(componentEndpointIds.getCredentialUuid());
@@ -933,8 +993,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            ClusterOperationResponseMessage responseMessage = processResponse(callbackResponse,
-                    ClusterOperationResponseMessage.class);
+            ClusterOperationResponseMessage responseMessage = processResponse(callbackResponse, ClusterOperationResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
@@ -976,8 +1035,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse,
-                    SoftwareVIBResponseMessage.class);
+            SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse, SoftwareVIBResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
@@ -1021,8 +1079,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse,
-                    SoftwareVIBResponseMessage.class);
+            SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse, SoftwareVIBResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
@@ -1064,8 +1121,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            AddHostToDvSwitchResponseMessage responseMessage = processResponse(callbackResponse,
-                    AddHostToDvSwitchResponseMessage.class);
+            AddHostToDvSwitchResponseMessage responseMessage = processResponse(callbackResponse, AddHostToDvSwitchResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
@@ -1235,7 +1291,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            UpdatePCIPassthruSVMResponseMessage responseMessage = processResponse(callbackResponse, UpdatePCIPassthruSVMResponseMessage.class);
+            UpdatePCIPassthruSVMResponseMessage responseMessage = processResponse(callbackResponse,
+                    UpdatePCIPassthruSVMResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
@@ -1298,7 +1355,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Override
     public ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage)
     {
-        ComponentEndpointIds returnData=null;
+        ComponentEndpointIds returnData = null;
         try
         {
             final String correlationId = UUID.randomUUID().toString();
@@ -1320,13 +1377,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse, ListEsxiCredentialDetailsResponseMessage.class);
+            ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse,
+                    ListEsxiCredentialDetailsResponseMessage.class);
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null && responseMessage.getComponentUuid() != null
                     && responseMessage.getEndpointUuid() != null && responseMessage.getCredentialUuid() != null)
             {
-                returnData = new ComponentEndpointIds(responseMessage.getComponentUuid(),
-                        responseMessage.getEndpointUuid(),null,responseMessage.getCredentialUuid());
+                returnData = new ComponentEndpointIds(responseMessage.getComponentUuid(), responseMessage.getEndpointUuid(), null,
+                        responseMessage.getCredentialUuid());
             }
             else
             {

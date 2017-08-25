@@ -16,6 +16,7 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -524,6 +525,13 @@ public class AmqpDneProducer implements DneProducer
     public void publishValidateClusters(ValidateVcenterClusterRequestMessage request) {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, request);
+    }
+
+    @Override
+    public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage) {
+        // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
+        LOGGER.info("Send request to ESS validation for storage pools.");
+        rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
     }
 
     /**

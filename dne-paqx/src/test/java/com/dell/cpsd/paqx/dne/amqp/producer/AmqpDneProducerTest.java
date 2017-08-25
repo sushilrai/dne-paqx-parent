@@ -18,6 +18,7 @@ import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -357,6 +358,19 @@ public class AmqpDneProducerTest
         ReflectionTestUtils.setField(this.producer, "essReqRoutingKeyPrefix", this.routingKey);
 
         this.producer.publishValidateClusters(request);
+
+        verify(this.rabbitTemplate).convertAndSend(this.exchange, this.routingKey, request);
+    }
+
+    @Test
+    public void publishValidateStorage() throws Exception
+    {
+        EssValidateStoragePoolRequestMessage request = mock(EssValidateStoragePoolRequestMessage.class);
+
+        ReflectionTestUtils.setField(this.producer, "essRequestExchange", this.exchange);
+        ReflectionTestUtils.setField(this.producer, "essReqRoutingKeyPrefix", this.routingKey);
+
+        this.producer.publishValidateStorage(request);
 
         verify(this.rabbitTemplate).convertAndSend(this.exchange, this.routingKey, request);
     }

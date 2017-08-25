@@ -11,6 +11,7 @@ import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBoo
 import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiRequestMessage;
 import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -60,7 +61,6 @@ public interface DneProducer
      * @param request
      */
     void publishValidateClusters(ValidateVcenterClusterRequestMessage request);
-
 
     /**
      * Complete node allocation
@@ -141,4 +141,6 @@ public interface DneProducer
     void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage);
 
     void publishEsxiHostExitMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
+
+    void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage);
 }

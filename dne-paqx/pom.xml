@@ -80,6 +80,13 @@
             <type>zip</type>
             <version>0.3-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.dell.cpsd.service.engineering.standards</groupId>
+            <artifactId>engineering-standards-service-api</artifactId>
+            <classifier>schemas</classifier>
+            <type>zip</type>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>commons-collections</groupId>
@@ -246,6 +253,18 @@
                             <includes>**\/*.jsd</includes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <id>unpack-json-schemas-engineering-standards-service-api</id>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.dell.cpsd.service.engineering.standards</includeGroupIds>
+                            <includeArtifactIds>engineering-standards-service-api</includeArtifactIds>
+                            <includes>**\/*.jsd</includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -311,6 +330,25 @@
                             <customRuleFactory>
                                 com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory
                             </customRuleFactory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-json-engineering-standards-service-api</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/dependency/engineering-standards-service-api/schema/json</sourceDirectory>
+                            <targetPackage>com.dell.cpsd.service.engineering.standards</targetPackage>
+                            <outputDirectory>${project.build.directory}/generated-sources/engineering-standards-service-api</outputDirectory>
+                            <removeOldOutput>true</removeOldOutput>
+                            <includeConstructors>true</includeConstructors>
+                            <serializable>false</serializable>
+                            <useCommonsLang3>true</useCommonsLang3>
+                            <includeAdditionalProperties>false</includeAdditionalProperties>
+                            <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
+                            <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
                         </configuration>
                     </execution>
                 </executions>
