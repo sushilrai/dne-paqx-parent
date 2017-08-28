@@ -5,19 +5,19 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracError;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.EsxiInstallationInfo;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
+import com.dell.cpsd.MessageProperties;
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracError;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.cpsd.EsxiInstallationInfo;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.InstallESXiResponseMessage;
+import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
@@ -200,7 +200,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             IdracNetworkSettings idracNetworkSettings = new IdracNetworkSettings();
 
-            idracNetworkSettings.setNodeId(idracNetworkSettingsRequest.getNodeId());
+            idracNetworkSettings.setUuid(idracNetworkSettingsRequest.getUuid());
             idracNetworkSettings.setIpAddress(idracNetworkSettingsRequest.getIdracIpAddress());
             idracNetworkSettings.setGateway(idracNetworkSettingsRequest.getIdracGatewayIpAddress());
             idracNetworkSettings.setNetmask(idracNetworkSettingsRequest.getIdracSubnetMask());
@@ -232,14 +232,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         LOGGER.info("Response from amqp ipAddress: " + resp.getIdracNetworkSettingsResponse().getIpAddress());
                         LOGGER.info("Response from amqp subnet: " + resp.getIdracNetworkSettingsResponse().getNetmask());
                         LOGGER.info("Response from amqp gateway: " + resp.getIdracNetworkSettingsResponse().getGateway());
-                        LOGGER.info("Response from amqp nodeId: " + resp.getIdracNetworkSettingsResponse().getNodeId());
+                        LOGGER.info("Response from amqp uuId: " + resp.getIdracNetworkSettingsResponse().getUuid());
 
                         if ("SUCCESS".equalsIgnoreCase(resp.getIdracNetworkSettingsResponse().getMessage()))
                         {
                             idracInfo.setIdracIpAddress(resp.getIdracNetworkSettingsResponse().getIpAddress());
                             idracInfo.setIdracSubnetMask(resp.getIdracNetworkSettingsResponse().getNetmask());
                             idracInfo.setIdracGatewayIpAddress(resp.getIdracNetworkSettingsResponse().getGateway());
-                            idracInfo.setNodeId(resp.getIdracNetworkSettingsResponse().getNodeId());
+                            idracInfo.setNodeId(resp.getIdracNetworkSettingsResponse().getUuid());
 
                         }
                         else
@@ -293,7 +293,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             if (nodes.getDiscoveredNodes() != null)
             {
                 return nodes.getDiscoveredNodes().stream()
-                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getNodeId(), d.getAllocationStatus()))
+                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
                         .collect(Collectors.toList());
             }
         }
@@ -456,7 +456,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
         messageProperties.setReplyTo(replyTo);
 
-        CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier);
+        CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
 
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
@@ -514,7 +514,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * {@inheritDoc}
      */
     @Override
-    public ChangeIdracCredentialsResponse changeIdracCredentials(String nodeId) throws ServiceTimeoutException, ServiceExecutionException
+    public ChangeIdracCredentialsResponse changeIdracCredentials(String uuid) throws ServiceTimeoutException, ServiceExecutionException
     {
         ChangeIdracCredentialsResponse responseMessage = new ChangeIdracCredentialsResponse();
 
@@ -527,7 +527,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             messageProperties.setReplyTo(replyTo);
 
             changeIdracCredentialsRequestMessage.setMessageProperties(messageProperties);
-            changeIdracCredentialsRequestMessage.setNodeID(nodeId);
+            changeIdracCredentialsRequestMessage.setUuid(uuid);
 
             LOGGER.info("Sending Change Idrac Credentials request with correlation id: " + messageProperties.getCorrelationId());
 
@@ -555,7 +555,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                     if (resp.getStatus() != null)
                     {
                         LOGGER.info("Response for Change Idrac Credentials: " + resp.getStatus());
-                        responseMessage.setNodeId(nodeId);
+                        responseMessage.setNodeId(uuid);
 
                         if ("SUCCESS".equalsIgnoreCase(resp.getStatus().toString()))
                         {
@@ -564,7 +564,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         else
                         {
                             LOGGER.error("Error response from change idrac credentials: " + resp.getChangeIdracCredentialsErrors());
-                            responseMessage.setMessage("Error while setting new credentials to the node " + nodeId);
+                            responseMessage.setMessage("Error while setting new credentials to the node " + uuid);
                         }
                     }
                 }
@@ -595,7 +595,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             messageProperties.setReplyTo(replyTo);
             configureBootDeviceIdracRequestMessage.setMessageProperties(messageProperties);
 
-            configureBootDeviceIdracRequestMessage.setNodeID(configureBootDeviceIdracRequest.getNodeId());
+            configureBootDeviceIdracRequestMessage.setUuid(configureBootDeviceIdracRequest.getUuid());
             configureBootDeviceIdracRequestMessage.setIpAddress(configureBootDeviceIdracRequest.getIdracIpAddress());
 
             ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()

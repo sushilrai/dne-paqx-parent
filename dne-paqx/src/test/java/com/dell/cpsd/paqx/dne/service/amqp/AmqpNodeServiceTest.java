@@ -13,8 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.EsxiInstallationInfo;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiResponseMessage;
+import com.dell.cpsd.EsxiInstallationInfo;
+import com.dell.cpsd.InstallESXiResponseMessage;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
@@ -59,13 +59,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracError;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracResponseMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodeAllocationInfo.AllocationStatus;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.NodesListed;
+import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
+import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracError;
+import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.cpsd.NodeAllocationInfo;
+import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
+import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
@@ -151,12 +151,12 @@ public class AmqpNodeServiceTest
                     long timeout) throws ServiceTimeoutException
             {
                 // default status of discovered
-                com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode node =
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode(nodeId, convergedUuid, 
-                                com.dell.converged.capabilities.compute.discovered.nodes.api.DiscoveredNode.AllocationStatus.DISCOVERED);
+                com.dell.cpsd.DiscoveredNode node =
+                        new com.dell.cpsd.DiscoveredNode(convergedUuid,
+                                com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED);
 
-                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties =
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties(Calendar.getInstance().getTime(),
+                com.dell.cpsd.MessageProperties messageProperties =
+                        new com.dell.cpsd.MessageProperties(Calendar.getInstance().getTime(),
                                 UUID.randomUUID().toString(), "replyToMe");
 
                 NodesListed listed = new NodesListed(messageProperties, Arrays.asList(node));
@@ -169,7 +169,6 @@ public class AmqpNodeServiceTest
 
         DiscoveredNode discovered = discovereds.get(0);
         Assert.assertEquals(convergedUuid, discovered.getConvergedUuid());
-        Assert.assertEquals(nodeId, discovered.getNodeId());
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishListNodes(any());
     }
@@ -382,8 +381,8 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
                     throws ServiceTimeoutException
             {
-                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties = 
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties();
+                com.dell.cpsd.MessageProperties messageProperties =
+                        new com.dell.cpsd.MessageProperties();
                 messageProperties.setCorrelationId(UUID.randomUUID().toString());
 
                 NodeAllocationInfo nodeAllocationInfo = new NodeAllocationInfo("elementIdentifier", "nodeIdentifier", AllocationStatus.ADDED);
@@ -447,8 +446,8 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
                     throws ServiceTimeoutException
             {
-                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties =
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties(Calendar.getInstance().getTime(),
+                com.dell.cpsd.MessageProperties messageProperties =
+                        new com.dell.cpsd.MessageProperties(Calendar.getInstance().getTime(),
                                 UUID.randomUUID().toString(), "replyToMe");
 
                 List<ConfigureBootDeviceIdracError> configureBootDeviceIdracErrors = new ArrayList<ConfigureBootDeviceIdracError>();
@@ -512,8 +511,8 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
                     throws ServiceTimeoutException
             {
-                com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties = 
-                        new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties();
+                com.dell.cpsd.MessageProperties messageProperties =
+                        new com.dell.cpsd.MessageProperties();
                 messageProperties.setCorrelationId(UUID.randomUUID().toString());
 
                 ChangeIdracCredentialsResponse changeCredentialsResponse = new ChangeIdracCredentialsResponse();
@@ -928,7 +927,7 @@ public class AmqpNodeServiceTest
         final DneProducer dneProducer = Mockito.mock(DneProducer.class);
         final DataServiceRepository repository = Mockito.mock(DataServiceRepository.class);
         final InstallESXiResponseMessage responseMessage = mock(InstallESXiResponseMessage.class);
-        final com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties messageProperties = new com.dell.converged.capabilities.compute.discovered.nodes.api.MessageProperties(
+        final com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(
                 new Date(), UUID.randomUUID().toString(), "test");
 
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);

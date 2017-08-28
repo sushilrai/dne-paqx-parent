@@ -5,7 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.service;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.EsxiInstallationInfo;
+import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;

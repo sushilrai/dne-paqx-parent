@@ -5,11 +5,11 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.ListNodes;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;

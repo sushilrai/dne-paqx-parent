@@ -6,11 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ChangeIdracCredentialsRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.CompleteNodeAllocationRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.InstallESXiRequestMessage;
-import com.dell.converged.capabilities.compute.discovered.nodes.api.ListNodes;
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.ListNodes;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.Capability;
 import com.dell.cpsd.hdp.capability.registry.api.EndpointProperty;
