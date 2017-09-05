@@ -32,7 +32,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     /**
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AssignDefaultHostNameTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigureBootDeviceIdracTaskHandler.class);
 
     /**
      * The <code>NodeService</code> instance
