@@ -92,6 +92,8 @@ public class HostToInstallEsxiRequestTransformer
         //As per the documentation
         transformSwitchDevices(esxiInstallationInfo);
 
+        esxiInstallationInfo.setNtpServers(host.getNtpServers());
+
         return esxiInstallationInfo;
     }
 
