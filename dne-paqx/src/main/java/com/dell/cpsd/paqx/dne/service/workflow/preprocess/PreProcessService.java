@@ -53,6 +53,11 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Finding discovered Nodes", new FindDiscoveredNodesTaskHandler(nodeService));
     }
 
+    @Bean("configureObmSettingsTask")
+    private WorkflowTask configureObmSettingsTask(){
+        return createTask("Configuring Obm Settings", new ConfigureObmSettingsTaskHandler(nodeService));
+    }
+
     @Bean("configIdracTask")
     private WorkflowTask configIdracTask()
     {
@@ -129,6 +134,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("listVCenterComponents", listVCenterComponentsTask());
         workflowTasks.put("discoverScaleIo", discoverScaleIoTask());
         workflowTasks.put("discoverVCenter", discoverVCenterTask());
+        workflowTasks.put("configureObmSettings", configureObmSettingsTask());
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());
         workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());

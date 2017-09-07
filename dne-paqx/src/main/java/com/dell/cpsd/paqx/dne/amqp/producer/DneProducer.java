@@ -5,30 +5,12 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
-import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
-import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.cpsd.InstallESXiRequestMessage;
-import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.*;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
-import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
-import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
-import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.*;
 
 /**
  * <p>
@@ -89,6 +71,13 @@ public interface DneProducer
      * @param request
      */
     void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request);
+
+    /**
+     * configure boot device idrac
+     *
+     * @param request
+     */
+    void publishConfigureObmSettings(SetObmSettingsRequestMessage request);
 
     /**
      * List ScaleIO Components
