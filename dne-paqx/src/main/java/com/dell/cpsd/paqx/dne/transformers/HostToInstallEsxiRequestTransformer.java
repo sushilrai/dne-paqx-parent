@@ -125,6 +125,7 @@ public class HostToInstallEsxiRequestTransformer
     {
         if (hostIpRouteConfig != null)
         {
+
             final BootImageNetworkDevice bootImageNetworkDevice1 = new BootImageNetworkDevice();
             bootImageNetworkDevice1.setDevice("vmnic0");
             bootImageNetworkDevice1.setEsxSwitchName("vSwitch0");

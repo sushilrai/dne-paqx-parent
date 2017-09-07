@@ -72,6 +72,8 @@ public interface DneProducer
      */
     void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request);
 
+    void publishConfigurePxeBoot(ConfigurePxeBootRequestMessage request);
+
     /**
      * configure boot device idrac
      *

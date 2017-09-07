@@ -102,6 +102,30 @@ public class AmqpDneProducer implements DneProducer
     }
 
     @Override
+    public void publishConfigurePxeBoot(ConfigurePxeBootRequestMessage request) {
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishConfigurePxeboot");
+            return;
+        }
+
+        LOGGER.info("publishConfigurePxeBoot: found list of capablities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(ConfigurePxeBootRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Publish configure Pxe Boot request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+            }
+        }
+    }
+
+    @Override
     public void publishConfigureObmSettings(SetObmSettingsRequestMessage request)
     {
         Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
@@ -118,6 +142,7 @@ public class AmqpDneProducer implements DneProducer
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+
             if (messageType(SetObmSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Publish configure obm settings request message from DNE paqx.");

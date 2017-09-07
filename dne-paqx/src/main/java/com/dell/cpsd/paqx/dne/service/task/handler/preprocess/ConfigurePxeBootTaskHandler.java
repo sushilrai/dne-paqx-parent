@@ -28,11 +28,11 @@ import java.util.Map;
  * @since 1.0
  */
 @Component
-public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
+public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
     /**
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigureBootDeviceIdracTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurePxeBootTaskHandler.class);
 
     /**
      * The <code>NodeService</code> instance
@@ -47,7 +47,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
      *
      * @since 1.0
      */
-    public ConfigureBootDeviceIdracTaskHandler(NodeService nodeService){
+    public ConfigurePxeBootTaskHandler(NodeService nodeService){
         this.nodeService = nodeService;
     }
 
@@ -61,7 +61,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
      */
     @Override
     public boolean executeTask(Job job)
-    {   LOGGER.info("Execute BootOrderSequence Task");
+    {   LOGGER.info("Execute Config Pxe Boot Task");
         TaskResponse response = initializeResponse(job);
 
         try
@@ -88,11 +88,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
             LOGGER.info("uuid:" + uuid);
             LOGGER.info("ipAddress:" + ipAddress);
 
-            ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest = new ConfigureBootDeviceIdracRequest();
-            configureBootDeviceIdracRequest.setUuid(uuid);
-            configureBootDeviceIdracRequest.setIdracIpAddress(ipAddress);
-
-            BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.bootDeviceIdracStatus(configureBootDeviceIdracRequest);
+            BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.configurePxeBoot(uuid, ipAddress);
             if ("SUCCESS".equalsIgnoreCase(bootDeviceIdracStatus.getStatus()))
             {
                 response.setResults(buildResponseResult(bootDeviceIdracStatus));
@@ -100,8 +96,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
                 return true;
             }
             else{
-                if ( bootDeviceIdracStatus.getErrors()!= null )
-                    response.addError(bootDeviceIdracStatus.getErrors().toString());
+                response.addError(bootDeviceIdracStatus.getErrors().toString());
             }
         }
         catch(Exception e){

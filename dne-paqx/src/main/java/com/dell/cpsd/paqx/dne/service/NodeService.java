@@ -110,7 +110,7 @@ public interface NodeService
     /**
      * Change Idrac credentials
      *
-     * @param configureBootDeviceIdracRequest - The <code>ChangeIdracCredentialsRequest</code> instance.
+     * @param nodeId - The <code>ChangeIdracCredentialsRequest</code> instance.
      * @return
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
@@ -130,6 +130,10 @@ public interface NodeService
             throws ServiceTimeoutException, ServiceExecutionException;
 
     BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
+            throws ServiceTimeoutException, ServiceExecutionException;
+
+
+    BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)
             throws ServiceTimeoutException, ServiceExecutionException;
 
     boolean requestScaleIoComponents() throws ServiceTimeoutException, ServiceExecutionException;

@@ -111,7 +111,7 @@ public class RabbitConfig
      */
     @Autowired
     private PropertiesConfig propertiesConfig;
-    
+
     /*
      * The support system-integration-sdk class mappings
      */
@@ -226,6 +226,9 @@ public class RabbitConfig
 
         messageClasses.add(ConfigureBootDeviceIdracRequestMessage.class);
         messageClasses.add(ConfigureBootDeviceIdracResponseMessage.class);
+
+        messageClasses.add(ConfigurePxeBootRequestMessage.class);
+        messageClasses.add(ConfigurePxeBootResponseMessage.class);
 
         messageClasses.add(IdracNetworkSettings.class);
         messageClasses.add(IdracNetworkSettingsRequestMessage.class);
