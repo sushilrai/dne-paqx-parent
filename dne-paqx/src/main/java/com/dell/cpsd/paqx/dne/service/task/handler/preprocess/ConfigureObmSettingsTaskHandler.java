@@ -11,13 +11,12 @@ import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
+import com.dell.cpsd.paqx.dne.service.model.ObmSettingsResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +38,6 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigureObmSettingsTaskHandler.class);
 
-
-    @Value("${obm.service.name}")
-    private String serviceName = "dell-wsman-obm-service";
-
-
     /**
      * The <code>NodeService</code> instance
      */
@@ -62,7 +56,7 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     }
 
     /**
-     * Perform the task of setting up boot order and disabling PXE
+     * Perform the task of setting up obm settings.
      *
      * @param job
      *            - The <code>Job</code> this task is part of.
@@ -93,16 +87,13 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
                 throw new IllegalStateException("No discovered node info found.");
             }
 
-            job.getInputParams().setServiceName(serviceName);
-
             String uuid = findNodeTask.getResults().get("symphonyUUID");
             String ipAddress = job.getInputParams().getIdracIpAddress();
             String service = job.getInputParams().getServiceName();
 
             LOGGER.info("uuid:" + uuid);
             LOGGER.info("ipAddress:" + ipAddress);
-            LOGGER.info("serviceName1:" + serviceName);
-
+            LOGGER.info("serviceName:" + service);
 
             SetObmSettingsRequestMessage configureObmSettingsRequest = new SetObmSettingsRequestMessage();
             configureObmSettingsRequest.setService(service);
@@ -112,19 +103,19 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
             obmConfig.setHost(ipAddress);
             configureObmSettingsRequest.setObmConfig(obmConfig);
 
-            BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.bootDeviceIdracStatus(configureObmSettingsRequest);
-            if ("SUCCESS".equalsIgnoreCase(bootDeviceIdracStatus.getStatus()))
+            ObmSettingsResponse obmSettingsResponse = nodeService.obmSettingsResponse(configureObmSettingsRequest);
+            if ("SUCCESS".equalsIgnoreCase(obmSettingsResponse.getStatus()))
             {
-                response.setResults(buildResponseResult(bootDeviceIdracStatus));
+                response.setResults(buildResponseResult(obmSettingsResponse));
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
             else{
-                response.addError(bootDeviceIdracStatus.getErrors().toString());
+                response.addError(obmSettingsResponse.getErrors().toString());
             }
         }
         catch(Exception e){
-            LOGGER.error("Error showing boot order status", e);
+            LOGGER.error("Error showing obm settings", e);
             response.addError(e.toString());
         }
         response.setWorkFlowTaskStatus(Status.FAILED);
@@ -134,38 +125,38 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     /*
      * This method add all the node information to the response object
      */
-    private Map<String, String> buildResponseResult(BootDeviceIdracStatus bootDeviceIdracStatus)
+    private Map<String, String> buildResponseResult(ObmSettingsResponse obmSettingsResponse)
     {
         Map<String, String> result = new HashMap<>();
 
-        if (bootDeviceIdracStatus == null)
+        if (obmSettingsResponse == null)
         {
             return result;
         }
 
-        if (bootDeviceIdracStatus.getStatus() != null)
+        if (obmSettingsResponse.getStatus() != null)
         {
-            result.put("bootDeviceIdracStatus", bootDeviceIdracStatus.getStatus());
+            result.put("obmSettingsResponseStatus", obmSettingsResponse.getStatus());
         }
 
-        if (bootDeviceIdracStatus.getErrors() != null)
+        if (obmSettingsResponse.getErrors() != null)
         {
-            result.put("bootDeviceIdracErrorsList", bootDeviceIdracStatus.getErrors().toString());
+            result.put("obmSettingsResponseErrorList", obmSettingsResponse.getErrors().toString());
         }
 
         return result;
     }
 
     /**
-     * Create the <code>BootOrderSequenceResponse</code> instance and initialize it.
+     * Create the <code>ObmSettingsResponse</code> instance and initialize it.
      *
      * @param job
      *            - The <code>Job</code> this task is part of.
      */
     @Override
-    public BootDeviceIdracStatus initializeResponse(Job job)
+    public ObmSettingsResponse initializeResponse(Job job)
     {
-        BootDeviceIdracStatus response = new BootDeviceIdracStatus();
+        ObmSettingsResponse response = new ObmSettingsResponse();
         response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
         response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
         job.addTaskResponse(job.getStep(), response);

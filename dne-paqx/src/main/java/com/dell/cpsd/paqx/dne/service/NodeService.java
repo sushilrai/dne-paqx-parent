@@ -9,30 +9,12 @@ import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
-import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
-import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
+import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
-import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
-import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
-import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
-
+import com.dell.cpsd.virtualization.capabilities.api.*;
 
 import java.util.List;
 
@@ -126,7 +108,7 @@ public interface NodeService
      * @throws ServiceExecutionException
      */
 
-    BootDeviceIdracStatus bootDeviceIdracStatus(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
+    ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
             throws ServiceTimeoutException, ServiceExecutionException;
 
     BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)

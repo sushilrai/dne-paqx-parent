@@ -709,11 +709,11 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
 
     @Override
-    public BootDeviceIdracStatus bootDeviceIdracStatus(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
+    public ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
             throws ServiceTimeoutException, ServiceExecutionException
     {
 
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
+        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse();
 
         try
         {
@@ -747,7 +747,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                     {
                         LOGGER.info("Response message is: " + resp.getStatus().toString());
 
-                        bootDeviceIdracStatus.setStatus(resp.getStatus().toString());
+                        obmSettingsResponse.setStatus(resp.getStatus().toString());
                     }
                 }
             }
@@ -756,7 +756,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             LOGGER.error("Exception in boot order sequence: ", e);
         }
-        return bootDeviceIdracStatus;
+        return obmSettingsResponse;
     }
 
     @Override
