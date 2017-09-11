@@ -169,8 +169,8 @@ public class HostToInstallEsxiRequestTransformer
     {
         final NodeWorkflowSwitchDevice switchDevice1 = new NodeWorkflowSwitchDevice("vSwitch0", "iphash",
                 Arrays.asList("vmnic1", "vmnic5"));
-        final NodeWorkflowSwitchDevice switchDevice2 = new NodeWorkflowSwitchDevice("vSwitch1", "", Collections.singletonList("vmnic0"));
-        final NodeWorkflowSwitchDevice switchDevice3 = new NodeWorkflowSwitchDevice("vSwitch2", "", Collections.singletonList("vmnic2"));
+        final NodeWorkflowSwitchDevice switchDevice2 = new NodeWorkflowSwitchDevice("vSwitch1", "", Collections.singletonList("vmnic2"));
+        final NodeWorkflowSwitchDevice switchDevice3 = new NodeWorkflowSwitchDevice("vSwitch2", "", Collections.singletonList("vmnic0"));
         esxiInstallationInfo.setSwitchDevices(Arrays.asList(switchDevice1, switchDevice2, switchDevice3));
     }
 }
