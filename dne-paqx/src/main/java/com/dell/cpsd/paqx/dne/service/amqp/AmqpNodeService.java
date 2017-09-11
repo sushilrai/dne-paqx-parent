@@ -78,6 +78,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     private final String replyTo;
     private final long timeout = 600000L;
+    private final long installEsxiTimeout = 2700000L;
 
     private final DataServiceRepository repository;
 
@@ -1039,7 +1040,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo)
+    public boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo, final String idracIp)
     {
         try
         {
@@ -1047,8 +1048,10 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             final String correlationId = UUID.randomUUID().toString();
             requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
             requestMessage.setEsxiInstallationInfo(esxiInstallationInfo);
+            //TODO: Temporary Solution
+            requestMessage.getAdditionalProperties().put("obm-ip", idracIp);
 
-            ServiceResponse<?> callbackResponse = processRequest(timeout, new ServiceRequestCallback()
+            ServiceResponse<?> callbackResponse = processRequest(installEsxiTimeout, new ServiceRequestCallback()
             {
                 @Override
                 public String getRequestId()
@@ -1067,8 +1070,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
-                //TODO: Not sure what to use in status
-                return "FINISHED".equalsIgnoreCase(responseMessage.getStatus());
+                return "succeeded".equalsIgnoreCase(responseMessage.getStatus());
             }
             else
             {

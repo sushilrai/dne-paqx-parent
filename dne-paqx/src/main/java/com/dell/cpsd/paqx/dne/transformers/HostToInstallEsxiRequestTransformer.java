@@ -32,9 +32,9 @@ import java.util.List;
 @Component
 public class HostToInstallEsxiRequestTransformer
 {
-    private static final Logger LOG                   = LoggerFactory.getLogger(HostToInstallEsxiRequestTransformer.class);
-    private static final String VERSION               = "6.0";
-    private static final String DELL_NODE_KARGS       = "netdevice=vmnic2";
+    private static final Logger LOG             = LoggerFactory.getLogger(HostToInstallEsxiRequestTransformer.class);
+    private static final String VERSION         = "6.0";
+    private static final String DELL_NODE_KARGS = "netdevice=vmnic2";
     private final DataServiceRepository dataServiceRepository;
 
     public HostToInstallEsxiRequestTransformer(final DataServiceRepository dataServiceRepository)
@@ -42,48 +42,49 @@ public class HostToInstallEsxiRequestTransformer
         this.dataServiceRepository = dataServiceRepository;
     }
 
-    public EsxiInstallationInfo transformInstallEsxiData(final String hostname, final String nodeId,
+    public EsxiInstallationInfo transformInstallEsxiData(final String esxiManagementHostName, final String symphonyUuid,
             final IpV4Configuration ipv4Configuration) throws IllegalArgumentException
     {
-        if (hostname == null)
+        if (esxiManagementHostName == null)
         {
             LOG.error("Hostname is null");
             throw new IllegalArgumentException("Hostname is null");
         }
 
-        if (nodeId == null)
+        if (symphonyUuid == null)
         {
-            LOG.error("Node Id is null");
-            throw new IllegalArgumentException("Node Id is null");
+            LOG.error("Symphony Id is null");
+            throw new IllegalArgumentException("Symphony Id is null");
         }
 
         Host host = null;
 
         try
         {
-            host = dataServiceRepository.getVCenterHost(hostname);
+            host = dataServiceRepository.getExistingVCenterHost();
         }
         catch (NoResultException e)
         {
-            LOG.error("No Host found for the host with host name [{}]", hostname);
-            throw new IllegalArgumentException("No Host found for the host with host name" + hostname);
+            LOG.error("No Host found");
+            throw new IllegalArgumentException("No Host found");
         }
 
-        return buildEsxiInstallData(host, nodeId, ipv4Configuration);
+        return buildEsxiInstallData(host, symphonyUuid, ipv4Configuration, esxiManagementHostName);
     }
 
-    protected EsxiInstallationInfo buildEsxiInstallData(final Host host, final String nodeId, final IpV4Configuration ipv4Configuration)
+    protected EsxiInstallationInfo buildEsxiInstallData(final Host host, final String symphonyUuid,
+            final IpV4Configuration ipv4Configuration, final String esxiManagementHostName)
     {
         final EsxiInstallationInfo esxiInstallationInfo = new EsxiInstallationInfo();
 
-        esxiInstallationInfo.setIdentifier(nodeId);
+        esxiInstallationInfo.setIdentifier(symphonyUuid);
 
         //Specific to Dell Node
         esxiInstallationInfo.setKargs(DELL_NODE_KARGS);
         esxiInstallationInfo.setVersion(VERSION);
 
         // Based on any existing host in the vcenter
-        transformHostDnsConfig(esxiInstallationInfo, host.getHostDnsConfig());
+        transformHostDnsConfig(esxiInstallationInfo, host.getHostDnsConfig(), esxiManagementHostName);
         // Based on any existing host in the vcenter
         transformNetworkDevices(esxiInstallationInfo, host.getHostIpRouteConfig(), ipv4Configuration);
         // Based on any existing host in the vcenter
@@ -97,12 +98,13 @@ public class HostToInstallEsxiRequestTransformer
         return esxiInstallationInfo;
     }
 
-    protected void transformHostDnsConfig(final EsxiInstallationInfo esxiInstallationInfo, final HostDnsConfig hostDnsConfig)
+    protected void transformHostDnsConfig(final EsxiInstallationInfo esxiInstallationInfo, final HostDnsConfig hostDnsConfig,
+            final String esxiManagementHostName)
 
     {
         if (hostDnsConfig != null)
         {
-            esxiInstallationInfo.setHostname(hostDnsConfig.getHostname());
+            esxiInstallationInfo.setHostname(esxiManagementHostName);
 
             final List<String> searchDomains = hostDnsConfig.getSearchDomains();
 
@@ -146,7 +148,7 @@ public class HostToInstallEsxiRequestTransformer
             bootImageNetworkDevice3.setEsxSwitchName("vSwitch2");
 
             esxiInstallationInfo
-                    .setNetworkDevices(Arrays.asList(bootImageNetworkDevice1, bootImageNetworkDevice3, bootImageNetworkDevice3));
+                    .setNetworkDevices(Arrays.asList(bootImageNetworkDevice1, bootImageNetworkDevice2, bootImageNetworkDevice3));
         }
     }
 
@@ -166,8 +168,8 @@ public class HostToInstallEsxiRequestTransformer
     protected void transformSwitchDevices(final EsxiInstallationInfo esxiInstallationInfo)
     {
         final NodeWorkflowSwitchDevice switchDevice1 = new NodeWorkflowSwitchDevice("vSwitch0", "iphash",
-                Collections.singletonList("vmnic0"));
-        final NodeWorkflowSwitchDevice switchDevice2 = new NodeWorkflowSwitchDevice("vSwitch1", "", Collections.singletonList("vmnic1"));
+                Arrays.asList("vmnic1", "vmnic5"));
+        final NodeWorkflowSwitchDevice switchDevice2 = new NodeWorkflowSwitchDevice("vSwitch1", "", Collections.singletonList("vmnic0"));
         final NodeWorkflowSwitchDevice switchDevice3 = new NodeWorkflowSwitchDevice("vSwitch2", "", Collections.singletonList("vmnic2"));
         esxiInstallationInfo.setSwitchDevices(Arrays.asList(switchDevice1, switchDevice2, switchDevice3));
     }

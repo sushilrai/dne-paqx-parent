@@ -128,7 +128,7 @@ public interface NodeService
     boolean requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
             throws ServiceTimeoutException, ServiceExecutionException;
 
-    boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo);
+    boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo, final String idracIp);
 
     boolean requestAddHostToVCenter(final ClusterOperationRequestMessage requestMessage);
 

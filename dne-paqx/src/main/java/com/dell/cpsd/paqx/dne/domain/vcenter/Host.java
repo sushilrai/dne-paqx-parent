@@ -55,8 +55,9 @@ public class Host
     private Cluster cluster;
 
     @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
     @CollectionTable(name = "NTP_SERVERS", joinColumns = @JoinColumn(name = "UUID"))
-    private List<String> ntpServers;
+    private List<String> ntpServers = new ArrayList<>();
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "host", orphanRemoval = true)

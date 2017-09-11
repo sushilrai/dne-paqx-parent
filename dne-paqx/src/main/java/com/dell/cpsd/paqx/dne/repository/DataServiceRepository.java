@@ -57,6 +57,8 @@ public interface DataServiceRepository
 
     Host getVCenterHost(final String hostName) throws NoResultException;
 
+    Host getExistingVCenterHost() throws NoResultException;
+
     List<PortGroup> getPortGroups();
 
     ScaleIOData getScaleIoDataByJobId(final String jobId);

@@ -423,6 +423,20 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
+    public Host getExistingVCenterHost()
+    {
+        final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
+        final List<Host> resultList = query.getResultList();
+
+        if (resultList == null || resultList.isEmpty())
+        {
+            throw new NoResultException("No Host exist");
+        }
+
+        return resultList.get(0);
+    }
+
+    @Override
     public List<PortGroup> getPortGroups()
     {
         final TypedQuery<PortGroup> query = entityManager.createQuery("SELECT p FROM PortGroup as p", PortGroup.class);

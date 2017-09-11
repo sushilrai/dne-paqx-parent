@@ -5,6 +5,9 @@
 
 package com.dell.cpsd.paqx.dne.domain.vcenter;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -37,10 +40,12 @@ public class HostDnsConfig
     private String hostname;
 
     @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
     @CollectionTable(name = "SEARCH_DOMAIN", joinColumns = @JoinColumn(name = "UUID"))
     private List<String> searchDomains;
 
     @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
     @CollectionTable(name = "DNS_CONFIG_IP", joinColumns = @JoinColumn(name = "UUID"))
     private List<String> dnsConfigIPs;
 

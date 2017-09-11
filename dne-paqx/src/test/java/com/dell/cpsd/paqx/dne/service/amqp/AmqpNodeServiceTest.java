@@ -863,7 +863,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestInstallEsxi(info);
+        nodeService.requestInstallEsxi(info, anyString());
         Mockito.verify(dneProducer, Mockito.times(1)).publishInstallEsxiRequest(any());
     }
 
@@ -878,7 +878,7 @@ public class AmqpNodeServiceTest
                 new Date(), UUID.randomUUID().toString(), "test");
 
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn("FINISHED");
+        when(responseMessage.getStatus()).thenReturn("succeeded");
 
         AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null,null)
         {
@@ -890,7 +890,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestInstallEsxi(any());
+        final boolean success = nodeService.requestInstallEsxi(any(), "1.2.3.4");
 
         assertTrue(success);
 

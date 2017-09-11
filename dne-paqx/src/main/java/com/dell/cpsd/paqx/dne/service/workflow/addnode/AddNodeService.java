@@ -80,18 +80,18 @@ public class AddNodeService extends BaseService implements IAddNodeService
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
 		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
-        workflowTasks.put("installEsxi", installEsxiTask());//WIP
+        workflowTasks.put("installEsxi", installEsxiTask());
         workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
-        workflowTasks.put("addHostToVcenter", addHostToVcenterTask());//CODING DONE, TESTING PENDING
-        workflowTasks.put("installScaleIoVib", installScaleIoVibTask());//VIB URL's SOURCE IS NOT KNOWN
-        workflowTasks.put("configureScaleIoVib", configureScaleIoVibTask());//CODING DONE, TESTING PENDING
-        workflowTasks.put("addHostToDvSwitch", addHostToDvSwitchTask());//WIP
-        workflowTasks.put("deploySVM", deploySVMTask());//CODING DONE, TESTING PENDING
-        workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());//CODING DONE, TESTING PENDING
-        workflowTasks.put("rebootHost", rebootHostTask());//CODING DONE, TESTING DONE
+        workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
+        workflowTasks.put("installScaleIoVib", installScaleIoVibTask());
+        workflowTasks.put("configureScaleIoVib", configureScaleIoVibTask());
+        workflowTasks.put("addHostToDvSwitch", addHostToDvSwitchTask());
+        workflowTasks.put("deploySVM", deploySVMTask());
+        workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());
+        workflowTasks.put("rebootHost", rebootHostTask());
         workflowTasks.put("exitHostMaintenanceMode", exitHostMaintenanceModeTask());
-        workflowTasks.put("setPciPassthroughSioVm", setPciPassthroughSioVmTask());//CODING DONE, TESTING PENDING
-        workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());//CODING DONE, TESTING DONE
+        workflowTasks.put("setPciPassthroughSioVm", setPciPassthroughSioVmTask());
+        workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());
         /*workflowTasks.put("installScaleIOSDC", null);
         workflowTasks.put("addNewHostToScaleIO", null);*/
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());

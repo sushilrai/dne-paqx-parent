@@ -25,6 +25,7 @@ public class AddNodeTaskConfig
         addWorkflowSteps(workflowSteps,
                 "retrieveEsxiDefaultCredentialDetails",
                 "changeIdracCredentials",
+                "installEsxi",
                 //TODO: Add all the steps here once tested
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");

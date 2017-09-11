@@ -65,11 +65,11 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
                 throw new IllegalStateException("Job input parameters are null");
             }
 
-            final String nodeId = inputParams.getNodeId();
+            final String symphonyUuid = inputParams.getSymphonyUuid();
 
-            if (StringUtils.isEmpty(nodeId))
+            if (StringUtils.isEmpty(symphonyUuid))
             {
-                throw new IllegalStateException("Node Id is null");
+                throw new IllegalStateException("Symphony Id is null");
             }
 
             final String esxiManagementIpAddress = inputParams.getEsxiManagementIpAddress();
@@ -112,9 +112,16 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
             ipV4Configuration.setEsxiManagementNetworkMask(esxiManagementSubnetMask);
 
             final EsxiInstallationInfo esxiInstallationInfo = hostToInstallEsxiRequestTransformer
-                    .transformInstallEsxiData(esxiManagementHostname, nodeId, ipV4Configuration);
+                    .transformInstallEsxiData(esxiManagementHostname, symphonyUuid, ipV4Configuration);
 
-            final boolean success = this.nodeService.requestInstallEsxi(esxiInstallationInfo);
+            final String idracIpAddress = inputParams.getIdracIpAddress();
+
+            if (idracIpAddress == null)
+            {
+                throw new IllegalStateException("Idrac IP is null");
+            }
+
+            final boolean success = this.nodeService.requestInstallEsxi(esxiInstallationInfo, idracIpAddress);
 
             response.setWorkFlowTaskStatus(success? Status.SUCCEEDED : Status.FAILED);
             return success;
