@@ -11,6 +11,7 @@ import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
 import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
 import com.dell.cpsd.InstallESXiRequestMessage;
 import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.NodeInventoryRequestMessage;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.Capability;
 import com.dell.cpsd.hdp.capability.registry.api.EndpointProperty;
@@ -407,6 +408,12 @@ public class AmqpDneProducerTest
     public void publishChangeIdracCredentials() throws Exception
     {
         this.executeTest(mock(ChangeIdracCredentialsRequestMessage.class), this.producer::publishChangeIdracCredentials);
+    }
+
+    @Test
+    public void publishNodeInventoryDiscovery()
+    {
+        this.executeTest(mock(NodeInventoryRequestMessage.class), this.producer::publishNodeInventoryDiscovery);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

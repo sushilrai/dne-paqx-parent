@@ -48,6 +48,15 @@ public interface NodeService
     List<ScaleIOData> listScaleIOData() throws ServiceTimeoutException, ServiceExecutionException;
 
     /**
+     * List the rackhd node inventory
+     *
+     * @return Node Inventory data
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    Object listNodeInventory(String symphonyUUID) throws ServiceTimeoutException, ServiceExecutionException;
+
+    /**
      * List the validated cluster names
      *
      * @return

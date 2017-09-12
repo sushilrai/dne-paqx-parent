@@ -8,6 +8,7 @@
 package com.dell.cpsd.paqx.dne.repository;
 
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
+import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
@@ -78,4 +79,8 @@ public interface DataServiceRepository
     String getDataCenterName(final String clusterName);
 
     String getVlanIdVmk0();
+
+    boolean saveNodeInventory(final NodeInventory nodeInventory);
+
+    NodeInventory getNodeIventory(final String symphonyUUID) throws NoResultException;
 }

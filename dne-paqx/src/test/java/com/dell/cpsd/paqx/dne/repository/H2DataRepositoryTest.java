@@ -1,6 +1,5 @@
 /**
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved. Dell EMC Confidential/Proprietary Information
- *
  */
 
 package com.dell.cpsd.paqx.dne.repository;
@@ -9,6 +8,7 @@ import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
+import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -114,25 +117,25 @@ public class H2DataRepositoryTest
     @InjectMocks
     private H2DataRepository repository = new H2DataRepository();
 
-    private Answer answer;
-    private List<ComponentDetails> componentDetailsList;
-    private List<EndpointDetails> endpointDetailsList;
+    private Answer                  answer;
+    private List<ComponentDetails>  componentDetailsList;
+    private List<EndpointDetails>   endpointDetailsList;
     private List<CredentialDetails> credentialDetailsList;
-    private List<VCenter> vCenterList;
-    private List<ScaleIOData> scaleIODataList;
-    private List<PortGroup> portGroupList;
-    private List<PciDevice> pciDeviceList;
-    private String componentType;
-    private String endpointType;
-    private String componentUUID;
-    private String endpointUUID;
-    private String credentialUUID;
-    private String endpointURL;
-    private String jobId;
-    private Long uuid;
-    private String hostName;
-    private String clusterName;
-    private String vNicDevice;
+    private List<VCenter>           vCenterList;
+    private List<ScaleIOData>       scaleIODataList;
+    private List<PortGroup>         portGroupList;
+    private List<PciDevice>         pciDeviceList;
+    private String                  componentType;
+    private String                  endpointType;
+    private String                  componentUUID;
+    private String                  endpointUUID;
+    private String                  credentialUUID;
+    private String                  endpointURL;
+    private String                  jobId;
+    private Long                    uuid;
+    private String                  hostName;
+    private String                  clusterName;
+    private String                  vNicDevice;
 
     /**
      * The test setup.
@@ -427,7 +430,8 @@ public class H2DataRepositoryTest
     @Test
     public void saveVCenterData_vcenter_list_is_empty_and_dnejob_is_not_null_and_vcenter_exists() throws Exception
     {
-        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.vCenterTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -446,7 +450,8 @@ public class H2DataRepositoryTest
     {
         VCenter nullVCenter = null;
 
-        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.vCenterTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -487,7 +492,8 @@ public class H2DataRepositoryTest
     @Test
     public void saveVCenterData_vcenter_exception() throws Exception
     {
-        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.vCenterTypedQuery, this.dneJobTypedQuery, this.vCenterTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.vCenterTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -530,7 +536,8 @@ public class H2DataRepositoryTest
     @Test
     public void saveScaleIoData_scaleiodata_list_is_empty_and_dnejob_is_not_null_and_scaliodata_exists() throws Exception
     {
-        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.scaleIODataTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -549,7 +556,8 @@ public class H2DataRepositoryTest
     {
         ScaleIOData nullScaleIOData = null;
 
-        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.scaleIODataTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -589,7 +597,8 @@ public class H2DataRepositoryTest
     @Test
     public void saveScaleIoData_scaleiodata_exception() throws Exception
     {
-        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.scaleIODataTypedQuery, this.dneJobTypedQuery, this.scaleIODataTypedQuery).when(this.entityManager)
+                .createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.scaleIODataTypedQuery).getResultList();
         doReturn(this.dneJobTypedQuery).when(this.dneJobTypedQuery).setParameter(anyString(), anyString());
         doReturn(this.dneJob).when(this.dneJobTypedQuery).getSingleResult();
@@ -726,4 +735,78 @@ public class H2DataRepositoryTest
 
         assertNull(this.repository.getVlanIdVmk0());
     }
+
+    @Test
+    public void getValidNodeInventory()
+    {
+        NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
+
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(nodeInventory).when(this.stringTypedQuery).getSingleResult();
+
+        NodeInventory nodeInventoryFound = this.repository.getNodeIventory("FAKE_KEY");
+
+        assertNotNull(nodeInventoryFound);
+        assertEquals("FAKE_KEY", nodeInventoryFound.getSymphonyUUID());
+        assertEquals("FAKE_INVENTORY", nodeInventoryFound.getNodeInventory());
+    }
+
+    @Test
+    public void getInvalidNodeInventory()
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(null).when(this.stringTypedQuery).getSingleResult();
+
+        NodeInventory nodeInventoryFound = this.repository.getNodeIventory("FAKE_KEY");
+
+        assertNull(nodeInventoryFound);
+    }
+
+    @Test
+    public void saveNullNodeInventory()
+    {
+        boolean result = this.repository.saveNodeInventory(null);
+
+        assertEquals(false, result);
+    }
+
+    @Test
+    public void saveValidNodeInventory()
+    {
+        NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
+
+        DataServiceRepository repositorySpy = Mockito.spy(this.repository);
+        doReturn(nodeInventory).when(repositorySpy).getNodeIventory(anyString());
+
+        doNothing().when(this.entityManager).flush();
+        doNothing().when(this.entityManager).persist(any());
+        doNothing().when(this.entityManager).remove(any());
+
+        boolean result =repositorySpy.saveNodeInventory(nodeInventory);
+
+        assertEquals(true, result);
+        verify(this.entityManager).flush();
+        verify(this.entityManager).persist(any());
+        verify(this.entityManager).remove(any());
+    }
+
+    @Test
+    public void saveNoExistentNodeInventory()
+    {
+        NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
+
+        DataServiceRepository repositorySpy = Mockito.spy(this.repository);
+        doReturn(null).when(repositorySpy).getNodeIventory(anyString());
+
+        doNothing().when(this.entityManager).flush();
+        doNothing().when(this.entityManager).persist(any());
+
+        boolean result =repositorySpy.saveNodeInventory(nodeInventory);
+
+        assertEquals(true, result);
+        verify(this.entityManager).flush();
+        verify(this.entityManager).persist(any());
+        verify(this.entityManager, times(0)).remove(any());
+    }
+
 }

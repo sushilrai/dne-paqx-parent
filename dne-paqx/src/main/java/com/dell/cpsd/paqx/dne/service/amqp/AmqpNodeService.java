@@ -5,8 +5,27 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import com.dell.cpsd.*;
+import com.dell.cpsd.ConfigurePxeBootError;
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
+import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.MessageProperties;
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracError;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.cpsd.EsxiInstallationInfo;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.InstallESXiResponseMessage;
+import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.NodeInventoryRequestMessage;
+import com.dell.cpsd.NodeInventoryResponseMessage;
+import com.dell.cpsd.NodesListed;
+import com.dell.cpsd.PxeBootConfig;
+import com.dell.cpsd.SetObmSettingsRequestMessage;
+import com.dell.cpsd.SetObmSettingsResponseMessage;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
@@ -163,6 +182,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new ApplyEsxiLicenseResponseAdapter(this));
         this.consumer.addAdapter(new ListESXiCredentialDetailsResponseAdapter(this));
         this.consumer.addAdapter(new HostMaintenanceModeResponseAdapter(this));
+        this.consumer.addAdapter(new NodeInventoryResponseMessageAdapter(this));
     }
 
     /**
@@ -278,8 +298,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             if (nodes.getDiscoveredNodes() != null)
             {
-                return nodes.getDiscoveredNodes().stream()
-                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
+                return nodes.getDiscoveredNodes().stream().map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
                         .collect(Collectors.toList());
             }
         }
@@ -1555,5 +1574,41 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             LOGGER.error("Exception occurred", e);
         }
         return false;
+    }
+
+    @Override
+    public Object listNodeInventory(final String symphonyUUID) throws ServiceTimeoutException, ServiceExecutionException
+    {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        NodeInventoryRequestMessage nodeInventoryRequestMessage = new NodeInventoryRequestMessage();
+        nodeInventoryRequestMessage.setMessageProperties(messageProperties);
+        nodeInventoryRequestMessage.setSymphonyUUID(symphonyUUID);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                producer.publishNodeInventoryDiscovery(nodeInventoryRequestMessage);
+            }
+        });
+
+        NodeInventoryResponseMessage nodeInventoryResponseMessage = processResponse(response, NodeInventoryResponseMessage.class);
+        if (nodeInventoryResponseMessage != null)
+        {
+            return nodeInventoryResponseMessage.getNodeInventory();
+        }
+
+        return null;
     }
 }

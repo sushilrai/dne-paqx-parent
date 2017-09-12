@@ -28,7 +28,7 @@ public class PreProcessTaskConfig {
     @Bean("preProcessWorkflowSteps")
     public Map<String, Step> preProcessWorkflowSteps(){
         final Map<String, Step> workflowSteps = new HashMap<>();
-      
+
         addWorkflowSteps(workflowSteps,
                 "findAvailableNodes",
                 "listScaleIoComponents",
@@ -36,11 +36,12 @@ public class PreProcessTaskConfig {
                 //TODO: Re-enable the discover scaleio when mdm is up and running
                 /*"discoverScaleIo",*/
                 "discoverVCenter",
+                "discoverNodeInventory",
                 "configIdrac",
                 "pingIdrac",
                 "configureObmSettings",
                 "configureBootDeviceIdrac",
-                 "configurePxeBoot", // move this to add node worflow after it's tested.
+                "configurePxeBoot", // move this to add node worflow after it's tested.
                 //TODO: Re-enable the find scaleio when mdm is up and running
                 /*"findScaleIO"*/
                 "findVCluster",
@@ -48,7 +49,7 @@ public class PreProcessTaskConfig {
                 "findSystemData",
                 "assignDefaultHostName",
                 "assignDefaultCredentials");
-      
+
         return workflowSteps;
     }
 

@@ -11,6 +11,7 @@ import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
+import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
@@ -257,6 +258,59 @@ public class H2DataRepository implements DataServiceRepository
 
     @Override
     @Transactional
+    public boolean saveNodeInventory(final NodeInventory nodeInventory)
+    {
+        LOG.info("Persisting Node Inventory data ...");
+
+        if (nodeInventory == null)
+        {
+            LOG.error("Node inventory data can not be persisted because it empty.");
+            return false;
+        }
+
+        NodeInventory nodeInventoryData = this.getNodeIventory(nodeInventory.getSymphonyUUID());
+        if (nodeInventoryData != null)
+        {
+            //If it already exists, delete and save the new one.
+            entityManager.remove(nodeInventoryData);
+        }
+
+        entityManager.persist(nodeInventory);
+        entityManager.flush();
+
+        return true;
+    }
+
+    @Override
+    public NodeInventory getNodeIventory(final String symphonyUUID)
+    {
+        NodeInventory result = null;
+
+        final TypedQuery<NodeInventory> query;
+        try
+        {
+            query = entityManager
+                    .createQuery("SELECT ni FROM NodeInventory as ni where ni.symphonyUUID=:symphonyUUID", NodeInventory.class);
+
+            query.setParameter("symphonyUUID", symphonyUUID);
+
+            NodeInventory nodeInventory = query.getSingleResult();
+
+            if (nodeInventory != null && nodeInventory.getNodeInventory() != null)
+            {
+                result = nodeInventory;
+            }
+        }
+        catch (NoResultException noResultEx)
+        {
+            //  Do not do anything as the result will be null indicating that no result found.
+        }
+
+        return result;
+    }
+
+    @Override
+    @Transactional
     public boolean saveVCenterData(final String jobId, final VCenter vCenterData)
     {
         final TypedQuery<VCenter> vCenterTypedQuery = entityManager.createQuery("select v from VCenter as v", VCenter.class);
@@ -463,8 +517,7 @@ public class H2DataRepository implements DataServiceRepository
     @Override
     public ScaleIOData getScaleIoData()
     {
-        final TypedQuery<ScaleIOData> query = entityManager
-                .createQuery("SELECT scaleio FROM ScaleIOData as scaleio", ScaleIOData.class);
+        final TypedQuery<ScaleIOData> query = entityManager.createQuery("SELECT scaleio FROM ScaleIOData as scaleio", ScaleIOData.class);
 
         final List<ScaleIOData> scaleIODataList = query.getResultList();
 
@@ -523,11 +576,8 @@ public class H2DataRepository implements DataServiceRepository
     public String getVlanIdVmk0()
     {
         final TypedQuery<String> typedQuery = entityManager.createQuery(
-                "select p.vlanId from PortGroup as p "
-                        + "join VirtualNicDVPortGroup vnpg on p.id = vnpg.portGroupId "
-                        + "join VirtualNic vnic on vnic.uuid = vnpg.virtualNic.uuid "
-                        + "where vnic.device = :vNicDevice",
-                String.class);
+                "select p.vlanId from PortGroup as p " + "join VirtualNicDVPortGroup vnpg on p.id = vnpg.portGroupId "
+                        + "join VirtualNic vnic on vnic.uuid = vnpg.virtualNic.uuid " + "where vnic.device = :vNicDevice", String.class);
 
         typedQuery.setParameter("vNicDevice", "vmk0");
 

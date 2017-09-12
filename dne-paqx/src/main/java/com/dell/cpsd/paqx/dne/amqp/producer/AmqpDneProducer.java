@@ -5,7 +5,14 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.cpsd.*;
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.NodeInventoryRequestMessage;
+import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
@@ -554,22 +561,24 @@ public class AmqpDneProducer implements DneProducer
     }
 
     @Override
-    public void publishValidateClusters(ValidateVcenterClusterRequestMessage request) {
+    public void publishValidateClusters(ValidateVcenterClusterRequestMessage request)
+    {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, request);
     }
 
     @Override
-    public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage) {
+    public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage)
+    {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         LOGGER.info("Send request to ESS validation for storage pools.");
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
     }
 
     /**
-     * Send the <code>CompleteNodeAllocationRequestMessage</code> to the node 
+     * Send the <code>CompleteNodeAllocationRequestMessage</code> to the node
      * discovery service.
-     * 
+     *
      * @param request - The <code>CompleteNodeAllocationRequestMessage</code> instance
      */
     @Override
@@ -584,15 +593,13 @@ public class AmqpDneProducer implements DneProducer
         }
 
         CapabilityData capabilityData = capabilities.stream()
-                .filter((data) -> "manage-node-allocation".equals(data.getCapability().getProfile()))
-                .findFirst()
-                .orElse(null);
-        
-        if (capabilityData != null) 
+                .filter((data) -> "manage-node-allocation".equals(data.getCapability().getProfile())).findFirst().orElse(null);
+
+        if (capabilityData != null)
         {
             ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
             AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-                    
+
             LOGGER.info("Send complete node allocation request message from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
@@ -602,10 +609,9 @@ public class AmqpDneProducer implements DneProducer
     /**
      * Send the <code>ChangeIdracCredentialsRequestMessage</code> to the node 
      * discovery service.
-     * 
+     *
      * @param request - The <code>ChangeIdracCredentialsRequestMessage</code> instance
-     */
-    public void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request)
+     */ public void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request)
     {
         Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
         LOGGER.info("publishChangeIdracCrdentials: found list of capablities with size {}", capabilityDatas.size());
@@ -621,9 +627,35 @@ public class AmqpDneProducer implements DneProducer
         }
     }
 
+    @Override
+    public void publishNodeInventoryDiscovery(final NodeInventoryRequestMessage request)
+    {
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishNodeInventoryDiscovery");
+            return;
+        }
+
+        LOGGER.info("publishNodeInventoryDiscovery: found list of capabilities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(NodeInventoryRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Send node inventory discovery request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+                break;
+            }
+        }
+    }
+
     private String messageType(Class messageClass)
     {
-        Message messageAnnotation = (Message)messageClass.getAnnotation(Message.class);
+        Message messageAnnotation = (Message) messageClass.getAnnotation(Message.class);
         return messageAnnotation.value();
     }
 }

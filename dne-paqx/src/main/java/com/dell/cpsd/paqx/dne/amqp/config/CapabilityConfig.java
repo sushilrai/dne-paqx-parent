@@ -113,9 +113,10 @@ public class CapabilityConfig
                         .withProfile("esxi-credential-details"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("vcenter-enterMaintenance"),
+                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("rackhd-node-inventory"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("rackhd-set-node-obm-setting")
-
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

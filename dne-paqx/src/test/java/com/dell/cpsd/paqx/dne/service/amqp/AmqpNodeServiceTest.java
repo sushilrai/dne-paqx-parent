@@ -1374,4 +1374,29 @@ public class AmqpNodeServiceTest
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishListExsiCredentialDetails(request);
     }
+
+    /**
+     * Test that the listNodeInventory method can handle a timeout.
+     *
+     * @throws Exception
+     */
+    @Test(expected = ServiceTimeoutException.class)
+    public void testListNodeInventory() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = Mockito.mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null,
+                null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                    long timeout) throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        nodeService.listNodeInventory("FAKE_UUID");
+    }
 }

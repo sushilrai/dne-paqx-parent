@@ -285,6 +285,9 @@ public class RabbitConfig
         messageClasses.add(HostMaintenanceModeRequestMessage.class);
         messageClasses.add(HostMaintenanceModeResponseMessage.class);
 
+        messageClasses.add(NodeInventoryRequestMessage.class);
+        messageClasses.add(NodeInventoryResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         
@@ -339,5 +342,6 @@ public class RabbitConfig
     {
         return BindingBuilder.bind(essResponseQueue()).to(essResponseExchange()).with(essRespRoutingKeyPrefix + ".#");
     }
+
 }
 
