@@ -127,7 +127,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("installEsxiTask")
     private WorkflowTask installEsxiTask()
     {
-        return createTask("Install ESXi", new InstallEsxiTaskHandler(this.nodeService, hostToInstallEsxiRequestTransformer));
+        return createTask("Install ESXi", new InstallEsxiTaskHandler(this.nodeService, hostToInstallEsxiRequestTransformer, this.repository));
     }
 
     @Bean("addHostToVcenterTask")
