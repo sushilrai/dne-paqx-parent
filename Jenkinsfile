@@ -9,11 +9,6 @@ UPSTREAM_TRIGGERS = getUpstreamTriggers([
     "virtualization-capabilities-api"
 ])
 
-MAVEN_PHASE = "install"
-if (env.BRANCH_NAME ==~ /master|develop|release\/.*/) {
-    MAVEN_PHASE = "deploy"
-}
-
 pipeline { 
     parameters {
         string(name: 'dockerImagesDel', defaultValue: 'true')
@@ -50,7 +45,13 @@ pipeline {
         }
         stage("Build") {
             steps {
-                sh "mvn clean ${MAVEN_PHASE} -Dmaven.repo.local=.repo -DskipDocker=false -PbuildDockerImageOnJenkins -Ddocker.registry=${params.dockerRegistry} -DdockerImage.tag=${params.dockerImageTag} -DdeleteDockerImages=${params.dockerImagesDel}"
+                script {
+                    if (env.BRANCH_NAME ==~ /master|stable\/.*/) {
+                        sh "mvn clean deploy -Dmaven.repo.local=.repo -DskipDocker=false -PbuildDockerImageOnJenkins -Ddocker.registry=${params.dockerRegistry} -DdockerImage.tag=${params.dockerImageTag} -DdeleteDockerImages=${params.dockerImagesDel}"
+                    } else {
+                        sh "mvn clean install -Dmaven.repo.local=.repo -DskipDocker=false -PbuildDockerImageOnJenkins -Ddocker.registry=${params.dockerRegistry} -DdockerImage.tag=${params.dockerImageTag} -DdeleteDockerImages=${params.dockerImagesDel}"
+                    }
+                }
             }
         }
         stage('Record Test Results') {
@@ -90,14 +91,13 @@ pipeline {
         }
         stage('NexB Scan') {
             steps {
-                sh 'rm -rf .repo'
                 doNexbScanning()
             }
         }
         stage('Run pytest Scanner') {
-          steps {
-            runPyTestScanner()
-          }
+            steps {
+                runPyTestScanner()
+            }
     	}
     }
     post {
