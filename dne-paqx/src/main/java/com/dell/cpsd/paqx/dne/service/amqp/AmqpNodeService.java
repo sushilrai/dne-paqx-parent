@@ -171,7 +171,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * The replyTo queue name
      */
     private final String replyTo;
-    private final long timeout = 600000L;
+    private final long timeout = 1800000L;
     private final long installEsxiTimeout = 2700000L;
 
     private final DataServiceRepository repository;
