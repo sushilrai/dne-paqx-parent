@@ -41,6 +41,8 @@ import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
 import org.springframework.amqp.core.*;
@@ -292,6 +294,9 @@ public class RabbitConfig
 
         messageClasses.add(DatastoreRenameRequestMessage.class);
         messageClasses.add(DatastoreRenameResponseMessage.class);
+
+        messageClasses.add(VCenterUpdateSoftwareAcceptanceRequestMessage.class);
+        messageClasses.add(VCenterUpdateSoftwareAcceptanceResponseMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);

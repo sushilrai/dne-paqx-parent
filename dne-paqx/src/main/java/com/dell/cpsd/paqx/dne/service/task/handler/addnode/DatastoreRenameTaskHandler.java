@@ -40,7 +40,11 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
     /*
      * The <code>NodeService</code> instance
      */
-    private final NodeService           nodeService;
+    private final NodeService nodeService;
+
+    /*
+    * The <code>DataServiceRepository</code> instance
+    */
     private final DataServiceRepository dataServiceRepository;
 
     private static final String DATASTORE_PREFIX_NAME = "DAS";
@@ -54,7 +58,7 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
      * @param dataServiceRepository
      * @since 1.0
      */
-    public DatastoreRenameTaskHandler(NodeService nodeService, final DataServiceRepository dataServiceRepository)
+    public DatastoreRenameTaskHandler(final NodeService nodeService, final DataServiceRepository dataServiceRepository)
     {
         this.nodeService = nodeService;
         this.dataServiceRepository = dataServiceRepository;

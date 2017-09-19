@@ -489,13 +489,13 @@ public class AmqpDneProducer implements DneProducer
     }
 
     @Override
-    public void publishEsxiHostExitMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
+    public void publishHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
     {
         final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
 
         if (capabilities == null)
         {
-            LOGGER.error("No Capabilities found for publishEsxiHostExitMaintenanceMode");
+            LOGGER.error("No Capabilities found for publishHostMaintenanceMode");
             return;
         }
 
@@ -673,6 +673,32 @@ public class AmqpDneProducer implements DneProducer
             if (messageType(DatastoreRenameRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
             {
                 LOGGER.info("Send datastore rename request message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void publishUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage)
+    {
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishUpdateSoftwareAcceptance");
+            return;
+        }
+
+        LOGGER.info("publishUpdateSoftwareAcceptance: found list of capabilities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(VCenterUpdateSoftwareAcceptanceRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Send update software acceptance message from DNE paqx.");
                 rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
                 break;
             }

@@ -145,9 +145,11 @@ public interface DneProducer
 
     void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage);
 
-    void publishEsxiHostExitMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
+    void publishHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
 
     void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage);
 
     void publishDatastoreRename(DatastoreRenameRequestMessage requestMessage);
+
+    void publishUpdateSoftwareAcceptance(VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
 }

@@ -118,7 +118,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("rackhd-set-node-obm-setting"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("vcenter-rename-datastore")
+                        .withProfile("vcenter-rename-datastore"),
+                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("vcenter-update-software-acceptance")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

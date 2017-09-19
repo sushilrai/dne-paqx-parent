@@ -159,8 +159,9 @@ public interface NodeService
 
     ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage);
 
-    boolean requestExitHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
+    boolean requestHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
 
-    boolean requestDatastoreRename(final DatastoreRenameRequestMessage datastoreRenameRequestMessage);
+    boolean requestDatastoreRename(final DatastoreRenameRequestMessage requestMessage);
 
+    boolean requestUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
 }

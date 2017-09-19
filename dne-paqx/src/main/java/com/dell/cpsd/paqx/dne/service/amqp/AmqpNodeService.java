@@ -61,6 +61,7 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.VCenterUpdateSoftwareAcceptanceResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
@@ -126,6 +127,8 @@ import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRespons
 import com.dell.cpsd.virtualization.capabilities.api.VCenterComponentDetails;
 import com.dell.cpsd.virtualization.capabilities.api.VCenterCredentialDetails;
 import com.dell.cpsd.virtualization.capabilities.api.VCenterEndpointDetails;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
 import org.slf4j.Logger;
@@ -259,6 +262,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new HostMaintenanceModeResponseAdapter(this));
         this.consumer.addAdapter(new NodeInventoryResponseMessageAdapter(this));
         this.consumer.addAdapter(new DatastoreRenameResponseAdapter(this));
+        this.consumer.addAdapter(new VCenterUpdateSoftwareAcceptanceResponseAdapter(this));
     }
 
     /**
@@ -1610,7 +1614,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestExitHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
+    public boolean requestHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
     {
         try
         {
@@ -1629,7 +1633,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 @Override
                 public void executeRequest(String requestId) throws Exception
                 {
-                    producer.publishEsxiHostExitMaintenanceMode(requestMessage);
+                    producer.publishHostMaintenanceMode(requestMessage);
                 }
             });
 
@@ -1689,7 +1693,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestDatastoreRename(final DatastoreRenameRequestMessage datastoreRenameRequestMessage)
+    public boolean requestDatastoreRename(final DatastoreRenameRequestMessage requestMessage)
     {
         try
         {
@@ -1699,7 +1703,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
             messageProperties.setReplyTo(replyTo);
 
-            datastoreRenameRequestMessage.setMessageProperties(messageProperties);
+            requestMessage.setMessageProperties(messageProperties);
 
             ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
@@ -1712,7 +1716,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 @Override
                 public void executeRequest(String requestId) throws Exception
                 {
-                    producer.publishDatastoreRename(datastoreRenameRequestMessage);
+                    producer.publishDatastoreRename(requestMessage);
                 }
             });
 
@@ -1721,6 +1725,50 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             if (datastoreRenameResponseMessage != null)
             {
                 return datastoreRenameResponseMessage.getStatus().equals(DatastoreRenameResponseMessage.Status.SUCCESS);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("Exception occurred", ex);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean requestUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage)
+    {
+        try
+        {
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishUpdateSoftwareAcceptance(requestMessage);
+                }
+            });
+
+            VCenterUpdateSoftwareAcceptanceResponseMessage vCenterUpdateSoftwareAcceptanceResponseMessage =
+                    processResponse(response, VCenterUpdateSoftwareAcceptanceResponseMessage.class);
+
+            if (vCenterUpdateSoftwareAcceptanceResponseMessage != null)
+            {
+                return vCenterUpdateSoftwareAcceptanceResponseMessage.getStatus().equals(VCenterUpdateSoftwareAcceptanceResponseMessage.Status.SUCCESS);
             }
         }
         catch (Exception ex)

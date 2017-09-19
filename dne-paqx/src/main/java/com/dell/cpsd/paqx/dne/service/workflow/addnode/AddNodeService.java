@@ -19,12 +19,14 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTa
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DatastoreRenameTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnterHostMaintenanceModeTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceModeTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSoftwareAcceptanceTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +87,10 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
         workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
         workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());
+        workflowTasks.put("updateSoftwareAcceptance", updateSoftwareAcceptanceTask());
         workflowTasks.put("installScaleIoVib", installScaleIoVibTask());
         workflowTasks.put("configureScaleIoVib", configureScaleIoVibTask());
+        workflowTasks.put("enterHostMaintenanceMode", enterHostMaintenanceModeTask());
         workflowTasks.put("addHostToDvSwitch", addHostToDvSwitchTask());
         workflowTasks.put("deploySVM", deploySVMTask());
         workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());
@@ -198,6 +202,19 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         return createTask("Datastore rename",
                 new DatastoreRenameTaskHandler(this.nodeService, this.repository));
+    }
+
+    @Bean("updateSoftwareAcceptanceTask")
+    private WorkflowTask updateSoftwareAcceptanceTask()
+    {
+        return createTask("Update software acceptance",
+                new UpdateSoftwareAcceptanceTaskHandler(this.nodeService, this.repository));
+    }
+
+    @Bean("enterHostMaintenanceModeTask")
+    private WorkflowTask enterHostMaintenanceModeTask()
+    {
+        return createTask("Enter Host Maintenance Mode", new EnterHostMaintenanceModeTaskHandler(nodeService, repository));
     }
 
     public Job findJob(UUID jobId)

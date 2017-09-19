@@ -795,7 +795,7 @@ public class AmqpNodeServiceTest
     }
 
     @Test
-    public void testExitHostMaintenanceFailure() throws Exception
+    public void testHostMaintenanceFailure() throws Exception
     {
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
@@ -812,12 +812,12 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestExitHostMaintenanceMode(request);
-        Mockito.verify(dneProducer, Mockito.times(1)).publishEsxiHostExitMaintenanceMode(request);
+        nodeService.requestHostMaintenanceMode(request);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishHostMaintenanceMode(request);
     }
 
     @Test
-    public void testExitHostMaintenanceSuccess() throws Exception
+    public void testHostMaintenanceSuccess() throws Exception
     {
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = Mockito.mock(DneProducer.class);
@@ -839,11 +839,10 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestExitHostMaintenanceMode(request);
+        final boolean success = nodeService.requestHostMaintenanceMode(request);
 
         assertTrue(success);
-
-        Mockito.verify(dneProducer, Mockito.times(1)).publishEsxiHostExitMaintenanceMode(request);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishHostMaintenanceMode(request);
     }
 
     @Test
@@ -1450,5 +1449,56 @@ public class AmqpNodeServiceTest
 
         assertFalse(result);
         Mockito.verify(dneProducer).publishDatastoreRename(any(DatastoreRenameRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestUpdateSoftwareAcceptanceSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+        final VCenterUpdateSoftwareAcceptanceResponseMessage responseMessage = mock(VCenterUpdateSoftwareAcceptanceResponseMessage.class);
+        final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage = mock(VCenterUpdateSoftwareAcceptanceRequestMessage.class);
+        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
+        when(responseMessage.getStatus()).thenReturn(VCenterUpdateSoftwareAcceptanceResponseMessage.Status.SUCCESS);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        boolean result = nodeService.requestUpdateSoftwareAcceptance(requestMessage);
+
+        assertTrue(result);
+        Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestUpdateSoftwareAcceptanceException() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage = mock(VCenterUpdateSoftwareAcceptanceRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        boolean result = nodeService.requestUpdateSoftwareAcceptance(requestMessage);
+
+        assertFalse(result);
+        Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
     }
 }

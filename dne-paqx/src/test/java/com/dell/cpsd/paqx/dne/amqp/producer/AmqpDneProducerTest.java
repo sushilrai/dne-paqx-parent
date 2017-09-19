@@ -37,6 +37,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRe
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -316,15 +317,15 @@ public class AmqpDneProducerTest
     }
 
     @Test
-    public void publishEsxiHostExitMaintenanceMode() throws Exception
+    public void publishHostMaintenanceMode() throws Exception
     {
-        this.executeTest(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishEsxiHostExitMaintenanceMode);
+        this.executeTest(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishHostMaintenanceMode);
     }
 
     @Test
-    public void publishEsxiHostExitMaintenanceMode_no_capabilities() throws Exception
+    public void publishHostMaintenanceMode_no_capabilities() throws Exception
     {
-        this.executeTest_no_capabilities(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishEsxiHostExitMaintenanceMode);
+        this.executeTest_no_capabilities(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishHostMaintenanceMode);
     }
 
     @Test
@@ -427,6 +428,18 @@ public class AmqpDneProducerTest
     public void publishDatastoreRename_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(DatastoreRenameRequestMessage.class), this.producer::publishDatastoreRename);
+    }
+
+    @Test
+    public void publishUpdateSoftwareAcceptance()
+    {
+        this.executeTest(mock(VCenterUpdateSoftwareAcceptanceRequestMessage.class), this.producer::publishUpdateSoftwareAcceptance);
+    }
+
+    @Test
+    public void publishUpdateSoftwareAcceptance_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(VCenterUpdateSoftwareAcceptanceRequestMessage.class), this.producer::publishUpdateSoftwareAcceptance);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)
