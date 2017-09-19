@@ -30,6 +30,7 @@ public class AddNodeTaskConfig
                 "applyEsxiLicense",
                 "datastoreRename",
                 //TODO: Add all the steps here once tested
+                "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
 

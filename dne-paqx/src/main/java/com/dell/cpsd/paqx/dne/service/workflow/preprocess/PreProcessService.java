@@ -76,12 +76,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Configure Boot Device Idrac", new ConfigureBootDeviceIdracTaskHandler(nodeService));
     }
 
-    @Bean("configurePxeBoot")
-    private WorkflowTask configurePxeBoot(){
-        return createTask("Configure Pxe boot", new ConfigurePxeBootTaskHandler(nodeService));
-    }
-
-
     @Bean("findVClusterTask")
     public WorkflowTask createVClusterTask()
     {
@@ -150,7 +144,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());
         workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());
-        workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("findScaleIO", createFindScaleIOTask());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("discoverNodeInventory", discoverNodeInventory());

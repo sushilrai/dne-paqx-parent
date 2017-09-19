@@ -27,6 +27,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDet
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSoftwareAcceptanceTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigurePxeBootTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         /*workflowTasks.put("installScaleIOSDC", null);
         workflowTasks.put("addNewHostToScaleIO", null);*/
         workflowTasks.put("datastoreRename", datastoreRenameTask());
+        workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
@@ -128,6 +130,11 @@ public class AddNodeService extends BaseService implements IAddNodeService
     private WorkflowTask changeIdracCredentialsTask()
     {
         return createTask("Change Out of Band Management Credentials", new ChangeIdracCredentialsTaskHandler(this.nodeService));
+    }
+
+    @Bean("configurePxeBoot")
+    private WorkflowTask configurePxeBoot(){
+        return createTask("Configure Pxe boot", new ConfigurePxeBootTaskHandler(nodeService));
     }
 
     @Bean("installEsxiTask")

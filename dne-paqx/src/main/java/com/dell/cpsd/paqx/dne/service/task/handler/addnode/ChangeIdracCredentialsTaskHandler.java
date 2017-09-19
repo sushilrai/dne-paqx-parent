@@ -62,12 +62,12 @@ public class ChangeIdracCredentialsTaskHandler  extends BaseTaskHandler implemen
 
         try
         {
-            if (StringUtils.isEmpty(job.getInputParams().getNodeId()))
+            if (StringUtils.isEmpty(job.getInputParams().getSymphonyUuid()))
             {
                 throw new IllegalStateException("No discovered node passed.");
             }
 
-            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials(job.getInputParams().getNodeId());
+            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials(job.getInputParams().getSymphonyUuid());
             
             if ("SUCCESS".equalsIgnoreCase(responseMessage.getMessage()))
             {

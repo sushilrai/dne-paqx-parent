@@ -69,7 +69,7 @@ public class AddNodeServiceImplTest {
     public void testAddNodeWorkFlowTasks_setup() 
     {
         Assert.assertNotNull(workFlowTasks);
-        Assert.assertEquals(18, workFlowTasks.size());
+        Assert.assertEquals(19, workFlowTasks.size());
     }
     
 
@@ -87,5 +87,11 @@ public class AddNodeServiceImplTest {
     @Test
     public void testTaskName_notifyNodeDiscoveryToUpdateStatus() {
     	Assert.assertEquals("Notify Node Discovery To Update Status", workFlowTasks.get("notifyNodeDiscoveryToUpdateStatus").getTaskName());
+    }
+
+
+    @Test
+    public void testTaskName_findConfigurePxeBoot() {
+        Assert.assertEquals("Configure Pxe boot", workFlowTasks.get("configurePxeBoot").getTaskName());
     }
 }

@@ -75,7 +75,7 @@ public class PreProcessServiceImplTest {
     public void testPreProcessWorkFlowTask_setup()
     {
         Assert.assertNotNull(workFlowTasks);
-        Assert.assertEquals(13, workFlowTasks.size());
+        Assert.assertEquals(12, workFlowTasks.size());
     }
 
     @Test
@@ -90,10 +90,6 @@ public class PreProcessServiceImplTest {
     	Assert.assertEquals("Configuring Out of Band Management", workFlowTasks.get("configIdrac").getTaskName());
     }
 
-    @Test
-    public void testTaskName_findConfigurePxeBoot() {
-        Assert.assertEquals("Configure Pxe boot", workFlowTasks.get("configurePxeBoot").getTaskName());
-    }
   
     @Test
     public void testTaskName_configureObmSettings()
