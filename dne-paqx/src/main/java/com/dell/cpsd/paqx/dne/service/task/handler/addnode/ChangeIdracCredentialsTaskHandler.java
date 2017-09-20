@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 
 public class ChangeIdracCredentialsTaskHandler  extends BaseTaskHandler implements IWorkflowTaskHandler
 {
-
     /*
      * The logger instance
      */
@@ -62,18 +61,31 @@ public class ChangeIdracCredentialsTaskHandler  extends BaseTaskHandler implemen
 
         try
         {
-            if (StringUtils.isEmpty(job.getInputParams().getSymphonyUuid()))
+            final NodeExpansionRequest inputParams = job.getInputParams();
+
+            if (inputParams == null)
             {
-                throw new IllegalStateException("No discovered node passed.");
+                throw new IllegalStateException("Job input parameters are null");
             }
 
-            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials(job.getInputParams().getSymphonyUuid());
-            
-            if ("SUCCESS".equalsIgnoreCase(responseMessage.getMessage()))
+            String symphonuUuid = inputParams.getSymphonyUuid();
+
+            if (StringUtils.isEmpty(symphonuUuid))
             {
-                response.setWorkFlowTaskStatus(Status.SUCCEEDED);
-                return true;
+                throw new IllegalStateException("Symphony Id is null");
             }
+
+            ChangeIdracCredentialsResponse responseMessage = this.nodeService.changeIdracCredentials(symphonuUuid);
+
+            boolean succeeded = "SUCCESS".equalsIgnoreCase(responseMessage.getMessage());
+
+            if (!succeeded)
+            {
+                throw new IllegalStateException("Change idrac credentials request failed");
+            }
+
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            return true;
         }
         catch (Exception e)
         {
