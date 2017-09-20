@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.service.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,6 +38,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
  *
  * @since 1.0
  */
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ChangeIdracCredentialsTaskHandlerTest
 {
