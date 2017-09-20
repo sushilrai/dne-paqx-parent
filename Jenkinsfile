@@ -9,6 +9,14 @@ UPSTREAM_TRIGGERS = getUpstreamTriggers([
     "virtualization-capabilities-api"
 ])
 
+properties([[
+    $class: 'BuildBlockerProperty',
+    blockLevel: 'GLOBAL',
+    blockingJobs: UPSTREAM_TRIGGERS.replace(',', '\n'),
+    scanQueueFor: 'ALL',
+    useBuildBlocker: true
+]])
+
 pipeline { 
     parameters {
         string(name: 'dockerImagesDel', defaultValue: 'true')
