@@ -73,13 +73,13 @@ public class NodeExpansionController
      * The service controlling the workflow.
      */
     @Autowired
-    IPreProcessService preProcessService;
+    private IPreProcessService preProcessService;
 
     @Autowired
-    IAddNodeService addNodeService;
+    private IAddNodeService addNodeService;
 
     @Autowired
-    IOrchestrationService orchestrationService;
+    private IOrchestrationService orchestrationService;
 
     public NodeService getNodeService() {
         return nodeService;

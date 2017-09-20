@@ -1595,8 +1595,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse,
                     ListEsxiCredentialDetailsResponseMessage.class);
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null && responseMessage.getComponentUuid() != null
-                    && responseMessage.getEndpointUuid() != null && responseMessage.getCredentialUuid() != null)
+            boolean validResponse = true;
+            validResponse = validResponse && responseMessage != null;
+            validResponse = validResponse && responseMessage.getMessageProperties() != null;
+            validResponse = validResponse && responseMessage.getComponentUuid() != null;
+            validResponse = validResponse && responseMessage.getEndpointUuid() != null;
+            validResponse = validResponse && responseMessage.getCredentialUuid() != null;
+
+            if (validResponse)
             {
                 returnData = new ComponentEndpointIds(responseMessage.getComponentUuid(), responseMessage.getEndpointUuid(), null,
                         responseMessage.getCredentialUuid());

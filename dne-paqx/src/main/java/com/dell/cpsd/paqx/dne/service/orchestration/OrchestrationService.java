@@ -32,6 +32,7 @@ public class OrchestrationService implements IOrchestrationService
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestrationService.class);
+    private static final int WAIT_TIME = 100; // 100 milli-seconds
 
     @Async
     public void orchestrateWorkflow(Job job, IBaseService jobService)
@@ -53,7 +54,7 @@ public class OrchestrationService implements IOrchestrationService
                         {
                             try
                             {
-                                Thread.sleep(100);
+                                Thread.sleep(WAIT_TIME);
                             }
                             catch (Exception e)
                             {

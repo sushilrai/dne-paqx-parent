@@ -20,16 +20,14 @@ public interface WorkflowService
      * 
      * @param   workflowType    The type of workflow.
      * @param   startingStep    The starting step in the workflow.
-     * @param   startingStep     The current step in the workflow.
+     * @param   startingStep    The current step in the workflow.
      * 
      * @return  The job for the specified workflow.
      * 
      * @since   1.0
      */
-    Job createWorkflow(final String workflowType, final String startingStep, 
-            final String currentStatus, Map<String, WorkflowTask> taskMap);
+    Job createWorkflow(String workflowType, String startingStep, String currentStatus, Map<String, WorkflowTask> taskMap);
 
-    
     /**
      * This returns the next step in the workflow, or null if there is none.
      * 
@@ -40,9 +38,7 @@ public interface WorkflowService
      * 
      * @since   1.0
      */
-    Step findNextStep(final String workflowType, final String currentStep);
-
-//    public Task getTask(String currentStep);
+    Step findNextStep(String workflowType, String currentStep);
     
     /**
      * This returns the active workflow jobs.
@@ -53,7 +49,6 @@ public interface WorkflowService
      */
     Job[] findActiveJobs();
 
-    
     /**
      * This returns the job with the specified job identifier.
      * 
@@ -63,9 +58,17 @@ public interface WorkflowService
      * 
      * @since   1.0
      */
-    Job findJob(final UUID jobId);
+    Job findJob(UUID jobId);
 
-    void saveJob(final Job job);
+    /**
+     * This saves the given job to the database
+     *
+     * @param job   The job to save
+     *
+     * @since   1.0
+     */
+    void saveJob(Job job);
+
     /**
      * This advances the job to the next step and assigns the specified status.
      * 
@@ -77,7 +80,14 @@ public interface WorkflowService
      * 
      * @since   1.0
      */
-    Job advanceToNextStep(final Job job, final String currentStep, final String currentStatus);
+    Job advanceToNextStep(Job job, String currentStep, String currentStatus);
 
-    public Map<String, Step> getWorkflowSteps();
+    /**
+     * This gets the workflow steps
+     *
+     * @return The map of steps keyed by step name
+     *
+     * @since   1.0
+     */
+    Map<String, Step> getWorkflowSteps();
 }

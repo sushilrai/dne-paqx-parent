@@ -46,7 +46,7 @@ public class H2DataRepository implements DataServiceRepository
     private static final Logger LOG = LoggerFactory.getLogger(H2DataRepository.class);
 
     @PersistenceContext
-    public EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     @Transactional

@@ -30,6 +30,8 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
     private WorkflowService workflowService;
 
+    private static final int WAIT_TIME = 50000; // 50 seconds
+
     public FindProtectionDomainTaskHandler(WorkflowService workflowService){
         this.workflowService = workflowService;
     }
@@ -40,7 +42,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         LOGGER.info("Execute ProtectionDomain task");
         TaskResponse response = initializeResponse(job);
         try {
-            Thread.sleep(50000);
+            Thread.sleep(WAIT_TIME);
         }
         catch(Exception e){}
         response.setWorkFlowTaskStatus(Status.SUCCEEDED);

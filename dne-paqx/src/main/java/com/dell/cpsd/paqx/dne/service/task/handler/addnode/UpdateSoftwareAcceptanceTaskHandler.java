@@ -12,7 +12,6 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;

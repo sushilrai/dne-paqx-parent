@@ -9,6 +9,7 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostIpRouteConfig;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.model.IpV4Configuration;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -93,8 +94,6 @@ public class HostToInstallEsxiRequestTransformer
         //As per the documentation
         transformSwitchDevices(esxiInstallationInfo);
 
-        esxiInstallationInfo.setNtpServers(host.getNtpServers());
-
         return esxiInstallationInfo;
     }
 
@@ -108,7 +107,7 @@ public class HostToInstallEsxiRequestTransformer
 
             final List<String> searchDomains = hostDnsConfig.getSearchDomains();
 
-            if (searchDomains != null && !searchDomains.isEmpty())
+            if (CollectionUtils.isNotEmpty(searchDomains))
             {
                 esxiInstallationInfo.setDomain(searchDomains.get(0));
             }

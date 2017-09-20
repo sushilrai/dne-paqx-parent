@@ -42,7 +42,7 @@ public enum DnepMessageCode
      * 
      * @since   1.0
      */
-    private DnepMessageCode(int errorCode, String messageCode)
+    DnepMessageCode(int errorCode, String messageCode)
     {
         this.errorCode = errorCode;
         this.messageCode = messageCode;

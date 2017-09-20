@@ -133,7 +133,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
         private       String                                clusterId;
         private       ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse;
 
-        public Validate(final Job job)
+        Validate(final Job job)
         {
             this.job = job;
         }
@@ -183,15 +183,15 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
                 throw new IllegalStateException("Cluster ID is null");
             }
 
-            final ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse = (ListESXiCredentialDetailsTaskResponse) job
+            final ListESXiCredentialDetailsTaskResponse listEsxiDefaultCredentialDetailsTaskResponse = (ListESXiCredentialDetailsTaskResponse) job
                     .getTaskResponseMap().get("retrieveEsxiDefaultCredentialDetails");
 
-            if (listESXiCredentialDetailsTaskResponse == null)
+            if (listEsxiDefaultCredentialDetailsTaskResponse == null)
             {
                 throw new IllegalStateException("Default ESXi Host Credential Details are null.");
             }
 
-            this.listESXiCredentialDetailsTaskResponse = listESXiCredentialDetailsTaskResponse;
+            this.listESXiCredentialDetailsTaskResponse = listEsxiDefaultCredentialDetailsTaskResponse;
 
             return this;
         }

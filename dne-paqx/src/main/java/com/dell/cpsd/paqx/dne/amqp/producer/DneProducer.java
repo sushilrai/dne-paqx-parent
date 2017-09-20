@@ -52,7 +52,7 @@ public interface DneProducer
     void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request);
 
     /**
-     * validate list of clusters
+     * Validate list of clusters
      *
      * @param request
      */
@@ -66,26 +66,31 @@ public interface DneProducer
     void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request);
 
     /**
-     * list the idrac network settings
+     * List the idrac network settings
      *
      * @param request
      */
     void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request);
-    
+
     /**
-     * change idrac credentials
+     * Change idrac credentials
      * 
      * @param request
      */
     void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request);
 
     /**
-     * configure boot device idrac
+     * Configure boot device idrac
      *
      * @param request
      */
     void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request);
 
+    /**
+     * Configure PXE boot options
+     *
+     * @param request
+     */
     void publishConfigurePxeBoot(ConfigurePxeBootRequestMessage request);
 
     /**
@@ -100,56 +105,131 @@ public interface DneProducer
      *
      * @param request ListComponentRequestMessage
      */
-    void publishListScaleIoComponents(final ListComponentRequestMessage request);
+    void publishListScaleIoComponents(ListComponentRequestMessage request);
 
     /**
      * List VCenter Components
      *
      * @param request ListComponentsRequestMessage
      */
-    void publishListVCenterComponents(final ListComponentsRequestMessage request);
+    void publishListVCenterComponents(ListComponentsRequestMessage request);
 
     /**
      * Discover ScaleIO.
      *
      * @param request ListStorageRequestMessage
      */
-    void publishDiscoverScaleIo(final ListStorageRequestMessage request);
+    void publishDiscoverScaleIo(ListStorageRequestMessage request);
 
     /**
      * Discover VCenter.
      *
      * @param request DiscoveryRequestInfoMessage
      */
-    void publishDiscoverVcenter(final DiscoveryRequestInfoMessage request);
+    void publishDiscoverVcenter(DiscoveryRequestInfoMessage request);
 
-    void publishInstallEsxiRequest(final InstallESXiRequestMessage request);
+    /**
+     * Install ESXi on a host
+     *
+     * @param request
+     */
+    void publishInstallEsxiRequest(InstallESXiRequestMessage request);
 
-    void publishAddHostToVCenter(final ClusterOperationRequestMessage request);
+    /**
+     * Add ESXi host to vCenter
+     *
+     * @param request
+     */
+    void publishAddHostToVCenter(ClusterOperationRequestMessage request);
 
-    void publishInstallScaleIoVib(final SoftwareVIBRequestMessage request);
+    /**
+     * Install ScaleIO VIB
+     *
+     * @param request
+     */
+    void publishInstallScaleIoVib(SoftwareVIBRequestMessage request);
 
-    void publishConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage request);
+    /**
+     * Configure ScaleIO VIB
+     *
+     * @param request
+     */
+    void publishConfigureScaleIoVib(SoftwareVIBConfigureRequestMessage request);
 
-    void publishAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage request);
+    /**
+     * Add ESXi host to virtual distributed switch
+     *
+     * @param request
+     */
+    void publishAddHostToDvSwitch(AddHostToDvSwitchRequestMessage request);
 
-    void publishDeployVmFromTemplate(final DeployVMFromTemplateRequestMessage request);
+    /**
+     * Deploy VM from a template
+     *
+     * @param request
+     */
+    void publishDeployVmFromTemplate(DeployVMFromTemplateRequestMessage request);
 
-    void publishEnablePciPassthrough(final EnablePCIPassthroughRequestMessage request);
+    /**
+     * Enable PCI pass-through
+     *
+     * @param request
+     */
+    void publishEnablePciPassthrough(EnablePCIPassthroughRequestMessage request);
 
-    void publishRebootHost(final HostPowerOperationRequestMessage request);
+    /**
+     * Reboot the host
+     *
+     * @param request
+     */
+    void publishRebootHost(HostPowerOperationRequestMessage request);
 
-    void publishSetPciPassthrough(final UpdatePCIPassthruSVMRequestMessage request);
+    /**
+     * Set PCI pass-through
+     *
+     * @param request
+     */
+    void publishSetPciPassthrough(UpdatePCIPassthruSVMRequestMessage request);
 
-    void publishApplyEsxiLicense(final AddEsxiHostVSphereLicenseRequest request);
+    /**
+     * Apply the ESXi host vSphere license
+     *
+     * @param request
+     */
+    void publishApplyEsxiLicense(AddEsxiHostVSphereLicenseRequest request);
 
-    void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage);
+    /**
+     * List ESXi host credential details
+     *
+     * @param requestMessage
+     */
+    void publishListExsiCredentialDetails(ListEsxiCredentialDetailsRequestMessage requestMessage);
 
-    void publishHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
+    /**
+     * Switch host maintenance modes
+     *
+     * @param requestMessage
+     */
+    void publishHostMaintenanceMode(HostMaintenanceModeRequestMessage requestMessage);
 
+    /**
+     * Request ESS to validate storage pools
+     *
+     * @param requestMessage
+     */
     void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage);
 
+    /**
+     * Rename the ESXi host's datastore
+     *
+     * @param requestMessage
+     */
     void publishDatastoreRename(DatastoreRenameRequestMessage requestMessage);
 
+    /**
+     * Update the software acceptance level on the ESXi host
+     *
+     * @param requestMessage
+     */
     void publishUpdateSoftwareAcceptance(VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
 }

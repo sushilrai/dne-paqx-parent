@@ -24,9 +24,9 @@ import java.util.UUID;
  */
 
 public interface IPreProcessService extends IBaseService {
-    Job createWorkflow(final String workflowType, final String startingStep,
-                              final String currentStatus);
-    NodeExpansionResponse makeNodeExpansionResponse(final Job job);
+    Job createWorkflow(String workflowType, String startingStep, String currentStatus);
+
+    NodeExpansionResponse makeNodeExpansionResponse(Job job);
 
     Job findJob(UUID jobId);
 

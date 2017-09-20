@@ -31,6 +31,8 @@ public class FindSystemDataTaskHandler extends BaseTaskHandler implements IWorkf
 
     private WorkflowService workflowService;
 
+    private static final int WAIT_TIME = 50000; // 50 seconds
+
     public FindSystemDataTaskHandler(WorkflowService workflowService){
         this.workflowService = workflowService;
     }
@@ -41,7 +43,7 @@ public class FindSystemDataTaskHandler extends BaseTaskHandler implements IWorkf
         LOGGER.info("Execute SystemData task");
         TaskResponse response = initializeResponse(job);
         try {
-            Thread.sleep(50000);
+            Thread.sleep(WAIT_TIME);
         }
         catch(Exception e){}
         response.setWorkFlowTaskStatus(Status.SUCCEEDED);

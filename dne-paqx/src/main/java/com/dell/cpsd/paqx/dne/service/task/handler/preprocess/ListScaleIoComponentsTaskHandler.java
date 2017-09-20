@@ -11,7 +11,6 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ListScaleIoComponentsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

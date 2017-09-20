@@ -75,61 +75,49 @@ public class DiscoveryInfoToVCenterDomainTransformer
         returnVal.setName(datacenter.getName());
 
         final List<VirtualMachine> virtualMachines = new ArrayList<>();
-        if (datacenter.getVms() != null)
+        if (datacenter.getVms() != null && !datacenter.getVms().values().isEmpty())
         {
-            if (!datacenter.getVms().values().isEmpty())
-            {
-                // Transform vms
-                virtualMachines.addAll(datacenter.getVms().values().stream().filter(Objects::nonNull).map(this::transformVirtualMachine)
-                        .collect(Collectors.toList()));
-
-            }
+            // Transform vms
+            virtualMachines.addAll(datacenter.getVms().values().stream().filter(Objects::nonNull).map(this::transformVirtualMachine)
+                    .collect(Collectors.toList()));
         }
-        if (datacenter.getDatastores() != null)
+        if (datacenter.getDatastores() != null && !datacenter.getDatastores().values().isEmpty())
         {
-            if (!datacenter.getDatastores().values().isEmpty())
-            {
-                // Transform and link datastores
-                final List<Datastore> datastores = datacenter.getDatastores().values().stream().filter(Objects::nonNull)
-                        .map(datastore -> transformDatastore(datastore, returnVal, virtualMachines)).collect(Collectors.toList());
-                returnVal.setDatastoreList(datastores);
-            }
+            // Transform and link datastores
+            final List<Datastore> datastores = datacenter.getDatastores().values().stream().filter(Objects::nonNull)
+                    .map(datastore -> transformDatastore(datastore, returnVal, virtualMachines)).collect(Collectors.toList());
+
+            returnVal.setDatastoreList(datastores);
         }
 
         // Transform and link dvswitches
-        if (datacenter.getDvSwitches() != null)
+        if (datacenter.getDvSwitches() != null && !datacenter.getDvSwitches().values().isEmpty())
         {
-            if (!datacenter.getDvSwitches().values().isEmpty())
-            {
-                final List<com.dell.cpsd.virtualization.capabilities.api.PortGroup> portGroups = datacenter.getPortgroups().values()
-                        .stream().filter(Objects::nonNull).collect(Collectors.toList());
+            final List<com.dell.cpsd.virtualization.capabilities.api.PortGroup> portGroups = datacenter.getPortgroups().values()
+                    .stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-                final List<DVSwitch> dvSwitches = datacenter.getDvSwitches().values().stream().filter(Objects::nonNull)
-                        .map(dvSwitch -> transformDVSwitch(dvSwitch, returnVal, portGroups)).collect(Collectors.toList());
-                returnVal.setDvSwitchList(dvSwitches);
-            }
+            final List<DVSwitch> dvSwitches = datacenter.getDvSwitches().values().stream().filter(Objects::nonNull)
+                    .map(dvSwitch -> transformDVSwitch(dvSwitch, returnVal, portGroups)).collect(Collectors.toList());
+
+            returnVal.setDvSwitchList(dvSwitches);
         }
 
-        if (datacenter.getClusters() != null)
+        if (datacenter.getClusters() != null && !datacenter.getClusters().values().isEmpty())
         {
-            if (!datacenter.getClusters().values().isEmpty())
-            {
-                // Transform and link clusters
-                final List<Cluster> clusters = datacenter.getClusters().values().stream().filter(Objects::nonNull)
-                        .map(cluster -> transformCluster(cluster, returnVal, virtualMachines)).collect(Collectors.toList());
-                returnVal.setClusterList(clusters);
-            }
+            // Transform and link clusters
+            final List<Cluster> clusters = datacenter.getClusters().values().stream().filter(Objects::nonNull)
+                    .map(cluster -> transformCluster(cluster, returnVal, virtualMachines)).collect(Collectors.toList());
+
+            returnVal.setClusterList(clusters);
         }
 
-        if (datacenter.getNetworks() != null)
+        if (datacenter.getNetworks() != null && !datacenter.getNetworks().isEmpty())
         {
-            if (!datacenter.getNetworks().isEmpty())
-            {
-                // Transform and link networks
-                final List<Network> networks = datacenter.getNetworks().values().stream().filter(Objects::nonNull)
-                        .map(network -> transformNetwork(network, returnVal)).collect(Collectors.toList());
-                returnVal.setNetworkList(networks);
-            }
+            // Transform and link networks
+            final List<Network> networks = datacenter.getNetworks().values().stream().filter(Objects::nonNull)
+                    .map(network -> transformNetwork(network, returnVal)).collect(Collectors.toList());
+
+            returnVal.setNetworkList(networks);
         }
         // TODO: Link Host Pnics to Dvswitches
         // TODO: Link Datastores to Hosts

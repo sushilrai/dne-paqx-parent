@@ -47,6 +47,8 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Autowired
     private DataServiceRepository repository;
 
+    private static final int PING_TIMEOUT = 120000; // 120 seconds
+
     @Bean("findDiscoveredNodesTask")
     private WorkflowTask findDiscoveredNodesTask()
     {
@@ -67,7 +69,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("pingIdracTask")
     private WorkflowTask pingIdracTask()
     {
-        return createTask("Ping iDRAC IP Address", new PingIdracTaskHandler(120000));
+        return createTask("Ping iDRAC IP Address", new PingIdracTaskHandler(PING_TIMEOUT));
     }
 
     @Bean("configureBootDeviceIdrac")

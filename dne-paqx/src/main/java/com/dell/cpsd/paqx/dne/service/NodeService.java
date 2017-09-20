@@ -131,37 +131,37 @@ public interface NodeService
 
     boolean requestVCenterComponents() throws ServiceTimeoutException, ServiceExecutionException;
 
-    boolean requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds, final String jobId)
+    boolean requestDiscoverScaleIo(ComponentEndpointIds componentEndpointIds, String jobId)
             throws ServiceTimeoutException, ServiceExecutionException;
 
-    boolean requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
+    boolean requestDiscoverVCenter(ComponentEndpointIds componentEndpointIds, String jobId)
             throws ServiceTimeoutException, ServiceExecutionException;
 
-    boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo, final String idracIp);
+    boolean requestInstallEsxi(EsxiInstallationInfo esxiInstallationInfo, String idracIp);
 
-    boolean requestAddHostToVCenter(final ClusterOperationRequestMessage requestMessage);
+    boolean requestAddHostToVCenter(ClusterOperationRequestMessage requestMessage);
 
-    boolean requestInstallSoftwareVib(final SoftwareVIBRequestMessage requestMessage);
+    boolean requestInstallSoftwareVib(SoftwareVIBRequestMessage requestMessage);
 
-    boolean requestConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage requestMessage);
+    boolean requestConfigureScaleIoVib(SoftwareVIBConfigureRequestMessage requestMessage);
 
-    boolean requestAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage requestMessage);
+    boolean requestAddHostToDvSwitch(AddHostToDvSwitchRequestMessage requestMessage);
 
-    boolean requestDeployScaleIoVm(final DeployVMFromTemplateRequestMessage requestMessage);
+    boolean requestDeployScaleIoVm(DeployVMFromTemplateRequestMessage requestMessage);
 
-    boolean requestEnablePciPassThrough(final EnablePCIPassthroughRequestMessage requestMessage);
+    boolean requestEnablePciPassThrough(EnablePCIPassthroughRequestMessage requestMessage);
 
-    boolean requestHostReboot(final HostPowerOperationRequestMessage requestMessage);
+    boolean requestHostReboot(HostPowerOperationRequestMessage requestMessage);
 
-    boolean requestSetPciPassThrough(final UpdatePCIPassthruSVMRequestMessage requestMessage);
+    boolean requestSetPciPassThrough(UpdatePCIPassthruSVMRequestMessage requestMessage);
 
-    boolean requestInstallEsxiLicense(final AddEsxiHostVSphereLicenseRequest requestMessage);
+    boolean requestInstallEsxiLicense(AddEsxiHostVSphereLicenseRequest requestMessage);
 
-    ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage);
+    ComponentEndpointIds listDefaultCredentials(ListEsxiCredentialDetailsRequestMessage requestMessage);
 
-    boolean requestHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage);
+    boolean requestHostMaintenanceMode(HostMaintenanceModeRequestMessage requestMessage);
 
-    boolean requestDatastoreRename(final DatastoreRenameRequestMessage requestMessage);
+    boolean requestDatastoreRename(DatastoreRenameRequestMessage requestMessage);
 
-    boolean requestUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
+    boolean requestUpdateSoftwareAcceptance(VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
 }

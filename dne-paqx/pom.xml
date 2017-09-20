@@ -140,10 +140,10 @@
             <artifactId>SDKClient-driver</artifactId>
             <version>1.01-SNAPSHOT</version>
             <exclusions>
-               <exclusion>
-                   <groupId>ch.qos.logback</groupId>
-                   <artifactId>logback-classic</artifactId>
-               </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 

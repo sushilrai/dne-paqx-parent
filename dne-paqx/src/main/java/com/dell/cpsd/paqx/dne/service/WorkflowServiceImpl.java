@@ -128,10 +128,6 @@ public class WorkflowServiceImpl implements WorkflowService
         return foundJob;
     }
 
-//    @Override
-//    public Task getTask(String currentStep){
-//        return workflowTasks.get(currentStep);
-//    }
     /**
      * {@inheritDoc}
      */
@@ -151,6 +147,10 @@ public class WorkflowServiceImpl implements WorkflowService
         return job;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void saveJob(final Job job){
         jobRepository.save(job);
     }

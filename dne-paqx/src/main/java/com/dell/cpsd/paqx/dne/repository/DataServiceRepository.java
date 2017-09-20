@@ -41,7 +41,7 @@ public interface DataServiceRepository
      * @param componentType VCenter/ScaleIO
      * @return ComponentEndpointIds
      */
-    ComponentEndpointIds getComponentEndpointIds(final String componentType);
+    ComponentEndpointIds getComponentEndpointIds(String componentType);
 
     /**
      * This method returns the component endpoint uuids based on
@@ -50,19 +50,19 @@ public interface DataServiceRepository
      * @param endpointType VCENTER-CUSTOMER/VCENTER-MANAGEMENT
      * @return ComponentEndpointIds
      */
-    ComponentEndpointIds getVCenterComponentEndpointIdsByEndpointType(final String endpointType);
+    ComponentEndpointIds getVCenterComponentEndpointIdsByEndpointType(String endpointType);
 
-    boolean saveVCenterData(final String jobId, final VCenter vCenterData);
+    boolean saveVCenterData(String jobId, VCenter vCenterData);
 
-    boolean saveScaleIoData(final String jobId, final ScaleIOData scaleIOData);
+    boolean saveScaleIoData(String jobId, ScaleIOData scaleIOData);
 
-    Host getVCenterHost(final String hostName) throws NoResultException;
+    Host getVCenterHost(String hostName) throws NoResultException;
 
     Host getExistingVCenterHost() throws NoResultException;
 
     List<PortGroup> getPortGroups();
 
-    ScaleIOData getScaleIoDataByJobId(final String jobId);
+    ScaleIOData getScaleIoDataByJobId(String jobId);
 
     /**
      * The MVP Approach, later can be integrated with the Job,
@@ -74,15 +74,15 @@ public interface DataServiceRepository
 
     List<PciDevice> getPciDeviceList();
 
-    String getClusterId(final String clusterName);
+    String getClusterId(String clusterName);
 
-    String getDataCenterName(final String clusterName);
+    String getDataCenterName(String clusterName);
 
     String getVlanIdVmk0();
 
-    boolean saveNodeInventory(final NodeInventory nodeInventory);
+    boolean saveNodeInventory(NodeInventory nodeInventory);
 
-    NodeInventory getNodeIventory(final String symphonyUUID) throws NoResultException;
+    NodeInventory getNodeIventory(String symphonyUUID) throws NoResultException;
 
     String getDomainName();
 }

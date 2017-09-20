@@ -15,11 +15,10 @@ import java.util.UUID;
 
 public interface IAddNodeService extends IBaseService {
 
-    Job createWorkflow(final String workflowType, final String startingStep,
-                                                        final String currentStatus);
+    Job createWorkflow(String workflowType, String startingStep, String currentStatus);
 
     Job findJob(UUID jobId);
 
-    NodeExpansionResponse makeNodeExpansionResponse(final Job job);
+    NodeExpansionResponse makeNodeExpansionResponse(Job job);
 
 }
