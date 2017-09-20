@@ -4,7 +4,7 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
+package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
@@ -66,23 +66,7 @@ public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWor
 
         try
         {
-            Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
-            if (findNodeTask == null)
-            {
-                throw new IllegalStateException("No discovered node task found.");
-            }
-            if (findNodeTask.getResults() == null)
-            {
-                throw new IllegalStateException("No results found.");
-            }
-
-            if (findNodeTask.getResults().get("symphonyUUID") == null)
-            {
-                throw new IllegalStateException("No discovered node info found.");
-            }
-
-            String uuid = findNodeTask.getResults().get("symphonyUUID");
+            String uuid = job.getInputParams().getSymphonyUuid();
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
             LOGGER.info("uuid:" + uuid);
