@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Preprocess service.
+ *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -33,7 +35,6 @@ import java.util.UUID;
  *
  * @since 1.0
  */
-
 @Service
 public class PreProcessService extends BaseService implements IPreProcessService
 {
@@ -164,7 +165,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return job;
     }
 
-    ///////////////////////////////////////////////
     public Job findJob(UUID jobId)
     {
         final Job job = workflowService.findJob(jobId);
@@ -176,15 +176,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
     {
         return makeNodeExpansionResponse(job, workflowService);
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////
-    //
-
-    //    public String findPathFromStep(final String step)
-    //    {
-    //        return propertyAsMap.get(step);
-    //    }
 
     public WorkflowService getWorkflowService()
     {
