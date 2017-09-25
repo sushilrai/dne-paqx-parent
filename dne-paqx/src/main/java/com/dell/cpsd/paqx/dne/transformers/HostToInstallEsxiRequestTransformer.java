@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.service.model.IpV4Configuration;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.NoResultException;
@@ -34,9 +35,14 @@ import java.util.List;
 public class HostToInstallEsxiRequestTransformer
 {
     private static final Logger LOG             = LoggerFactory.getLogger(HostToInstallEsxiRequestTransformer.class);
-    private static final String VERSION         = "6.0";
     private static final String DELL_NODE_KARGS = "netdevice=vmnic0";
     private final DataServiceRepository dataServiceRepository;
+
+    @Value("${rackhd.esxi.install.repo.url}")
+    private String rackhdEsxiRepoUrl;
+
+    @Value("${rackhd.esxi.install.repo.version}")
+    private String rackhdEsxiRepoVersion;
 
     public HostToInstallEsxiRequestTransformer(final DataServiceRepository dataServiceRepository)
     {
@@ -78,11 +84,13 @@ public class HostToInstallEsxiRequestTransformer
     {
         final EsxiInstallationInfo esxiInstallationInfo = new EsxiInstallationInfo();
 
+        esxiInstallationInfo.setRepo(rackhdEsxiRepoUrl);
+
         esxiInstallationInfo.setIdentifier(symphonyUuid);
 
         //Specific to Dell Node
         esxiInstallationInfo.setKargs(DELL_NODE_KARGS);
-        esxiInstallationInfo.setVersion(VERSION);
+        esxiInstallationInfo.setVersion(rackhdEsxiRepoVersion);
 
         // Based on any existing host in the vcenter
         transformHostDnsConfig(esxiInstallationInfo, host.getHostDnsConfig(), esxiManagementHostName);
