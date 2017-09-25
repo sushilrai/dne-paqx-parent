@@ -8,12 +8,13 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,10 +44,13 @@ import static org.mockito.Mockito.verify;
 public class DatastoreRenameTaskHandlerTest
 {
     @Mock
+    private WorkflowTask task;
+
+    @Mock
     private Job job;
 
     @Mock
-    private TaskResponse response;
+    private DatastoreRenameTaskResponse response;
 
     @Mock
     private NodeService service;
@@ -59,7 +65,10 @@ public class DatastoreRenameTaskHandlerTest
     private ComponentEndpointIds componentEndpointIds;
 
     private DatastoreRenameTaskHandler handler;
+    private String taskName = "datastoreRenameTask";
+    private String stepName = "datastoreRenameStep";
     private final String esxiManagementHostname = "fpr1-h17";
+    private final String dataStorweName = "DAS17";
 
     @Before
     public void setUp() throws Exception
@@ -81,6 +90,7 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
+        verify(this.response).setDatastoreName(this.dataStorweName);
     }
 
     @Test
@@ -97,6 +107,7 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
+        verify(this.response, never()).setDatastoreName(anyString());
     }
 
     @Test
@@ -110,6 +121,7 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
+        verify(this.response, never()).setDatastoreName(anyString());
     }
 
     @Test
@@ -124,6 +136,7 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
+        verify(this.response, never()).setDatastoreName(anyString());
     }
 
     @Test
@@ -139,5 +152,20 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
+        verify(this.response, never()).setDatastoreName(anyString());
+    }
+
+    @Test
+    public void testInitializeResponse_should_successfully_create_the_response()
+    {
+        doReturn(this.task).when(this.job).getCurrentTask();
+        doReturn(this.taskName).when(this.task).getTaskName();
+        doReturn(this.stepName).when(this.job).getStep();
+
+        DatastoreRenameTaskResponse response = this.handler.initializeResponse(this.job);
+
+        assertNotNull(response);
+        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

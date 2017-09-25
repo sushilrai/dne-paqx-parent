@@ -11,9 +11,9 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
@@ -69,7 +69,7 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
     {
         LOGGER.info("Execute datastore rename task");
 
-        final TaskResponse response = initializeResponse(job);
+        final DatastoreRenameTaskResponse response = initializeResponse(job);
 
         try
         {
@@ -95,11 +95,10 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("Hostname is null");
             }
 
-            final String oldDatastoreName = "datastore1";
             final String newDatastoreName = buildDatastoreNewName(esxiManagementHostname);
 
             final DatastoreRenameRequestMessage requestMessage = new DatastoreRenameRequestMessage();
-            requestMessage.setDatastoreName(oldDatastoreName);
+            requestMessage.setHostname(esxiManagementHostname);
             requestMessage.setNewDatastoreName(newDatastoreName);
             requestMessage.setCredentials(new Credentials(vCenterComponentEndpointIdsByEndpointType.getEndpointUrl(), null, null));
             requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
@@ -114,6 +113,7 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("Datastore rename failed");
             }
 
+            response.setDatastoreName(newDatastoreName);
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             return true;
         }
@@ -125,6 +125,17 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
 
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
+    }
+
+    @Override
+    public DatastoreRenameTaskResponse initializeResponse(Job job)
+    {
+        final DatastoreRenameTaskResponse response = new DatastoreRenameTaskResponse();
+        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
+        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
+        job.addTaskResponse(job.getStep(), response);
+
+        return response;
     }
 
     public static String buildDatastoreNewName(final String esxiManagementHostname)

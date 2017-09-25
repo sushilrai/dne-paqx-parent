@@ -6,7 +6,8 @@
 package com.dell.cpsd.paqx.dne.service.model;
 
 /**
- * TODO: Document Usage
+ * Pojo for managing datastore rename attributes.
+ *
  * <p/>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * <p/>
@@ -14,17 +15,17 @@ package com.dell.cpsd.paqx.dne.service.model;
  * @version 1.0
  * @since 1.0
  */
-public class InstallEsxiTaskResponse extends TaskResponse
+public class DatastoreRenameTaskResponse extends TaskResponse
 {
-    private String hostname;
+    private String datastoreName;
 
-    public String getHostname()
+    public String getDatastoreName()
     {
-        return hostname;
+        return datastoreName;
     }
 
-    public void setHostname(final String hostname)
+    public void setDatastoreName(final String datastoreName)
     {
-        this.hostname = hostname;
+        this.datastoreName = datastoreName;
     }
 }
