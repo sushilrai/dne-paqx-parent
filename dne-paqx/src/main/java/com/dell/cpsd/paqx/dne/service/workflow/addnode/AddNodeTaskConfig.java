@@ -30,6 +30,12 @@ public class AddNodeTaskConfig
                 "applyEsxiLicense",
                 "datastoreRename",
                 //TODO: Add all the steps here once tested
+                //"exitHostMaintenanceMode",
+                //"installScaleIoVib",
+                //"enterHostMaintenanceMode",
+                //"rebootHost",
+                //"exitHostMaintenanceMode",
+                //"configureScaleIoVib",
                 "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
