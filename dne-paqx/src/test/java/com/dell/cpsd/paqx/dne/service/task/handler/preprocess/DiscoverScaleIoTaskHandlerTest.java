@@ -22,8 +22,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -65,8 +67,6 @@ public class DiscoverScaleIoTaskHandlerTest
 
     private DiscoverScaleIoTaskHandler handler;
 
-    private DiscoverScaleIoTaskHandler spy;
-    
     private final String taskName = "discoverScaleIo";
 
     private final String stepName = "discoverScaleIoStep";
@@ -74,19 +74,20 @@ public class DiscoverScaleIoTaskHandlerTest
     @Before
     public void setup() throws Exception
     {
-        this.handler = new DiscoverScaleIoTaskHandler(this.service, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new DiscoverScaleIoTaskHandler(this.service, this.repository));
     }
 
     @Test
     public void executeTaskSuccessful() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         when(this.job.getId()).thenReturn(UUID.randomUUID());
         doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString());
         doReturn(true).when(this.service).requestDiscoverScaleIo(any(), anyString());
 
-        assertEquals(true, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -96,10 +97,12 @@ public class DiscoverScaleIoTaskHandlerTest
     {
         final ComponentEndpointIds emptyComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(emptyComponentEndpointIds).when(this.repository).getComponentEndpointIds(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -107,12 +110,14 @@ public class DiscoverScaleIoTaskHandlerTest
     @Test
     public void executeTaskFailure() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         when(this.job.getId()).thenReturn(UUID.randomUUID());
         doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString());
         doReturn(false).when(this.service).requestDiscoverScaleIo(any(), anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -125,6 +130,7 @@ public class DiscoverScaleIoTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         final DiscoverScaleIoTaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

@@ -31,7 +31,6 @@ import java.util.Map;
  */
 public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FindVClusterTaskHandler.class);
 
     private NodeService         nodeService;
@@ -50,7 +49,8 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
         {
             List<ClusterInfo> clusterInfo = nodeService.listClusters();
             ValidateVcenterClusterResponseMessage responseMsg = nodeService.validateClusters(clusterInfo);
-            if ( responseMsg.getClusters().size() > 0 ) {
+            if ( responseMsg.getClusters().size() > 0 )
+            {
                 Map<String, String> result = new HashMap<>();
                 result.put("clusterName", responseMsg.getClusters().get(0));
                 response.setResults(result);

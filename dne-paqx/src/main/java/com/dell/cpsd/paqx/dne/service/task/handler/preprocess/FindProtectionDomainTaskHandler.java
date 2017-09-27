@@ -25,7 +25,8 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  */
 @Component
-public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
+public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(FindProtectionDomainTaskHandler.class);
 
     private WorkflowService workflowService;
@@ -41,7 +42,8 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     {
         LOGGER.info("Execute ProtectionDomain task");
         TaskResponse response = initializeResponse(job);
-        try {
+        try
+        {
             Thread.sleep(WAIT_TIME);
         }
         catch(Exception e){}

@@ -28,7 +28,8 @@ import java.util.Map;
  * @since 1.0
  */
 @Component
-public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
+public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+{
     /**
      * The logger instance
      */
@@ -79,11 +80,13 @@ public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWor
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
-            else{
+            else
+            {
                 response.addError(bootDeviceIdracStatus.getErrors().toString());
             }
         }
-        catch(Exception e){
+        catch(Exception e)
+        {
             LOGGER.error("Error showing boot order status", e);
             response.addError(e.toString());
         }

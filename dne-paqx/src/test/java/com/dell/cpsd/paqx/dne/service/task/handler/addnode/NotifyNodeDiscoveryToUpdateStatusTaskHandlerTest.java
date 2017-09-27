@@ -20,8 +20,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -56,7 +58,6 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     private NodeExpansionRequest request;
 
     private NotifyNodeDiscoveryToUpdateStatusTaskHandler handler;
-    private NotifyNodeDiscoveryToUpdateStatusTaskHandler spy;
 
     private String taskName = "notifyNodeDiscoveryToUpdateStatusTask";
     private String stepName = "notifyNodeDiscoveryToUpdateStatusStep";
@@ -70,8 +71,7 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     @Before
     public void setUp()
     {
-        this.handler = new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.service);
-        this.spy = spy(this.handler);
+        this.handler = spy(new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.service));
     }
 
     /**
@@ -85,12 +85,14 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     @Test
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(true).when(this.service).notifyNodeAllocationComplete(anyString());
 
-        assertEquals(true, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.service).notifyNodeAllocationComplete(any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
@@ -109,10 +111,12 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     {
         NodeExpansionRequest nullRequest = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullRequest).when(this.job).getInputParams();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.service, never()).notifyNodeAllocationComplete(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
@@ -131,11 +135,13 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     {
         String emptySymphonyUuid = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(emptySymphonyUuid).when(this.request).getSymphonyUuid();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.service, never()).notifyNodeAllocationComplete(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
@@ -152,12 +158,14 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     @Test
     public void testExecuteTask_node_discovery_service_error() throws ServiceTimeoutException, ServiceExecutionException
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(false).when(this.service).notifyNodeAllocationComplete(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.service).notifyNodeAllocationComplete(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
@@ -174,6 +182,7 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         TaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

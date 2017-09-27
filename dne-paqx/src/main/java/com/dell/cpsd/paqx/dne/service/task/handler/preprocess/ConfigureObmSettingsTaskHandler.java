@@ -32,8 +32,8 @@ import java.util.Map;
  * @since 1.0
  */
 
-public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
-
+public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+{
     /**
      * The logger instance
      */
@@ -112,11 +112,13 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
-            else{
+            else
+            {
                 response.addError(obmSettingsResponse.getErrors().toString());
             }
         }
-        catch(Exception e){
+        catch(Exception e)
+        {
             LOGGER.error("Error showing obm settings", e);
             response.addError(e.toString());
         }

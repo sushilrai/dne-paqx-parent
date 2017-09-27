@@ -85,7 +85,9 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
                                 response.addError(f);
                             });
                             return false;
-                        } else if (storageResponseMessage.getValidStorage().size() > 0) {
+                        }
+                        else if (storageResponseMessage.getValidStorage().size() > 0)
+                        {
                             Map<String, String> result = new HashMap<>();
                             result.put("storagePool", storageResponseMessage.getValidStorage().get(0));
                             response.setResults(result);

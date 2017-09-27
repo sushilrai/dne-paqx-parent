@@ -26,8 +26,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -80,7 +82,6 @@ public class AddHostToVCenterTaskHandlerTest
     private NodeExpansionRequest inputParams;
 
     private AddHostToVCenterTaskHandler handler;
-    private AddHostToVCenterTaskHandler spy;
 
     private String hostname = "hostname_1.2.3.4";
     private String taskName = "addHostToVCenterTask";
@@ -94,15 +95,13 @@ public class AddHostToVCenterTaskHandlerTest
     @Before
     public void setUp() throws Exception
     {
-        this.handler = new AddHostToVCenterTaskHandler(this.service, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new AddHostToVCenterTaskHandler(this.service, this.repository));
     }
 
     @Test
     public void executeTask_successful_case() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get("installEsxi");
@@ -112,7 +111,10 @@ public class AddHostToVCenterTaskHandlerTest
         when(repository.getClusterId(anyString())).thenReturn("cluster-id");
         doReturn(this.esXiCredentialDetailsTaskResponse).when(this.taskResponseMap).get("retrieveEsxiDefaultCredentialDetails");
         doReturn(true).when(this.service).requestAddHostToVCenter(any());
-        assertEquals(true, this.spy.executeTask(this.job));
+
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -122,11 +124,12 @@ public class AddHostToVCenterTaskHandlerTest
     {
         final ComponentEndpointIds nullComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -136,13 +139,14 @@ public class AddHostToVCenterTaskHandlerTest
     {
         final InstallEsxiTaskResponse nullInstallEsxiTaskResponse = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(nullInstallEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -152,14 +156,15 @@ public class AddHostToVCenterTaskHandlerTest
     {
         final String nullHostname = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(nullHostname).when(this.installEsxiTaskResponse).getHostname();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -167,8 +172,7 @@ public class AddHostToVCenterTaskHandlerTest
     @Test
     public void executeTask_failed_add_host_to_vcenter_request() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get("installEsxi");
@@ -177,10 +181,11 @@ public class AddHostToVCenterTaskHandlerTest
         when(inputParams.getClusterName()).thenReturn("cluster-name");
         when(repository.getClusterId(anyString())).thenReturn("cluster-id");
         doReturn(this.esXiCredentialDetailsTaskResponse).when(this.taskResponseMap).get("retrieveEsxiDefaultCredentialDetails");
-
         doReturn(false).when(this.service).requestAddHostToVCenter(any());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -193,6 +198,7 @@ public class AddHostToVCenterTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         final AddHostToVCenterResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

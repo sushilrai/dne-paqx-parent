@@ -18,8 +18,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -57,7 +59,6 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     private String stepName = "listEsxiCredentialsStep";
 
     private ListESXiCredentialDetailsTaskHandler handler;
-    private ListESXiCredentialDetailsTaskHandler spy;
 
     /**
      * The test setup.
@@ -67,8 +68,7 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     @Before
     public void setUp() throws Exception
     {
-        this.handler = new ListESXiCredentialDetailsTaskHandler(this.service);
-        this.spy = spy(this.handler);
+        this.handler = spy(new ListESXiCredentialDetailsTaskHandler(this.service));
     }
 
     /**
@@ -79,10 +79,12 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     @Test
     public void executeTask_successful_case() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.service).listDefaultCredentials(any());
 
-        assertEquals(true, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -97,10 +99,12 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     {
         ComponentEndpointIds nullComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.service).listDefaultCredentials(any());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -118,6 +122,7 @@ public class ListESXiCredentialDetailsTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         ListESXiCredentialDetailsTaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

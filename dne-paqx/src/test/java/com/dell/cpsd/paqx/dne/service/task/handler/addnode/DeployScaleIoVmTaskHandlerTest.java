@@ -24,8 +24,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -74,7 +76,6 @@ public class DeployScaleIoVmTaskHandlerTest
     private Map<String, TaskResponse> taskResponseMap;
 
     private DeployScaleIoVmTaskHandler handler;
-    private DeployScaleIoVmTaskHandler spy;
 
     private String hostname = "hostname_1.2.3.4";
     private String clusterName = "cluster_01";
@@ -86,8 +87,7 @@ public class DeployScaleIoVmTaskHandlerTest
     @Before
     public void setUp() throws Exception
     {
-        this.handler = new DeployScaleIoVmTaskHandler(this.service, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new DeployScaleIoVmTaskHandler(this.service, this.repository));
     }
 
     /**
@@ -98,7 +98,7 @@ public class DeployScaleIoVmTaskHandlerTest
     @Test
     public void executeTask_successful_case() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
@@ -109,7 +109,9 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
         doReturn(true).when(this.service).requestDeployScaleIoVm(any());
 
-        assertEquals(true, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response).setNewVMName(argThat(value -> value.contains(this.scaleIOSVMManagementIpAddress)));
         verify(this.response, never()).addError(anyString());
@@ -125,10 +127,12 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         ComponentEndpointIds nullComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -144,12 +148,14 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         InstallEsxiTaskResponse nullInstallEsxiTaskResponse = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(nullInstallEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -165,13 +171,15 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         String nullHostname = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(nullHostname).when(this.installEsxiTaskResponse).getHostname();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -187,14 +195,16 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         NodeExpansionRequest nullRequest = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
         doReturn(nullRequest).when(this.job).getInputParams();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -210,7 +220,7 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         String nullClusterName = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
@@ -218,7 +228,9 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(nullClusterName).when(this.request).getClusterName();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -234,7 +246,7 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         String nullDataCenterName = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
@@ -243,7 +255,9 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(nullDataCenterName).when(this.repository).getDataCenterName(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -259,7 +273,7 @@ public class DeployScaleIoVmTaskHandlerTest
     {
         String nullScaleIOSVMManagementIpAddress = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
@@ -269,7 +283,9 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(nullScaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -283,7 +299,7 @@ public class DeployScaleIoVmTaskHandlerTest
     @Test
     public void executeTask_failed_deploy_scaleio_vm_request() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
@@ -294,7 +310,9 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
         doReturn(false).when(this.service).requestDeployScaleIoVm(any());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result  = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response, never()).setNewVMName(anyString());
         verify(this.response).addError(anyString());
@@ -313,6 +331,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         DeployScaleIoVmTaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

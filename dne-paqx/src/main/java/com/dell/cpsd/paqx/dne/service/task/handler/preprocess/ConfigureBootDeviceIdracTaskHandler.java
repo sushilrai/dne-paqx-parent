@@ -28,7 +28,8 @@ import java.util.Map;
  * @since 1.0
  */
 @Component
-public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler {
+public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+{
     /**
      * The logger instance
      */
@@ -99,12 +100,14 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
-            else{
+            else
+            {
                 if ( bootDeviceIdracStatus.getErrors()!= null )
                     response.addError(bootDeviceIdracStatus.getErrors().toString());
             }
         }
-        catch(Exception e){
+        catch(Exception e)
+        {
             LOGGER.error("Error showing boot order status", e);
             response.addError(e.toString());
         }

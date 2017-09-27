@@ -17,7 +17,6 @@ import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
@@ -28,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -71,8 +71,6 @@ public class InstallEsxiTaskHandlerTest
     private EsxiInstallationInfo esxiInstallInfo;
 
     private InstallEsxiTaskHandler handler;
-    private InstallEsxiTaskHandler spy;
-
     private String taskName                       = "installEsxiTask";
     private String stepName                       = "installEsxiStep";
     private String symphonyUuid                   = "symphonyUuid";
@@ -91,8 +89,7 @@ public class InstallEsxiTaskHandlerTest
     @Before
     public void setUp()
     {
-        this.handler = new InstallEsxiTaskHandler(this.service, this.transformer, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new InstallEsxiTaskHandler(this.service, this.transformer, this.repository));
     }
 
     /**
@@ -101,7 +98,7 @@ public class InstallEsxiTaskHandlerTest
     @Test
     public void testExecuteTask()
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
@@ -113,7 +110,7 @@ public class InstallEsxiTaskHandlerTest
         doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
         doReturn(this.esxiHostDomainName).when(this.repository).getDomainName();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(true));
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
@@ -134,10 +131,10 @@ public class InstallEsxiTaskHandlerTest
     {
         NodeExpansionRequest nullRequest = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullRequest).when(this.job).getInputParams();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
@@ -154,11 +151,11 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullISymphonyUuid = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(nullISymphonyUuid).when(this.request).getSymphonyUuid();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
@@ -175,12 +172,12 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullEsxiManagementIpAddress = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(nullEsxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
@@ -195,13 +192,13 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullEsxiManagementGatewayIpAddress = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
         doReturn(nullEsxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
@@ -216,14 +213,14 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullEsxiManagementSubnetMask = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
         doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
         doReturn(nullEsxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
@@ -241,7 +238,7 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullEsxiManagementHostname = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
@@ -253,7 +250,7 @@ public class InstallEsxiTaskHandlerTest
         doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
         doReturn(this.esxiHostDomainName).when(this.repository).getDomainName();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(true));
         ArgumentCaptor<String> setHostnameParameterCaptor = ArgumentCaptor.forClass(String.class);
@@ -274,7 +271,7 @@ public class InstallEsxiTaskHandlerTest
     {
         String nullEsxiHostDomainName = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
@@ -286,7 +283,7 @@ public class InstallEsxiTaskHandlerTest
         doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
         doReturn(nullEsxiHostDomainName).when(this.repository).getDomainName();
 
-        boolean result = this.spy.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setHostname(anyString());

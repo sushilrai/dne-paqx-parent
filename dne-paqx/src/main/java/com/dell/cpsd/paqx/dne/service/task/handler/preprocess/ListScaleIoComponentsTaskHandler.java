@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ListScaleIoComponentsTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
-
     /**
      * The logger instance
      */

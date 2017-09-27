@@ -22,8 +22,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -65,8 +67,6 @@ public class DiscoverVCenterTaskHandlerTest
 
     private DiscoverVCenterTaskHandler handler;
 
-    private DiscoverVCenterTaskHandler spy;
-
     private final String taskName = "discoverVCenter";
 
     private final String stepName = "discoverVCenterStep";
@@ -74,19 +74,20 @@ public class DiscoverVCenterTaskHandlerTest
     @Before
     public void setup() throws Exception
     {
-        this.handler = new DiscoverVCenterTaskHandler(this.service, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new DiscoverVCenterTaskHandler(this.service, this.repository));
     }
 
     @Test
     public void executeTaskSuccessful() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         when(this.job.getId()).thenReturn(UUID.randomUUID());
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(true).when(this.service).requestDiscoverVCenter(any(), anyString());
 
-        assertEquals(true, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -96,11 +97,12 @@ public class DiscoverVCenterTaskHandlerTest
     {
         final ComponentEndpointIds emptyVCenterComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(emptyVCenterComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -108,12 +110,14 @@ public class DiscoverVCenterTaskHandlerTest
     @Test
     public void executeTaskFailure() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         when(this.job.getId()).thenReturn(UUID.randomUUID());
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(false).when(this.service).requestDiscoverVCenter(any(), anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -126,6 +130,7 @@ public class DiscoverVCenterTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         final DiscoverVCenterTaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

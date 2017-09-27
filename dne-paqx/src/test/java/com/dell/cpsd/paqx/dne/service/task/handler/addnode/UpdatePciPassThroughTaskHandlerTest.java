@@ -15,7 +15,6 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DeployScaleIoVmTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.EnablePciPassThroughTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.UpdatePciPassThroughTaskResponse;
@@ -27,8 +26,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -79,11 +80,7 @@ public class UpdatePciPassThroughTaskHandlerTest
     @Mock
     private Map<String, TaskResponse> taskResponseMap;
 
-    @Mock
-    private NodeExpansionRequest inputParams;
-
     private UpdatePciPassThroughTaskHandler handler;
-    private UpdatePciPassThroughTaskHandler spy;
 
     private String hostname = "hostname_1.2.3.4";
     private String hostPciDeviceId = "0000:00:000:0";
@@ -99,14 +96,13 @@ public class UpdatePciPassThroughTaskHandlerTest
     @Before
     public void setUp() throws Exception
     {
-        this.handler = new UpdatePciPassThroughTaskHandler(this.service, this.repository);
-        this.spy = spy(this.handler);
+        this.handler = spy(new UpdatePciPassThroughTaskHandler(this.service, this.repository));
     }
 
     @Test
     public void executeTask_successful_case() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
 
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
@@ -117,7 +113,10 @@ public class UpdatePciPassThroughTaskHandlerTest
         doReturn(this.deployScaleIoVmTaskResponse).when(this.taskResponseMap).get("deploySVM");
         doReturn(this.newVmName).when(this.deployScaleIoVmTaskResponse).getNewVMName();
         doReturn(true).when(this.service).requestSetPciPassThrough(any());
-        assertEquals(true, this.spy.executeTask(this.job));
+
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -127,11 +126,12 @@ public class UpdatePciPassThroughTaskHandlerTest
     {
         final ComponentEndpointIds nullComponentEndpointIds = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -141,13 +141,14 @@ public class UpdatePciPassThroughTaskHandlerTest
     {
         final InstallEsxiTaskResponse nullInstallEsxiTaskResponse = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(nullInstallEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -157,14 +158,15 @@ public class UpdatePciPassThroughTaskHandlerTest
     {
         final String nullHostname = null;
 
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(nullHostname).when(this.installEsxiTaskResponse).getHostname();
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -172,8 +174,7 @@ public class UpdatePciPassThroughTaskHandlerTest
     @Test
     public void executeTask_failed_updatePciPassThrough_request() throws Exception
     {
-        doReturn(this.response).when(this.spy).initializeResponse(this.job);
-
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get("installEsxi");
@@ -182,10 +183,11 @@ public class UpdatePciPassThroughTaskHandlerTest
         doReturn(this.hostPciDeviceId).when(this.enablePciPassThroughTaskResponse).getHostPciDeviceId();
         doReturn(this.deployScaleIoVmTaskResponse).when(this.taskResponseMap).get("deploySVM");
         doReturn(this.newVmName).when(this.deployScaleIoVmTaskResponse).getNewVMName();
-
         doReturn(false).when(this.service).requestSetPciPassThrough(any());
 
-        assertEquals(false, this.spy.executeTask(this.job));
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -198,6 +200,7 @@ public class UpdatePciPassThroughTaskHandlerTest
         doReturn(this.stepName).when(this.job).getStep();
 
         final UpdatePciPassThroughTaskResponse response = this.handler.initializeResponse(this.job);
+
         assertNotNull(response);
         assertEquals(this.taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());

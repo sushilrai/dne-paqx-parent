@@ -40,7 +40,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class FindDiscoveredNodesTaskHandlerTest
 {
-
     /*
      * The <code>NodeService</code> instance.
      */
@@ -50,7 +49,7 @@ public class FindDiscoveredNodesTaskHandlerTest
     /*
      * The job running the add node to system definition task handler
      */
-    private Job         job         = null;
+    private Job job = null;
 
     /**
      * The test setup.

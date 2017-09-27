@@ -107,7 +107,8 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
                 response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
             }
-            else {
+            else
+            {
                 response.addError(idracInfo.getMessage());
             }
         }

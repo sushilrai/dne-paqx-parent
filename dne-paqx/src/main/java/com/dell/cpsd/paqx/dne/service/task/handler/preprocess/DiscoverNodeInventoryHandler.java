@@ -88,7 +88,8 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
 
                         return isNodeInventorySaved;
                     }
-                } else {
+                } else
+                {
                     LOGGER.info("There is no node inventory for UUID ", symphonyUUID);
                     response.addError("There is no node inventory for UUID " + symphonyUUID);
                 }
@@ -98,7 +99,9 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
                 LOGGER.error("Node Inventory discover failed : ", ex);
                 response.addError("Unable to discover node inventory.");
             }
-        } else {
+        }
+        else
+        {
             response.addError("There is no discovered node available.");
         }
 
