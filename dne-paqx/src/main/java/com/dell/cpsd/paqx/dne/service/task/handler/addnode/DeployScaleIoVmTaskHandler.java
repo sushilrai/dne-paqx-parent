@@ -8,9 +8,12 @@ package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.DeployScaleIoVmTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
@@ -18,10 +21,16 @@ import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.NicSetting;
 import com.dell.cpsd.virtualization.capabilities.api.VirtualMachineCloneSpec;
+import com.dell.cpsd.virtualization.capabilities.api.VirtualMachineConfigSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * TODO: Document Usage
@@ -41,6 +50,8 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     private static final Logger LOGGER                   = LoggerFactory.getLogger(DeployScaleIoVmTaskHandler.class);
     private static final String SCALEIO_VM_PREFIX        = "ScaleIO-";
     private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
+    private static final int    SCALEIO_VM_NUM_CPU       = 8;
+    private static final int    SCALEIO_VM_RAM           = 8192;
 
     /**
      * The <code>NodeService</code> instance
@@ -66,11 +77,36 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             final Validate validate = new Validate(job).invoke();
             final ComponentEndpointIds componentEndpointIds = validate.getComponentEndpointIds();
             final String hostname = validate.getHostname();
-            final String newScaleIoVmName = validate.getNewScaleIoVmName();
             final String dataCenterName = validate.getDataCenterName();
+            final String newScaleIoVmName = validate.getNewScaleIoVmName();
+            final String newScaleIoVmHostname = validate.getNewScaleIoVmHostname();
+            final String domainName = validate.getNewScaleIoVmDomainName();
+            final List<String> dnsServers = validate.getNewScaleIoVmDnsServers();
+            final List<NicSetting> nicSettings = validate.getNewScaleIoVmNicSettings();
 
-            final DeployVMFromTemplateRequestMessage requestMessage = getDeployVMFromTemplateRequestMessage(componentEndpointIds, hostname,
-                    newScaleIoVmName, dataCenterName);
+            final VirtualMachineCloneSpec virtualMachineCloneSpec = new VirtualMachineCloneSpec();
+            virtualMachineCloneSpec.setPoweredOn(true);
+            virtualMachineCloneSpec.setTemplate(false);
+            virtualMachineCloneSpec.setDomain(domainName);
+
+            final VirtualMachineConfigSpec virtualMachineConfigSpec = new VirtualMachineConfigSpec();
+            virtualMachineConfigSpec.setHostName(newScaleIoVmHostname);
+            virtualMachineConfigSpec.setNumCPUs(SCALEIO_VM_NUM_CPU);
+            virtualMachineConfigSpec.setMemoryMB(SCALEIO_VM_RAM);
+            virtualMachineConfigSpec.setDnsServerList(dnsServers);
+            virtualMachineConfigSpec.setNicSettings(nicSettings);
+            virtualMachineCloneSpec.setVirtualMachineConfigSpec(virtualMachineConfigSpec);
+
+            final DeployVMFromTemplateRequestMessage requestMessage = new DeployVMFromTemplateRequestMessage();
+            requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
+            requestMessage.setComponentEndpointIds(
+                    new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
+                            componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
+            requestMessage.setHostName(hostname);
+            requestMessage.setTemplateName(SCALEIO_TEMPLATE_VM_NAME);
+            requestMessage.setDatacenterName(dataCenterName);
+            requestMessage.setNewVMName(newScaleIoVmName);
+            requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
 
             final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 
@@ -93,25 +129,6 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
         return false;
     }
 
-    private DeployVMFromTemplateRequestMessage getDeployVMFromTemplateRequestMessage(final ComponentEndpointIds componentEndpointIds,
-            final String hostname, final String newScaleIoVmName, final String dataCenterName)
-    {
-        final DeployVMFromTemplateRequestMessage requestMessage = new DeployVMFromTemplateRequestMessage();
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-        requestMessage.setHostName(hostname);
-        requestMessage.setTemplateName(SCALEIO_TEMPLATE_VM_NAME);
-        requestMessage.setNewVMName(newScaleIoVmName);
-        requestMessage.setDatacenterName(dataCenterName);
-        final VirtualMachineCloneSpec virtualMachineCloneSpec = new VirtualMachineCloneSpec();
-        virtualMachineCloneSpec.setPoweredOn(true);
-        virtualMachineCloneSpec.setTemplate(false);
-        requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
-        return requestMessage;
-    }
-
     @Override
     public DeployScaleIoVmTaskResponse initializeResponse(Job job)
     {
@@ -128,8 +145,14 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
         private final Job                  job;
         private       ComponentEndpointIds componentEndpointIds;
         private       String               hostname;
+        private       String               datastoreName;
         private       String               dataCenterName;
+        private       String               newScaleIoVmIpAddress;
         private       String               newScaleIoVmName;
+        private       String               newScaleIoVmHostname;
+        private       String               newScaleIoVmDomainName;
+        private       List<String>         newScaleIoVmDnsServers;
+        private       List<NicSetting>     newScaleIoVmNicSettings;
 
         Validate(final Job job)
         {
@@ -145,7 +168,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("No VCenter components found.");
             }
 
-            final InstallEsxiTaskResponse installEsxiTaskResponse = (InstallEsxiTaskResponse) job.getTaskResponseMap().get("installEsxi");
+            final InstallEsxiTaskResponse installEsxiTaskResponse = (InstallEsxiTaskResponse)job.getTaskResponseMap().get("installEsxi");
 
             if (installEsxiTaskResponse == null)
             {
@@ -157,6 +180,21 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             if (StringUtils.isEmpty(hostname))
             {
                 throw new IllegalStateException("Host name is null");
+            }
+
+            final DatastoreRenameTaskResponse datastoreRenameTaskResponse = (DatastoreRenameTaskResponse) job.getTaskResponseMap()
+                    .get("datastoreRename");
+
+            if (datastoreRenameTaskResponse == null)
+            {
+                throw new IllegalStateException("No Datastore Rename task response found");
+            }
+
+            datastoreName = datastoreRenameTaskResponse.getDatastoreName();
+
+            if (StringUtils.isEmpty(datastoreName))
+            {
+                throw new IllegalStateException("Datastore name is null");
             }
 
             final NodeExpansionRequest inputParams = job.getInputParams();
@@ -187,7 +225,53 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("ScaleIO Management IP Address is null");
             }
 
-            newScaleIoVmName = SCALEIO_VM_PREFIX + scaleIOSVMManagementIpAddress;
+            newScaleIoVmIpAddress = scaleIOSVMManagementIpAddress;
+            newScaleIoVmName = SCALEIO_VM_PREFIX + newScaleIoVmIpAddress;
+            newScaleIoVmHostname = newScaleIoVmName.replace(".", "-");
+
+            newScaleIoVmDomainName = repository.getDomainName();
+
+            if (StringUtils.isEmpty(newScaleIoVmDomainName))
+            {
+                throw new IllegalStateException("Domain name is null");
+            }
+
+            final Host existingVCenterHost = repository.getExistingVCenterHost();
+            final HostDnsConfig hostDnsConfig = existingVCenterHost.getHostDnsConfig();
+            newScaleIoVmDnsServers = hostDnsConfig.getDnsConfigIPs();
+
+            if (CollectionUtils.isEmpty(newScaleIoVmDnsServers))
+            {
+                throw new IllegalStateException("No DNS config IPs");
+            }
+
+            final String esxiManagementIpAddress = inputParams.getEsxiManagementIpAddress();
+
+            if (StringUtils.isEmpty(esxiManagementIpAddress))
+            {
+                throw new IllegalStateException("ESXi Management IP Address is null");
+            }
+
+            final String esxiManagementGatewayIpAddress = inputParams.getEsxiManagementGatewayIpAddress();
+
+            if (StringUtils.isEmpty(esxiManagementGatewayIpAddress))
+            {
+                throw new IllegalStateException("ESXi Management Gateway IP Address is null");
+            }
+
+            final String esxiManagementSubnetMask = inputParams.getEsxiManagementSubnetMask();
+
+            if (StringUtils.isEmpty(esxiManagementSubnetMask))
+            {
+                throw new IllegalStateException("ESXi Management Subnet Mask is null");
+            }
+
+            NicSetting nicSetting = new NicSetting();
+            nicSetting.setIpAddress(esxiManagementIpAddress);
+            nicSetting.setGateway(Arrays.asList(esxiManagementGatewayIpAddress));
+            nicSetting.setSubnetMask(esxiManagementSubnetMask);
+            newScaleIoVmNicSettings = Arrays.asList(nicSetting, nicSetting, nicSetting);
+
             return this;
         }
 
@@ -206,9 +290,14 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             return dataCenterName;
         }
 
-        String getNewScaleIoVmName()
-        {
-            return newScaleIoVmName;
-        }
+        String getNewScaleIoVmName() { return newScaleIoVmName; }
+
+        String getNewScaleIoVmHostname() { return newScaleIoVmHostname; }
+
+        String getNewScaleIoVmDomainName() { return newScaleIoVmDomainName; }
+
+        List<String> getNewScaleIoVmDnsServers() { return newScaleIoVmDnsServers; }
+
+        List<NicSetting> getNewScaleIoVmNicSettings() { return newScaleIoVmNicSettings; }
     }
 }
