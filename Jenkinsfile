@@ -1,4 +1,4 @@
-UPSTREAM_TRIGGERS = getUpstreamTriggers([
+UPSTREAM_TRIGGERS = [
     "common-dependencies",
     "common-client-parent",
     "common-messaging-parent",
@@ -7,24 +7,14 @@ UPSTREAM_TRIGGERS = getUpstreamTriggers([
     "hdp-capability-registry-client-parent",
     "system-integration-sdk",
     "virtualization-capabilities-api"
-])
-
-properties([[
-    $class: 'BuildBlockerProperty',
-    blockLevel: 'GLOBAL',
-    blockingJobs: UPSTREAM_TRIGGERS.replace(',', '\n'),
-    scanQueueFor: 'ALL',
-    useBuildBlocker: true
-]])
+]
+properties(getBuildProperties(upstreamRepos: UPSTREAM_TRIGGERS))
 
 pipeline { 
     parameters {
         string(name: 'dockerImagesDel', defaultValue: 'true')
         string(name: 'dockerRegistry',  defaultValue: 'docker-dev-local.art.local')
         string(name: 'dockerImageTag',  defaultValue: '${BRANCH_NAME}.${BUILD_NUMBER}')
-    }
-    triggers {
-        upstream(upstreamProjects: UPSTREAM_TRIGGERS, threshold: hudson.model.Result.SUCCESS)
     }
     agent {
         node {
@@ -37,9 +27,7 @@ pipeline {
     }
     options { 
         skipDefaultCheckout()
-        buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '5', daysToKeepStr: '30', numToKeepStr: '5'))
         timestamps()
-        disableConcurrentBuilds()
     }
     tools {
         maven 'linux-maven-3.3.9'
