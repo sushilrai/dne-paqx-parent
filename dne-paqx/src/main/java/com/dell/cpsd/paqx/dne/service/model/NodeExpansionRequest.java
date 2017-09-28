@@ -16,9 +16,14 @@ public class NodeExpansionRequest
     private String esxiManagementSubnetMask;
     private String esxiManagementHostname;
 
-    private String scaleIOSVMDataIpAddress1;
-    private String scaleIOSVMDataIpAddress2;
-    private String scaleIOSVMManagementIpAddress;
+    private String scaleIoData1SvmIpAddress;
+    private String scaleIoData1KernelIpAddress;
+    private String scaleIoData1KernelAndSvmSubnetMask;
+    private String scaleIoData2SvmIpAddress;
+    private String scaleIoData2KernelIpAddress;
+    private String scaleIoData2KernelAndSvmSubnetMask;
+    private String scaleIoSvmManagementIpAddress;
+    private String scaleIoSvmManagementSubnetMask;
     private String hostname;
     private String nodeId;
     private String clusterName;
@@ -32,8 +37,10 @@ public class NodeExpansionRequest
 
     public NodeExpansionRequest(String idracIpAddress, String idracGatewayIpAddress, String idracSubnetMask,
                                 String esxiManagementIpAddress, String esxiManagementGatewayIpAddress, String esxiManagementSubnetMask,
-                                String esxiManagementHostname, String scaleIOSVMDataIpAddress1, String scaleIOSVMDataIpAddress2,
-                                String scaleIOSVMManagementIpAddress, String nodeId, String symphonyUuid, String clusterName) {
+                                String esxiManagementHostname, String scaleIoData1SvmIpAddress, String scaleIoData1KernelIpAddress,
+                                String scaleIoData1KernelAndSvmSubnetMask, String scaleIoData2SvmIpAddress, String scaleIoData2KernelIpAddress,
+                                String scaleIoData2KernelAndSvmSubnetMask, String scaleIoSvmManagementIpAddress, String scaleIoSvmManagementSubnetMask,
+                                String nodeId, String symphonyUuid, String clusterName) {
         this.idracIpAddress = idracIpAddress;
         this.idracGatewayIpAddress = idracGatewayIpAddress;
         this.idracSubnetMask = idracSubnetMask;
@@ -41,9 +48,14 @@ public class NodeExpansionRequest
         this.esxiManagementGatewayIpAddress = esxiManagementGatewayIpAddress;
         this.esxiManagementSubnetMask = esxiManagementSubnetMask;
         this.esxiManagementHostname = esxiManagementHostname;
-        this.scaleIOSVMDataIpAddress1 = scaleIOSVMDataIpAddress1;
-        this.scaleIOSVMDataIpAddress2 = scaleIOSVMDataIpAddress2;
-        this.scaleIOSVMManagementIpAddress = scaleIOSVMManagementIpAddress;
+        this.scaleIoData1SvmIpAddress = scaleIoData1SvmIpAddress;
+        this.scaleIoData1KernelIpAddress = scaleIoData1KernelIpAddress;
+        this.scaleIoData1KernelAndSvmSubnetMask = scaleIoData1KernelAndSvmSubnetMask;
+        this.scaleIoData2SvmIpAddress = scaleIoData2SvmIpAddress;
+        this.scaleIoData2KernelIpAddress = scaleIoData2KernelIpAddress;
+        this.scaleIoData2KernelAndSvmSubnetMask = scaleIoData2KernelAndSvmSubnetMask;
+        this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
+        this.scaleIoSvmManagementSubnetMask = scaleIoSvmManagementSubnetMask;
         this.nodeId = nodeId;
         this.symphonyUuid = symphonyUuid;
         this.clusterName = clusterName;
@@ -114,32 +126,35 @@ public class NodeExpansionRequest
         this.esxiManagementHostname = esxiManagementHostname;
     }
 
-    public String getScaleIOSVMDataIpAddress1()
+    public String getScaleIoData1SvmIpAddress()
     {
-        return scaleIOSVMDataIpAddress1;
+        return scaleIoData1SvmIpAddress;
     }
 
-    public void setScaleIOSVMDataIpAddress1(String scaleIOSVMDataIpAddress)
+    public void setScaleIoData1SvmIpAddress(final String scaleIoData1SvmIpAddress)
     {
-        this.scaleIOSVMDataIpAddress1 = scaleIOSVMDataIpAddress;
+        this.scaleIoData1SvmIpAddress = scaleIoData1SvmIpAddress;
     }
 
-    public String getScaleIOSVMDataIpAddress2()
+    public String getScaleIoData2SvmIpAddress()
     {
-        return scaleIOSVMDataIpAddress2;
+        return scaleIoData2SvmIpAddress;
     }
 
-    public void setScaleIOSVMDataIpAddress2(String scaleIOSVMDataIpAddress)
+    public void setScaleIoData2SvmIpAddress(final String scaleIoData2SvmIpAddress)
     {
-        this.scaleIOSVMDataIpAddress2 = scaleIOSVMDataIpAddress;
+        this.scaleIoData2SvmIpAddress = scaleIoData2SvmIpAddress;
     }
 
-    public String getScaleIOSVMManagementIpAddress()
+    public String getScaleIoSvmManagementIpAddress()
     {
-        return scaleIOSVMManagementIpAddress;
+        return scaleIoSvmManagementIpAddress;
     }
 
-    public void setScaleIOSVMManagementIpAddress(String scaleIOSVMManagementIpAddress) { this.scaleIOSVMManagementIpAddress = scaleIOSVMManagementIpAddress; }
+    public void setScaleIoSvmManagementIpAddress(final String scaleIoSvmManagementIpAddress)
+    {
+        this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
+    }
 
     public String getHostname()
     {
@@ -184,6 +199,56 @@ public class NodeExpansionRequest
         this.serviceName = serviceName;
     }
 
+    public String getScaleIoData1KernelIpAddress()
+    {
+        return scaleIoData1KernelIpAddress;
+    }
+
+    public void setScaleIoData1KernelIpAddress(final String scaleIoData1KernelIpAddress)
+    {
+        this.scaleIoData1KernelIpAddress = scaleIoData1KernelIpAddress;
+    }
+
+    public String getScaleIoData1KernelAndSvmSubnetMask()
+    {
+        return scaleIoData1KernelAndSvmSubnetMask;
+    }
+
+    public void setScaleIoData1KernelAndSvmSubnetMask(final String scaleIoData1KernelAndSvmSubnetMask)
+    {
+        this.scaleIoData1KernelAndSvmSubnetMask = scaleIoData1KernelAndSvmSubnetMask;
+    }
+
+    public String getScaleIoData2KernelIpAddress()
+    {
+        return scaleIoData2KernelIpAddress;
+    }
+
+    public void setScaleIoData2KernelIpAddress(final String scaleIoData2KernelIpAddress)
+    {
+        this.scaleIoData2KernelIpAddress = scaleIoData2KernelIpAddress;
+    }
+
+    public String getScaleIoData2KernelAndSvmSubnetMask()
+    {
+        return scaleIoData2KernelAndSvmSubnetMask;
+    }
+
+    public void setScaleIoData2KernelAndSvmSubnetMask(final String scaleIoData2KernelAndSvmSubnetMask)
+    {
+        this.scaleIoData2KernelAndSvmSubnetMask = scaleIoData2KernelAndSvmSubnetMask;
+    }
+
+    public String getScaleIoSvmManagementSubnetMask()
+    {
+        return scaleIoSvmManagementSubnetMask;
+    }
+
+    public void setScaleIoSvmManagementSubnetMask(final String scaleIoSvmManagementSubnetMask)
+    {
+        this.scaleIoSvmManagementSubnetMask = scaleIoSvmManagementSubnetMask;
+    }
+
     @Override
     public String toString()
     {
@@ -195,9 +260,14 @@ public class NodeExpansionRequest
                 + ", esxiManagementGatewayIpAddress='" + esxiManagementGatewayIpAddress + '\''
                 + ", esxiManagementSubnetMask='" + esxiManagementSubnetMask + '\''
                 + ", esxiManagementHostname='" + esxiManagementHostname + '\''
-                + ", scaleIOSVMDataIpAddress1='" + scaleIOSVMDataIpAddress1 + '\''
-                + ", scaleIOSVMDataIpAddress2='" + scaleIOSVMDataIpAddress2 + '\''
-                + ", scaleIOSVMManagementIpAddress='" + scaleIOSVMManagementIpAddress + '\''
+                + ", scaleIoData1SvmIpAddress='" + scaleIoData1SvmIpAddress + '\''
+                + ", scaleIoData1KernelIpAddress='" + scaleIoData1KernelIpAddress + '\''
+                + ", scaleIoData1KernelAndSvmSubnetMask='" + scaleIoData1KernelAndSvmSubnetMask + '\''
+                + ", scaleIoData2SvmIpAddress='" + scaleIoData2SvmIpAddress + '\''
+                + ", scaleIoData2KernelIpAddress='" + scaleIoData2KernelIpAddress + '\''
+                + ", scaleIoData2KernelAndSvmSubnetMask='" + scaleIoData2KernelAndSvmSubnetMask + '\''
+                + ", scaleIoSvmManagementIpAddress='" + scaleIoSvmManagementIpAddress + '\''
+                + ", scaleIoSvmManagementSubnetMask='" + scaleIoSvmManagementSubnetMask + '\''
                 + ", nodeId='" + nodeId + '\''
                 + ", clusterName='" + clusterName + '\''
                 + ", symphonyUuid='" + symphonyUuid + '\''

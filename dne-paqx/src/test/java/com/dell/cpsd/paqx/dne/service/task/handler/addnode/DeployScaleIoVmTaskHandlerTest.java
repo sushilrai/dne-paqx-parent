@@ -106,7 +106,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
-        doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
+        doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
         doReturn(true).when(this.service).requestDeployScaleIoVm(any());
 
         boolean result  = this.handler.executeTask(this.job);
@@ -281,7 +281,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
-        doReturn(nullScaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
+        doReturn(nullScaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
 
         boolean result  = this.handler.executeTask(this.job);
 
@@ -307,7 +307,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
-        doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIOSVMManagementIpAddress();
+        doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
         doReturn(false).when(this.service).requestDeployScaleIoVm(any());
 
         boolean result  = this.handler.executeTask(this.job);

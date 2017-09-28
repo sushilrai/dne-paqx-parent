@@ -180,7 +180,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("DataCenter name is null");
             }
 
-            final String scaleIOSVMManagementIpAddress = inputParams.getScaleIOSVMManagementIpAddress();
+            final String scaleIOSVMManagementIpAddress = inputParams.getScaleIoSvmManagementIpAddress();
 
             if (StringUtils.isEmpty(scaleIOSVMManagementIpAddress))
             {

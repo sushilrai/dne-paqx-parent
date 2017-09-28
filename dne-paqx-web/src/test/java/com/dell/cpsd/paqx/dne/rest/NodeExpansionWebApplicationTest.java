@@ -85,9 +85,9 @@ public class NodeExpansionWebApplicationTest
         request.setIdracIpAddress("4.4.4.4");
         request.setIdracSubnetMask("5.55.5.5");
         request.setEsxiManagementSubnetMask("6.66.6.6");
-        request.setScaleIOSVMDataIpAddress1("7.7.7.7");
-        request.setScaleIOSVMDataIpAddress2("8.88.8.8");
-        request.setScaleIOSVMManagementIpAddress("9.99.9.9");
+        request.setScaleIoData1SvmIpAddress("7.7.7.7");
+        request.setScaleIoData2SvmIpAddress("8.88.8.8");
+        request.setScaleIoSvmManagementIpAddress("9.99.9.9");
 
         Gson gson = new Gson();
         json = gson.toJson(request);
@@ -112,14 +112,14 @@ public class NodeExpansionWebApplicationTest
         params.setEsxiManagementSubnetMask("1.1.1.1");
         assertNotNull(params.getEsxiManagementSubnetMask());
 
-        params.setScaleIOSVMDataIpAddress1("1.1.1.1");
-        assertNotNull(params.getScaleIOSVMDataIpAddress1());
+        params.setScaleIoData1SvmIpAddress("1.1.1.1");
+        assertNotNull(params.getScaleIoData1SvmIpAddress());
 
-        params.setScaleIOSVMDataIpAddress2("1.1.1.1");
-        assertNotNull(params.getScaleIOSVMDataIpAddress2());
+        params.setScaleIoData2SvmIpAddress("1.1.1.1");
+        assertNotNull(params.getScaleIoData2SvmIpAddress());
 
-        params.setScaleIOSVMManagementIpAddress("1.1.1.1");
-        assertNotNull(params.getScaleIOSVMManagementIpAddress());
+        params.setScaleIoSvmManagementIpAddress("1.1.1.1");
+        assertNotNull(params.getScaleIoSvmManagementIpAddress());
     }
 
     @Test

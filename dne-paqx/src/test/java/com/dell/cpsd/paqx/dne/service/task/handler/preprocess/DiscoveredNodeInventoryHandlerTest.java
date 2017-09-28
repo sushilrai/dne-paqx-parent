@@ -75,8 +75,9 @@ public class DiscoveredNodeInventoryHandlerTest
         this.job = preprocessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
 
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIOSVMDataIpAddress1",
-                "scaleIOSVMDataIpAddress2", "scaleIOSVMManagementIpAddress", "nodeId", "symphonyUuid", "clausterName");
+                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
+                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
+                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask","nodeId", "symphonyUuid", "clausterName");
         this.job.setInputParams(nodeExpansionRequest);
 
         FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
