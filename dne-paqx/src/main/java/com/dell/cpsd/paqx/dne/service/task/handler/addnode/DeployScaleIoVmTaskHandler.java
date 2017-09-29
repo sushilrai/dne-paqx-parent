@@ -267,7 +267,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             }
 
             NicSetting nicSetting = new NicSetting();
-            nicSetting.setIpAddress(esxiManagementIpAddress);
+            nicSetting.setIpAddress(newScaleIoVmIpAddress);
             nicSetting.setGateway(Arrays.asList(esxiManagementGatewayIpAddress));
             nicSetting.setSubnetMask(esxiManagementSubnetMask);
             newScaleIoVmNicSettings = Arrays.asList(nicSetting, nicSetting, nicSetting);
