@@ -15,6 +15,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.ConfigureScaleIoVibTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.ListESXiCredentialDetailsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
@@ -30,7 +31,7 @@ import java.util.UUID;
 
 /**
  * TODO: Document Usage
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -92,7 +93,16 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
                 throw new IllegalStateException("Host name is null");
             }
 
-            final SoftwareVIBConfigureRequestMessage requestMessage = getSoftwareVIBConfigureRequestMessage(componentEndpointIds, hostname);
+            final ListESXiCredentialDetailsTaskResponse listEsxiDefaultCredentialDetailsTaskResponse = (ListESXiCredentialDetailsTaskResponse) job
+                    .getTaskResponseMap().get("retrieveEsxiDefaultCredentialDetails");
+
+            if (listEsxiDefaultCredentialDetailsTaskResponse == null)
+            {
+                throw new IllegalStateException("Default ESXi Host Credential Details are null.");
+            }
+
+            final SoftwareVIBConfigureRequestMessage requestMessage = getSoftwareVIBConfigureRequestMessage(componentEndpointIds, hostname,
+                    listEsxiDefaultCredentialDetailsTaskResponse);
 
             final boolean success = this.nodeService.requestConfigureScaleIoVib(requestMessage);
 
@@ -115,19 +125,22 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
         return false;
     }
 
-    private SoftwareVIBConfigureRequestMessage getSoftwareVIBConfigureRequestMessage(final ComponentEndpointIds componentEndpointIds,
-            final String hostname) throws Exception
+    private SoftwareVIBConfigureRequestMessage getSoftwareVIBConfigureRequestMessage(final ComponentEndpointIds vCenterComponentEndpointIds,
+            final String hostname, final ListESXiCredentialDetailsTaskResponse esxiHostComponentEndpointIds) throws Exception
     {
         final SoftwareVIBConfigureRequestMessage requestMessage = new SoftwareVIBConfigureRequestMessage();
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
+        requestMessage.setCredentials(new Credentials(vCenterComponentEndpointIds.getEndpointUrl(), null, null));
         requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
+                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(vCenterComponentEndpointIds.getComponentUuid(),
+                        vCenterComponentEndpointIds.getEndpointUuid(), vCenterComponentEndpointIds.getCredentialUuid()));
 
         final SoftwareVIBConfigureRequest softwareVIBConfigureRequest = new SoftwareVIBConfigureRequest();
         softwareVIBConfigureRequest.setHostName(hostname);
         softwareVIBConfigureRequest.setModuleName(SOFTWARE_VIB_MODULE);
         softwareVIBConfigureRequest.setModuleOptions(buildModuleOptions());
+        softwareVIBConfigureRequest.setComponentEndpointIds(
+                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(esxiHostComponentEndpointIds.getComponentUuid(),
+                        esxiHostComponentEndpointIds.getEndpointUuid(), esxiHostComponentEndpointIds.getCredentialUuid()));
         requestMessage.setSoftwareVIBConfigureRequest(softwareVIBConfigureRequest);
         return requestMessage;
     }

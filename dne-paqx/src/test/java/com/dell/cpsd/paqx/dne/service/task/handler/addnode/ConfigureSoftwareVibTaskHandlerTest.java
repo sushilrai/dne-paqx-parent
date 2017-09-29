@@ -15,6 +15,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.ConfigureScaleIoVibTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.ListESXiCredentialDetailsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.junit.Before;
@@ -71,6 +72,9 @@ public class ConfigureSoftwareVibTaskHandlerTest
     private ComponentEndpointIds componentEndpointIds;
 
     @Mock
+    private ListESXiCredentialDetailsTaskResponse listESXiCredentialDetailsTaskResponse;
+
+    @Mock
     private ScaleIOData scaleIOData;
 
     @Mock
@@ -94,12 +98,13 @@ public class ConfigureSoftwareVibTaskHandlerTest
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
-        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get("installEsxi");
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
+        doReturn(this.listESXiCredentialDetailsTaskResponse).when(this.taskResponseMap).get("retrieveEsxiDefaultCredentialDetails");
         doReturn(this.scaleIOData).when(this.repository).getScaleIoData();
         doReturn(true).when(this.service).requestConfigureScaleIoVib(any());
 
-        boolean result  = this.handler.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
@@ -114,7 +119,7 @@ public class ConfigureSoftwareVibTaskHandlerTest
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(nullComponentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
-        boolean result  = this.handler.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
@@ -131,7 +136,7 @@ public class ConfigureSoftwareVibTaskHandlerTest
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(nullInstallEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
 
-        boolean result  = this.handler.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
@@ -149,7 +154,7 @@ public class ConfigureSoftwareVibTaskHandlerTest
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(nullHostname).when(this.installEsxiTaskResponse).getHostname();
 
-        boolean result  = this.handler.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
@@ -162,12 +167,13 @@ public class ConfigureSoftwareVibTaskHandlerTest
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
-        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get("installEsxi");
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
+        doReturn(this.listESXiCredentialDetailsTaskResponse).when(this.taskResponseMap).get("retrieveEsxiDefaultCredentialDetails");
         doReturn(this.scaleIOData).when(this.repository).getScaleIoData();
         doReturn(false).when(this.service).requestConfigureScaleIoVib(any());
 
-        boolean result  = this.handler.executeTask(this.job);
+        boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
