@@ -28,7 +28,6 @@
     </properties>
     
     <dependencies>
-    
         <dependency>
             <groupId>com.dell.cpsd.ess</groupId>
             <artifactId>engineering-standards-service-distribution</artifactId>
@@ -44,8 +43,60 @@
             <type>tar</type>
             <classifier>service-tar</classifier>
         </dependency>
-        
     </dependencies>
+
+    <profiles>
+        <profile>
+            <!-- Profile for executing the build in unix -->
+            <id>package-unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                 <!--run rpm.sh to create RPM, based on parameters described in spec file-->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>rpmbuild-windows</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Profile for building on Windows-->
+            <id>package-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <!--run rpm.sh to create RPM, based on parameters described in spec file-->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>rpmbuild-unix</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -55,7 +106,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
                 <executions>
-                
+
                     <execution>
                         <id>unpack-ess-service-tar</id>
                         <phase>package</phase>
@@ -68,7 +119,7 @@
                             <includes>**</includes>
                         </configuration>
                     </execution>
-                    
+
                     <execution>
                         <id>unpack-dne-paqx-service-tar</id>
                         <phase>package</phase>
@@ -81,7 +132,7 @@
                             <includes>**</includes>
                         </configuration>
                     </execution>
-                    
+
                 </executions>
             </plugin>
 
@@ -93,22 +144,40 @@
                 <version>1.2.1</version>
                 <executions>
                     <execution>
-                        <id>rpmbuild</id>
+                        <id>rpmbuild-unix</id>
                         <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <!-- Configuration requires Unix with sh installed -->
+                        <configuration>
+                            <executable>/bin/sh</executable>
+                            <arguments>
+                                <argument>build/build_rpm.sh</argument>
+                                <argument>1.0.0.0</argument>
+                                <argument>1</argument>
+                            </arguments>
+                            <workingDirectory>${basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>rpmbuild-windows</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <!-- Configuration requires Windows with Cygwin with bash.exe installed -->
+                        <configuration>
+                            <executable>bash.exe</executable>
+                            <arguments>
+                                <argument>build/build_rpm.sh</argument>
+                                <argument>1.0.0.0</argument>
+                                <argument>1</argument>
+                            </arguments>
+                            <workingDirectory>${basedir}</workingDirectory>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>/bin/sh</executable>
-                    <arguments>
-                        <argument>build/build_rpm.sh</argument>
-                        <argument>1.0.0.0</argument>
-                        <argument>1</argument>
-                    </arguments>
-                    <workingDirectory>${basedir}</workingDirectory>
-                </configuration>
             </plugin>
 
             <plugin>
