@@ -151,10 +151,10 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
 
         if (requiredPciDevice == null)
         {
-            throw new IllegalStateException("Unable to find matching PCI device");
+            return PCI_BUS_DEVICE_ID;
         }
 
-        return requiredPciDevice.getDeviceId();
+        return requiredPciDevice.getId();
     }
 
 }

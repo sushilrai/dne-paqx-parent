@@ -347,14 +347,23 @@ public class DiscoveryInfoToVCenterDomainTransformer
         return returnVal;
     }
 
-    private PciDevice transformHostPciDevice(final HostPciDevice pciDevice, final Host returnVal)
+    private PciDevice transformHostPciDevice(final HostPciDevice pciDevice, final Host host)
     {
         if (pciDevice == null)
         {
             return null;
         }
-        return new PciDevice(pciDevice.getDeviceId(), pciDevice.getDeviceName(), pciDevice.getVendorId(), pciDevice.getVendorName(),
-                pciDevice.getSubVendorId(), returnVal);
+
+        PciDevice transformedPciDevice = new PciDevice();
+        transformedPciDevice.setId(pciDevice.getId());
+        transformedPciDevice.setDeviceId(pciDevice.getDeviceId());
+        transformedPciDevice.setDeviceName(pciDevice.getDeviceName());
+        transformedPciDevice.setVendorId(pciDevice.getVendorId());
+        transformedPciDevice.setVendorName(pciDevice.getVendorName());
+        transformedPciDevice.setSubVendorId(pciDevice.getSubVendorId());
+        transformedPciDevice.setHost(host);
+
+        return transformedPciDevice;
     }
 
     private HostDnsConfig transformHostDnsConfig(com.dell.cpsd.virtualization.capabilities.api.HostDnsConfig hostDnsConfig, Host host)
