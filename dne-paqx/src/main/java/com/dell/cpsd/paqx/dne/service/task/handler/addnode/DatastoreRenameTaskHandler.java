@@ -12,7 +12,7 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
+import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
@@ -73,11 +73,11 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
 
         try
         {
-            final NodeExpansionRequest inputParams = job.getInputParams();
+            final InstallEsxiTaskResponse installEsxiTaskResponse = (InstallEsxiTaskResponse)job.getTaskResponseMap().get("installEsxi");
 
-            if (inputParams == null)
+            if (installEsxiTaskResponse == null)
             {
-                throw new IllegalStateException("Job input parameters are null");
+                throw new IllegalStateException("No Install ESXi task response found");
             }
 
             final ComponentEndpointIds vCenterComponentEndpointIdsByEndpointType = dataServiceRepository
@@ -88,7 +88,7 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("VCenter Component Endpoint Ids are null");
             }
 
-            final String esxiManagementHostname = inputParams.getEsxiManagementHostname();
+            final String esxiManagementHostname = installEsxiTaskResponse.getHostname();
 
             if (esxiManagementHostname == null)
             {

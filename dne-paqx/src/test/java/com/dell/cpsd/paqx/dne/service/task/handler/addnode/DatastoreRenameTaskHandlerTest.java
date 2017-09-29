@@ -13,13 +13,16 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
+import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -59,7 +62,10 @@ public class DatastoreRenameTaskHandlerTest
     private DataServiceRepository repository;
 
     @Mock
-    private NodeExpansionRequest request;
+    private InstallEsxiTaskResponse installEsxiTaskResponse;
+
+    @Mock
+    private Map<String, TaskResponse> taskResponseMap;
 
     @Mock
     private ComponentEndpointIds componentEndpointIds;
@@ -67,7 +73,7 @@ public class DatastoreRenameTaskHandlerTest
     private DatastoreRenameTaskHandler handler;
     private String taskName = "datastoreRenameTask";
     private String stepName = "datastoreRenameStep";
-    private final String esxiManagementHostname = "fpr1-h17";
+    private final String esxiManagementHostname = "fpr1-h17.example.com";
     private final String dataStorweName = "DAS17";
 
     @Before
@@ -80,9 +86,10 @@ public class DatastoreRenameTaskHandlerTest
     public void executeTask_should_successfully_request_a_datastore_rename() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(any());
-        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
-        doReturn(this.esxiManagementHostname).when(this.request).getEsxiManagementHostname();
+        doReturn(this.esxiManagementHostname).when(this.installEsxiTaskResponse).getHostname();
         doReturn(true).when(this.service).requestDatastoreRename(any());
 
         boolean result = this.handler.executeTask(this.job);
@@ -97,9 +104,10 @@ public class DatastoreRenameTaskHandlerTest
     public void executeTask_should_fail_the_workflow_when_the_datastore_rename_request_fails() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(any());
-        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
-        doReturn(this.esxiManagementHostname).when(this.request).getEsxiManagementHostname();
+        doReturn(this.esxiManagementHostname).when(this.installEsxiTaskResponse).getHostname();
         doReturn(false).when(this.service).requestDatastoreRename(any());
 
         boolean result = this.handler.executeTask(this.job);
@@ -111,10 +119,11 @@ public class DatastoreRenameTaskHandlerTest
     }
 
     @Test
-    public void executeTask_should_fail_the_workflow_when_the_job_input_params_is_null() throws Exception
+    public void executeTask_should_fail_the_workflow_when_the_esxi_install_task_response_is_null() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(any());
-        doReturn(null).when(this.job).getInputParams();
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(null).when(this.taskResponseMap).get(anyString());
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -128,7 +137,8 @@ public class DatastoreRenameTaskHandlerTest
     public void executeTask_should_fail_the_workflow_when_the_component_endpoint_ids_are_null() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(any());
-        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(null).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
 
         boolean result = this.handler.executeTask(this.job);
@@ -143,9 +153,10 @@ public class DatastoreRenameTaskHandlerTest
     public void executeTask_should_fail_the_workflow_when_the_esxi_management_hostname_is_null() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(any());
-        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
-        doReturn(null).when(this.request).getEsxiManagementHostname();
+        doReturn(null).when(this.installEsxiTaskResponse).getHostname();
 
         boolean result = this.handler.executeTask(this.job);
 
