@@ -5,6 +5,9 @@
 
 package com.dell.cpsd.paqx.dne.domain.inventory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -31,12 +34,18 @@ public class NodeInventory
     @Column(name = "NODE_INVENTORY")
     private String nodeInventory;
 
-    public NodeInventory(){}
+    public NodeInventory()
+    {
+    }
 
-    public NodeInventory(String symphonyUUID, String nodeInventory)
+    public NodeInventory(String symphonyUUID, Object nodeInventory) throws JsonProcessingException
     {
         this.symphonyUUID = symphonyUUID;
-        this.nodeInventory = nodeInventory;
+        if (nodeInventory != null)
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            this.nodeInventory = mapper.writeValueAsString(nodeInventory);
+        }
     }
 
     public String getSymphonyUUID()

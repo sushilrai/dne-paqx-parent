@@ -19,6 +19,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,7 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
                 if (nodeInventoryResponse != null)
                 {
 
-                    NodeInventory nodeInventory = new NodeInventory(symphonyUUID, nodeInventoryResponse.toString());
+                    NodeInventory nodeInventory = new NodeInventory(symphonyUUID, nodeInventoryResponse);
                     boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
                     if(isNodeInventorySaved) {
                         response.setWorkFlowTaskStatus(Status.SUCCEEDED);
@@ -94,7 +95,7 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
                     response.addError("There is no node inventory for UUID " + symphonyUUID);
                 }
             }
-            catch (ServiceTimeoutException | ServiceExecutionException ex)
+            catch (ServiceTimeoutException | ServiceExecutionException | JsonProcessingException ex)
             {
                 LOGGER.error("Node Inventory discover failed : ", ex);
                 response.addError("Unable to discover node inventory.");
