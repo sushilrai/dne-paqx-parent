@@ -64,6 +64,7 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.VCenterUpdateSoftwareAcceptanceResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -131,6 +132,8 @@ import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAccept
 import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -263,6 +266,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new NodeInventoryResponseMessageAdapter(this));
         this.consumer.addAdapter(new DatastoreRenameResponseAdapter(this));
         this.consumer.addAdapter(new VCenterUpdateSoftwareAcceptanceResponseAdapter(this));
+        this.consumer.addAdapter(new VmPowerOperationResponseAdapter(this));
     }
 
     /**
@@ -1775,6 +1779,51 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             if (vCenterUpdateSoftwareAcceptanceResponseMessage != null)
             {
                 return vCenterUpdateSoftwareAcceptanceResponseMessage.getStatus().equals(VCenterUpdateSoftwareAcceptanceResponseMessage.Status.SUCCESS);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("Exception occurred", ex);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean requestVmPowerOperation(final VmPowerOperationsRequestMessage requestMessage)
+    {
+        try
+        {
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishVmPowerOperation(requestMessage);
+                }
+            });
+
+            VmPowerOperationsResponseMessage vmPowerOperationsResponseMessage = processResponse(response,
+                    VmPowerOperationsResponseMessage.class);
+
+            if (vmPowerOperationsResponseMessage != null)
+            {
+                return vmPowerOperationsResponseMessage.getStatus()
+                        .equals(VmPowerOperationsResponseMessage.Status.SUCCESS);
             }
         }
         catch (Exception ex)

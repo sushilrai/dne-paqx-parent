@@ -24,6 +24,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceMo
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PowerOnScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSoftwareAcceptanceTaskHandler;
@@ -101,6 +102,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("enterHostMaintenanceMode", enterHostMaintenanceModeTask());
         workflowTasks.put("addHostToDvSwitch", addHostToDvSwitchTask());
         workflowTasks.put("deploySVM", deploySVMTask());
+        workflowTasks.put("powerOnSVM", powerOnSVMTask());
         workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());
         workflowTasks.put("rebootHost", rebootHostTask());
         workflowTasks.put("exitHostMaintenanceMode", exitHostMaintenanceModeTask());
@@ -113,6 +115,11 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;
+    }
+
+    private WorkflowTask powerOnSVMTask()
+    {
+        return createTask("Power on the ScaleIO VM", new PowerOnScaleIoVmTaskHandler(nodeService, repository));
     }
 
     @Bean("exitHostMaintenanceModeTask")

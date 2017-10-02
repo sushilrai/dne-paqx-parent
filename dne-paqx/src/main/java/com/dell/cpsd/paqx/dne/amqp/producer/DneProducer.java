@@ -232,4 +232,11 @@ public interface DneProducer
      * @param requestMessage
      */
     void publishUpdateSoftwareAcceptance(VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
+
+    /**
+     * Perform a VM power operation, e.g. power on or off or suspend
+     *
+     * @param requestMessage
+     */
+    void publishVmPowerOperation(VmPowerOperationsRequestMessage requestMessage);
 }

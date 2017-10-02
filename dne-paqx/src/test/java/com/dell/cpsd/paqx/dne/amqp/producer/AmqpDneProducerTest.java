@@ -39,6 +39,7 @@ import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -440,6 +441,18 @@ public class AmqpDneProducerTest
     public void publishUpdateSoftwareAcceptance_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(VCenterUpdateSoftwareAcceptanceRequestMessage.class), this.producer::publishUpdateSoftwareAcceptance);
+    }
+
+    @Test
+    public void publishVmPowerOperation()
+    {
+        this.executeTest(mock(VmPowerOperationsRequestMessage.class), this.producer::publishVmPowerOperation);
+    }
+
+    @Test
+    public void publishVmPowerOperation_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(VmPowerOperationsRequestMessage.class), this.producer::publishVmPowerOperation);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)
