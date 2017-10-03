@@ -27,11 +27,8 @@ import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessag
 import com.dell.cpsd.virtualization.capabilities.api.DistributedVirtualSwicthPortConnection;
 import com.dell.cpsd.virtualization.capabilities.api.DvSwitch;
 import com.dell.cpsd.virtualization.capabilities.api.GuestNicInfo;
-import com.dell.cpsd.virtualization.capabilities.api.HostHardwareInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostPciDevice;
 import com.dell.cpsd.virtualization.capabilities.api.HostSystem;
-import com.dell.cpsd.virtualization.capabilities.api.HostSystemIdentificationInfo;
-import com.dell.cpsd.virtualization.capabilities.api.HostSystemInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualNic;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualSwitch;
 import org.springframework.stereotype.Component;
@@ -39,6 +36,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -66,59 +64,68 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private DataCenter transformDatacenter(com.dell.cpsd.virtualization.capabilities.api.Datacenter datacenter, VCenter vCenter)
     {
-        if (datacenter == null)
-        {
-            return null;
-        }
         final DataCenter returnVal = new DataCenter();
         returnVal.setId(datacenter.getId());
         returnVal.setName(datacenter.getName());
 
         final List<VirtualMachine> virtualMachines = new ArrayList<>();
-        if (datacenter.getVms() != null && !datacenter.getVms().values().isEmpty())
-        {
-            // Transform vms
-            virtualMachines.addAll(datacenter.getVms().values().stream().filter(Objects::nonNull).map(this::transformVirtualMachine)
-                    .collect(Collectors.toList()));
-        }
-        if (datacenter.getDatastores() != null && !datacenter.getDatastores().values().isEmpty())
-        {
-            // Transform and link datastores
-            final List<Datastore> datastores = datacenter.getDatastores().values().stream().filter(Objects::nonNull)
-                    .map(datastore -> transformDatastore(datastore, returnVal, virtualMachines)).collect(Collectors.toList());
 
-            returnVal.setDatastoreList(datastores);
-        }
+        Optional.ofNullable(datacenter.getVms()).ifPresent(virtualMachineMap -> {
+            if (!virtualMachineMap.values().isEmpty())
+            {
+                // Transform vms
+                virtualMachines.addAll(virtualMachineMap.values().stream().filter(Objects::nonNull).map(this::transformVirtualMachine)
+                        .collect(Collectors.toList()));
+            }
+        });
 
-        // Transform and link dvswitches
-        if (datacenter.getDvSwitches() != null && !datacenter.getDvSwitches().values().isEmpty())
-        {
-            final List<com.dell.cpsd.virtualization.capabilities.api.PortGroup> portGroups = datacenter.getPortgroups().values()
-                    .stream().filter(Objects::nonNull).collect(Collectors.toList());
+        Optional.ofNullable(datacenter.getDatastores()).ifPresent(datastoreMap -> {
+            if (!datastoreMap.values().isEmpty())
+            {
+                // Transform and link datastores
+                final List<Datastore> datastores = datastoreMap.values().stream().filter(Objects::nonNull)
+                        .map(datastore -> transformDatastore(datastore, returnVal, virtualMachines)).collect(Collectors.toList());
 
-            final List<DVSwitch> dvSwitches = datacenter.getDvSwitches().values().stream().filter(Objects::nonNull)
-                    .map(dvSwitch -> transformDVSwitch(dvSwitch, returnVal, portGroups)).collect(Collectors.toList());
+                returnVal.setDatastoreList(datastores);
+            }
+        });
 
-            returnVal.setDvSwitchList(dvSwitches);
-        }
+        Optional.ofNullable(datacenter.getDvSwitches()).ifPresent(dvSwitchMap -> {
+            if (!dvSwitchMap.values().isEmpty())
+            {
+                // Transform and link dvswitches
+                final List<com.dell.cpsd.virtualization.capabilities.api.PortGroup> portGroups = datacenter.getPortgroups().values()
+                        .stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        if (datacenter.getClusters() != null && !datacenter.getClusters().values().isEmpty())
-        {
-            // Transform and link clusters
-            final List<Cluster> clusters = datacenter.getClusters().values().stream().filter(Objects::nonNull)
-                    .map(cluster -> transformCluster(cluster, returnVal, virtualMachines)).collect(Collectors.toList());
+                final List<DVSwitch> dvSwitches = dvSwitchMap.values().stream().filter(Objects::nonNull)
+                        .map(dvSwitch -> transformDVSwitch(dvSwitch, returnVal, portGroups)).collect(Collectors.toList());
 
-            returnVal.setClusterList(clusters);
-        }
+                returnVal.setDvSwitchList(dvSwitches);
+            }
+        });
 
-        if (datacenter.getNetworks() != null && !datacenter.getNetworks().isEmpty())
-        {
-            // Transform and link networks
-            final List<Network> networks = datacenter.getNetworks().values().stream().filter(Objects::nonNull)
-                    .map(network -> transformNetwork(network, returnVal)).collect(Collectors.toList());
+        Optional.ofNullable(datacenter.getClusters()).ifPresent(clusterMap -> {
+            if (!clusterMap.values().isEmpty())
+            {
+                // Transform and link clusters
+                final List<Cluster> clusters = clusterMap.values().stream().filter(Objects::nonNull)
+                        .map(cluster -> transformCluster(cluster, returnVal, virtualMachines)).collect(Collectors.toList());
 
-            returnVal.setNetworkList(networks);
-        }
+                returnVal.setClusterList(clusters);
+            }
+        });
+
+        Optional.ofNullable(datacenter.getNetworks()).ifPresent(networkMap -> {
+            if (!networkMap.isEmpty()) // why not `networkMap.values().isEmpty()` here as with all the others???
+            {
+                // Transform and link networks
+                final List<Network> networks = networkMap.values().stream().filter(Objects::nonNull)
+                        .map(network -> transformNetwork(network, returnVal)).collect(Collectors.toList());
+
+                returnVal.setNetworkList(networks);
+            }
+        });
+
         // TODO: Link Host Pnics to Dvswitches
         // TODO: Link Datastores to Hosts
         // TODO: Link Virtual Nics to DVPortgroups
@@ -133,11 +140,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
     private Datastore transformDatastore(com.dell.cpsd.virtualization.capabilities.api.Datastore datastore, DataCenter datacenter,
             List<VirtualMachine> virtualMachines)
     {
-        if (datastore == null)
-        {
-            return null;
-        }
-
         final Datastore returnVal = new Datastore();
         returnVal.setId(datastore.getId());
         returnVal.setName(datastore.getName());
@@ -159,11 +161,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
     private DVSwitch transformDVSwitch(DvSwitch dvSwitch, DataCenter datacenter,
             List<com.dell.cpsd.virtualization.capabilities.api.PortGroup> portGroups)
     {
-        if (dvSwitch == null)
-        {
-            return null;
-        }
-
         final DVSwitch returnVal = new DVSwitch();
         returnVal.setId(dvSwitch.getId());
         returnVal.setName(dvSwitch.getName());
@@ -191,11 +188,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private PortGroup transformPortgroup(com.dell.cpsd.virtualization.capabilities.api.PortGroup portGroup, DVSwitch dvSwitch)
     {
-        if (portGroup == null)
-        {
-            return null;
-        }
-
         final PortGroup returnVal = new PortGroup();
         returnVal.setId(portGroup.getId());
         returnVal.setName(portGroup.getName());
@@ -208,11 +200,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private Network transformNetwork(com.dell.cpsd.virtualization.capabilities.api.Network network, DataCenter datacenter)
     {
-        if (network == null)
-        {
-            return null;
-        }
-
         final Network returnVal = new Network();
         returnVal.setId(network.getId());
         returnVal.setName(network.getName());
@@ -224,11 +211,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
     private Cluster transformCluster(com.dell.cpsd.virtualization.capabilities.api.Cluster cluster, DataCenter datacenter,
             List<VirtualMachine> virtualMachines)
     {
-        if (cluster == null)
-        {
-            return null;
-        }
-
         final Cluster returnVal = new Cluster();
         returnVal.setId(cluster.getId());
         returnVal.setName(cluster.getName());
@@ -252,11 +234,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private Host transformHost(HostSystem hostSystem, Cluster cluster, List<VirtualMachine> virtualMachines)
     {
-        if (hostSystem == null)
-        {
-            return null;
-        }
-
         final Host returnVal = new Host();
         returnVal.setId(hostSystem.getId());
         returnVal.setName(hostSystem.getName());
@@ -266,74 +243,63 @@ public class DiscoveryInfoToVCenterDomainTransformer
         returnVal.setMaintenanceMode(hostSystem.getMaintenanceMode());
 
         // Transform and link HostDnsConfig
-        if (hostSystem.getHostConfigInfo() != null && hostSystem.getHostConfigInfo().getHostNetworkInfo() != null)
-        {
-            final HostDnsConfig hostDnsConfig = transformHostDnsConfig(
-                    hostSystem.getHostConfigInfo().getHostNetworkInfo().getHostDnsConfig(), returnVal);
+        Optional.ofNullable(hostSystem.getHostConfigInfo()).ifPresent(hostConfigInfo -> {
 
-            returnVal.setHostDnsConfig(hostDnsConfig);
+            Optional.ofNullable(hostConfigInfo.getHostNetworkInfo()).ifPresent(hostNetworkInfo -> {
 
-            // Transform and link HostIpRouteConfig
-            final HostIpRouteConfig hostIpRouteConfig = transformHostIpRouteConfig(
-                    hostSystem.getHostConfigInfo().getHostNetworkInfo().getHostIpRouteConfig(), returnVal);
-            returnVal.setHostIpRouteConfig(hostIpRouteConfig);
+                final HostDnsConfig hostDnsConfig = transformHostDnsConfig(hostNetworkInfo.getHostDnsConfig(), returnVal);
+                returnVal.setHostDnsConfig(hostDnsConfig);
 
-            if (hostSystem.getHostConfigInfo().getHostNetworkInfo().getVswitchs() != null)
-            {
-                // Transform and link HostVirtualSwitch
-                final List<VSwitch> vSwitches = hostSystem.getHostConfigInfo().getHostNetworkInfo().getVswitchs().stream()
-                        .filter(Objects::nonNull).map(hostVirtualSwitch -> transformVSwitch(hostVirtualSwitch, returnVal))
-                        .collect(Collectors.toList());
-                returnVal.setvSwitchList(vSwitches);
-            }
+                // Transform and link HostIpRouteConfig
+                final HostIpRouteConfig hostIpRouteConfig = transformHostIpRouteConfig(hostNetworkInfo.getHostIpRouteConfig(), returnVal);
+                returnVal.setHostIpRouteConfig(hostIpRouteConfig);
 
-            if (hostSystem.getHostConfigInfo().getHostNetworkInfo().getVnics() != null)
-            {
+                Optional.ofNullable(hostNetworkInfo.getVswitchs()).ifPresent(hostVirtualSwitches -> {
+
+                    // Transform and link HostVirtualSwitch
+                    final List<VSwitch> vSwitches = hostVirtualSwitches.stream().filter(Objects::nonNull)
+                            .map(hostVirtualSwitch -> transformVSwitch(hostVirtualSwitch, returnVal)).collect(Collectors.toList());
+                    returnVal.setvSwitchList(vSwitches);
+                });
+
+                Optional.ofNullable(hostNetworkInfo.getVnics()).ifPresent(hostVirtualNics -> {
+
+                    // Transform and link VirtualNics
+                    final List<VirtualNic> virtualNics = hostVirtualNics.stream().filter(Objects::nonNull)
+                            .map(hostVirtualNic -> transformHostVirtualNic(hostVirtualNic, returnVal)).collect(Collectors.toList());
+                    returnVal.setVirtualNicList(virtualNics);
+                });
+
+                Optional.ofNullable(hostNetworkInfo.getPnics()).ifPresent(hostPhysicalNics -> {
+
+                    // Transform and link VirtualNics
+                    final List<PhysicalNic> physicalNics = hostPhysicalNics.stream().filter(Objects::nonNull)
+                            .map(physicalNic -> transformHostPhysicalNic(physicalNic, returnVal)).collect(Collectors.toList());
+                    returnVal.setPhysicalNicList(physicalNics);
+                });
+            });
+
+            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> {
+
+                returnVal.setNtpServers(hostDateTimeInfo.getNtpServers());
+            });
+        });
+
+        Optional.ofNullable(hostSystem.getHostHardwareInfo()).ifPresent(hostHardwareInfo -> {
+
+            Optional.ofNullable(hostHardwareInfo.getPciDevice()).ifPresent(hostPciDevices -> {
                 // Transform and link VirtualNics
-                final List<VirtualNic> virtualNics = hostSystem.getHostConfigInfo().getHostNetworkInfo().getVnics().stream()
-                        .filter(Objects::nonNull).map(hostVirtualNic -> transformHostVirtualNic(hostVirtualNic, returnVal))
-                        .collect(Collectors.toList());
-                returnVal.setVirtualNicList(virtualNics);
-            }
+                hostPciDevices.stream().filter(Objects::nonNull)
+                        .forEach(pciDevice -> returnVal.getPciDevices().add(transformHostPciDevice(pciDevice, returnVal)));
+            });
 
-            if (hostSystem.getHostConfigInfo().getHostNetworkInfo().getPnics() != null)
-            {
-                // Transform and link VirtualNics
-                final List<PhysicalNic> physicalNics = hostSystem.getHostConfigInfo().getHostNetworkInfo().getPnics().stream()
-                        .filter(Objects::nonNull).map(physicalNic -> transformHostPhysicalNic(physicalNic, returnVal))
-                        .collect(Collectors.toList());
-                returnVal.setPhysicalNicList(physicalNics);
-            }
+            Optional.ofNullable(hostHardwareInfo.getHostSystemInfo()).ifPresent(hostSystemInfo -> {
 
-            if (hostSystem.getHostConfigInfo().getHostDateTimeInfo() != null)
-            {
-                returnVal.setNtpServers(hostSystem.getHostConfigInfo().getHostDateTimeInfo().getNtpServers());
-            }
-
-        }
-
-        final HostHardwareInfo hostHardwareInfo = hostSystem.getHostHardwareInfo();
-
-        if (hostHardwareInfo != null)
-        {
-            final List<HostPciDevice> hostPciDevices = hostHardwareInfo.getPciDevice();
-            if (hostPciDevices != null)
-            {
-                // Transform and link VirtualNics
-                hostPciDevices.stream().filter(Objects::nonNull).forEach(pciDevice -> returnVal.getPciDevices().add(transformHostPciDevice(pciDevice, returnVal)));
-            }
-
-            final HostSystemInfo hostSystemInfo = hostHardwareInfo.getHostSystemInfo();
-            if (hostSystemInfo != null)
-            {
-                final HostSystemIdentificationInfo hostSystemVerificationInfo = hostSystemInfo.getHostSystemIdentificationInfo();
-
-                if (hostSystemVerificationInfo != null)
-                {
-                    returnVal.setServiceTag(hostSystemVerificationInfo.getServiceTag());
-                }
-            }
-        }
+                Optional.ofNullable(hostSystemInfo.getHostSystemIdentificationInfo()).ifPresent(hostSystemIdentificationInfo -> {
+                    returnVal.setServiceTag(hostSystemIdentificationInfo.getServiceTag());
+                });
+            });
+        });
 
         // One to Many Link to VMs
         final List<VirtualMachine> vmsOnHost = virtualMachines.stream()
@@ -349,11 +315,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private PciDevice transformHostPciDevice(final HostPciDevice pciDevice, final Host host)
     {
-        if (pciDevice == null)
-        {
-            return null;
-        }
-
         PciDevice transformedPciDevice = new PciDevice();
         transformedPciDevice.setId(pciDevice.getId());
         transformedPciDevice.setDeviceId(pciDevice.getDeviceId());
@@ -408,11 +369,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private VSwitch transformVSwitch(HostVirtualSwitch hostVirtualSwitch, Host host)
     {
-        if (hostVirtualSwitch == null)
-        {
-            return null;
-        }
-
         final VSwitch returnVal = new VSwitch();
         returnVal.setId(hostVirtualSwitch.getKey());
         returnVal.setName(hostVirtualSwitch.getName());
@@ -427,11 +383,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private VirtualNic transformHostVirtualNic(HostVirtualNic virtualNic, Host host)
     {
-        if (virtualNic == null)
-        {
-            return null;
-        }
-
         final VirtualNic returnVal = new VirtualNic();
         returnVal.setDevice(virtualNic.getDevice());
         returnVal.setPort(virtualNic.getPort());
@@ -467,11 +418,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private PhysicalNic transformHostPhysicalNic(com.dell.cpsd.virtualization.capabilities.api.PhysicalNic physicalNic, Host host)
     {
-        if (physicalNic == null)
-        {
-            return null;
-        }
-
         final PhysicalNic returnVal = new PhysicalNic();
         returnVal.setDevice(physicalNic.getDevice());
         returnVal.setDriver(physicalNic.getDriver());
@@ -486,11 +432,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private VirtualMachine transformVirtualMachine(com.dell.cpsd.virtualization.capabilities.api.VirtualMachine virtualMachine)
     {
-        if (virtualMachine == null)
-        {
-            return null;
-        }
-
         final VirtualMachine returnVal = new VirtualMachine();
         returnVal.setName(virtualMachine.getName());
         returnVal.setId(virtualMachine.getId());
@@ -507,11 +448,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private VMNetwork transformVMNetwork(GuestNicInfo guestNicInfo, VirtualMachine virtualMachine)
     {
-        if (guestNicInfo == null)
-        {
-            return null;
-        }
-
         final VMNetwork returnVal = new VMNetwork();
         returnVal.setConnected(guestNicInfo.getConnected());
         returnVal.setMacAddress(guestNicInfo.getMacAddress());
@@ -528,11 +464,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
 
     private VMIP transformVMIP(String ip, VMNetwork vmNetwork)
     {
-        if (ip == null)
-        {
-            return null;
-        }
-
         final VMIP returnVal = new VMIP(ip);
 
         // FK link

@@ -13,7 +13,6 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.paqx.dne.service.model.DatastoreRenameTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.DeployScaleIoVmTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
@@ -34,7 +33,7 @@ import java.util.List;
 
 /**
  * TODO: Document Usage
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -47,16 +46,21 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     /**
      * The logger instance
      */
-    private static final Logger LOGGER                   = LoggerFactory.getLogger(DeployScaleIoVmTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeployScaleIoVmTaskHandler.class);
+
+    /**
+     * The <code>NodeService</code> instance
+     */
+    private final NodeService nodeService;
+
     private static final String SCALEIO_VM_PREFIX        = "ScaleIO-";
     private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
     private static final int    SCALEIO_VM_NUM_CPU       = 8;
     private static final int    SCALEIO_VM_RAM           = 8192;
 
     /**
-     * The <code>NodeService</code> instance
+     * The <code>DataServiceRepository</code> instance
      */
-    private final NodeService           nodeService;
     private final DataServiceRepository repository;
 
     public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
@@ -142,136 +146,46 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
     private class Validate
     {
-        private final Job                  job;
-        private       ComponentEndpointIds componentEndpointIds;
-        private       String               hostname;
-        private       String               datastoreName;
-        private       String               dataCenterName;
-        private       String               newScaleIoVmIpAddress;
-        private       String               newScaleIoVmName;
-        private       String               newScaleIoVmHostname;
-        private       String               newScaleIoVmDomainName;
-        private       List<String>         newScaleIoVmDnsServers;
-        private       List<NicSetting>     newScaleIoVmNicSettings;
+        private final InstallEsxiTaskResponse installEsxiTaskResponse;
+        private final NodeExpansionRequest    inputParams;
+        private       ComponentEndpointIds    componentEndpointIds;
+        private       String                  hostname;
+        private       String                  dataCenterName;
+        private       String                  newScaleIoVmIpAddress;
+        private       String                  newScaleIoVmName;
+        private       String                  newScaleIoVmHostname;
+        private       String                  newScaleIoVmDomainName;
+        private       List<String>            newScaleIoVmDnsServers;
+        private       List<NicSetting>        newScaleIoVmNicSettings;
 
         Validate(final Job job)
         {
-            this.job = job;
-        }
+            this.installEsxiTaskResponse = (InstallEsxiTaskResponse) job.getTaskResponseMap().get("installEsxi");
 
-        Validate invoke()
-        {
-            componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
-
-            if (componentEndpointIds == null)
-            {
-                throw new IllegalStateException("No VCenter components found.");
-            }
-
-            final InstallEsxiTaskResponse installEsxiTaskResponse = (InstallEsxiTaskResponse)job.getTaskResponseMap().get("installEsxi");
-
-            if (installEsxiTaskResponse == null)
+            if (this.installEsxiTaskResponse == null)
             {
                 throw new IllegalStateException("No Install ESXi task response found");
             }
 
-            hostname = installEsxiTaskResponse.getHostname();
+            this.inputParams = job.getInputParams();
 
-            if (StringUtils.isEmpty(hostname))
-            {
-                throw new IllegalStateException("Host name is null");
-            }
-
-            final DatastoreRenameTaskResponse datastoreRenameTaskResponse = (DatastoreRenameTaskResponse) job.getTaskResponseMap()
-                    .get("datastoreRename");
-
-            if (datastoreRenameTaskResponse == null)
-            {
-                throw new IllegalStateException("No Datastore Rename task response found");
-            }
-
-            datastoreName = datastoreRenameTaskResponse.getDatastoreName();
-
-            if (StringUtils.isEmpty(datastoreName))
-            {
-                throw new IllegalStateException("Datastore name is null");
-            }
-
-            final NodeExpansionRequest inputParams = job.getInputParams();
-
-            if (inputParams == null)
+            if (this.inputParams == null)
             {
                 throw new IllegalStateException("Job Input Params are null");
             }
+        }
 
-            final String clusterName = inputParams.getClusterName();
-
-            if (StringUtils.isEmpty(clusterName))
-            {
-                throw new IllegalStateException("Cluster Name is null");
-            }
-
-            dataCenterName = repository.getDataCenterName(clusterName);
-
-            if (StringUtils.isEmpty(dataCenterName))
-            {
-                throw new IllegalStateException("DataCenter name is null");
-            }
-
-            final String scaleIOSVMManagementIpAddress = inputParams.getScaleIoSvmManagementIpAddress();
-
-            if (StringUtils.isEmpty(scaleIOSVMManagementIpAddress))
-            {
-                throw new IllegalStateException("ScaleIO Management IP Address is null");
-            }
-
-            newScaleIoVmIpAddress = scaleIOSVMManagementIpAddress;
-            newScaleIoVmName = SCALEIO_VM_PREFIX + newScaleIoVmIpAddress;
-            newScaleIoVmHostname = newScaleIoVmName.replace(".", "-");
-
-            newScaleIoVmDomainName = repository.getDomainName();
-
-            if (StringUtils.isEmpty(newScaleIoVmDomainName))
-            {
-                throw new IllegalStateException("Domain name is null");
-            }
-
-            final Host existingVCenterHost = repository.getExistingVCenterHost();
-            final HostDnsConfig hostDnsConfig = existingVCenterHost.getHostDnsConfig();
-            newScaleIoVmDnsServers = hostDnsConfig.getDnsConfigIPs();
-
-            if (CollectionUtils.isEmpty(newScaleIoVmDnsServers))
-            {
-                throw new IllegalStateException("No DNS config IPs");
-            }
-
-            final String esxiManagementIpAddress = inputParams.getEsxiManagementIpAddress();
-
-            if (StringUtils.isEmpty(esxiManagementIpAddress))
-            {
-                throw new IllegalStateException("ESXi Management IP Address is null");
-            }
-
-            final String esxiManagementGatewayIpAddress = inputParams.getEsxiManagementGatewayIpAddress();
-
-            if (StringUtils.isEmpty(esxiManagementGatewayIpAddress))
-            {
-                throw new IllegalStateException("ESXi Management Gateway IP Address is null");
-            }
-
-            final String esxiManagementSubnetMask = inputParams.getEsxiManagementSubnetMask();
-
-            if (StringUtils.isEmpty(esxiManagementSubnetMask))
-            {
-                throw new IllegalStateException("ESXi Management Subnet Mask is null");
-            }
-
-            NicSetting nicSetting = new NicSetting();
-            nicSetting.setIpAddress(newScaleIoVmIpAddress);
-            nicSetting.setGateway(Arrays.asList(esxiManagementGatewayIpAddress));
-            nicSetting.setSubnetMask(esxiManagementSubnetMask);
-            newScaleIoVmNicSettings = Arrays.asList(nicSetting, nicSetting, nicSetting);
-
+        Validate invoke()
+        {
+            this.componentEndpointIds = this.queryComponentEndpointIds();
+            this.hostname = this.queryHostname();
+            this.dataCenterName = this.queryDatacenterName();
+            this.newScaleIoVmIpAddress = this.queryScaleIOSVMManagementIpAddress();
+            this.newScaleIoVmName = SCALEIO_VM_PREFIX + this.newScaleIoVmIpAddress;
+            this.newScaleIoVmHostname = this.newScaleIoVmName.replace(".", "-");
+            this.newScaleIoVmDomainName = this.queryDomainName();
+            this.newScaleIoVmDnsServers = this.queryDnsConfigIps();
+            this.newScaleIoVmNicSettings = this.buildNicSettingsList();
             return this;
         }
 
@@ -290,14 +204,133 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             return dataCenterName;
         }
 
-        String getNewScaleIoVmName() { return newScaleIoVmName; }
+        String getNewScaleIoVmName()
+        {
+            return newScaleIoVmName;
+        }
 
-        String getNewScaleIoVmHostname() { return newScaleIoVmHostname; }
+        String getNewScaleIoVmHostname()
+        {
+            return newScaleIoVmHostname;
+        }
 
-        String getNewScaleIoVmDomainName() { return newScaleIoVmDomainName; }
+        String getNewScaleIoVmDomainName()
+        {
+            return newScaleIoVmDomainName;
+        }
 
-        List<String> getNewScaleIoVmDnsServers() { return newScaleIoVmDnsServers; }
+        List<String> getNewScaleIoVmDnsServers()
+        {
+            return newScaleIoVmDnsServers;
+        }
 
-        List<NicSetting> getNewScaleIoVmNicSettings() { return newScaleIoVmNicSettings; }
+        List<NicSetting> getNewScaleIoVmNicSettings()
+        {
+            return newScaleIoVmNicSettings;
+        }
+
+        ComponentEndpointIds queryComponentEndpointIds()
+        {
+            final ComponentEndpointIds ids = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
+
+            if (ids == null)
+            {
+                throw new IllegalStateException("No VCenter components found.");
+            }
+
+            return ids;
+        }
+
+        String queryHostname()
+        {
+            final String hostName = this.installEsxiTaskResponse.getHostname();
+
+            if (StringUtils.isEmpty(hostName))
+            {
+                throw new IllegalStateException("Hostname is null");
+            }
+
+            return hostName;
+        }
+
+        String queryScaleIOSVMManagementIpAddress()
+        {
+            final String scaleIOSVMManagementIpAddress = this.inputParams.getScaleIoSvmManagementIpAddress();
+
+            if (StringUtils.isEmpty(scaleIOSVMManagementIpAddress))
+            {
+                throw new IllegalStateException("ScaleIO Management IP Address is null");
+            }
+
+            return scaleIOSVMManagementIpAddress;
+        }
+
+        String queryDatacenterName()
+        {
+            final String clusterName = this.inputParams.getClusterName();
+
+            if (StringUtils.isEmpty(clusterName))
+            {
+                throw new IllegalStateException("Cluster name is null");
+            }
+
+            String dcName = repository.getDataCenterName(clusterName);
+
+            if (StringUtils.isEmpty(dcName))
+            {
+                throw new IllegalStateException("DataCenter name is null");
+            }
+
+            return dcName;
+        }
+
+        String queryDomainName()
+        {
+            final String domainName = repository.getDomainName();
+
+            if (StringUtils.isEmpty(domainName))
+            {
+                throw new IllegalStateException("Domain name is null");
+            }
+
+            return domainName;
+        }
+
+        List<String> queryDnsConfigIps()
+        {
+            final Host existingVCenterHost = repository.getExistingVCenterHost();
+            final HostDnsConfig hostDnsConfig = existingVCenterHost.getHostDnsConfig();
+            List<String> dnsConfigIps = hostDnsConfig.getDnsConfigIPs();
+
+            if (CollectionUtils.isEmpty(dnsConfigIps))
+            {
+                throw new IllegalStateException("No DNS config IPs");
+            }
+
+            return dnsConfigIps;
+        }
+
+        List<NicSetting> buildNicSettingsList()
+        {
+            final String esxiManagementGatewayIpAddress = this.inputParams.getEsxiManagementGatewayIpAddress();
+
+            if (StringUtils.isEmpty(esxiManagementGatewayIpAddress))
+            {
+                throw new IllegalStateException("ESXi Management Gateway IP Address is null");
+            }
+
+            final String esxiManagementSubnetMask = this.inputParams.getEsxiManagementSubnetMask();
+
+            if (StringUtils.isEmpty(esxiManagementSubnetMask))
+            {
+                throw new IllegalStateException("ESXi Management Subnet Mask is null");
+            }
+
+            NicSetting nicSetting = new NicSetting();
+            nicSetting.setIpAddress(this.newScaleIoVmIpAddress);
+            nicSetting.setGateway(Arrays.asList(esxiManagementGatewayIpAddress));
+            nicSetting.setSubnetMask(esxiManagementSubnetMask);
+            return Arrays.asList(nicSetting, nicSetting, nicSetting);
+        }
     }
 }
