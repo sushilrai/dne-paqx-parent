@@ -172,13 +172,25 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
             final ScaleIOMdmCluster scaleIOMdmCluster = scaleIOData.getMdmCluster();
             if (scaleIOMdmCluster != null)
             {
-                // Scan the slave element info for ips
-                scaleIOMdmCluster.getSlaveElementInfo().stream().filter(Objects::nonNull).forEach(
-                        scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> mdmIpList.add(scaleIOIP.getIp())));
-
                 // Scan the master element info the ips
-                scaleIOMdmCluster.getMasterElementInfo().stream().filter(Objects::nonNull).forEach(
-                        scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> mdmIpList.add(scaleIOIP.getIp())));
+                scaleIOMdmCluster.getMasterElementInfo().stream().filter(Objects::nonNull)
+                        .forEach(scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
+                            //TODO: Temp fix
+                            if (scaleIOIP.getType() == null && !scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker"))
+                            {
+                                mdmIpList.add(scaleIOIP.getIp());
+                            }
+                        }));
+
+                // Scan the slave element info for ips
+                scaleIOMdmCluster.getSlaveElementInfo().stream().filter(Objects::nonNull)
+                        .forEach(scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
+                            //TODO: Temp fix
+                            if (scaleIOIP.getType() == null && !scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker"))
+                            {
+                                mdmIpList.add(scaleIOIP.getIp());
+                            }
+                        }));
             }
 
             final StringBuilder builder = new StringBuilder();

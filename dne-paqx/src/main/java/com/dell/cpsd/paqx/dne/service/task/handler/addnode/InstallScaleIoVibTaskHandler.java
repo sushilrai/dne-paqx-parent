@@ -20,11 +20,12 @@ import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequest;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
+import static java.util.Collections.singletonList;
 
 /**
- * TODO: Document Usage
+ * Install ScaleIo Data Client (SDC) Task Handler
  *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -45,6 +46,9 @@ public class InstallScaleIoVibTaskHandler extends BaseTaskHandler implements IWo
      */
     private final NodeService           nodeService;
     private final DataServiceRepository repository;
+
+    @Value("${rackhd.sdsc.vib.install.repo.url}")
+    private String sdcVibRemoteUrl;
 
     public InstallScaleIoVibTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
     {
@@ -111,8 +115,7 @@ public class InstallScaleIoVibTaskHandler extends BaseTaskHandler implements IWo
         final SoftwareVIBRequest softwareVIBRequest = new SoftwareVIBRequest();
         softwareVIBRequest.setVibOperation(SoftwareVIBRequest.VibOperation.INSTALL);
         softwareVIBRequest.setHostName(hostname);
-        //TODO: From where to get the vib urls
-        softwareVIBRequest.setVibUrls(new ArrayList<>());
+        softwareVIBRequest.setVibUrls(singletonList(sdcVibRemoteUrl));
         requestMessage.setSoftwareVibInstallRequest(softwareVIBRequest);
         requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
         requestMessage.setComponentEndpointIds(

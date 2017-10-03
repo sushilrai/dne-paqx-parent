@@ -85,7 +85,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             final List<NicSetting> nicSettings = validate.getNewScaleIoVmNicSettings();
 
             final VirtualMachineCloneSpec virtualMachineCloneSpec = new VirtualMachineCloneSpec();
-            virtualMachineCloneSpec.setPoweredOn(true);
+            virtualMachineCloneSpec.setPoweredOn(false);
             virtualMachineCloneSpec.setTemplate(false);
             virtualMachineCloneSpec.setDomain(domainName);
 
