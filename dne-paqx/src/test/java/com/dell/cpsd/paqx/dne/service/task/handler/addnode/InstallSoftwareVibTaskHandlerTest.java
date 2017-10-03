@@ -78,10 +78,12 @@ public class InstallSoftwareVibTaskHandlerTest
 
     private InstallScaleIoVibTaskHandler handler;
 
+    private String vibUrl = "test.vib";
+
     @Before
     public void setUp() throws Exception
     {
-        this.handler = spy(new InstallScaleIoVibTaskHandler(this.service, this.repository));
+        this.handler = spy(new InstallScaleIoVibTaskHandler(this.service, this.repository, vibUrl));
     }
 
     @Test

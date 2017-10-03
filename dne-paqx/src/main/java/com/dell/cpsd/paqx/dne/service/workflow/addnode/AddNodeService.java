@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +79,9 @@ public class AddNodeService extends BaseService implements IAddNodeService
 
     @Autowired
     private DataServiceRepository repository;
+
+    @Value("${rackhd.sdc.vib.install.repo.url}")
+    private String sdcVibUrl;
 
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
@@ -166,7 +170,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("installScaleIoVibTask")
     private WorkflowTask installScaleIoVibTask()
     {
-        return createTask("Install ScaleIO VIB", new InstallScaleIoVibTaskHandler(this.nodeService, repository));
+        return createTask("Install ScaleIO VIB", new InstallScaleIoVibTaskHandler(this.nodeService, repository, sdcVibUrl));
     }
 
     @Bean("configureScaleIoVibTask")

@@ -20,7 +20,6 @@ import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequest;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import static java.util.Collections.singletonList;
 
@@ -46,14 +45,13 @@ public class InstallScaleIoVibTaskHandler extends BaseTaskHandler implements IWo
      */
     private final NodeService           nodeService;
     private final DataServiceRepository repository;
+    private final String sdcVibRemoteUrl;
 
-    @Value("${rackhd.sdsc.vib.install.repo.url}")
-    private String sdcVibRemoteUrl;
-
-    public InstallScaleIoVibTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    public InstallScaleIoVibTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final String sdcVibRemoteUrl)
     {
         this.nodeService = nodeService;
         this.repository = repository;
+        this.sdcVibRemoteUrl = sdcVibRemoteUrl;
     }
 
     @Override
