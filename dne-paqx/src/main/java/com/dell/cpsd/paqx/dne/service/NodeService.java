@@ -13,6 +13,8 @@ import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 
@@ -86,6 +88,17 @@ public interface NodeService
      * @throws ServiceExecutionException
      */
     EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools) throws ServiceTimeoutException, ServiceExecutionException;
+
+    /**
+     * Validate protection domains
+     *
+     * @param essValidateProtectionDomainsRequestMessage
+     *
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    EssValidateProtectionDomainsResponseMessage validateProtectionDomains(EssValidateProtectionDomainsRequestMessage essValidateProtectionDomainsRequestMessage) throws ServiceTimeoutException, ServiceExecutionException;
 
     /**
      * Notify the Node Discovery Service that node allocation is complete

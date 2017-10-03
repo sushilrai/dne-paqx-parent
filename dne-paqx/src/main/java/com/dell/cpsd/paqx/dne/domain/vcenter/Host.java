@@ -39,6 +39,9 @@ public class Host
     @Column(name = "HOST_NAME")
     private String name;
 
+    @Column(name = "HOST_TYPE")
+    private String type;
+
     @Column(name = "POWER_STATE")
     private String powerState;
 
@@ -282,4 +285,13 @@ public class Host
     {
         this.pciDevices = pciDevices;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
 }

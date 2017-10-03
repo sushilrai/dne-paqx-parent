@@ -5,23 +5,11 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
-import java.util.Map;
-
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
-import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
-import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
-import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
-import com.dell.cpsd.paqx.dne.transformers.ScaleIORestToScaleIODomainTransformer;
-import com.dell.cpsd.paqx.dne.transformers.StoragePoolEssRequestTransformer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
+import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.repository.JobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
@@ -37,12 +25,20 @@ import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.paqx.dne.transformers.*;
 import com.dell.cpsd.paqx.dne.util.PropertySplitter;
 import com.dell.cpsd.sdk.AMQPClient;
 import com.dell.cpsd.sdk.SystemDefinitionMessenger;
 import com.dell.cpsd.sdk.config.SDKConfiguration;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.google.common.base.Splitter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -68,7 +64,7 @@ import com.google.common.base.Splitter;
     DiscoveryInfoToVCenterDomainTransformer.class,
     ScaleIORestToScaleIODomainTransformer.class,
     HostToInstallEsxiRequestTransformer.class,
-    StoragePoolEssRequestTransformer.class
+    StoragePoolEssRequestTransformer.class,
 })
 public class ServiceConfig
 {

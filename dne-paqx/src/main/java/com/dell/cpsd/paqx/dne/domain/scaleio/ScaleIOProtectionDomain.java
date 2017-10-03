@@ -113,6 +113,10 @@ public class ScaleIOProtectionDomain
         this.protectionDomainState = protectionDomainState;
     }
 
+    public List<ScaleIOSDS> getSdsList() {return sdsList;}
+
+    public void setSdsList(List<ScaleIOSDS> sdsList) {this.sdsList = sdsList;}
+
     public void addFaultSet(final ScaleIOFaultSet faultSet)
     {
         this.faultSets.add(faultSet);

@@ -6,20 +6,13 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.domain.vcenter.Cluster;
-import com.dell.cpsd.paqx.dne.domain.vcenter.DVSwitch;
-import com.dell.cpsd.paqx.dne.domain.vcenter.DataCenter;
+import com.dell.cpsd.paqx.dne.domain.vcenter.*;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Datastore;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostIpRouteConfig;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Network;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PhysicalNic;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VMIP;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VMNetwork;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VSwitch;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualMachine;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualNic;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualNicDVPortGroup;
@@ -42,6 +35,9 @@ import java.util.stream.Collectors;
 @Component
 public class DiscoveryInfoToVCenterDomainTransformer
 {
+
+    private static final String ONE_RACK_UNIT = "1U1N";
+    private static final String TWO_RACK_UNIT = "2U1N";
 
     public VCenter transform(final DiscoveryResponseInfoMessage discoveryResponseInfoMessage)
     {
@@ -300,8 +296,18 @@ public class DiscoveryInfoToVCenterDomainTransformer
                 });
             });
         });
+        
+        String model = hostSystem.getHostHardwareInfo().getHostSystemInfo().getModel();
+        if (model != null){
+            if (model.contains("R6")){
+                returnVal.setType(ONE_RACK_UNIT);
+            }
+            else if (model.contains("R7")){
+                returnVal.setType(TWO_RACK_UNIT);
+            }
+        }
 
-        // One to Many Link to VMs
+    // One to Many Link to VMs
         final List<VirtualMachine> vmsOnHost = virtualMachines.stream()
                 .filter(virtualMachine -> hostSystem.getVmIds().contains(virtualMachine.getId())).collect(Collectors.toList());
         vmsOnHost.forEach(virtualMachine -> virtualMachine.setHost(returnVal));

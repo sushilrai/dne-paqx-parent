@@ -25,6 +25,8 @@ import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.common.client.rpc.DefaultMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.*;
 import com.dell.cpsd.virtualization.capabilities.api.*;
@@ -1501,7 +1503,6 @@ public class AmqpNodeServiceTest
         assertFalse(result);
         Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
     }
-
     @Test
     public void testRequestVmPowerOperationSuccess() throws Exception
     {
@@ -1552,4 +1553,69 @@ public class AmqpNodeServiceTest
         assertFalse(result);
         Mockito.verify(dneProducer).publishVmPowerOperation(any(VmPowerOperationsRequestMessage.class));
     }
+  
+  @Test(expected = ServiceTimeoutException.class)
+    public void testvalidateProtectionDomains() throws Exception{
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null,consumer,dneProducer,"replyToMe",null,null,null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+        nodeService.validateProtectionDomains(requestMessage);
+        Mockito.verify(dneProducer).publishValidateProtectionDomain(any(EssValidateProtectionDomainsRequestMessage.class));
+    }
+
+    @Test
+    public void testvalidateProtectionDomainsSuccess() throws ServiceExecutionException, ServiceTimeoutException{
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
+
+        final EssValidateProtectionDomainsRequestMessage request = mock(EssValidateProtectionDomainsRequestMessage.class);
+        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+
+        final EssValidateProtectionDomainsResponseMessage responseMessage = mock(EssValidateProtectionDomainsResponseMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null, null,null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+        EssValidateProtectionDomainsResponseMessage response = nodeService.validateProtectionDomains(request);
+        Assert.assertNotNull(response.getValidProtectionDomains());
+        Assert.assertNull(response.getError());
+    }
+
+    @Test(expected = ServiceExecutionException.class)
+    public void testvalidateProtectionDomainsFailure() throws Exception{
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null,
+                null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                                                  long timeout) throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.validateProtectionDomains(requestMessage);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishValidateProtectionDomain(any());
+    }
+  
 }

@@ -100,7 +100,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("findProtectionDomainTask")
     public WorkflowTask findProtectionDomainTask()
     {
-        return createTask("Find ProtectionDomain", new FindProtectionDomainTaskHandler(workflowService));
+        return createTask("Find ProtectionDomain", new FindProtectionDomainTaskHandler(nodeService, repository));
     }
 
     @Bean("listScaleIoComponentsTask")
@@ -144,7 +144,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("findScaleIO", createFindScaleIOTask());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("discoverNodeInventory", discoverNodeInventory());
-        //workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
+        workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         return workflowTasks;
     }
 

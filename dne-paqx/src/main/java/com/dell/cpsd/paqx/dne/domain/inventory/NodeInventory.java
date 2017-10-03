@@ -7,7 +7,7 @@ package com.dell.cpsd.paqx.dne.domain.inventory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.springframework.util.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -41,7 +41,8 @@ public class NodeInventory
     public NodeInventory(String symphonyUUID, Object nodeInventory) throws JsonProcessingException
     {
         this.symphonyUUID = symphonyUUID;
-        if (nodeInventory != null)
+
+        if(nodeInventory != null)
         {
             ObjectMapper mapper = new ObjectMapper();
             this.nodeInventory = mapper.writeValueAsString(nodeInventory);

@@ -81,7 +81,6 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
                 Object nodeInventoryResponse = nodeService.listNodeInventory(symphonyUUID);
                 if (nodeInventoryResponse != null)
                 {
-
                     NodeInventory nodeInventory = new NodeInventory(symphonyUUID, nodeInventoryResponse);
                     boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
                     if(isNodeInventorySaved) {

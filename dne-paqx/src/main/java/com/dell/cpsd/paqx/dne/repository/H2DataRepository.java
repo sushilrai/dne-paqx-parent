@@ -13,12 +13,10 @@ import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
-import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.vcenter.*;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -270,7 +268,7 @@ public class H2DataRepository implements DataServiceRepository
             return false;
         }
 
-        NodeInventory nodeInventoryData = this.getNodeIventory(nodeInventory.getSymphonyUUID());
+        NodeInventory nodeInventoryData = this.getNodeInventory(nodeInventory.getSymphonyUUID());
         if (nodeInventoryData != null)
         {
             //If it already exists, delete and save the new one.
@@ -284,7 +282,7 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public NodeInventory getNodeIventory(final String symphonyUUID)
+    public NodeInventory getNodeInventory(final String symphonyUUID)
     {
         NodeInventory result = null;
 
@@ -479,6 +477,12 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
+    public List<Host> getVcenterHost() throws NoResultException {
+        final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
+        return query.getResultList();
+    }
+
+    @Override
     public Host getExistingVCenterHost()
     {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
@@ -626,4 +630,20 @@ public class H2DataRepository implements DataServiceRepository
             return searchDomains.stream().filter(StringUtils::isNotEmpty).findFirst().orElse(null);
         }
     }
+
+    @Override
+    public List<ScaleIOProtectionDomain> getScaleIoProtectionDomains()
+    {
+        final TypedQuery<ScaleIOProtectionDomain> query = entityManager.createQuery("SELECT scaleio FROM ScaleIOProtectionDomain as scaleio", ScaleIOProtectionDomain.class);
+
+        final List<ScaleIOProtectionDomain> scaleIOProtectionDomainList = query.getResultList();
+
+        if (!CollectionUtils.isEmpty(scaleIOProtectionDomainList))
+        {
+            return scaleIOProtectionDomainList;
+        }
+        throw new NoResultException("No protection domain found");
+
+    }
+
 }

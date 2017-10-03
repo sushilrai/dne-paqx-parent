@@ -19,6 +19,7 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
@@ -644,6 +645,14 @@ public class AmqpDneProducer implements DneProducer
     {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         LOGGER.info("Send request to ESS validation for storage pools.");
+        rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
+    }
+
+    @Override
+    public void publishValidateProtectionDomain(EssValidateProtectionDomainsRequestMessage requestMessage)
+    {
+        // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
+        LOGGER.info("Send request to ESS validation for protection domains.");
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
     }
 

@@ -10,6 +10,8 @@ import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOSDS;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
@@ -91,6 +93,12 @@ public class H2DataRepositoryTest
     private ScaleIOData scaleIOData;
 
     @Mock
+    private ScaleIOProtectionDomain scaleIOProtectionDomain;
+
+    @Mock
+    private ScaleIOSDS scaleIOSDS;
+
+    @Mock
     private PortGroup portGroup;
 
     @Mock
@@ -110,6 +118,11 @@ public class H2DataRepositoryTest
 
     @Mock
     private TypedQuery<Host> hostTypedQuery;
+
+    @Mock
+    private TypedQuery<ScaleIOProtectionDomain> protectionDomainTypedQuery;
+    @Mock
+    private TypedQuery<ScaleIOSDS> sdsTypedQuery;
 
     @Mock
     private TypedQuery<PortGroup> portGroupTypedQuery;
@@ -135,6 +148,8 @@ public class H2DataRepositoryTest
     private List<CredentialDetails> credentialDetailsList;
     private List<VCenter>           vCenterList;
     private List<ScaleIOData>       scaleIODataList;
+    private List<ScaleIOProtectionDomain> scaleIOProtectionDomainList;
+    private List<ScaleIOSDS>        scaleIOSDSList;
     private List<PortGroup>         portGroupList;
     private List<PciDevice>         pciDeviceList;
     private List<HostDnsConfig>     hostDnsConfigs;
@@ -178,6 +193,12 @@ public class H2DataRepositoryTest
 
         this.scaleIODataList = new ArrayList<>();
         this.scaleIODataList.add(this.scaleIOData);
+
+        this.scaleIOProtectionDomainList = new ArrayList<>();
+        this.scaleIOProtectionDomainList.add(this.scaleIOProtectionDomain);
+
+        this.scaleIOSDSList = new ArrayList<>();
+        this.scaleIOSDSList.add(this.scaleIOSDS);
 
         this.portGroupList = new ArrayList<>();
         this.portGroupList.add(this.portGroup);
@@ -786,7 +807,7 @@ public class H2DataRepositoryTest
         doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(nodeInventory).when(this.stringTypedQuery).getSingleResult();
 
-        NodeInventory nodeInventoryFound = this.repository.getNodeIventory("FAKE_KEY");
+        NodeInventory nodeInventoryFound = this.repository.getNodeInventory("FAKE_KEY");
 
         assertNotNull(nodeInventoryFound);
         assertEquals("FAKE_KEY", nodeInventoryFound.getSymphonyUUID());
@@ -799,7 +820,7 @@ public class H2DataRepositoryTest
         doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(null).when(this.stringTypedQuery).getSingleResult();
 
-        NodeInventory nodeInventoryFound = this.repository.getNodeIventory("FAKE_KEY");
+        NodeInventory nodeInventoryFound = this.repository.getNodeInventory("FAKE_KEY");
 
         assertNull(nodeInventoryFound);
     }
@@ -818,7 +839,7 @@ public class H2DataRepositoryTest
         NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
 
         DataServiceRepository repositorySpy = Mockito.spy(this.repository);
-        doReturn(nodeInventory).when(repositorySpy).getNodeIventory(anyString());
+        doReturn(nodeInventory).when(repositorySpy).getNodeInventory(anyString());
 
         doNothing().when(this.entityManager).flush();
         doNothing().when(this.entityManager).persist(any());
@@ -838,7 +859,7 @@ public class H2DataRepositoryTest
         NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
 
         DataServiceRepository repositorySpy = Mockito.spy(this.repository);
-        doReturn(null).when(repositorySpy).getNodeIventory(anyString());
+        doReturn(null).when(repositorySpy).getNodeInventory(anyString());
 
         doNothing().when(this.entityManager).flush();
         doNothing().when(this.entityManager).persist(any());
@@ -907,5 +928,31 @@ public class H2DataRepositoryTest
         String result = this.repository.getDomainName();
 
         assertNull(result);
+    }
+
+    @Test
+    public void getScaleIoProtectionDomain() throws Exception
+    {
+        doReturn(this.protectionDomainTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Arrays.asList(this.scaleIOProtectionDomain)).when(this.protectionDomainTypedQuery).getResultList();
+
+        assertNotNull(this.repository.getScaleIoProtectionDomains());
+    }
+
+    @Test
+    public void getScaleIoProtectionDomain_should_throw_an_exception_if_no_existing_protection_domain_found() throws Exception
+    {
+        doReturn(this.protectionDomainTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Collections.emptyList()).when(this.protectionDomainTypedQuery).getResultList();
+
+        try
+        {
+            this.repository.getScaleIoProtectionDomains();
+            fail("Expected an exception to be thrown here but it wasn't");
+        }
+        catch (Exception ex)
+        {
+            assertThat(ex.getMessage().toLowerCase(), containsString("no protection domain found"));
+        }
     }
 }

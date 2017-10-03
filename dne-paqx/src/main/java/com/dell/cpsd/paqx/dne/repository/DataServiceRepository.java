@@ -10,6 +10,7 @@ package com.dell.cpsd.paqx.dne.repository;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
@@ -58,6 +59,8 @@ public interface DataServiceRepository
 
     Host getVCenterHost(String hostName) throws NoResultException;
 
+    List<Host> getVcenterHost() throws NoResultException;
+
     Host getExistingVCenterHost() throws NoResultException;
 
     List<PortGroup> getPortGroups();
@@ -72,6 +75,8 @@ public interface DataServiceRepository
      */
     ScaleIOData getScaleIoData();
 
+    List<ScaleIOProtectionDomain> getScaleIoProtectionDomains();
+
     List<PciDevice> getPciDeviceList();
 
     String getClusterId(String clusterName);
@@ -82,7 +87,8 @@ public interface DataServiceRepository
 
     boolean saveNodeInventory(NodeInventory nodeInventory);
 
-    NodeInventory getNodeIventory(String symphonyUUID) throws NoResultException;
+    NodeInventory getNodeInventory(String symphonyUUID) throws NoResultException;
 
     String getDomainName();
+
 }
