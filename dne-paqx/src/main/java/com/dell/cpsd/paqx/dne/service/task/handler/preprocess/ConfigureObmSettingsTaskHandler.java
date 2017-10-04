@@ -105,7 +105,7 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
             SetObmSettingsRequestMessage configureObmSettingsRequest = new SetObmSettingsRequestMessage();
             // TODO - for now we only set the dell-wsman obm service, but we will
             // TODO - also be setting the ipmi obm service here once the capability is updated.
-            configureObmSettingsRequest.setService(obmServices[0]);
+            //configureObmSettingsRequest.setService(obmServices[0]);
             configureObmSettingsRequest.setUuid(uuid);
 
             ObmConfig obmConfig = new ObmConfig();

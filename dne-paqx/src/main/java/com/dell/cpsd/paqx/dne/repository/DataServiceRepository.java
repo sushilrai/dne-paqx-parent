@@ -19,6 +19,7 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TODO: Document Usage
@@ -90,5 +91,10 @@ public interface DataServiceRepository
     NodeInventory getNodeInventory(String symphonyUUID) throws NoResultException;
 
     String getDomainName();
+
+    Map<String, String> getDvSwitchNames();
+
+    Map<String, String> getDvPortGroupNames(Map<String, String> dvSwitchMap);
+
 
 }

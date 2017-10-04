@@ -14,7 +14,11 @@ import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
 import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
-import com.dell.cpsd.paqx.dne.domain.vcenter.*;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
+import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
+import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
+import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +30,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -597,6 +603,8 @@ public class H2DataRepository implements DataServiceRepository
         }
     }
 
+
+
     @Override
     public String getDomainName()
     {
@@ -628,6 +636,81 @@ public class H2DataRepository implements DataServiceRepository
 
             return searchDomains.stream().filter(StringUtils::isNotEmpty).findFirst().orElse(null);
         }
+    }
+
+    @Override
+    public Map<String, String> getDvSwitchNames()
+    {
+        final Map<String, String> switchNames = new HashMap<>();
+
+        try
+        {
+
+            final TypedQuery<String> typedQueryDvSwitch0 = entityManager.createQuery(
+                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch0%'",
+                    String.class);
+            switchNames.put("dvswitch0", typedQueryDvSwitch0.getSingleResult());
+
+            final TypedQuery<String> typedQueryDvSwitch1 = entityManager.createQuery(
+                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch1%'",
+                    String.class);
+            switchNames.put("dvswitch1", typedQueryDvSwitch1.getSingleResult());
+
+            final TypedQuery<String> typedQueryDvSwitch2 = entityManager.createQuery(
+                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch2%'",
+                    String.class);
+            switchNames.put("dvswitch2", typedQueryDvSwitch2.getSingleResult());
+
+        }
+        catch (Exception e)
+        {
+            LOG.error("Exception Occurred [{}]", e);
+            return null;
+        }
+
+        return switchNames;
+    }
+
+    @Override
+    public Map<String, String> getDvPortGroupNames(final Map<String, String> dvSwitchMap)
+    {
+        final Map<String, String> dvPortGroupAssociationMap = new HashMap<>();
+
+        try
+        {
+            final TypedQuery<String> typedQueryVmk0Management = entityManager.createQuery(
+                    "select p.name from PortGroup as p " + "join VirtualNicDVPortGroup vnpg on p.id = vnpg.portGroupId "
+                            + "join VirtualNic vnic on vnic.uuid = vnpg.virtualNic.uuid " + "where vnic.device = :vNicDevice", String.class);
+
+            typedQueryVmk0Management.setParameter("vNicDevice", "vmk0");
+            dvPortGroupAssociationMap.put("esx-mgmt", typedQueryVmk0Management.getSingleResult());
+
+            final TypedQuery<String> typedQueryVmotionManagement = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch0") + "%' and LOWER(p.name) like '%vmotion%'",
+                    String.class);
+            dvPortGroupAssociationMap.put("vmotion", typedQueryVmotionManagement.getSingleResult());
+
+            final TypedQuery<String> typedQuerySioData1 = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch1") + "%' and LOWER(p.name) like '%sio-data1%'",
+                    String.class);
+            dvPortGroupAssociationMap.put("sio-data1", typedQuerySioData1.getSingleResult());
+
+            final TypedQuery<String> typedQuerySioData2 = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch2") + "%' and LOWER(p.name) like '%sio-data2%'",
+                    String.class);
+            dvPortGroupAssociationMap.put("sio-data2", typedQuerySioData2.getSingleResult());
+
+        }
+        catch (Exception e)
+        {
+            LOG.error("Exception Occurred [{}]", e);
+            return null;
+        }
+
+        return dvPortGroupAssociationMap;
     }
 
     @Override

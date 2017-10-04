@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.AddHostToDvSwitchTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.junit.Before;
@@ -69,6 +70,15 @@ public class AddHostToDvSwitchTaskHandlerTest
     @Mock
     private Map<String, TaskResponse> taskResponseMap;
 
+    @Mock
+    private NodeExpansionRequest inputParams;
+
+    @Mock
+    private Map<String, String> dvSwitchNames;
+
+    @Mock
+    private Map<String, String> dvPortGroupNames;
+
     private AddHostToDvSwitchTaskHandler handler;
     private String hostname = "hostname_1.2.3.4";
     private String taskName = "addHostToDvSwitchTask";
@@ -98,6 +108,23 @@ public class AddHostToDvSwitchTaskHandlerTest
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
+        doReturn(this.inputParams).when(this.job).getInputParams();
+        doReturn("1.1.1.1").when(this.inputParams).getvMotionManagementIpAddress();
+        doReturn("2.2.2.2").when(this.inputParams).getvMotionManagementSubnetMask();
+        doReturn("3.3.3.3").when(this.inputParams).getScaleIoData1SvmIpAddress();
+        doReturn("4.4.4.4").when(this.inputParams).getScaleIoData1KernelAndSvmSubnetMask();
+        doReturn("5.5.5.5").when(this.inputParams).getScaleIoData2SvmIpAddress();
+        doReturn("6.6.6.6").when(this.inputParams).getScaleIoData2KernelAndSvmSubnetMask();
+        doReturn(this.dvSwitchNames).when(this.repository).getDvSwitchNames();
+        doReturn("dvswitch0").when(this.dvSwitchNames).get("dvswitch0");
+        doReturn("dvswitch1").when(this.dvSwitchNames).get("dvswitch1");
+        doReturn("dvswitch2").when(this.dvSwitchNames).get("dvswitch2");
+        doReturn(this.dvPortGroupNames).when(this.repository).getDvPortGroupNames(dvSwitchNames);
+        doReturn("esx-mgmt-dvport-group").when(this.dvPortGroupNames).get("esx-mgmt");
+        doReturn("vmotion-dvport-group").when(this.dvPortGroupNames).get("vmotion");
+        doReturn("sio-data1-dvport-group").when(this.dvPortGroupNames).get("sio-data1");
+        doReturn("sio-data2-dvport-group").when(this.dvPortGroupNames).get("sio-data2");
+
         doReturn(true).when(this.service).requestAddHostToDvSwitch(any());
 
         boolean result = this.handler.executeTask(this.job);
@@ -185,6 +212,22 @@ public class AddHostToDvSwitchTaskHandlerTest
         doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
+        doReturn(this.inputParams).when(this.job).getInputParams();
+        doReturn("1.1.1.1").when(this.inputParams).getvMotionManagementIpAddress();
+        doReturn("2.2.2.2").when(this.inputParams).getvMotionManagementSubnetMask();
+        doReturn("3.3.3.3").when(this.inputParams).getScaleIoData1SvmIpAddress();
+        doReturn("4.4.4.4").when(this.inputParams).getScaleIoData1KernelAndSvmSubnetMask();
+        doReturn("5.5.5.5").when(this.inputParams).getScaleIoData2SvmIpAddress();
+        doReturn("6.6.6.6").when(this.inputParams).getScaleIoData2KernelAndSvmSubnetMask();
+        doReturn(this.dvSwitchNames).when(this.repository).getDvSwitchNames();
+        doReturn("dvswitch0").when(this.dvSwitchNames).get("dvswitch0");
+        doReturn("dvswitch1").when(this.dvSwitchNames).get("dvswitch1");
+        doReturn("dvswitch2").when(this.dvSwitchNames).get("dvswitch2");
+        doReturn(this.dvPortGroupNames).when(this.repository).getDvPortGroupNames(dvSwitchNames);
+        doReturn("esx-mgmt-dvport-group").when(this.dvPortGroupNames).get("esx-mgmt");
+        doReturn("vmotion-dvport-group").when(this.dvPortGroupNames).get("vmotion");
+        doReturn("sio-data1-dvport-group").when(this.dvPortGroupNames).get("sio-data1");
+        doReturn("sio-data2-dvport-group").when(this.dvPortGroupNames).get("sio-data2");
         doReturn(false).when(this.service).requestAddHostToDvSwitch(any());
 
         boolean result = this.handler.executeTask(this.job);

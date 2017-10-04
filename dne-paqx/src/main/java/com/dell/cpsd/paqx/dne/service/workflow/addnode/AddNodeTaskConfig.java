@@ -38,6 +38,7 @@ public class AddNodeTaskConfig
                 "configureScaleIoVib",
                 "deploySVM",
                 "setPciPassthroughSioVm",
+                "addHostToDvSwitch",
                 //TODO: Add all the steps here once tested
                 "configurePxeBoot",
                 "updateSystemDefinition",
