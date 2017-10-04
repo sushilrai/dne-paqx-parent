@@ -94,7 +94,8 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
              */
             NodeData nodeData = new NodeData();
             nodeData.setSymphonyUuid(uuid);
-            nodeData.setProtectionDomainId(scaleIOProtectionDomain.getId());
+            //nodeData.setProtectionDomainId(scaleIOProtectionDomain.getId());
+            nodeData.setProtectionDomainId("");
             nodeData.setType(getNodeType(uuid));
 
             List<ProtectionDomain> protectionDomainList = requestMessage.getProtectionDomains();
