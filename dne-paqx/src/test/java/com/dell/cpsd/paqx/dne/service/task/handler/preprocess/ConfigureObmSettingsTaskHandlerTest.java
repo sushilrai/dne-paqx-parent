@@ -39,26 +39,33 @@ import static org.mockito.Mockito.*;
  */
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConfigureObmSettingsTaskHandlerTest {
-
+public class ConfigureObmSettingsTaskHandlerTest
+{
     /*
      * The <code>NodeService</code> instance.
      * @since 1.0
      */
     @Mock
-    private NodeService nodeService = null;
+    private NodeService nodeService;
 
     /*
-     * The job running the add node to system definition task handler.
+     * The current job.
      */
-    private Job job         = null;
+    private Job job = null;
+
+    /*
+    * The obm services to be set/configured.
+    */
+    private String[] obmServices = {"onmService1", "obmService2"};
+
     /**
      * The test setup.
      *
      * @since 1.0
      */
     @Before
-    public void setUp(){
+    public void setUp()
+    {
         PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
         WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preProcessTaskConfig.preProcessWorkflowSteps());
 
@@ -84,6 +91,7 @@ public class ConfigureObmSettingsTaskHandlerTest {
         this.job.addTaskResponse("findAvailableNodes", response);
         this.job.changeToNextStep("configureObmSettings");
     }
+
     /**
      * Test successful execution of ConfigureObmSettingsTaskHandlerTest.executeTask() method
      *
@@ -99,7 +107,7 @@ public class ConfigureObmSettingsTaskHandlerTest {
         ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
         when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
 
-        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService);
+        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService, this.obmServices);
         boolean expectedResult = true;
         boolean actualResult = instance.executeTask(this.job);
 
@@ -122,7 +130,7 @@ public class ConfigureObmSettingsTaskHandlerTest {
         ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
         when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
 
-        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService);
+        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService, this.obmServices);
         boolean expectedResult = false;
         boolean actualResult = instance.executeTask(this.job);
 

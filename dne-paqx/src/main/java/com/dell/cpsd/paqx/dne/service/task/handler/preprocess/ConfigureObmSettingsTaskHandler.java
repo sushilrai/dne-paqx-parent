@@ -17,8 +17,8 @@ import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +44,11 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
      */
     private NodeService nodeService;
 
-    @Value("${obm.service.name}")
-    private String serviceName="dell-wsman-obm-service";
+    /**
+     * The obm services to set
+     */
+    private final String[] obmServices;
+
     /**
      *  ConfigureObmSettingsTaskHandler constructor.
      *
@@ -54,8 +57,10 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
      *
      * @since 1.0
      */
-    public ConfigureObmSettingsTaskHandler(NodeService nodeService){
+    public ConfigureObmSettingsTaskHandler(NodeService nodeService, String[] obmServices)
+    {
         this.nodeService = nodeService;
+        this.obmServices = obmServices;
     }
 
     /**
@@ -93,12 +98,14 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
             String uuid = findNodeTask.getResults().get("symphonyUUID");
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
-            LOGGER.info("uuid:" + uuid);
-            LOGGER.info("ipAddress:" + ipAddress);
-            LOGGER.info("serviceName:" + serviceName);
+            LOGGER.info("uuid: " + uuid);
+            LOGGER.info("ipAddress: " + ipAddress);
+            LOGGER.info("obmServices: " + Arrays.toString(this.obmServices));
 
             SetObmSettingsRequestMessage configureObmSettingsRequest = new SetObmSettingsRequestMessage();
-            configureObmSettingsRequest.setService(serviceName);
+            // TODO - for now we only set the dell-wsman obm service, but we will
+            // TODO - also be setting the ipmi obm service here once the capability is updated.
+            configureObmSettingsRequest.setService(obmServices[0]);
             configureObmSettingsRequest.setUuid(uuid);
 
             ObmConfig obmConfig = new ObmConfig();

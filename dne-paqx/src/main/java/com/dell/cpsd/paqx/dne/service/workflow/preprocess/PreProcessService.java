@@ -18,6 +18,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.FindDiscoveredNodesTa
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,9 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Autowired
     private DataServiceRepository repository;
 
+    @Value("${obm.services}")
+    private String[] obmServices;
+
     private static final int PING_TIMEOUT = 120000; // 120 seconds
 
     @Bean("findDiscoveredNodesTask")
@@ -58,7 +62,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     @Bean("configureObmSettingsTask")
     private WorkflowTask configureObmSettingsTask(){
-        return createTask("Configuring Obm Settings", new ConfigureObmSettingsTaskHandler(nodeService));
+        return createTask("Configuring Obm Settings", new ConfigureObmSettingsTaskHandler(nodeService, obmServices));
     }
 
     @Bean("configIdracTask")
