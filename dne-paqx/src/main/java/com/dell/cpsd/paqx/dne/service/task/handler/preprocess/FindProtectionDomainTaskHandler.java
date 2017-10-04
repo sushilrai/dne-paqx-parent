@@ -21,10 +21,13 @@ import com.dell.cpsd.paqx.dne.service.model.ValidateProtectionDomainResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.service.engineering.standards.*;
 import com.jayway.jsonpath.JsonPath;
+import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import javax.naming.InvalidNameException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +74,8 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         {
             EssValidateProtectionDomainsRequestMessage requestMessage = new EssValidateProtectionDomainsRequestMessage();
 
-            final ScaleIOProtectionDomain scaleIOProtectionDomain = repository.getScaleIoProtectionDomains().stream().findFirst().orElseGet(null);
+            final ScaleIOProtectionDomain scaleIOProtectionDomain = repository.getScaleIoProtectionDomains().stream().findFirst()
+                    .orElseGet(null);
             if (scaleIOProtectionDomain == null)
             {
                 throw new IllegalStateException("No ScaleIO protection domains found.");
@@ -83,7 +87,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
             TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
             String uuid = findNodeTask.getResults().get("symphonyUUID");
-            LOGGER.info("Node uuid is:" +uuid);
+            LOGGER.info("Node uuid is:" + uuid);
 
             /**
              * Setting up NodeData request
@@ -115,7 +119,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
                         protectionDomainRequest.setId(protectionDomain.getId());
                         protectionDomainRequest.setName(protectionDomain.getName());
                         protectionDomainRequest.setState(protectionDomain.getProtectionDomainState());
-                        for(ScaleIOSDS scaleIOSDS : protectionDomain.getSdsList())
+                        for (ScaleIOSDS scaleIOSDS : protectionDomain.getSdsList())
                         {
                             if (scaleIOSDS == null)
                             {
@@ -125,7 +129,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
                              * Setting up ScaleIO data server for each protection domain found.
                              */
                             ScaleIODataServer scaleIODataServer = new ScaleIODataServer();
-                            scaleIODataServer.setType(getHostType(scaleIOSDS,hosts));
+                            scaleIODataServer.setType(getHostType(scaleIOSDS, hosts));
                             scaleIODataServer.setId(scaleIOSDS.getId());
                             scaleIODataServer.setName(scaleIOSDS.getName());
                             scaleIODataServers.add(scaleIODataServer);
@@ -196,12 +200,15 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
     private String getHostType(ScaleIOSDS scaleIOSDS, List<Host> hosts)
     {
-        String type=null;
-        for(Host host:hosts){
-            if (scaleIOSDS.getName().contains(host.getName())){
-                type =  host.getType();
+        String type = null;
+        for (Host host : hosts)
+        {
+            if (scaleIOSDS.getName().contains(host.getName()))
+            {
+                type = host.getType();
             }
-            else{
+            else
+            {
                 LOGGER.info("ScaleIOSds name does not match with Host name");
             }
         }
@@ -211,20 +218,31 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     private String getNodeType(final String symphonyUuid)
     {
         NodeInventory nodeInventory = repository.getNodeInventory(symphonyUuid);
-        try {
+        try
+        {
             if (nodeInventory != null && nodeInventory.getNodeInventory() != null)
             {
-                String product_name = JsonPath.read(nodeInventory.getNodeInventory(), "$[0].data['System Information']['Product Name']");
+                JSONArray productNames= JsonPath.read(nodeInventory.getNodeInventory(), "$..data..['System Information']['Product Name']");
+                String productName;
+                if(CollectionUtils.isEmpty(productNames)) {
+                    throw new InvalidNameException("No product name found for node " + nodeInventory.getSymphonyUUID());
+                }
+
+                productName = (String) productNames.get(0);
                 String NodeType = null;
-                if (product_name.contains("R6")) {
+                if (productName.contains("R6"))
+                {
                     NodeType = "1U1N";
-                } else if (product_name.contains("R7")) {
+                }
+                else if (productName.contains("R7"))
+                {
                     NodeType = "2U1N";
                 }
                 return NodeType;
             }
         }
-        catch(Exception e){
+        catch (Exception e)
+        {
             LOGGER.info("", e);
         }
         return null;
