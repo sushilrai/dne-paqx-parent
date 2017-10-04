@@ -141,7 +141,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("updateSystemDefinitionTask")
     private WorkflowTask updateSystemDefinitionTask()
     {
-        return createTask("Update System Definition", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient));
+        return createTask("Update System Definition", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient, repository));
     }
     
     @Bean("changeIdracCredentialsTask")

@@ -7,13 +7,12 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
@@ -80,19 +79,6 @@ public class DiscoveredNodeInventoryHandlerTest
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
                 "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
         this.job.setInputParams(nodeExpansionRequest);
-
-        FirstAvailableDiscoveredNodeResponse response = new FirstAvailableDiscoveredNodeResponse();
-        response.setWorkFlowTaskName("findAvailableNodes");
-        NodeInfo nodeInfo = new NodeInfo("symphonyUuid", NodeStatus.DISCOVERED);
-        response.setNodeInfo(nodeInfo);
-        Map<String, String> results = new HashMap<>();
-
-        results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
-        results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
-
-        response.setResults(results);
-
-        this.job.addTaskResponse("discoverNodeInventory", response);
 
         this.job.changeToNextStep("discoverNodeInventory");
     }

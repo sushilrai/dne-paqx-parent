@@ -68,34 +68,15 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
 
         try
         {
-            Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
-            if (findNodeTask == null)
-            {
-                throw new IllegalStateException("No discovered node task found.");
-            }
-
-            if (findNodeTask.getResults() == null)
-            {
-                throw new IllegalStateException("No results found.");
-            }
-
-            if (findNodeTask.getResults().get("symphonyUUID") == null)
-            {
-                throw new IllegalStateException("No discovered node info found.");
-            }
-
-            String uuid = findNodeTask.getResults().get("symphonyUUID");
-
             String ipAddress = job.getInputParams().getIdracIpAddress();
             String gatewayIpAddress = job.getInputParams().getIdracGatewayIpAddress();
             String subnetMask = job.getInputParams().getIdracSubnetMask();
 
-            LOGGER.info("uuid:" + uuid);
+            LOGGER.info("uuid:" + job.getInputParams().getSymphonyUuid());
             LOGGER.info("Idrac input request parameters: " + job.getInputParams().toString());
 
             IdracNetworkSettingsRequest idracNetworkSettingsRequest = new IdracNetworkSettingsRequest();
-            idracNetworkSettingsRequest.setUuid(uuid);
+            idracNetworkSettingsRequest.setUuid(job.getInputParams().getSymphonyUuid());
             idracNetworkSettingsRequest.setIdracIpAddress(ipAddress);
             idracNetworkSettingsRequest.setIdracGatewayIpAddress(gatewayIpAddress);
             idracNetworkSettingsRequest.setIdracSubnetMask(subnetMask);

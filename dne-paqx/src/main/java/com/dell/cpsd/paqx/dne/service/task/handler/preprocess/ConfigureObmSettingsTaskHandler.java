@@ -79,23 +79,8 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
 
         try
         {
-            Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
-            if (findNodeTask == null)
-            {
-                throw new IllegalStateException("No discovered node task found.");
-            }
-            if (findNodeTask.getResults() == null)
-            {
-                throw new IllegalStateException("No results found.");
-            }
 
-            if (findNodeTask.getResults().get("symphonyUUID") == null)
-            {
-                throw new IllegalStateException("No discovered node info found.");
-            }
-
-            String uuid = findNodeTask.getResults().get("symphonyUUID");
+            String uuid = job.getInputParams().getSymphonyUuid();
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
             LOGGER.info("uuid: " + uuid);

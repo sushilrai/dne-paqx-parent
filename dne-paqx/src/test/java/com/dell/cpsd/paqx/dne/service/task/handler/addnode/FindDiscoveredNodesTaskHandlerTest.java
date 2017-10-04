@@ -13,6 +13,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindDiscoveredNodesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
@@ -91,7 +92,7 @@ public class FindDiscoveredNodesTaskHandlerTest
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
         when(this.nodeService.listDiscoveredNodes())
-                .thenReturn(Arrays.asList(new DiscoveredNode("convergedUuid",  AllocationStatus.DISCOVERED)));
+                .thenReturn(Arrays.asList(new DiscoveredNode("convergedUuid", AllocationStatus.DISCOVERED)));
 
         FindDiscoveredNodesTaskHandler instance = new FindDiscoveredNodesTaskHandler(this.nodeService);
         boolean expectedResult = true;

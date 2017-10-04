@@ -85,9 +85,10 @@ public class NodeExpansionWebApplicationTest
         request.setIdracIpAddress("4.4.4.4");
         request.setIdracSubnetMask("5.55.5.5");
         request.setEsxiManagementSubnetMask("6.66.6.6");
-        request.setScaleIoData1SvmIpAddress("7.7.7.7");
-        request.setScaleIoData2SvmIpAddress("8.88.8.8");
-        request.setScaleIoSvmManagementIpAddress("9.99.9.9");
+        request.setScaleIoData1KernelAndSvmSubnetMask("7.7.7.7");
+        request.setScaleIoData1KernelIpAddress("8.88.8.8");
+        request.setScaleIoData1SvmIpAddress("9.99.9.9");
+        request.setSymphonyUuid(UUID.randomUUID().toString());
 
         Gson gson = new Gson();
         json = gson.toJson(request);
@@ -112,14 +113,14 @@ public class NodeExpansionWebApplicationTest
         params.setEsxiManagementSubnetMask("1.1.1.1");
         assertNotNull(params.getEsxiManagementSubnetMask());
 
+        params.setScaleIoData1KernelIpAddress("1.1.1.1");
+        assertNotNull(params.getScaleIoData1KernelIpAddress());
+
+        params.setScaleIoData1KernelAndSvmSubnetMask("1.1.1.1");
+        assertNotNull(params.getScaleIoData1KernelAndSvmSubnetMask());
+
         params.setScaleIoData1SvmIpAddress("1.1.1.1");
         assertNotNull(params.getScaleIoData1SvmIpAddress());
-
-        params.setScaleIoData2SvmIpAddress("1.1.1.1");
-        assertNotNull(params.getScaleIoData2SvmIpAddress());
-
-        params.setScaleIoSvmManagementIpAddress("1.1.1.1");
-        assertNotNull(params.getScaleIoSvmManagementIpAddress());
     }
 
     @Test
@@ -156,7 +157,7 @@ public class NodeExpansionWebApplicationTest
 
     @Test
     public void testPostPreProcess() throws  Exception{
-        Job mockJob = new Job(UUID.randomUUID(), "testPreProess", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "testPreProess", "startAddNodeWorkflow", "status1", new HashMap<>());
         Mockito.when(preProcessService.createWorkflow(anyString(), anyString(), anyString())).thenReturn(mockJob);
 
         this.mockMvc.perform(post("/dne/preprocess")

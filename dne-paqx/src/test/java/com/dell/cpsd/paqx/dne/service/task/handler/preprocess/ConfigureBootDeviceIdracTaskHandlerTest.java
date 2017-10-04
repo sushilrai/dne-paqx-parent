@@ -71,17 +71,6 @@ public class ConfigureBootDeviceIdracTaskHandlerTest {
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
                 "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
         this.job.setInputParams(nodeExpansionRequest);
-
-        TaskResponse response = new TaskResponse();
-        NodeInfo nodeInfo = new NodeInfo("symphonyUuid", NodeStatus.DISCOVERED);
-
-        Map<String, String> results = new HashMap<>();
-
-        results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
-        results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
-        response.setResults(results);
-
-        this.job.addTaskResponse("findAvailableNodes", response);
         this.job.changeToNextStep("configureBootDeviceIdrac");
     }
     /**

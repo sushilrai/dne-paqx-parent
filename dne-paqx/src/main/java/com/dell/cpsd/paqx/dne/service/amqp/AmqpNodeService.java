@@ -12,6 +12,8 @@ import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
@@ -24,6 +26,7 @@ import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
 import com.dell.cpsd.paqx.dne.transformers.ScaleIORestToScaleIODomainTransformer;
 import com.dell.cpsd.paqx.dne.transformers.StoragePoolEssRequestTransformer;
+import com.dell.cpsd.paqx.dne.util.NodeInventoryParsingUtil;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
@@ -75,6 +78,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterReque
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -323,6 +327,42 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<DiscoveredNodeInfo> listDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+        List<DiscoveredNode> discoveredNodes = listDiscoveredNodes();
+
+        for (DiscoveredNode node : discoveredNodes) {
+            Object nodeInventoryResponse = listNodeInventory(node.getConvergedUuid());
+            NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse.toString());
+            repository.saveNodeInventory(nodeInventory);
+            DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, node.getConvergedUuid());
+            discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
+            repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
+        }
+
+        LOGGER.info("Listing DiscoveredNodeInfo data ...");
+        return repository.getDiscoveredNodeInfo();
+
+    }
+
+    @Override
+    public DiscoveredNodeInfo getFirstDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+        List<DiscoveredNode> discoveredNodes = listDiscoveredNodes();
+
+        DiscoveredNodeInfo discoveredNodeInfo = null ;
+        if (discoveredNodes.size() != 0 ) {
+            Object nodeInventoryResponse = listNodeInventory(discoveredNodes.get(0).getConvergedUuid());
+            NodeInventory nodeInventory = new NodeInventory(discoveredNodes.get(0).getConvergedUuid(), nodeInventoryResponse.toString());
+            repository.saveNodeInventory(nodeInventory);
+            discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, discoveredNodes.get(0).getConvergedUuid());
+            discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(discoveredNodes.get(0).getNodeStatus().toString()));
+            repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
+        }
+
+        LOGGER.info("getting first DiscoveredNodeInfo data ...");
+        return discoveredNodeInfo;
     }
 
     /**

@@ -9,7 +9,10 @@ package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.service.system.definition.api.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +21,6 @@ import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.sdk.AMQPClient;
-import com.dell.cpsd.service.system.definition.api.Component;
-import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
-import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
-import com.dell.cpsd.service.system.definition.api.Group;
 import org.springframework.util.StringUtils;
 
 /**
@@ -44,6 +43,10 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
      * The <code>AMQPClient</code> instance
      */
     private final AMQPClient    sdkAMQPClient;
+    /*
+     * Reference to H2 repository
+     */
+    private final DataServiceRepository repository;
 
     /*
     * The component on which to base new components.
@@ -55,12 +58,14 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
      * 
      * @param sdkAMQPClient
      *            - The <code>AMQPClient</code> instance.
-     * 
+     *
+     * @param repository
      * @since 1.0
      */
-    public AddNodeToSystemDefinitionTaskHandler(AMQPClient sdkAMQPClient)
+    public AddNodeToSystemDefinitionTaskHandler(AMQPClient sdkAMQPClient, DataServiceRepository repository)
     {
         this.sdkAMQPClient = sdkAMQPClient;
+        this.repository = repository;
     }
 
     /**
@@ -112,21 +117,31 @@ public class AddNodeToSystemDefinitionTaskHandler extends BaseTaskHandler implem
 
             ConvergedSystem systemToBeUpdated = systemDetails.get(0);
 
-            NodeInfo nodeInfo = new NodeInfo(symphonyUuid,  NodeStatus.DISCOVERED);
+            DiscoveredNodeInfo nodeInfo = repository.getDiscoveredNodeInfo(symphonyUuid);
+            if( nodeInfo == null)
+            {
+                {
+                    throw new IllegalStateException("No discovered node info.");
+                }
+            }
             Component newNode = new Component();
+            List<String> parentGroups = new ArrayList<>();
+            List<String> endpoints = new ArrayList<>();
+            parentGroups.add("SystemCompute");
+            endpoints.add("RACKHD-EP");
             newNode.setUuid(nodeInfo.getSymphonyUuid());
-            newNode.setIdentity(nodeInfo.getIdentity());
-            newNode.setDefinition(nodeInfo.getDefinition());
-            newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(nodeInfo.getParentGroups(), systemToBeUpdated.getGroups()));
+            newNode.setIdentity(new Identity("computeServer", nodeInfo.getSymphonyUuid(), nodeInfo.getSymphonyUuid(), nodeInfo.getSerialNumber(),null));
+            newNode.setDefinition(new Definition(nodeInfo.getProductFamily(), nodeInfo.getProduct(), nodeInfo.getModelFamily(), nodeInfo.getModel()));
+            newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(parentGroups, systemToBeUpdated.getGroups()));
             newNode.setEndpoints(new ArrayList<>());
 
-            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, nodeInfo.getEndpoints(), COMPONENT_SERVER_TEMPLATE);
+            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
 
             // Need to make sure the node was really added.
             // The SDK has a habit of swallowing exceptions making it difficult to know
             // if there was an error...
-            systemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
-            ConvergedSystem systemThatWasUpdated = systemDetails.get(0);
+            List<ConvergedSystem>  updateSystemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
+            ConvergedSystem systemThatWasUpdated = updateSystemDetails.get(0);
 
             Component newComponent = systemThatWasUpdated.getComponents().stream()
                 .filter(c -> c.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier()))

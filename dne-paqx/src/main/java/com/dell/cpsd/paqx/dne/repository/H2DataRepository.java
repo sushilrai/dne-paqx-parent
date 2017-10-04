@@ -11,7 +11,8 @@ import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
-import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
@@ -728,4 +729,38 @@ public class H2DataRepository implements DataServiceRepository
 
     }
 
+    @Override
+    @Transactional
+    public boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo) {
+        LOG.info("Persisting discovered node info data ...");
+
+        try {
+            DiscoveredNodeInfo nodeInfo = this.getDiscoveredNodeInfo(discoveredNodeInfo.getSymphonyUuid());
+            if (nodeInfo != null) {
+                //If it already exists, delete and save the new one.
+                entityManager.remove(nodeInfo);
+            }
+        } catch (NoResultException noResultEx)
+        {
+            //  Do not do anything as the result will be null indicating that no result found.
+        }
+
+        entityManager.persist(discoveredNodeInfo);
+        entityManager.flush();
+
+        return true;
+    }
+
+    @Override
+    public DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid) {
+        final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT n FROM DiscoveredNodeInfo as n where n.symphonyUuid=:symphonyUuid", DiscoveredNodeInfo.class);
+        query.setParameter("symphonyUuid", uuid);
+        return query.getSingleResult();
+    }
+
+    @Override
+    public List<DiscoveredNodeInfo> getDiscoveredNodeInfo() {
+        final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
+        return query.getResultList();
+    }
 }

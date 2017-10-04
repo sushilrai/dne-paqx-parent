@@ -7,6 +7,7 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.service.model.*;
@@ -17,6 +18,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
@@ -40,6 +42,18 @@ public interface NodeService
      * @throws ServiceExecutionException
      */
     List<DiscoveredNode> listDiscoveredNodes() throws ServiceTimeoutException, ServiceExecutionException;
+
+    /**
+     * List the discovered nodes with node info
+     *
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    List<DiscoveredNodeInfo> listDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException;
+
+    // before we have new landing page to list all discovered node, UI will call this api to get only first node.
+    DiscoveredNodeInfo getFirstDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException;
 
     /**
      * List the virtualisation clusters

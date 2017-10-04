@@ -8,7 +8,7 @@ package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
@@ -64,46 +64,33 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
     }
 
     @Override
-    public boolean executeTask(final Job job)
-    {
+    public boolean executeTask(final Job job)  {
         LOGGER.info("Execute DiscoverNodeInventoryHandler task.");
 
         TaskResponse response = initializeResponse(job);
 
-        NodeInfo nodeInfo = findNodeInfo(job.getTaskResponseList());
+        try {
+            String symphonyUUID = job.getInputParams().getSymphonyUuid();
 
-        if (nodeInfo != null)
-        {
-            try
-            {
-                String symphonyUUID = nodeInfo.getSymphonyUuid();
+            Object nodeInventoryResponse = nodeService.listNodeInventory(symphonyUUID);
+            if (nodeInventoryResponse != null) {
+                NodeInventory nodeInventory = new NodeInventory(symphonyUUID, nodeInventoryResponse.toString());
+                boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
 
-                Object nodeInventoryResponse = nodeService.listNodeInventory(symphonyUUID);
-                if (nodeInventoryResponse != null)
-                {
-                    NodeInventory nodeInventory = new NodeInventory(symphonyUUID, nodeInventoryResponse);
-                    boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
-                    if(isNodeInventorySaved) {
-                        response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+                if (isNodeInventorySaved) {
+                    response.setWorkFlowTaskStatus(Status.SUCCEEDED);
 
-                        return isNodeInventorySaved;
-                    }
-                } else
-                {
-                    LOGGER.info("There is no node inventory for UUID ", symphonyUUID);
-                    response.addError("There is no node inventory for UUID " + symphonyUUID);
+                    return isNodeInventorySaved;
                 }
+            } else {
+                LOGGER.info("There is no node inventory for UUID ", symphonyUUID);
+                response.addError("There is no node inventory for UUID " + symphonyUUID);
             }
-            catch (ServiceTimeoutException | ServiceExecutionException | JsonProcessingException ex)
-            {
-                LOGGER.error("Node Inventory discover failed : ", ex);
-                response.addError("Unable to discover node inventory.");
-            }
+        } catch (ServiceTimeoutException | ServiceExecutionException | JsonProcessingException ex) {
+            LOGGER.error("Node Inventory discover failed : ", ex);
+            response.addError("Unable to discover node inventory.");
         }
-        else
-        {
-            response.addError("There is no discovered node available.");
-        }
+
 
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;

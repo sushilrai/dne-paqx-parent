@@ -30,12 +30,11 @@ public class PreProcessTaskConfig {
         final Map<String, Step> workflowSteps = new HashMap<>();
 
         addWorkflowSteps(workflowSteps,
-                "findAvailableNodes",
                 "listScaleIoComponents",
                 "listVCenterComponents",
                 "discoverScaleIo",
                 "discoverVCenter",
-                "discoverNodeInventory",
+                //"discoverNodeInventory",
                 "configIdrac",
                 "pingIdrac",
                 "configureObmSettings",

@@ -8,7 +8,8 @@
 package com.dell.cpsd.paqx.dne.repository;
 
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
-import com.dell.cpsd.paqx.dne.domain.inventory.NodeInventory;
+import com.dell.cpsd.paqx.dne.domain.node.*;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
@@ -91,10 +92,13 @@ public interface DataServiceRepository
     NodeInventory getNodeInventory(String symphonyUUID) throws NoResultException;
 
     String getDomainName();
+    boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo);
 
+    DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid);
+
+    List<DiscoveredNodeInfo> getDiscoveredNodeInfo();
     Map<String, String> getDvSwitchNames();
 
     Map<String, String> getDvPortGroupNames(Map<String, String> dvSwitchMap);
-
 
 }

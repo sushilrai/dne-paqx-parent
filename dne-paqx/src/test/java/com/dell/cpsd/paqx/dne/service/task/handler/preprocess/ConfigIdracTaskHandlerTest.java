@@ -75,18 +75,6 @@ public class ConfigIdracTaskHandlerTest
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
                 "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
         this.job.setInputParams(nodeExpansionRequest);
-
-        TaskResponse response = new TaskResponse();
-        NodeInfo nodeInfo = new NodeInfo("symphonyUuid",  NodeStatus.DISCOVERED);
-        Map<String, String> results = new HashMap<>();
-
-        results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
-        results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
-
-        response.setResults(results);
-
-        this.job.addTaskResponse("findAvailableNodes", response);
-
         this.job.changeToNextStep("configIdrac");
     }
 
@@ -111,56 +99,6 @@ public class ConfigIdracTaskHandlerTest
 
         assertEquals(expectedResult, actualResult);
         verify(this.nodeService, times(1)).idracNetworkSettings(requestCaptor.capture());
-    }
-
-    /**
-     * Test error execution of ConfigIdracTaskHandler.executeTask() method - test error case where no findAvailableNodes task response was
-     * set.
-     * 
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * 
-     * @since 1.0
-     */
-    @Test
-    public void testExecuteTask_no_find_nodes_response() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
-        taskResponse.remove("findAvailableNodes");
-
-        ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
-
-        ConfigIdracTaskHandler instance = new ConfigIdracTaskHandler(this.nodeService);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
-
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(0)).idracNetworkSettings(requestCaptor.capture());
-    }
-
-    /**
-     * Test error execution of ConfigIdracTaskHandler.executeTask() method - test error case where no discovered node instance is present.
-     * 
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * 
-     * @since 1.0
-     */
-    @Test
-    public void testExecuteTask_no_discovered_node() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        Map<String, TaskResponse> taskResponse = this.job.getTaskResponseMap();
-        TaskResponse response = taskResponse.get("findAvailableNodes");
-        Map<String, String> results = new HashMap<>();
-        response.setResults(results);
-
-        ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
-        ConfigIdracTaskHandler instance = new ConfigIdracTaskHandler(this.nodeService);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
-
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(0)).idracNetworkSettings(requestCaptor.capture());
     }
 
     /**

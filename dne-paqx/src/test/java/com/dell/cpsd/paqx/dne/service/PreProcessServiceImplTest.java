@@ -79,12 +79,6 @@ public class PreProcessServiceImplTest {
     }
 
     @Test
-    public void testTaskName_findAvailableNodes()
-    {
-        Assert.assertEquals("Finding discovered Nodes", workFlowTasks.get("findAvailableNodes").getTaskName());
-    }
-
-    @Test
     public void testTaskName_configIdrac()
     {
     	Assert.assertEquals("Configuring Out of Band Management", workFlowTasks.get("configIdrac").getTaskName());

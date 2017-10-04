@@ -5,11 +5,11 @@
 package com.dell.cpsd.paqx.dne.rest.controller;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.rest.exception.WorkflowNotFoundException;
 import com.dell.cpsd.paqx.dne.rest.model.AboutInfo;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
@@ -22,6 +22,7 @@ import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +38,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -112,16 +113,36 @@ public class NodeExpansionController
     @CrossOrigin
     @RequestMapping(path = "/nodes", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<NodeInfo> listDiscoveredNodes(HttpServletRequest servletRequest) throws ServiceTimeoutException, ServiceExecutionException 
-    {
-        List<DiscoveredNode> discoveredNodes = nodeService.listDiscoveredNodes();
-        if (discoveredNodes != null)
+    public List<NodeInfo> listDiscoveredNodes(HttpServletRequest servletRequest) throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+        List<DiscoveredNodeInfo> discoveredNodes = nodeService.listDiscoveredNodeInfo();
+        if ( discoveredNodes.size()!= 0)
         {
-            return discoveredNodes.stream().map(n -> new NodeInfo(
-                    n.getConvergedUuid(),  NodeStatus.valueOf(
-                            n.getNodeStatus().toString()))).collect(Collectors.toList());
+            return discoveredNodes.stream().map( n -> new NodeInfo( n.getSymphonyUuid(), NodeStatus.valueOf(n.getNodeStatus().toString()),
+                    n.getSerialNumber())).collect(Collectors.toList());
         }
+
         return new ArrayList<>();
+    }
+
+    /**
+     * List discovered nodes
+     *
+     * @param servletRequest
+     * @return
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    @CrossOrigin
+    @RequestMapping(path = "/firstnode", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public NodeInfo GetFirstDiscoveredNodes(HttpServletRequest servletRequest) throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+        DiscoveredNodeInfo discoveredNode = nodeService.getFirstDiscoveredNodeInfo();
+        if ( discoveredNode != null )
+        {
+            return  new NodeInfo( discoveredNode.getSymphonyUuid(), NodeStatus.valueOf(discoveredNode.getNodeStatus().toString()),
+                    discoveredNode.getSerialNumber());
+        }
+        return null;
     }
 
     @CrossOrigin
@@ -129,6 +150,16 @@ public class NodeExpansionController
     public ResponseEntity<NodeExpansionResponse> preProcessOrchestration(@RequestBody NodeExpansionRequest params,
                                                                          HttpServletRequest servletRequest) throws InterruptedException, ExecutionException
     {
+        String uuid = params.getSymphonyUuid();
+
+        if ( uuid == null || uuid.isEmpty()) {
+            String errMsg = "Symphony uuid is required field for preprocess workflow.";
+            LOGGER.error(errMsg);
+            NodeExpansionResponse ner = new NodeExpansionResponse();
+            ner.setErrors(Collections.singletonList(errMsg));
+            return  new ResponseEntity<>(ner, HttpStatus.BAD_REQUEST);
+        }
+
         Job job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow",
                 "PreProcess request has been Submitted successfully");
         job.setInputParams(params);
