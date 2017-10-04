@@ -167,7 +167,10 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
             validateProtectionDomainResponse.setProtectionDomains(protectionDomainId);
             response.setResults(buildResponseResult(validateProtectionDomainResponse));
-            response.addWarning(protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().toString());
+            for (Integer n = 0 ;n < protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().size(); n++)
+            {
+                response.addWarning(protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().get(n).getMessage());
+            }
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
 
             return true;
