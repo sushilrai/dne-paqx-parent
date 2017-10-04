@@ -24,12 +24,8 @@ public class NodeExpansionRequest
     private String scaleIoData2KernelAndSvmSubnetMask;
     private String scaleIoSvmManagementIpAddress;
     private String scaleIoSvmManagementSubnetMask;
-    private String hostname;
-    private String nodeId;
     private String clusterName;
     private String symphonyUuid;
-
-    private String serviceName;
 
     public NodeExpansionRequest()
     {
@@ -40,7 +36,7 @@ public class NodeExpansionRequest
                                 String esxiManagementHostname, String scaleIoData1SvmIpAddress, String scaleIoData1KernelIpAddress,
                                 String scaleIoData1KernelAndSvmSubnetMask, String scaleIoData2SvmIpAddress, String scaleIoData2KernelIpAddress,
                                 String scaleIoData2KernelAndSvmSubnetMask, String scaleIoSvmManagementIpAddress, String scaleIoSvmManagementSubnetMask,
-                                String nodeId, String symphonyUuid, String clusterName) {
+                                String symphonyUuid, String clusterName) {
         this.idracIpAddress = idracIpAddress;
         this.idracGatewayIpAddress = idracGatewayIpAddress;
         this.idracSubnetMask = idracSubnetMask;
@@ -56,7 +52,6 @@ public class NodeExpansionRequest
         this.scaleIoData2KernelAndSvmSubnetMask = scaleIoData2KernelAndSvmSubnetMask;
         this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
         this.scaleIoSvmManagementSubnetMask = scaleIoSvmManagementSubnetMask;
-        this.nodeId = nodeId;
         this.symphonyUuid = symphonyUuid;
         this.clusterName = clusterName;
     }
@@ -156,24 +151,6 @@ public class NodeExpansionRequest
         this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
     }
 
-    public String getHostname()
-    {
-        return hostname;
-    }
-
-    public void setHostname(final String hostname)
-    {
-        this.hostname = hostname;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
     public String getClusterName() {
         return clusterName;
     }
@@ -188,15 +165,6 @@ public class NodeExpansionRequest
 
     public void setSymphonyUuid(String symphonyUuid) {
         this.symphonyUuid = symphonyUuid;
-    }
-
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
     }
 
     public String getScaleIoData1KernelIpAddress()
@@ -268,10 +236,7 @@ public class NodeExpansionRequest
                 + ", scaleIoData2KernelAndSvmSubnetMask='" + scaleIoData2KernelAndSvmSubnetMask + '\''
                 + ", scaleIoSvmManagementIpAddress='" + scaleIoSvmManagementIpAddress + '\''
                 + ", scaleIoSvmManagementSubnetMask='" + scaleIoSvmManagementSubnetMask + '\''
-                + ", nodeId='" + nodeId + '\''
                 + ", clusterName='" + clusterName + '\''
-                + ", symphonyUuid='" + symphonyUuid + '\''
-                + ", serviceName='" + serviceName + '\''
-                + ", hostname='" + hostname + '\'' + '}';
+                + ", symphonyUuid='" + symphonyUuid + '\'' + '}';
     }
 }
