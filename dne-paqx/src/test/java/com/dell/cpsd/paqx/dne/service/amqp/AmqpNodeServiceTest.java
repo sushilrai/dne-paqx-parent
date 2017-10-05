@@ -865,7 +865,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestInstallEsxi(info, anyString());
+        nodeService.requestInstallEsxi(info);
         Mockito.verify(dneProducer, Mockito.times(1)).publishInstallEsxiRequest(any());
     }
 
@@ -892,7 +892,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestInstallEsxi(any(), "1.2.3.4");
+        final boolean success = nodeService.requestInstallEsxi(any());
 
         assertTrue(success);
 

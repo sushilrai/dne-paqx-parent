@@ -78,7 +78,6 @@ public class InstallEsxiTaskHandlerTest
     private String esxiManagementHostname         = "vCenter-1-2-1-2";
     private String esxiManagementGatewayIpAddress = "1.3.5.7";
     private String esxiManagementSubnetMask       = "255.255.255.0";
-    private String idracIpAddress                 = "1.2.3.4";
     private String esxiHostDomainName             = "example.com";
 
     /**
@@ -96,7 +95,7 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask()
+    public void testExecuteTask_should_successfully_request_an_esxi_installation()
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
@@ -106,15 +105,14 @@ public class InstallEsxiTaskHandlerTest
         doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
         doReturn(this.esxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
         doReturn(this.esxiInstallInfo).when(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        doReturn(this.idracIpAddress).when(this.request).getIdracIpAddress();
-        doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
+        doReturn(true).when(this.service).requestInstallEsxi(any());
         doReturn(this.esxiHostDomainName).when(this.repository).getDomainName();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(true));
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service).requestInstallEsxi(any(), anyString());
+        verify(this.service).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
         ArgumentCaptor<String> setHostnameParameterCaptor = ArgumentCaptor.forClass(String.class);
@@ -127,18 +125,16 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask_node_expansion_request_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_node_expansion_request_is_null()
     {
-        NodeExpansionRequest nullRequest = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
-        doReturn(nullRequest).when(this.job).getInputParams();
+        doReturn(null).when(this.job).getInputParams();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service, never()).requestInstallEsxi(any(), anyString());
+        verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -147,19 +143,17 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask_symphonyUuid_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_symphonyUuid_is_null()
     {
-        String nullISymphonyUuid = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
-        doReturn(nullISymphonyUuid).when(this.request).getSymphonyUuid();
+        doReturn(null).when(this.request).getSymphonyUuid();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service, never()).requestInstallEsxi(any(), anyString());
+        verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -168,64 +162,58 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask_esxi_management_ip_address_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_esxi_management_ip_address_is_null()
     {
-        String nullEsxiManagementIpAddress = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
-        doReturn(nullEsxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
+        doReturn(null).when(this.request).getEsxiManagementIpAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service, never()).requestInstallEsxi(any(), anyString());
+        verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
 
     @Test
-    public void testExecuteTask_esxi_management_gateway_ip_address_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_esxi_management_gateway_ip_address_is_null()
     {
-        String nullEsxiManagementGatewayIpAddress = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
-        doReturn(nullEsxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
+        doReturn(null).when(this.request).getEsxiManagementGatewayIpAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service, never()).requestInstallEsxi(any(), anyString());
+        verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
 
     @Test
-    public void testExecuteTask_esxi_management_subnet_mask_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_esxi_management_subnet_mask_is_null()
     {
-        String nullEsxiManagementSubnetMask = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
         doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
-        doReturn(nullEsxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
+        doReturn(null).when(this.request).getEsxiManagementSubnetMask();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response, never()).setHostname(anyString());
         verify(this.transformer, never()).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service, never()).requestInstallEsxi(any(), anyString());
+        verify(this.service, never()).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -234,20 +222,17 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask_esxi_management_hostname_is_null_it_should_be_auto_generated()
+    public void testExecuteTask_should_successfully_request_an_esxi_installation_when_the_esxi_management_hostname_is_auto_generated()
     {
-        String nullEsxiManagementHostname = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
         doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
         doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
         doReturn(this.esxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
-        doReturn(nullEsxiManagementHostname).when(this.request).getEsxiManagementHostname();
+        doReturn(null).when(this.request).getEsxiManagementHostname();
         doReturn(this.esxiInstallInfo).when(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        doReturn(this.idracIpAddress).when(this.request).getIdracIpAddress();
-        doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
+        doReturn(true).when(this.service).requestInstallEsxi(any());
         doReturn(this.esxiHostDomainName).when(this.repository).getDomainName();
 
         boolean result = this.handler.executeTask(this.job);
@@ -258,7 +243,7 @@ public class InstallEsxiTaskHandlerTest
         assertThat(setHostnameParameterCaptor.getAllValues().get(0), endsWith("-1-2-3-4"));
         assertThat(setHostnameParameterCaptor.getAllValues().get(1), endsWith("-1-2-3-4.example.com"));
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service).requestInstallEsxi(any(), anyString());
+        verify(this.service).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
     }
@@ -267,10 +252,8 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testExecuteTask_esxi_management_fqdn_is_null()
+    public void testExecuteTask_should_fail_the_workflow_if_the_esxi_management_fqdn_is_null()
     {
-        String nullEsxiHostDomainName = null;
-
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.request).when(this.job).getInputParams();
         doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
@@ -279,16 +262,40 @@ public class InstallEsxiTaskHandlerTest
         doReturn(this.esxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
         doReturn(this.esxiManagementHostname).when(this.request).getEsxiManagementHostname();
         doReturn(this.esxiInstallInfo).when(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        doReturn(this.idracIpAddress).when(this.request).getIdracIpAddress();
-        doReturn(true).when(this.service).requestInstallEsxi(any(), anyString());
-        doReturn(nullEsxiHostDomainName).when(this.repository).getDomainName();
+        doReturn(true).when(this.service).requestInstallEsxi(any());
+        doReturn(null).when(this.repository).getDomainName();
 
         boolean result = this.handler.executeTask(this.job);
 
         assertThat(result, is(false));
         verify(this.response).setHostname(anyString());
         verify(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
-        verify(this.service).requestInstallEsxi(any(), anyString());
+        verify(this.service).requestInstallEsxi(any());
+        verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response).addError(anyString());
+    }
+
+    /**
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     */
+    @Test
+    public void testExecuteTask_should_fail_the_workflow_if_the_install_esxi_request_fails()
+    {
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
+        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.symphonyUuid).when(this.request).getSymphonyUuid();
+        doReturn(this.esxiManagementIpAddress).when(this.request).getEsxiManagementIpAddress();
+        doReturn(this.esxiManagementHostname).when(this.request).getEsxiManagementHostname();
+        doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
+        doReturn(this.esxiManagementSubnetMask).when(this.request).getEsxiManagementSubnetMask();
+        doReturn(this.esxiInstallInfo).when(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
+        doReturn(false).when(this.service).requestInstallEsxi(any());
+
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
+        verify(this.transformer).transformInstallEsxiData(anyString(), anyString(), any());
+        verify(this.service).requestInstallEsxi(any());
         verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
         verify(this.response).addError(anyString());
     }
@@ -297,7 +304,7 @@ public class InstallEsxiTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler#initializeResponse(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void testInitializeResponse()
+    public void testInitializeResponse_should_successfully_initialize_the_response()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
         doReturn(this.taskName).when(this.task).getTaskName();

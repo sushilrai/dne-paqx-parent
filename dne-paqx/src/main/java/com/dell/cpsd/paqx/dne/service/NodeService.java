@@ -233,10 +233,9 @@ public interface NodeService
      * Request an installation of ESXi.
      *
      * @param esxiInstallationInfo - The <code>EsxiInstallationInfo</code> instance
-     * @param idracIp - The iDRAC IP address
      * @return
      */
-    boolean requestInstallEsxi(EsxiInstallationInfo esxiInstallationInfo, String idracIp);
+    boolean requestInstallEsxi(EsxiInstallationInfo esxiInstallationInfo);
 
     /**
      * Request a host to be added to VCenter.

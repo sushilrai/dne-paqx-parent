@@ -1158,7 +1158,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo, final String idracIp)
+    public boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo)
     {
         try
         {
@@ -1166,8 +1166,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             final String correlationId = UUID.randomUUID().toString();
             requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
             requestMessage.setEsxiInstallationInfo(esxiInstallationInfo);
-            //TODO: Temporary Solution
-            requestMessage.getAdditionalProperties().put("obm-ip", idracIp);
 
             ServiceResponse<?> callbackResponse = processRequest(installEsxiTimeout, new ServiceRequestCallback()
             {

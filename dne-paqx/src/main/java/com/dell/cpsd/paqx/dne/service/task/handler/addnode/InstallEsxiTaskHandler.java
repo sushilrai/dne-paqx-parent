@@ -120,14 +120,7 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
             final EsxiInstallationInfo esxiInstallationInfo = hostToInstallEsxiRequestTransformer
                     .transformInstallEsxiData(esxiManagementHostname, symphonyUuid, ipV4Configuration);
 
-            final String idracIpAddress = inputParams.getIdracIpAddress();
-
-            if (idracIpAddress == null)
-            {
-                throw new IllegalStateException("Idrac IP is null");
-            }
-
-            final boolean succeeded = this.nodeService.requestInstallEsxi(esxiInstallationInfo, idracIpAddress);
+            final boolean succeeded = this.nodeService.requestInstallEsxi(esxiInstallationInfo);
 
             if(!succeeded)
             {
