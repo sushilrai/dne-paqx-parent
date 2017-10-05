@@ -21,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * TODO: Document Usage
  * <p>
@@ -37,6 +40,8 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
      * The logger instance
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallEsxiTaskHandler.class);
+    private static final String ESXI_HOST_NAME_KEY = "hostName";
+    private static final String ESXI_MANAGEMENT_IP_ADDRESS_KEY = "esxiManagementIpAddress";
 
     /**
      * The <code>NodeService</code> instance
@@ -135,6 +140,8 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
             }
 
             response.setHostname(fqdn);
+            response.setEsxiManagementIpAddress(esxiManagementIpAddress);
+            response.setResults(buildResponseResult(response));
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             return true;
 
@@ -147,6 +154,17 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
 
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
+    }
+
+    private Map<String,String> buildResponseResult(InstallEsxiTaskResponse response) {
+        Map<String, String> result = new HashMap<>();
+        if ( response.getEsxiManagementIpAddress() != null )
+            result.put(ESXI_MANAGEMENT_IP_ADDRESS_KEY, response.getEsxiManagementIpAddress());
+
+        if ( response.getHostname() != null )
+            result.put(ESXI_HOST_NAME_KEY, response.getHostname());
+
+        return result;
     }
 
     @Override

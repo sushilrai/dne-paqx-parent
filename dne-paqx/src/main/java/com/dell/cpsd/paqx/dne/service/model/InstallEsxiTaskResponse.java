@@ -18,6 +18,8 @@ public class InstallEsxiTaskResponse extends TaskResponse
 {
     private String hostname;
 
+    private String esxiManagementIpAddress;
+
     public String getHostname()
     {
         return hostname;
@@ -26,5 +28,13 @@ public class InstallEsxiTaskResponse extends TaskResponse
     public void setHostname(final String hostname)
     {
         this.hostname = hostname;
+    }
+
+    public String getEsxiManagementIpAddress() {
+        return esxiManagementIpAddress;
+    }
+
+    public void setEsxiManagementIpAddress(String esxiManagementIpAddress) {
+        this.esxiManagementIpAddress = esxiManagementIpAddress;
     }
 }
