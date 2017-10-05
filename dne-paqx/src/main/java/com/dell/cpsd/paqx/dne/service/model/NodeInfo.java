@@ -5,12 +5,6 @@
 
 package com.dell.cpsd.paqx.dne.service.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dell.cpsd.service.system.definition.api.Definition;
-import com.dell.cpsd.service.system.definition.api.Identity;
-
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
