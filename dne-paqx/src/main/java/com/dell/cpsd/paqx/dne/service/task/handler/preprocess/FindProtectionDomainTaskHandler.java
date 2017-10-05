@@ -84,9 +84,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             /**
              * Finding uuid
              */
-            Map<String, TaskResponse> responseMap = job.getTaskResponseMap();
-            TaskResponse findNodeTask = responseMap.get("findAvailableNodes");
-            String uuid = findNodeTask.getResults().get("symphonyUUID");
+            String uuid = job.getInputParams().getSymphonyUuid();
             LOGGER.info("Node uuid is:" + uuid);
 
             /**
