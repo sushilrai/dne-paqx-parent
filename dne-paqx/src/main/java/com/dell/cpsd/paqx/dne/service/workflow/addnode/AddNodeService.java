@@ -109,7 +109,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("powerOnSVM", powerOnSVMTask());
         workflowTasks.put("enablePciPassthroughHost", enablePciPassthroughHostTask());
         workflowTasks.put("rebootHost", rebootHostTask());
-        workflowTasks.put("exitHostMaintenanceMode", exitHostMaintenanceModeTask());
+        workflowTasks.put("exitHostMaintenanceMode1", exitHostMaintenanceModeTask());
+        workflowTasks.put("exitHostMaintenanceMode2", exitHostMaintenanceModeTask());
         workflowTasks.put("setPciPassthroughSioVm", setPciPassthroughSioVmTask());
         /*workflowTasks.put("installScaleIOSDC", null);
         workflowTasks.put("addNewHostToScaleIO", null);*/
