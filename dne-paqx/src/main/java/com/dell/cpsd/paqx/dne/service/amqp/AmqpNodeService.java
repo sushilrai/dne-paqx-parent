@@ -335,7 +335,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         for (DiscoveredNode node : discoveredNodes) {
             Object nodeInventoryResponse = listNodeInventory(node.getConvergedUuid());
-            NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse.toString());
+            NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse);
             repository.saveNodeInventory(nodeInventory);
             DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, node.getConvergedUuid());
             discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
