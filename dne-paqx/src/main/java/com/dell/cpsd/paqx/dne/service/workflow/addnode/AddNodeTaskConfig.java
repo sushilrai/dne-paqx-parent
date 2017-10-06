@@ -36,10 +36,11 @@ public class AddNodeTaskConfig
                 "rebootHost",
                 "exitHostMaintenanceMode2",
                 "configureScaleIoVib",
+                "addHostToDvSwitch",
                 "deploySVM",
                 "setPciPassthroughSioVm",
-                "addHostToDvSwitch",
                 "configureVmNetworkSettings",
+                "powerOnSVM",
                 "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
