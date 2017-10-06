@@ -24,6 +24,9 @@ public class NodeInventoryParsingUtil {
     private static final String FAMILY_FIELD = "Family";
 
     public static DiscoveredNodeInfo getDiscoveredNodeInfo(Object nodeInventory, String uuid) {
+        if ( nodeInventory == null )
+            return null;
+
         List inventoryList = (ArrayList)nodeInventory;
         for ( Object obj: inventoryList)
         {

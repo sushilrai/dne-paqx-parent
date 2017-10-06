@@ -336,11 +336,18 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         for (DiscoveredNode node : discoveredNodes) {
             Object nodeInventoryResponse = listNodeInventory(node.getConvergedUuid());
-            NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse);
-            repository.saveNodeInventory(nodeInventory);
-            DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, node.getConvergedUuid());
-            discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
-            repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
+
+            if (nodeInventoryResponse != null) {
+                NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse);
+                boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
+                DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, node.getConvergedUuid());
+                if ( isNodeInventorySaved && discoveredNodeInfo != null) {
+                    discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
+                    repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
+                }
+            } else {
+                LOGGER.info("There is no node inventory for UUID ", node.getConvergedUuid());
+            }
         }
 
         LOGGER.info("Listing DiscoveredNodeInfo data ...");
@@ -350,20 +357,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public DiscoveredNodeInfo getFirstDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
-        List<DiscoveredNode> discoveredNodes = listDiscoveredNodes();
+        // since symphony doesn't have mechanism to auto delete obsolete node,
+        // there will be dangling node in node discovery paqx and if it's the first one,
+        // it will cause failure to get nodeInventory so just get all and return first one.
+        List<DiscoveredNodeInfo> nodeList = this.listDiscoveredNodeInfo();
 
-        DiscoveredNodeInfo discoveredNodeInfo = null ;
-        if (discoveredNodes.size() != 0 ) {
-            Object nodeInventoryResponse = listNodeInventory(discoveredNodes.get(0).getConvergedUuid());
-            NodeInventory nodeInventory = new NodeInventory(discoveredNodes.get(0).getConvergedUuid(), nodeInventoryResponse);
-            repository.saveNodeInventory(nodeInventory);
-            discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, discoveredNodes.get(0).getConvergedUuid());
-            discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(discoveredNodes.get(0).getNodeStatus().toString()));
-            repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
-        }
-
-        LOGGER.info("getting first DiscoveredNodeInfo data ...");
-        return discoveredNodeInfo;
+        if ( nodeList.size() != 0)
+            return nodeList.get(0);
+        return null;
     }
 
     /**
