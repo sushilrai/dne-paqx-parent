@@ -365,17 +365,16 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
             final NicSetting nicSettingScaleIoMgmt = new NicSetting();
             nicSettingScaleIoMgmt.setIpAddress(this.newScaleIoVmIpAddress);
-            nicSettingScaleIoMgmt.setGateway(singletonList(esxiManagementGatewayIpAddress));
+            //TODO: This needs to come from the UI
+            nicSettingScaleIoMgmt.setGateway(singletonList("10.239.139.33"));
             nicSettingScaleIoMgmt.setSubnetMask(scaleIoSvmManagementSubnetMask);
 
             final NicSetting nicSettingScaleIoData1 = new NicSetting();
             nicSettingScaleIoData1.setIpAddress(scaleIoData1SvmIpAddress);
-            nicSettingScaleIoData1.setGateway(singletonList(esxiManagementGatewayIpAddress));
             nicSettingScaleIoData1.setSubnetMask(scaleIoData1KernelAndSvmSubnetMask);
 
             final NicSetting nicSettingScaleIoData2 = new NicSetting();
             nicSettingScaleIoData2.setIpAddress(scaleIoData2SvmIpAddress);
-            nicSettingScaleIoData2.setGateway(singletonList(esxiManagementGatewayIpAddress));
             nicSettingScaleIoData2.setSubnetMask(scaleIoData2KernelAndSvmSubnetMask);
 
             return Arrays.asList(nicSettingScaleIoMgmt, nicSettingScaleIoData1, nicSettingScaleIoData2);

@@ -39,7 +39,7 @@ public class AddNodeTaskConfig
                 "deploySVM",
                 "setPciPassthroughSioVm",
                 "addHostToDvSwitch",
-                //"configureVmNetworkSettings",
+                "configureVmNetworkSettings",
                 "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
