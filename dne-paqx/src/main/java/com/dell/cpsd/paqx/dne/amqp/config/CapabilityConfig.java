@@ -122,7 +122,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("vcenter-update-software-acceptance"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("vcenter-vm-powercommand")
+                        .withProfile("vcenter-vm-powercommand"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("vcenter-configure-vm-network")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

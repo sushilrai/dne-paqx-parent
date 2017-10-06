@@ -31,6 +31,8 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 /**
  * TODO: Document Usage
  * <p>
@@ -319,18 +321,64 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("ESXi Management Gateway IP Address is null");
             }
 
-            final String esxiManagementSubnetMask = this.inputParams.getEsxiManagementSubnetMask();
+            final String scaleIoSvmManagementIpAddress = this.inputParams.getScaleIoSvmManagementIpAddress();
 
-            if (StringUtils.isEmpty(esxiManagementSubnetMask))
+            if (StringUtils.isEmpty(scaleIoSvmManagementIpAddress))
             {
-                throw new IllegalStateException("ESXi Management Subnet Mask is null");
+                throw new IllegalStateException("ScaleIO VM Management IP Address is null");
             }
 
-            NicSetting nicSetting = new NicSetting();
-            nicSetting.setIpAddress(this.newScaleIoVmIpAddress);
-            nicSetting.setGateway(Arrays.asList(esxiManagementGatewayIpAddress));
-            nicSetting.setSubnetMask(esxiManagementSubnetMask);
-            return Arrays.asList(nicSetting, nicSetting, nicSetting);
+            final String scaleIoSvmManagementSubnetMask = this.inputParams.getScaleIoSvmManagementSubnetMask();
+
+            if (StringUtils.isEmpty(scaleIoSvmManagementSubnetMask))
+            {
+                throw new IllegalStateException("ScaleIO VM Management Subnet Mask is null");
+            }
+
+            final String scaleIoData1SvmIpAddress = this.inputParams.getScaleIoData1SvmIpAddress();
+
+            if (StringUtils.isEmpty(scaleIoData1SvmIpAddress))
+            {
+                throw new IllegalStateException("ScaleIO Data1 IP Address is null");
+            }
+
+            final String scaleIoData1KernelAndSvmSubnetMask = this.inputParams.getScaleIoData1KernelAndSvmSubnetMask();
+
+            if (StringUtils.isEmpty(scaleIoData1KernelAndSvmSubnetMask))
+            {
+                throw new IllegalStateException("ScaleIO VM Data1 Subnet Mask is null");
+            }
+
+            final String scaleIoData2SvmIpAddress = this.inputParams.getScaleIoData2SvmIpAddress();
+
+            if (StringUtils.isEmpty(scaleIoData2SvmIpAddress))
+            {
+                throw new IllegalStateException("ScaleIO Data2 IP Address is null");
+            }
+
+            final String scaleIoData2KernelAndSvmSubnetMask = this.inputParams.getScaleIoData2KernelAndSvmSubnetMask();
+
+            if (StringUtils.isEmpty(scaleIoData2KernelAndSvmSubnetMask))
+            {
+                throw new IllegalStateException("ScaleIO VM Data2 Subnet Mask is null");
+            }
+
+            final NicSetting nicSettingScaleIoMgmt = new NicSetting();
+            nicSettingScaleIoMgmt.setIpAddress(this.newScaleIoVmIpAddress);
+            nicSettingScaleIoMgmt.setGateway(singletonList(esxiManagementGatewayIpAddress));
+            nicSettingScaleIoMgmt.setSubnetMask(scaleIoSvmManagementSubnetMask);
+
+            final NicSetting nicSettingScaleIoData1 = new NicSetting();
+            nicSettingScaleIoData1.setIpAddress(scaleIoData1SvmIpAddress);
+            nicSettingScaleIoData1.setGateway(singletonList(esxiManagementGatewayIpAddress));
+            nicSettingScaleIoData1.setSubnetMask(scaleIoData1KernelAndSvmSubnetMask);
+
+            final NicSetting nicSettingScaleIoData2 = new NicSetting();
+            nicSettingScaleIoData2.setIpAddress(scaleIoData2SvmIpAddress);
+            nicSettingScaleIoData2.setGateway(singletonList(esxiManagementGatewayIpAddress));
+            nicSettingScaleIoData2.setSubnetMask(scaleIoData2KernelAndSvmSubnetMask);
+
+            return Arrays.asList(nicSettingScaleIoMgmt, nicSettingScaleIoData1, nicSettingScaleIoData2);
         }
     }
 }

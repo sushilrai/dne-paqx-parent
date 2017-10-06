@@ -234,6 +234,11 @@ public interface DneProducer
      */
     void publishUpdateSoftwareAcceptance(VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage);
 
+    /**
+     * Validate a protection domain
+     *
+     * @param requestMessage
+     */
     void publishValidateProtectionDomain(EssValidateProtectionDomainsRequestMessage requestMessage);
 
     /**
@@ -242,4 +247,11 @@ public interface DneProducer
      * @param requestMessage
      */
     void publishVmPowerOperation(VmPowerOperationsRequestMessage requestMessage);
+
+    /**
+     * Configure VM network settings
+     *
+     * @param requestMessage
+     */
+    void publishConfigureVmNetworkSettings(ConfigureVmNetworkSettingsRequestMessage requestMessage);
 }

@@ -206,6 +206,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new DatastoreRenameResponseAdapter(this));
         this.consumer.addAdapter(new VCenterUpdateSoftwareAcceptanceResponseAdapter(this));
         this.consumer.addAdapter(new VmPowerOperationResponseAdapter(this));
+        this.consumer.addAdapter(new ConfigureVmNetworkSettingsResponseAdapter(this));
     }
 
     /**
@@ -1837,6 +1838,51 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             {
                 return vmPowerOperationsResponseMessage.getStatus()
                         .equals(VmPowerOperationsResponseMessage.Status.SUCCESS);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("Exception occurred", ex);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean requestConfigureVmNetworkSettings(final ConfigureVmNetworkSettingsRequestMessage requestMessage)
+    {
+        try
+        {
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
+                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishConfigureVmNetworkSettings(requestMessage);
+                }
+            });
+
+            ConfigureVmNetworkSettingsResponseMessage configureVmNetworkSettingsResponseMessage = processResponse(response,
+                    ConfigureVmNetworkSettingsResponseMessage.class);
+
+            if (configureVmNetworkSettingsResponseMessage != null)
+            {
+                return configureVmNetworkSettingsResponseMessage.getStatus()
+                        .equals(ConfigureVmNetworkSettingsResponseMessage.Status.SUCCESS);
             }
         }
         catch (Exception ex)

@@ -97,8 +97,11 @@ public interface DataServiceRepository
     DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid);
 
     List<DiscoveredNodeInfo> getDiscoveredNodeInfo();
+
     Map<String, String> getDvSwitchNames();
 
     Map<String, String> getDvPortGroupNames(Map<String, String> dvSwitchMap);
+
+    Map<String, String> getScaleIoNetworkNames(Map<String, String> switchNames);
 
 }

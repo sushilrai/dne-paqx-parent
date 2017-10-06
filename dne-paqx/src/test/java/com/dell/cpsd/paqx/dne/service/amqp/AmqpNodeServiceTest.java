@@ -1503,6 +1503,7 @@ public class AmqpNodeServiceTest
         assertFalse(result);
         Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
     }
+
     @Test
     public void testRequestVmPowerOperationSuccess() throws Exception
     {
@@ -1554,8 +1555,9 @@ public class AmqpNodeServiceTest
         Mockito.verify(dneProducer).publishVmPowerOperation(any(VmPowerOperationsRequestMessage.class));
     }
   
-  @Test(expected = ServiceTimeoutException.class)
-    public void testvalidateProtectionDomains() throws Exception{
+    @Test(expected = ServiceTimeoutException.class)
+    public void testvalidateProtectionDomains() throws Exception
+    {
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
         final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
@@ -1574,14 +1576,11 @@ public class AmqpNodeServiceTest
     }
 
     @Test
-    public void testvalidateProtectionDomainsSuccess() throws ServiceExecutionException, ServiceTimeoutException{
+    public void testvalidateProtectionDomainsSuccess() throws ServiceExecutionException, ServiceTimeoutException
+    {
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
-        final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
-
         final EssValidateProtectionDomainsRequestMessage request = mock(EssValidateProtectionDomainsRequestMessage.class);
-        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
-
         final EssValidateProtectionDomainsResponseMessage responseMessage = mock(EssValidateProtectionDomainsResponseMessage.class);
 
         AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null, null,null,null)
@@ -1599,7 +1598,8 @@ public class AmqpNodeServiceTest
     }
 
     @Test(expected = ServiceExecutionException.class)
-    public void testvalidateProtectionDomainsFailure() throws Exception{
+    public void testvalidateProtectionDomainsFailure() throws Exception
+    {
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
         final EssValidateProtectionDomainsRequestMessage requestMessage = mock(EssValidateProtectionDomainsRequestMessage.class);
@@ -1617,5 +1617,55 @@ public class AmqpNodeServiceTest
         nodeService.validateProtectionDomains(requestMessage);
         Mockito.verify(dneProducer, Mockito.times(1)).publishValidateProtectionDomain(any());
     }
-  
+
+    @Test
+    public void testRequestConfigureVmNetworkSettingsSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+        final ConfigureVmNetworkSettingsResponseMessage responseMessage = mock(ConfigureVmNetworkSettingsResponseMessage.class);
+        final ConfigureVmNetworkSettingsRequestMessage requestMessage = mock(ConfigureVmNetworkSettingsRequestMessage.class);
+        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
+        when(responseMessage.getStatus()).thenReturn(ConfigureVmNetworkSettingsResponseMessage.Status.SUCCESS);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        boolean result = nodeService.requestConfigureVmNetworkSettings(requestMessage);
+
+        assertTrue(result);
+        Mockito.verify(dneProducer).publishConfigureVmNetworkSettings(any(ConfigureVmNetworkSettingsRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestConfigureVmNetworkSettingsException() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final ConfigureVmNetworkSettingsRequestMessage requestMessage = mock(ConfigureVmNetworkSettingsRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        boolean result = nodeService.requestConfigureVmNetworkSettings(requestMessage);
+
+        assertFalse(result);
+        Mockito.verify(dneProducer).publishConfigureVmNetworkSettings(any(ConfigureVmNetworkSettingsRequestMessage.class));
+    }
 }

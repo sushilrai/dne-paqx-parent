@@ -715,6 +715,43 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
+    public Map<String, String> getScaleIoNetworkNames(final Map<String, String> switchNames)
+    {
+        final Map<String, String> switchAndScaleIoNetworkMappings = new HashMap<>();
+
+        final String dvSwitch0 = switchNames.get("dvswitch0");
+        final String dvSwitch1 = switchNames.get("dvswitch1");
+        final String dvSwitch2 = switchNames.get("dvswitch2");
+
+        try
+        {
+            final TypedQuery<String> typedQueryScaleIoManagement = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitch0 + "%' and LOWER(p.name) like '%sio-mgmt%'",
+                    String.class);
+            switchAndScaleIoNetworkMappings.put(dvSwitch0, typedQueryScaleIoManagement.getSingleResult());
+
+            final TypedQuery<String> typedQuerySioData1 = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitch1 + "%' and LOWER(p.name) like '%sio-data1%'",
+                    String.class);
+            switchAndScaleIoNetworkMappings.put(dvSwitch1, typedQuerySioData1.getSingleResult());
+
+            final TypedQuery<String> typedQuerySioData2 = entityManager.createQuery(
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
+                            + "where dvs.name like '%" + dvSwitch2 + "%' and LOWER(p.name) like '%sio-data2%'",
+                    String.class);
+            switchAndScaleIoNetworkMappings.put(dvSwitch2, typedQuerySioData2.getSingleResult());
+        }
+        catch (Exception e)
+        {
+            LOG.error("Exception Occurred [{}]", e);
+            return null;
+        }
+        return switchAndScaleIoNetworkMappings;
+    }
+
+    @Override
     public List<ScaleIOProtectionDomain> getScaleIoProtectionDomains()
     {
         final TypedQuery<ScaleIOProtectionDomain> query = entityManager.createQuery("SELECT scaleio FROM ScaleIOProtectionDomain as scaleio", ScaleIOProtectionDomain.class);

@@ -348,4 +348,12 @@ public interface NodeService
      * @return
      */
     boolean requestVmPowerOperation(VmPowerOperationsRequestMessage requestMessage);
+
+    /**
+     * Request configuration of network settings for a vm.
+     *
+     * @param requestMessage - The <code>ConfigureVmNetworkSettingsRequestMessage</code> instance
+     * @return
+     */
+    boolean requestConfigureVmNetworkSettings(ConfigureVmNetworkSettingsRequestMessage requestMessage);
 }

@@ -26,6 +26,7 @@ import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
@@ -466,7 +467,18 @@ public class AmqpDneProducerTest
     public void publishVmPowerOperation_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(VmPowerOperationsRequestMessage.class), this.producer::publishVmPowerOperation);
+    }
 
+    @Test
+    public void publishConfigureVmNetworkSettings()
+    {
+        this.executeTest(mock(ConfigureVmNetworkSettingsRequestMessage.class), this.producer::publishConfigureVmNetworkSettings);
+    }
+
+    @Test
+    public void publishConfigureVmNetworkSettings_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(ConfigureVmNetworkSettingsRequestMessage.class), this.producer::publishConfigureVmNetworkSettings);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

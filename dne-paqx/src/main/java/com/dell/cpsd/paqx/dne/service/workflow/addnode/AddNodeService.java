@@ -16,6 +16,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTask
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToVCenterTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureVmNetworkSettingsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DatastoreRenameTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
@@ -115,6 +116,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         /*workflowTasks.put("installScaleIOSDC", null);
         workflowTasks.put("addNewHostToScaleIO", null);*/
         workflowTasks.put("datastoreRename", datastoreRenameTask());
+        workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
         workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
@@ -122,6 +124,13 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return workflowTasks;
     }
 
+    @Bean("configureVmNetworkSettingsTask")
+    private WorkflowTask configureVmNetworkSettingsTask()
+    {
+        return createTask("Configure VM Network Settings", new ConfigureVmNetworkSettingsTaskHandler(nodeService, repository));
+    }
+
+    @Bean("powerOnSVMTask")
     private WorkflowTask powerOnSVMTask()
     {
         return createTask("Power on the ScaleIO VM", new PowerOnScaleIoVmTaskHandler(nodeService, repository));

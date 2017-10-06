@@ -74,12 +74,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.dell.cpsd.virtualization.capabilities.api</groupId>
             <artifactId>virtualization-capabilities-api</artifactId>
+            <groupId>com.dell.cpsd</groupId>
             <classifier>schemas</classifier>
             <type>zip</type>
-            <version>0.3-SNAPSHOT</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>com.dell.cpsd.service.engineering.standards</groupId>
             <artifactId>engineering-standards-service-api</artifactId>
@@ -234,7 +235,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.dell.cpsd.virtualization.capabilities.api</includeGroupIds>
+                            <includeGroupIds>com.dell.cpsd</includeGroupIds>
                             <includeArtifactIds>virtualization-capabilities-api</includeArtifactIds>
                             <includes>**\/*.jsd</includes>
                         </configuration>
