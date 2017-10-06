@@ -92,8 +92,6 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
              */
             NodeData nodeData = new NodeData();
             nodeData.setSymphonyUuid(uuid);
-            //nodeData.setProtectionDomainId(scaleIOProtectionDomain.getId());
-            nodeData.setProtectionDomainId("");
             nodeData.setType(getNodeType(uuid));
 
             List<ProtectionDomain> protectionDomainList = requestMessage.getProtectionDomains();
@@ -132,6 +130,14 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
                             scaleIODataServer.setId(scaleIOSDS.getId());
                             scaleIODataServer.setName(scaleIOSDS.getName());
                             scaleIODataServers.add(scaleIODataServer);
+
+                            if (scaleIOSDS.getName().contains(job.getInputParams().getEsxiManagementHostname()) || scaleIOSDS.getName().contains(job.getInputParams().getEsxiManagementIpAddress()))
+                            {
+                                nodeData.setProtectionDomainId(scaleIOProtectionDomain.getId());
+                            }
+                            else{
+                                nodeData.setProtectionDomainId("");
+                            }
                         }
                         protectionDomainRequest.setScaleIODataServers(scaleIODataServers);
                         protectionDomainList.add(protectionDomainRequest);
