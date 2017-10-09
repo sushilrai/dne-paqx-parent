@@ -55,7 +55,7 @@ public class DiscoverScaleIoTaskHandler extends BaseTaskHandler implements IWork
 
         try
         {
-            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("SCALEIO");
+            final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("SCALEIO-CLUSTER");
 
             if (componentEndpointIds == null)
             {
