@@ -61,7 +61,7 @@ public interface DataServiceRepository
 
     Host getVCenterHost(String hostName) throws NoResultException;
 
-    List<Host> getVcenterHost() throws NoResultException;
+    List<Host> getVCenterHosts() throws NoResultException;
 
     Host getExistingVCenterHost() throws NoResultException;
 

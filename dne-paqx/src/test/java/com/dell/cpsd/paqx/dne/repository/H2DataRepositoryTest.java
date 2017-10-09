@@ -8,6 +8,7 @@ import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.DneJob;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
@@ -22,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -33,10 +33,13 @@ import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,7 +55,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -108,6 +113,9 @@ public class H2DataRepositoryTest
     private HostDnsConfig hostDnsConfig;
 
     @Mock
+    private DiscoveredNodeInfo discoveredNodeInfo;
+
+    @Mock
     private TypedQuery<ComponentDetails> componentDetailsTypedQuery;
 
     @Mock
@@ -121,8 +129,6 @@ public class H2DataRepositoryTest
 
     @Mock
     private TypedQuery<ScaleIOProtectionDomain> protectionDomainTypedQuery;
-    @Mock
-    private TypedQuery<ScaleIOSDS> sdsTypedQuery;
 
     @Mock
     private TypedQuery<PortGroup> portGroupTypedQuery;
@@ -137,9 +143,9 @@ public class H2DataRepositoryTest
     private TypedQuery<String> stringTypedQuery;
 
     @Mock
-    private TypedQuery<HostDnsConfig> hostDnsConfigTypedQuery;
+    private TypedQuery<DiscoveredNodeInfo> discoveredNodeInfoTypedQuery;
 
-    @InjectMocks
+   @InjectMocks
     private H2DataRepository repository = new H2DataRepository();
 
     private Answer                  answer;
@@ -257,7 +263,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void saveScaleIoComponentDetails_exception_case() throws Exception
+    public void saveScaleIoComponentDetails_persistence_exception_case() throws Exception
     {
         doReturn(this.componentUUID).when(this.componentDetails).getComponentUuid();
         doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
@@ -266,6 +272,18 @@ public class H2DataRepositoryTest
 
         assertTrue(this.repository.saveScaleIoComponentDetails(this.componentDetailsList));
         verify(this.entityManager, never()).merge(this.componentDetails);
+        verify(this.entityManager, never()).flush();
+    }
+
+    @Test
+    public void saveScaleIoComponentDetails_main_exception_case() throws Exception
+    {
+        List<ComponentDetails> mockList = mock(List.class);
+        doThrow(new IllegalStateException("aaaah")).when(mockList).stream();
+
+        assertFalse(this.repository.saveScaleIoComponentDetails(mockList));
+        verify(this.entityManager, never()).merge(any());
+        verify(this.entityManager, never()).persist(any());
         verify(this.entityManager, never()).flush();
     }
 
@@ -304,7 +322,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void saveVCenterComponentDetails_exception_case() throws Exception
+    public void saveVCenterComponentDetails_persistence_exception_case() throws Exception
     {
         doReturn(this.componentUUID).when(this.componentDetails).getComponentUuid();
         doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
@@ -313,6 +331,18 @@ public class H2DataRepositoryTest
 
         assertTrue(this.repository.saveVCenterComponentDetails(this.componentDetailsList));
         verify(this.entityManager, never()).merge(this.componentDetails);
+        verify(this.entityManager, never()).flush();
+    }
+
+    @Test
+    public void saveVCenterComponentDetails_main_exception_case() throws Exception
+    {
+        List<ComponentDetails> mockList = mock(List.class);
+        doThrow(new IllegalStateException("aaaah")).when(mockList).stream();
+
+        assertFalse(this.repository.saveVCenterComponentDetails(mockList));
+        verify(this.entityManager, never()).merge(any());
+        verify(this.entityManager, never()).persist(any());
         verify(this.entityManager, never()).flush();
     }
 
@@ -660,6 +690,18 @@ public class H2DataRepositoryTest
     }
 
     @Test
+    public void getVCenterHosts() throws Exception
+    {
+        doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Arrays.asList(this.host)).when(this.hostTypedQuery).getResultList();
+
+        List<Host> result = this.repository.getVCenterHosts();
+
+        assertNotNull(result);
+        assertThat(result, hasSize(1));
+    }
+
+    @Test
     public void getExistingVCenterHost() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
@@ -838,7 +880,7 @@ public class H2DataRepositoryTest
     {
         NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
 
-        DataServiceRepository repositorySpy = Mockito.spy(this.repository);
+        DataServiceRepository repositorySpy = spy(this.repository);
         doReturn(nodeInventory).when(repositorySpy).getNodeInventory(anyString());
 
         doNothing().when(this.entityManager).flush();
@@ -858,7 +900,7 @@ public class H2DataRepositoryTest
     {
         NodeInventory nodeInventory = new NodeInventory("FAKE_KEY", "FAKE_INVENTORY");
 
-        DataServiceRepository repositorySpy = Mockito.spy(this.repository);
+        DataServiceRepository repositorySpy = spy(this.repository);
         doReturn(null).when(repositorySpy).getNodeInventory(anyString());
 
         doNothing().when(this.entityManager).flush();
@@ -931,6 +973,76 @@ public class H2DataRepositoryTest
     }
 
     @Test
+    public void getDvSwitchNames_should_return_a_map_of_dvswitch_names()  throws Exception
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn("dvswitch0", "dvswitch1", "dvswitch2").when(this.stringTypedQuery).getSingleResult();
+
+        Map<String, String> result = this.repository.getDvSwitchNames();
+
+        assertNotNull(result);
+        assertThat(result.values(), hasSize(3));
+    }
+
+    @Test
+    public void getDvSwitchNames_should_return_null_if_there_is_an_exception()  throws Exception
+    {
+        doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
+
+        Map<String, String> result = this.repository.getDvSwitchNames();
+
+        assertNull(result);
+    }
+
+    @Test
+    public void getDvPortGroupNames_should_return_a_map_of_portgroup_names()  throws Exception
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn("esx-mgmt", "vmotion", "sio-data1", "sio-data2").when(this.stringTypedQuery).getSingleResult();
+
+        Map<String, String> result = this.repository.getDvPortGroupNames(mock(Map.class));
+
+        assertNotNull(result);
+        assertThat(result.values(), hasSize(4));
+    }
+
+    @Test
+    public void getDvPortGroupNames_should_return_null_if_there_is_an_exception()  throws Exception
+    {
+        doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
+
+        Map<String, String> result = this.repository.getDvPortGroupNames(mock(Map.class));
+
+        assertNull(result);
+    }
+
+    @Test
+    public void getScaleIoNetworkNames_should_return_a_map_of_scaleio_network_names() throws Exception
+    {
+        Map<String, String> switchNames = new HashMap<>();
+        switchNames.put("dvswitch0", "dvswitch0");
+        switchNames.put("dvswitch1", "dvswitch1");
+        switchNames.put("dvswitch2", "dvswitch2");
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn("network1", "network2", "network3").when(this.stringTypedQuery).getSingleResult();
+
+        Map<String, String> result = this.repository.getScaleIoNetworkNames(switchNames);
+
+        assertNotNull(result);
+        assertThat(result.values(), hasSize(3));
+    }
+
+    @Test
+    public void getScaleIoNetworkNames_should_return_null_if_there_is_an_exception()  throws Exception
+    {
+        doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
+
+        Map<String, String> result = this.repository.getScaleIoNetworkNames(mock(Map.class));
+
+        assertNull(result);
+    }
+
+    @Test
     public void getScaleIoProtectionDomain() throws Exception
     {
         doReturn(this.protectionDomainTypedQuery).when(this.entityManager).createQuery(anyString(), any());
@@ -954,5 +1066,32 @@ public class H2DataRepositoryTest
         {
             assertThat(ex.getMessage().toLowerCase(), containsString("no protection domain found"));
         }
+    }
+
+    @Test
+    public void saveDiscoveredNodeInfo_should_save_discovered_node_info() throws Exception
+    {
+        doReturn(this.discoveredNodeInfoTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.discoveredNodeInfo).when(this.discoveredNodeInfoTypedQuery).getSingleResult();
+        doNothing().when(this.entityManager).remove(any());
+
+        boolean result = this.repository.saveDiscoveredNodeInfo(this.discoveredNodeInfo);
+
+        assertThat(result, is(true));
+        verify(this.entityManager).remove(any());
+        verify(this.entityManager).persist(any());
+        verify(this.entityManager).flush();
+    }
+
+    @Test
+    public void getDiscoveredNodeInfo_should_return_a_list_of_discovered_node_infos() throws Exception
+    {
+        doReturn(this.discoveredNodeInfoTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Arrays.asList(this.discoveredNodeInfo)).when(this.discoveredNodeInfoTypedQuery).getResultList();
+
+        List<DiscoveredNodeInfo> result = this.repository.getDiscoveredNodeInfo();
+
+        assertNotNull(result);
+        assertThat(result, hasSize(1));
     }
 }

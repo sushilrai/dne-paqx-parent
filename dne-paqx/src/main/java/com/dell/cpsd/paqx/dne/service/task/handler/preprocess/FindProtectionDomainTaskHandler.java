@@ -104,7 +104,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
                 List<ScaleIODataServer> scaleIODataServers = new ArrayList<>();
 
-                List<Host> hosts = repository.getVcenterHost();
+                List<Host> hosts = repository.getVCenterHosts();
                 List<ScaleIOProtectionDomain> protectionDomains = scaleIOData.getProtectionDomains();
                 if (protectionDomains != null)
                 {

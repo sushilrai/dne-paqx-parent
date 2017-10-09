@@ -483,7 +483,7 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public List<Host> getVcenterHost() throws NoResultException {
+    public List<Host> getVCenterHosts() throws NoResultException {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
         return query.getResultList();
     }
@@ -748,6 +748,7 @@ public class H2DataRepository implements DataServiceRepository
             LOG.error("Exception Occurred [{}]", e);
             return null;
         }
+
         return switchAndScaleIoNetworkMappings;
     }
 
@@ -762,22 +763,26 @@ public class H2DataRepository implements DataServiceRepository
         {
             return scaleIOProtectionDomainList;
         }
-        throw new NoResultException("No protection domain found");
 
+        throw new NoResultException("No protection domain found");
     }
 
     @Override
     @Transactional
-    public boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo) {
+    public boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo)
+    {
         LOG.info("Persisting discovered node info data ...");
 
-        try {
+        try
+        {
             DiscoveredNodeInfo nodeInfo = this.getDiscoveredNodeInfo(discoveredNodeInfo.getSymphonyUuid());
-            if (nodeInfo != null) {
+            if (nodeInfo != null)
+            {
                 //If it already exists, delete and save the new one.
                 entityManager.remove(nodeInfo);
             }
-        } catch (NoResultException noResultEx)
+        }
+        catch (NoResultException noResultEx)
         {
             //  Do not do anything as the result will be null indicating that no result found.
         }
@@ -789,14 +794,16 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid) {
+    public DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid)
+    {
         final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT n FROM DiscoveredNodeInfo as n where n.symphonyUuid=:symphonyUuid", DiscoveredNodeInfo.class);
         query.setParameter("symphonyUuid", uuid);
         return query.getSingleResult();
     }
 
     @Override
-    public List<DiscoveredNodeInfo> getDiscoveredNodeInfo() {
+    public List<DiscoveredNodeInfo> getDiscoveredNodeInfo()
+    {
         final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
         return query.getResultList();
     }
