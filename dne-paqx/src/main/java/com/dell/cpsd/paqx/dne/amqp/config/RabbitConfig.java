@@ -69,6 +69,8 @@ import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAccept
 import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -328,6 +330,9 @@ public class RabbitConfig
 
         messageClasses.add(ConfigureVmNetworkSettingsRequestMessage.class);
         messageClasses.add(ConfigureVmNetworkSettingsResponseMessage.class);
+
+        messageClasses.add(VmPowerOperationsRequestMessage.class);
+        messageClasses.add(VmPowerOperationsResponseMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
