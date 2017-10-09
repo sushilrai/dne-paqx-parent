@@ -11,6 +11,9 @@ services:
     network_mode: "bridge"
     ports:
       - "8071:8071"
+      # TODO temporarily adding this port for debugging purposes...
+      # TODO remove when done...
+      - "8555:8555"
     hostname: symphony-dne-paqx
     dns: 172.17.0.1
     volumes:
