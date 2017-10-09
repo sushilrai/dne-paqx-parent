@@ -104,7 +104,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("findProtectionDomainTask")
     public WorkflowTask findProtectionDomainTask()
     {
-        return createTask("Find ProtectionDomain", new FindProtectionDomainTaskHandler(nodeService, repository));
+        return createTask("Protection Domain", new FindProtectionDomainTaskHandler(nodeService, repository));
     }
 
     @Bean("listScaleIoComponentsTask")

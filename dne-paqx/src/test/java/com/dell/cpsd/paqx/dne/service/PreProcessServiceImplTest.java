@@ -104,7 +104,7 @@ public class PreProcessServiceImplTest {
     @Ignore
     @Test
     public void testTaskName_findProtectionDomain() {
-    	Assert.assertEquals("Find ProtectionDomain", workFlowTasks.get("findProtectionDomain").getTaskName());
+    	Assert.assertEquals("Protection Domain", workFlowTasks.get("findProtectionDomain").getTaskName());
     }
 
     @Ignore
