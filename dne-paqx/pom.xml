@@ -67,8 +67,8 @@
 
         <dependency>
             <artifactId>storage-capabilities-api</artifactId>
-            <groupId>com.dell.cpsd.storage.capabilities.api</groupId>
-            <version>0.2-SNAPSHOT</version>
+            <groupId>com.dell.cpsd</groupId>
+            <version>1.0.1-SNAPSHOT</version>
             <type>zip</type>
             <classifier>schemas</classifier>
         </dependency>
@@ -247,7 +247,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.dell.cpsd.storage.capabilities.api</includeGroupIds>
+                            <includeGroupIds>com.dell.cpsd</includeGroupIds>
                             <includeArtifactIds>storage-capabilities-api</includeArtifactIds>
                             <includes>**\/*.jsd</includes>
                         </configuration>

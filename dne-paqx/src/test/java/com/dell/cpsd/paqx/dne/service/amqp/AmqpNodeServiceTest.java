@@ -540,11 +540,12 @@ public class AmqpNodeServiceTest
         final ListComponentResponseMessage responseMessage = mock(ListComponentResponseMessage.class);
         final ScaleIOComponentDetails scaleIOComponentDetails = mock(ScaleIOComponentDetails.class);
         final ScaleIoEndpointDetails scaleIoEndpointDetails = mock(ScaleIoEndpointDetails.class);
+        final CredentialNameId credentialNameId = mock(CredentialNameId.class);
 
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getComponents()).thenReturn(Arrays.asList(scaleIOComponentDetails));
         when(scaleIOComponentDetails.getEndpoints()).thenReturn(Arrays.asList(scaleIoEndpointDetails));
-        when(scaleIoEndpointDetails.getCredentialUuids()).thenReturn(Arrays.asList("cred-uuid"));
+        when(scaleIoEndpointDetails.getCredentialNameIds()).thenReturn(Arrays.asList(credentialNameId));
 
         AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null,null)
         {

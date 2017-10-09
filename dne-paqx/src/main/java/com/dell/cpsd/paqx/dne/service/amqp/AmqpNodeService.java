@@ -921,8 +921,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
                         componentDetails.setComponentUuid(scaleIOComponentDetails.getComponentUuid());
                         componentDetails.setElementType(scaleIOComponentDetails.getElementType());
-                        componentDetails.setComponentType("SCALEIO");
-                        componentDetails.setIdentifier("SCALEIO");
+                        componentDetails.setComponentType(scaleIOComponentDetails.getElementType());
+                        componentDetails.setIdentifier(scaleIOComponentDetails.getIdentifier());
 
                         final List<ScaleIoEndpointDetails> endpointDetailsList = scaleIOComponentDetails.getEndpoints();
 
@@ -932,13 +932,13 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                                 final EndpointDetails endpointDetails = new EndpointDetails();
                                 endpointDetails.setEndpointUrl(scaleIoEndpointDetails.getEndpointUrl());
                                 endpointDetails.setEndpointUuid(scaleIoEndpointDetails.getEndpointUuid());
-                                endpointDetails.setIdentifier("SCALEIO");
-                                endpointDetails.setType("SCALEIO");
-                                final List<String> credentialUuids = scaleIoEndpointDetails.getCredentialUuids();
+                                endpointDetails.setIdentifier(scaleIoEndpointDetails.getIdentifier());
+                                endpointDetails.setType(scaleIoEndpointDetails.getElementType());
+                                final List<CredentialNameId> credentialUuids = scaleIoEndpointDetails.getCredentialNameIds();
                                 credentialUuids.forEach(credential -> {
                                     final CredentialDetails credentialDetails = new CredentialDetails();
-                                    credentialDetails.setCredentialName("DEFAULT");
-                                    credentialDetails.setCredentialUuid(credential);
+                                    credentialDetails.setCredentialName(credential.getCredentialName());
+                                    credentialDetails.setCredentialUuid(credential.getCredentialUuid());
                                     credentialDetails.setEndpointDetails(endpointDetails);
                                     endpointDetails.getCredentialDetailsList().add(credentialDetails);
                                 });
