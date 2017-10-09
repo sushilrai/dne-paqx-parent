@@ -74,7 +74,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("pingIdracTask")
     private WorkflowTask pingIdracTask()
     {
-        return createTask("Ping iDRAC IP Address", new PingIdracTaskHandler(PING_TIMEOUT));
+        return createTask("Ping Out of Band Management IP Address", new PingIdracTaskHandler(PING_TIMEOUT));
     }
 
     @Bean("configureBootDeviceIdrac")

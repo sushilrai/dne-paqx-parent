@@ -56,7 +56,7 @@ public class PingIdracTaskHandler  extends BaseTaskHandler implements IWorkflowT
     @Override
     public boolean executeTask(final Job job)
     {
-        LOGGER.info("Execute ping iDRAC task");
+        LOGGER.info("Execute ping out of band management task");
 
         TaskResponse response = initializeResponse(job);
 
@@ -88,7 +88,7 @@ public class PingIdracTaskHandler  extends BaseTaskHandler implements IWorkflowT
         }
         catch (Exception e)
         {
-            LOGGER.error("Error while pinging iDRAC IP", e);
+            LOGGER.error("Error while pinging out of band management IP", e);
             response.addError(e.toString());
         }
 
