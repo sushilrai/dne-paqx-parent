@@ -59,9 +59,7 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
             }
 
             response.setWorkFlowTaskStatus(Status.FAILED);
-            responseMsg.getFailedCluster().stream().forEach( f->{
-                response.addError(f);
-            });
+            responseMsg.getFailedCluster().stream().forEach(response::addError);
         }
         catch (Exception e)
         {

@@ -20,5 +20,4 @@ public class ContextConfig extends ConsumerContextConfig {
     public ContextConfig() {
         super(CONSUMER_NAME, true);
     }
-
 }

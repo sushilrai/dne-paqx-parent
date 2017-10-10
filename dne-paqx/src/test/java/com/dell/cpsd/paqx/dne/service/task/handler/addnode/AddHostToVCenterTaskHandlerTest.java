@@ -48,6 +48,7 @@ import static org.mockito.Mockito.when;
  * @version 1.0
  * @since 1.0
  */
+@SuppressWarnings("ALL")
 @RunWith(MockitoJUnitRunner.class)
 public class AddHostToVCenterTaskHandlerTest
 {
@@ -83,9 +84,7 @@ public class AddHostToVCenterTaskHandlerTest
 
     private AddHostToVCenterTaskHandler handler;
 
-    private String hostname = "hostname_1.2.3.4";
-    private String taskName = "addHostToVCenterTask";
-    private String stepName = "addHostToVCenterStep";
+    private static  final String hostname = "hostname_1.2.3.4";
 
     /**
      * The test setup.
@@ -194,13 +193,15 @@ public class AddHostToVCenterTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "addHostToVCenterTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "addHostToVCenterStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final AddHostToVCenterResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -79,8 +80,6 @@ public class EnablePciPassThroughTaskHandlerTest
     private PciDevice pciDevice;
 
     private String hostname = "hostname_1.2.3.4";
-    private String taskName = "enablePciPassthroughTask";
-    private String stepName = "enablePciPassthroughStep";
 
     private EnablePciPassthroughTaskHandler handler;
 
@@ -99,7 +98,7 @@ public class EnablePciPassThroughTaskHandlerTest
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
         when(this.pciDevice.getDeviceName()).thenReturn("Dell H730 Mini");
-        doReturn(Arrays.asList(this.pciDevice)).when(this.repository).getPciDeviceList();
+        doReturn(Collections.singletonList(this.pciDevice)).when(this.repository).getPciDeviceList();
         doReturn(true).when(this.service).requestEnablePciPassThrough(any());
 
         boolean result  = this.handler.executeTask(this.job);
@@ -168,7 +167,7 @@ public class EnablePciPassThroughTaskHandlerTest
         doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
         when(this.pciDevice.getDeviceName()).thenReturn("Dell H730 Mini");
-        doReturn(Arrays.asList(this.pciDevice)).when(this.repository).getPciDeviceList();
+        doReturn(Collections.singletonList(this.pciDevice)).when(this.repository).getPciDeviceList();
         doReturn(false).when(this.service).requestEnablePciPassThrough(any());
 
         boolean result  = this.handler.executeTask(this.job);
@@ -182,13 +181,15 @@ public class EnablePciPassThroughTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "enablePciPassthroughTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "enablePciPassthroughStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final EnablePciPassThroughTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

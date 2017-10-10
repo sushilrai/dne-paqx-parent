@@ -67,10 +67,6 @@ public class DiscoverVCenterTaskHandlerTest
 
     private DiscoverVCenterTaskHandler handler;
 
-    private final String taskName = "discoverVCenter";
-
-    private final String stepName = "discoverVCenterStep";
-
     @Before
     public void setup() throws Exception
     {
@@ -126,13 +122,15 @@ public class DiscoverVCenterTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "discoverVCenter";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "discoverVCenterStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final DiscoverVCenterTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

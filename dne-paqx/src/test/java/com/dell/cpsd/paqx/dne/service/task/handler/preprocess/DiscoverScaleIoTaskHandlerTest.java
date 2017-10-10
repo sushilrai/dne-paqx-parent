@@ -67,10 +67,6 @@ public class DiscoverScaleIoTaskHandlerTest
 
     private DiscoverScaleIoTaskHandler handler;
 
-    private final String taskName = "discoverScaleIo";
-
-    private final String stepName = "discoverScaleIoStep";
-
     @Before
     public void setup() throws Exception
     {
@@ -126,13 +122,15 @@ public class DiscoverScaleIoTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "discoverScaleIo";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "discoverScaleIoStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final DiscoverScaleIoTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

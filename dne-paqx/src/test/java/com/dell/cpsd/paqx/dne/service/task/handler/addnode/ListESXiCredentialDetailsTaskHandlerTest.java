@@ -55,9 +55,6 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     @Mock
     private ComponentEndpointIds componentEndpointIds;
 
-    private String taskName = "listEsxiCredentialsTask";
-    private String stepName = "listEsxiCredentialsStep";
-
     private ListESXiCredentialDetailsTaskHandler handler;
 
     /**
@@ -118,13 +115,15 @@ public class ListESXiCredentialDetailsTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "listEsxiCredentialsTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "listEsxiCredentialsStep";
+        doReturn(stepName).when(this.job).getStep();
 
         ListESXiCredentialDetailsTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 

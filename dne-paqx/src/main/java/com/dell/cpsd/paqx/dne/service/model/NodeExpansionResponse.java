@@ -81,7 +81,7 @@ public class NodeExpansionResponse {
     
     public void setWorkflow(String workflow)
     {
-        workflow = workflow;
+        this.workflow = workflow;
     }
 
     public Set<LinkRepresentation> getLinks()

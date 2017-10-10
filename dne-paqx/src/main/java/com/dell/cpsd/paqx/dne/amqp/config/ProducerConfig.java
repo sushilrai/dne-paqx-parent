@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Import;
 @Import(CapabilityConfig.class)
 public class ProducerConfig
 {
-
     @Bean
     public DneProducer dneProducer(@Autowired RabbitTemplate rabbitTemplate, @Autowired CapabilityBinder capabilityBinder)
     {

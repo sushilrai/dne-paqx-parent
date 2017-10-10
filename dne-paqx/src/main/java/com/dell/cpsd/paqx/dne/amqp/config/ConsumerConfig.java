@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
  */
 
 @Configuration
+@Import({RabbitConfig.class})
 public class ConsumerConfig
 {
 

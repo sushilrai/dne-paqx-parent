@@ -44,10 +44,12 @@ import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAccept
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+
+import org.mockito.junit.MockitoRule;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -71,9 +73,11 @@ import static org.mockito.Mockito.verify;
  *
  * @since 1.0
  */
-@RunWith(MockitoJUnitRunner.class)
 public class AmqpDneProducerTest
 {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private RabbitTemplate rabbitTemplate;
 
@@ -96,7 +100,7 @@ public class AmqpDneProducerTest
     private String routingKey = "the_routing_key";
 
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         this.producer = new AmqpDneProducer(this.rabbitTemplate, this.capabilityBinder);
 
@@ -117,247 +121,247 @@ public class AmqpDneProducerTest
     }
 
     @Test
-    public void publishIdracNetwokSettings() throws Exception
+    public void publishIdracNetwokSettings()
     {
         this.executeTest(mock(IdracNetworkSettingsRequestMessage.class), this.producer::publishIdracNetwokSettings);
     }
 
     @Test
-    public void publishIdracNetwokSettings_no_capabilities() throws Exception
+    public void publishIdracNetwokSettings_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(IdracNetworkSettingsRequestMessage.class), this.producer::publishIdracNetwokSettings);
     }
 
     @Test
-    public void publishConfigureBootDeviceIdrac() throws Exception
+    public void publishConfigureBootDeviceIdrac()
     {
         this.executeTest(mock(ConfigureBootDeviceIdracRequestMessage.class), this.producer::publishConfigureBootDeviceIdrac);
     }
 
     @Test
-    public void publishConfigureBootDeviceIdrac_no_capabilities() throws Exception
+    public void publishConfigureBootDeviceIdrac_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ConfigureBootDeviceIdracRequestMessage.class), this.producer::publishConfigureBootDeviceIdrac);
     }
 
     @Test
-    public void publishListScaleIoComponents() throws Exception
+    public void publishListScaleIoComponents()
     {
         this.executeTest(mock(ListComponentRequestMessage.class), this.producer::publishListScaleIoComponents);
     }
 
     @Test
-    public void publishListScaleIoComponents_no_capabilities() throws Exception
+    public void publishListScaleIoComponents_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ListComponentRequestMessage.class), this.producer::publishListScaleIoComponents);
     }
 
     @Test
-    public void publishListVCenterComponents() throws Exception
+    public void publishListVCenterComponents()
     {
         this.executeTest(mock(ListComponentsRequestMessage.class), this.producer::publishListVCenterComponents);
     }
 
     @Test
-    public void publishListVCenterComponents_no_capabilities() throws Exception
+    public void publishListVCenterComponents_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ListComponentsRequestMessage.class), this.producer::publishListVCenterComponents);
     }
 
     @Test
-    public void publishDiscoverScaleIo() throws Exception
+    public void publishDiscoverScaleIo()
     {
         this.executeTest(mock(ListStorageRequestMessage.class), this.producer::publishDiscoverScaleIo);
     }
 
     @Test
-    public void publishDiscoverScaleIo_no_capabilities() throws Exception
+    public void publishDiscoverScaleIo_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ListStorageRequestMessage.class), this.producer::publishDiscoverScaleIo);
     }
 
     @Test
-    public void publishDiscoverVcenter() throws Exception
+    public void publishDiscoverVcenter()
     {
         this.executeTest(mock(DiscoveryRequestInfoMessage.class), this.producer::publishDiscoverVcenter);
     }
 
     @Test
-    public void publishDiscoverVcenter_no_capabilities() throws Exception
+    public void publishDiscoverVcenter_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(DiscoveryRequestInfoMessage.class), this.producer::publishDiscoverVcenter);
     }
 
     @Test
-    public void publishInstallEsxiRequest() throws Exception
+    public void publishInstallEsxiRequest()
     {
         this.executeTest(mock(InstallESXiRequestMessage.class), this.producer::publishInstallEsxiRequest);
     }
 
     @Test
-    public void publishInstallEsxiRequest_no_capabilities() throws Exception
+    public void publishInstallEsxiRequest_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(InstallESXiRequestMessage.class), this.producer::publishInstallEsxiRequest);
     }
 
     @Test
-    public void publishAddHostToVCenter() throws Exception
+    public void publishAddHostToVCenter()
     {
         this.executeTest(mock(ClusterOperationRequestMessage.class), this.producer::publishAddHostToVCenter);
     }
 
     @Test
-    public void publishAddHostToVCenter_no_capabilities() throws Exception
+    public void publishAddHostToVCenter_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ClusterOperationRequestMessage.class), this.producer::publishAddHostToVCenter);
     }
 
     @Test
-    public void publishInstallScaleIoVib() throws Exception
+    public void publishInstallScaleIoVib()
     {
         this.executeTest(mock(SoftwareVIBRequestMessage.class), this.producer::publishInstallScaleIoVib);
     }
 
     @Test
-    public void publishInstallScaleIoVib_no_capabilities() throws Exception
+    public void publishInstallScaleIoVib_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(SoftwareVIBRequestMessage.class), this.producer::publishInstallScaleIoVib);
     }
 
     @Test
-    public void publishConfigureScaleIoVib() throws Exception
+    public void publishConfigureScaleIoVib()
     {
         this.executeTest(mock(SoftwareVIBConfigureRequestMessage.class), this.producer::publishConfigureScaleIoVib);
     }
 
     @Test
-    public void publishConfigureScaleIoVib_no_capabilities() throws Exception
+    public void publishConfigureScaleIoVib_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(SoftwareVIBConfigureRequestMessage.class), this.producer::publishConfigureScaleIoVib);
     }
 
     @Test
-    public void publishAddHostToDvSwitch() throws Exception
+    public void publishAddHostToDvSwitch()
     {
         this.executeTest(mock(AddHostToDvSwitchRequestMessage.class), this.producer::publishAddHostToDvSwitch);
     }
 
     @Test
-    public void publishAddHostToDvSwitch_no_capabilities() throws Exception
+    public void publishAddHostToDvSwitch_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(AddHostToDvSwitchRequestMessage.class), this.producer::publishAddHostToDvSwitch);
     }
 
     @Test
-    public void publishDeployVmFromTemplate() throws Exception
+    public void publishDeployVmFromTemplate()
     {
         this.executeTest(mock(DeployVMFromTemplateRequestMessage.class), this.producer::publishDeployVmFromTemplate);
     }
 
     @Test
-    public void publishDeployVmFromTemplate_no_capabilities() throws Exception
+    public void publishDeployVmFromTemplate_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(DeployVMFromTemplateRequestMessage.class), this.producer::publishDeployVmFromTemplate);
     }
 
     @Test
-    public void publishEnablePciPassthrough() throws Exception
+    public void publishEnablePciPassthrough()
     {
         this.executeTest(mock(EnablePCIPassthroughRequestMessage.class), this.producer::publishEnablePciPassthrough);
     }
 
     @Test
-    public void publishEnablePciPassthrough_no_capabilities() throws Exception
+    public void publishEnablePciPassthrough_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(EnablePCIPassthroughRequestMessage.class), this.producer::publishEnablePciPassthrough);
     }
 
     @Test
-    public void publishRebootHost() throws Exception
+    public void publishRebootHost()
     {
         this.executeTest(mock(HostPowerOperationRequestMessage.class), this.producer::publishRebootHost);
     }
 
     @Test
-    public void publishRebootHost_no_capabilities() throws Exception
+    public void publishRebootHost_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(HostPowerOperationRequestMessage.class), this.producer::publishRebootHost);
     }
 
     @Test
-    public void publishSetPciPassthrough() throws Exception
+    public void publishSetPciPassthrough()
     {
         this.executeTest(mock(UpdatePCIPassthruSVMRequestMessage.class), this.producer::publishSetPciPassthrough);
     }
 
     @Test
-    public void publishSetPciPassthrough_no_capabilities() throws Exception
+    public void publishSetPciPassthrough_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(UpdatePCIPassthruSVMRequestMessage.class), this.producer::publishSetPciPassthrough);
     }
 
     @Test
-    public void publishApplyEsxiLicense() throws Exception
+    public void publishApplyEsxiLicense()
     {
         this.executeTest(mock(AddEsxiHostVSphereLicenseRequest.class), this.producer::publishApplyEsxiLicense);
     }
 
     @Test
-    public void publishApplyEsxiLicense_no_capabilities() throws Exception
+    public void publishApplyEsxiLicense_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(AddEsxiHostVSphereLicenseRequest.class), this.producer::publishApplyEsxiLicense);
     }
 
     @Test
-    public void publishListExsiCredentialDetails() throws Exception
+    public void publishListExsiCredentialDetails()
     {
         this.executeTest(mock(ListEsxiCredentialDetailsRequestMessage.class), this.producer::publishListExsiCredentialDetails);
     }
 
     @Test
-    public void publishListExsiCredentialDetails_no_capabilities() throws Exception
+    public void publishListExsiCredentialDetails_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ListEsxiCredentialDetailsRequestMessage.class), this.producer::publishListExsiCredentialDetails);
     }
 
     @Test
-    public void publishHostMaintenanceMode() throws Exception
+    public void publishHostMaintenanceMode()
     {
         this.executeTest(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishHostMaintenanceMode);
     }
 
     @Test
-    public void publishHostMaintenanceMode_no_capabilities() throws Exception
+    public void publishHostMaintenanceMode_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(HostMaintenanceModeRequestMessage.class), this.producer::publishHostMaintenanceMode);
     }
 
     @Test
-    public void publishListNodes() throws Exception
+    public void publishListNodes()
     {
         this.executeTest(mock(ListNodes.class), this.producer::publishListNodes);
     }
 
     @Test
-    public void publishListNodes_no_capabilities() throws Exception
+    public void publishListNodes_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ListNodes.class), this.producer::publishListNodes);
     }
 
     @Test
-    public void publishDiscoverClusters() throws Exception
+    public void publishDiscoverClusters()
     {
         this.executeTest(mock(DiscoverClusterRequestInfoMessage.class), this.producer::publishDiscoverClusters);
     }
 
     @Test
-    public void publishDiscoverClusters_no_capabilities() throws Exception
+    public void publishDiscoverClusters_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(DiscoverClusterRequestInfoMessage.class), this.producer::publishDiscoverClusters);
     }
 
     @Test
-    public void publishValidateClusters() throws Exception
+    public void publishValidateClusters()
     {
         ValidateVcenterClusterRequestMessage request = mock(ValidateVcenterClusterRequestMessage.class);
 
@@ -370,7 +374,7 @@ public class AmqpDneProducerTest
     }
 
     @Test
-    public void publishValidateStorage() throws Exception
+    public void publishValidateStorage()
     {
         EssValidateStoragePoolRequestMessage request = mock(EssValidateStoragePoolRequestMessage.class);
 
@@ -383,14 +387,14 @@ public class AmqpDneProducerTest
     }
 
     @Test
-    public void publishCompleteNodeAllocation() throws Exception
+    public void publishCompleteNodeAllocation()
     {
         CompleteNodeAllocationRequestMessage request = mock(CompleteNodeAllocationRequestMessage.class);
         String profile = "manage-node-allocation";
 
         EndpointProperty property = new EndpointProperty();
         property.setName("request-message-type");
-        property.setValue(((Message)request.getClass().getAnnotation(Message.class)).value());
+        property.setValue((request.getClass().getAnnotation(Message.class)).value());
         this.endpointProperties.add(property);
 
         doReturn(this.capabilityDataList).when(this.capabilityBinder).getCurrentCapabilities();
@@ -405,13 +409,13 @@ public class AmqpDneProducerTest
     }
 
     @Test
-    public void publishCompleteNodeAllocation_no_capabilities() throws Exception
+    public void publishCompleteNodeAllocation_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(CompleteNodeAllocationRequestMessage.class), this.producer::publishCompleteNodeAllocation);
     }
 
     @Test
-    public void publishChangeIdracCredentials() throws Exception
+    public void publishChangeIdracCredentials()
     {
         this.executeTest(mock(ChangeIdracCredentialsRequestMessage.class), this.producer::publishChangeIdracCredentials);
     }
@@ -498,7 +502,7 @@ public class AmqpDneProducerTest
     {
         EndpointProperty property = new EndpointProperty();
         property.setName("request-message-type");
-        property.setValue(((Message)request.getClass().getAnnotation(Message.class)).value());
+        property.setValue((request.getClass().getAnnotation(Message.class)).value());
         this.endpointProperties.add(property);
 
         doReturn(this.capabilityDataList).when(this.capabilityBinder).getCurrentCapabilities();

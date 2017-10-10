@@ -7,6 +7,7 @@ package com.dell.cpsd.paqx.dne.amqp.config;
 
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
+import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
@@ -35,6 +36,7 @@ import com.google.common.base.Splitter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -50,25 +52,18 @@ import java.util.Map;
  */
 
 @Configuration
+@ComponentScan("com.dell.cpsd.paqx.dne.service, com.dell.cpsd.paqx.dne.transformers, com.dell.cpsd.paqx.dne.repository")
 @Import({
-    RabbitConfig.class, 
-    ConsumerConfig.class, 
-    ProducerConfig.class, 
-    AddNodeTaskConfig.class, 
-    PreProcessTaskConfig.class, 
-    PropertySplitter.class,
+    RabbitConfig.class,
+    ConsumerConfig.class,
+    ProducerConfig.class,
     SDKConfiguration.class,
-    SystemDefinitionMessenger.class, 
+    SystemDefinitionMessenger.class,
     AMQPClient.class,
-    PersistenceConfig.class,
-    DiscoveryInfoToVCenterDomainTransformer.class,
-    ScaleIORestToScaleIODomainTransformer.class,
-    HostToInstallEsxiRequestTransformer.class,
-    StoragePoolEssRequestTransformer.class,
+    PersistenceConfig.class
 })
 public class ServiceConfig
 {
-    private static ILogger LOGGER = DneLoggingManager.getLogger(ServiceConfig.class);
 
     @Autowired
     private DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer;
@@ -82,22 +77,21 @@ public class ServiceConfig
     @Autowired
     private StoragePoolEssRequestTransformer storagePoolEssRequestTransformer;
 
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private DataServiceRepository repository;
+
     @Bean
     public NodeService nodeServiceClient(@Autowired DelegatingMessageConsumer delegatingMessageConsumer,
             @Autowired DneProducer dneProducer,
             @Autowired String replyTo)
     {
-        return new AmqpNodeService(LOGGER, delegatingMessageConsumer, dneProducer, replyTo, repository(),
+        return new AmqpNodeService( delegatingMessageConsumer, dneProducer, replyTo, repository,
                 discoveryInfoToVCenterDomainTransformer, scaleIORestToScaleIODomainTransformer, storagePoolEssRequestTransformer);
     }
 
-    @Bean
-    DataServiceRepository repository()
-    {
-        return new H2DataRepository();
-    }
-    
-    
     /**
      * This returns the workflow service that is used to control the add node.
      * 
@@ -108,50 +102,12 @@ public class ServiceConfig
     @Bean("addNodeWorkflowService")
     public WorkflowService addNodeWorkflowService(@Qualifier("addNodeWorkflowSteps") Map<String, Step> workflowSteps)
     {
-        return new WorkflowServiceImpl(jobRepository(), workflowSteps);
+        return new WorkflowServiceImpl(jobRepository, workflowSteps);
     }
 
     @Bean("preProcessWorkflowService")
     public WorkflowService preProcessWorkflowService(@Qualifier("preProcessWorkflowSteps") Map<String, Step> workflowSteps)
     {
-        return new WorkflowServiceImpl(jobRepository(), workflowSteps);
-    }
-
-    @Bean
-    public IAddNodeService addNodeService(){
-        return new AddNodeService();
-    }
-
-    @Bean
-    public IPreProcessService preProcessService(){
-        return new PreProcessService();
-    }
-
-    @Bean
-    public IOrchestrationService orchestrationService(){
-        return new OrchestrationService();
-    }
-
-
-    /**
-     * This returns the repository for jobs, such as add node.
-     * 
-     * @return  The repository for jobs, such as add node.
-     * 
-     * @since   1.0
-     */
-    @Bean
-    public JobRepository jobRepository()
-    {
-        return new InMemoryJobRepository();
-    }
-
-
-    public Map<String, String> map(String property) {
-        return this.map(property, ",");
-    }
-
-    private Map<String, String> map(String property, String splitter) {
-        return Splitter.on(splitter).omitEmptyStrings().trimResults().withKeyValueSeparator(":").split(property);
+        return new WorkflowServiceImpl(jobRepository, workflowSteps);
     }
 }

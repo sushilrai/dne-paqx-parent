@@ -49,9 +49,6 @@ public class ListScaleIoComponentsTaskHandlerTest
     @Mock
     private NodeService service;
 
-    private String taskName = "listScaleIOComponentsTask";
-    private String stepName = "listScaleIOComponentsStep";
-
     private ListScaleIoComponentsTaskHandler handler;
 
     /**
@@ -110,13 +107,15 @@ public class ListScaleIoComponentsTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "listScaleIOComponentsTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "listScaleIOComponentsStep";
+        doReturn(stepName).when(this.job).getStep();
 
         ListScaleIoComponentsTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 

@@ -81,9 +81,7 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
                         if (storageResponseMessage.getInvalidStorage().size() > 0)
                         {
                             response.setWorkFlowTaskStatus(Status.FAILED);
-                            storageResponseMessage.getInvalidStorage().stream().forEach(f -> {
-                                response.addError(f);
-                            });
+                            storageResponseMessage.getInvalidStorage().stream().forEach(response::addError);
                             return false;
                         }
                         else if (storageResponseMessage.getValidStorage().size() > 0)

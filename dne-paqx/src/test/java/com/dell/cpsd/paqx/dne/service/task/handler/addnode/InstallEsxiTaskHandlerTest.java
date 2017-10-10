@@ -71,8 +71,6 @@ public class InstallEsxiTaskHandlerTest
     private EsxiInstallationInfo esxiInstallInfo;
 
     private InstallEsxiTaskHandler handler;
-    private String taskName                       = "installEsxiTask";
-    private String stepName                       = "installEsxiStep";
     private String symphonyUuid                   = "symphonyUuid";
     private String esxiManagementIpAddress        = "1.2.3.4";
     private String esxiManagementHostname         = "vCenter-1-2-1-2";
@@ -307,13 +305,15 @@ public class InstallEsxiTaskHandlerTest
     public void testInitializeResponse_should_successfully_initialize_the_response()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "installEsxiTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "installEsxiStep";
+        doReturn(stepName).when(this.job).getStep();
 
         InstallEsxiTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

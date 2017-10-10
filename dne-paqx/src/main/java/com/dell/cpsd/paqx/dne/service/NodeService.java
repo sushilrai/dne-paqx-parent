@@ -68,10 +68,9 @@ public interface NodeService
      * List the virtualisation scaleio data
      *
      * @return
-     * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    List<ScaleIOData> listScaleIOData() throws ServiceTimeoutException, ServiceExecutionException;
+    List<ScaleIOData> listScaleIOData() throws  ServiceExecutionException;
 
     /**
      * List the rackhd node inventory

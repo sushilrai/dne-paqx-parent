@@ -59,8 +59,6 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
 
     private NotifyNodeDiscoveryToUpdateStatusTaskHandler handler;
 
-    private String taskName = "notifyNodeDiscoveryToUpdateStatusTask";
-    private String stepName = "notifyNodeDiscoveryToUpdateStatusStep";
     private String symphonyUuid = "symphonyUuid";
 
     /**
@@ -178,13 +176,15 @@ public class NotifyNodeDiscoveryToUpdateStatusTaskHandlerTest
     public void testInitializeResponse()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "notifyNodeDiscoveryToUpdateStatusTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "notifyNodeDiscoveryToUpdateStatusStep";
+        doReturn(stepName).when(this.job).getStep();
 
         TaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

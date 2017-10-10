@@ -154,8 +154,6 @@ public class H2DataRepositoryTest
     private List<CredentialDetails> credentialDetailsList;
     private List<VCenter>           vCenterList;
     private List<ScaleIOData>       scaleIODataList;
-    private List<ScaleIOProtectionDomain> scaleIOProtectionDomainList;
-    private List<ScaleIOSDS>        scaleIOSDSList;
     private List<PortGroup>         portGroupList;
     private List<PciDevice>         pciDeviceList;
     private List<HostDnsConfig>     hostDnsConfigs;
@@ -169,7 +167,6 @@ public class H2DataRepositoryTest
     private Long                    uuid;
     private String                  hostName;
     private String                  clusterName;
-    private String                  vNicDevice;
 
     /**
      * The test setup.
@@ -200,11 +197,11 @@ public class H2DataRepositoryTest
         this.scaleIODataList = new ArrayList<>();
         this.scaleIODataList.add(this.scaleIOData);
 
-        this.scaleIOProtectionDomainList = new ArrayList<>();
-        this.scaleIOProtectionDomainList.add(this.scaleIOProtectionDomain);
+        List<ScaleIOProtectionDomain> scaleIOProtectionDomainList = new ArrayList<>();
+        scaleIOProtectionDomainList.add(this.scaleIOProtectionDomain);
 
-        this.scaleIOSDSList = new ArrayList<>();
-        this.scaleIOSDSList.add(this.scaleIOSDS);
+        List<ScaleIOSDS> scaleIOSDSList = new ArrayList<>();
+        scaleIOSDSList.add(this.scaleIOSDS);
 
         this.portGroupList = new ArrayList<>();
         this.portGroupList.add(this.portGroup);
@@ -225,7 +222,7 @@ public class H2DataRepositoryTest
         this.uuid = 123456789L;
         this.hostName = "the_host_name";
         this.clusterName = "the_cluster_name";
-        this.vNicDevice = "vmk0";
+        String vNicDevice = "vmk0";
     }
 
     @Test
@@ -705,7 +702,7 @@ public class H2DataRepositoryTest
     public void getExistingVCenterHost() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
-        doReturn(Arrays.asList(this.host)).when(this.hostTypedQuery).getResultList();
+        doReturn(Collections.singletonList(this.host)).when(this.hostTypedQuery).getResultList();
 
         assertNotNull(this.repository.getExistingVCenterHost());
     }
@@ -1046,7 +1043,7 @@ public class H2DataRepositoryTest
     public void getScaleIoProtectionDomain() throws Exception
     {
         doReturn(this.protectionDomainTypedQuery).when(this.entityManager).createQuery(anyString(), any());
-        doReturn(Arrays.asList(this.scaleIOProtectionDomain)).when(this.protectionDomainTypedQuery).getResultList();
+        doReturn(Collections.singletonList(this.scaleIOProtectionDomain)).when(this.protectionDomainTypedQuery).getResultList();
 
         assertNotNull(this.repository.getScaleIoProtectionDomains());
     }

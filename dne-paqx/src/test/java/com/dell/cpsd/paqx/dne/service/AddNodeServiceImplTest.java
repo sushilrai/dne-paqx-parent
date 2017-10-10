@@ -20,11 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddNodeServiceImplTest {
-    private WorkflowServiceImpl workflowServiceUnderTest;
     private AddNodeService addNodeServiceUnderTest;
     private Map<String, WorkflowTask> workFlowTasks;
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         final InMemoryJobRepository inMemoryJobRepository = new InMemoryJobRepository();
 
@@ -33,8 +32,7 @@ public class AddNodeServiceImplTest {
         workflowSteps.put("startAddNodeWorkflow", new Step("completed", true));
         workflowSteps.put("completed", null);
 
-        this.workflowServiceUnderTest =
-                new WorkflowServiceImpl(inMemoryJobRepository, workflowSteps);
+        WorkflowServiceImpl workflowServiceUnderTest = new WorkflowServiceImpl(inMemoryJobRepository, workflowSteps);
 
         this.addNodeServiceUnderTest = new AddNodeService();
         addNodeServiceUnderTest.setWorkflowService(workflowServiceUnderTest);

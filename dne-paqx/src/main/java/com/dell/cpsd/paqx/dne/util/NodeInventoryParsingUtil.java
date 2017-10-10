@@ -38,8 +38,7 @@ public class NodeInventoryParsingUtil {
                 String serialNumber = (String)sysInfo.get(SERIAL_NUM_FIELD);
                 String product = (String)sysInfo.get(PRODUCT_FIELD);
                 String family = (String)sysInfo.get(FAMILY_FIELD);
-                DiscoveredNodeInfo nodeInfo = new DiscoveredNodeInfo(product, family, product, family, serialNumber, uuid);
-                return nodeInfo;
+                return new DiscoveredNodeInfo(product, family, product, family, serialNumber, uuid);
             }
         }
         return null;

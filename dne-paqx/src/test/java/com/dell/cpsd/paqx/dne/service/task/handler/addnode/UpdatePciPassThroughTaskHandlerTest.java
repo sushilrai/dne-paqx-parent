@@ -82,11 +82,9 @@ public class UpdatePciPassThroughTaskHandlerTest
 
     private UpdatePciPassThroughTaskHandler handler;
 
-    private String hostname = "hostname_1.2.3.4";
-    private String hostPciDeviceId = "0000:00:000:0";
-    private String newVmName = "hello-vm-1";
-    private String taskName = "updatePciPassthroughTask";
-    private String stepName = "updatePciPassthroughStep";
+    private static final String hostname = "hostname_1.2.3.4";
+    private static final String hostPciDeviceId = "0000:00:000:0";
+    private static final String newVmName = "hello-vm-1";
 
     /**
      * The test setup.
@@ -196,13 +194,15 @@ public class UpdatePciPassThroughTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "updatePciPassthroughTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "updatePciPassthroughStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final UpdatePciPassThroughTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

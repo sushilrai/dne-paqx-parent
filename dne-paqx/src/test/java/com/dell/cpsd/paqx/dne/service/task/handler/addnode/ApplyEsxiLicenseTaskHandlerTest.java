@@ -71,9 +71,7 @@ public class ApplyEsxiLicenseTaskHandlerTest
     @Mock
     private Map<String, TaskResponse> taskResponseMap;
 
-    private String hostname = "hostname_1.2.3.4";
-    private String taskName = "applyEsxiLicenseTask";
-    private String stepName = "applyEsxiLicenseStep";
+    private static final String hostname = "hostname_1.2.3.4";
 
     private ApplyEsxiLicenseTaskHandler handler;
 
@@ -194,13 +192,15 @@ public class ApplyEsxiLicenseTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "applyEsxiLicenseTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "applyEsxiLicenseStep";
+        doReturn(stepName).when(this.job).getStep();
 
         ApplyEsxiLicenseTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

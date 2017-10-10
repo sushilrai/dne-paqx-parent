@@ -35,7 +35,6 @@ public class StoragePoolEssRequestTransformerTest
 
     private StoragePoolEssRequestTransformer transformer;
     private List<ScaleIOStoragePool>         listScaleIOStoragePool;
-    private List<ScaleIODevice>              listDevices;
 
     @Before
     public void setUp() throws Exception
@@ -57,7 +56,7 @@ public class StoragePoolEssRequestTransformerTest
     private void buildScaleIowithStoragePool()
     {
         listScaleIOStoragePool = new ArrayList<>();
-        listDevices = new ArrayList<>();
+        List<ScaleIODevice> listDevices = new ArrayList<>();
         ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
         storagePool.setId("1");
         storagePool.setName("SP-1");

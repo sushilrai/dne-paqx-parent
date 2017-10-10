@@ -61,13 +61,11 @@ public class PingIdracTaskHandlerTest
     /**
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      *
-     * @throws Exception
-     *
      * @since 1.0
      */
     @Ignore
     @Test
-    public void executeTask_successful_case() throws Exception
+    public void executeTask_successful_case()
     {
         String idracIpAddress = "127.0.0.1";// ping the loopback address
 
@@ -85,12 +83,10 @@ public class PingIdracTaskHandlerTest
     /**
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      *
-     * @throws Exception
-     *
      * @since 1.0
      */
     @Test
-    public void executeTask_no_input_params() throws Exception
+    public void executeTask_no_input_params()
     {
         NodeExpansionRequest nullRequest = null;
 
@@ -107,12 +103,10 @@ public class PingIdracTaskHandlerTest
     /**
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      *
-     * @throws Exception
-     *
      * @since 1.0
      */
     @Test
-    public void executeTask_no_idrac_ip_address() throws Exception
+    public void executeTask_no_idrac_ip_address()
     {
         String nullIdracIpAddress = null;
 
@@ -130,12 +124,10 @@ public class PingIdracTaskHandlerTest
     /**
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      *
-     * @throws Exception
-     *
      * @since 1.0
      */
     @Test
-    public void executeTask_ip_address_unreachable() throws Exception
+    public void executeTask_ip_address_unreachable()
     {
         String bogusIdracIpAddress = "1.0.0.0";
 

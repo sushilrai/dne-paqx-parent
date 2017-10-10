@@ -71,10 +71,7 @@ public class DatastoreRenameTaskHandlerTest
     private ComponentEndpointIds componentEndpointIds;
 
     private DatastoreRenameTaskHandler handler;
-    private String taskName = "datastoreRenameTask";
-    private String stepName = "datastoreRenameStep";
     private final String esxiManagementHostname = "fpr1-h17.example.com";
-    private final String dataStorweName = "DAS17";
 
     @Before
     public void setUp() throws Exception
@@ -97,7 +94,8 @@ public class DatastoreRenameTaskHandlerTest
         assertThat(result, is(true));
         verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
         verify(this.response, never()).addError(anyString());
-        verify(this.response).setDatastoreName(this.dataStorweName);
+        String dataStorweName = "DAS17";
+        verify(this.response).setDatastoreName(dataStorweName);
     }
 
     @Test
@@ -170,13 +168,15 @@ public class DatastoreRenameTaskHandlerTest
     public void testInitializeResponse_should_successfully_create_the_response()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "datastoreRenameTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "datastoreRenameStep";
+        doReturn(stepName).when(this.job).getStep();
 
         DatastoreRenameTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

@@ -6,11 +6,10 @@
 package com.dell.cpsd.paqx.dne;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-
-import java.io.File;
-import java.io.FileInputStream;
+import java.net.URL;
 
 /**
  * Test Util class containing common methods.
@@ -30,8 +29,11 @@ public class TestUtil
         properties.setContentType("application/json");
         properties.setHeader("__TypeId__", typeId);
 
-        final String content = IOUtils.toString(new FileInputStream(new File(contentFileName)));
+        URL resource = TestUtil.class.getClassLoader().getResource(contentFileName);
+        if ( resource != null )
+            return new Message(IOUtils.toByteArray(resource), properties);
 
-        return new Message(content.getBytes(), properties);
+        // else return empty message.
+        return new Message(new byte[0], properties);
     }
 }

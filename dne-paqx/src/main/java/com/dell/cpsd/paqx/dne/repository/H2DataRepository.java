@@ -24,6 +24,7 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -45,6 +46,7 @@ import java.util.Objects;
  * @version 1.0
  * @since 1.0
  */
+@Repository
 public class H2DataRepository implements DataServiceRepository
 {
     private static final Logger LOG = LoggerFactory.getLogger(H2DataRepository.class);

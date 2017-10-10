@@ -89,8 +89,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
     {
-        Job job = workflowService.createWorkflow(workflowType, startingStep, currentStatus, addNodeWorkflowTasks());
-        return job;
+        return workflowService.createWorkflow(workflowType, startingStep, currentStatus, addNodeWorkflowTasks());
     }
 
     @Bean("addNodesWorkflowTasks")
@@ -270,9 +269,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
 
     public Job findJob(UUID jobId)
     {
-        final Job job = workflowService.findJob(jobId);
-
-        return job;
+        return workflowService.findJob(jobId);
     }
 
     public NodeExpansionResponse makeNodeExpansionResponse(final Job job)

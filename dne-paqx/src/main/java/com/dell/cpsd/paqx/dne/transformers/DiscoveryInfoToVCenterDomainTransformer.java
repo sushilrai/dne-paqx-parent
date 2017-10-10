@@ -275,10 +275,7 @@ public class DiscoveryInfoToVCenterDomainTransformer
                 });
             });
 
-            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> {
-
-                returnVal.setNtpServers(hostDateTimeInfo.getNtpServers());
-            });
+            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> returnVal.setNtpServers(hostDateTimeInfo.getNtpServers()));
         });
 
         Optional.ofNullable(hostSystem.getHostHardwareInfo()).ifPresent(hostHardwareInfo -> {
@@ -289,12 +286,7 @@ public class DiscoveryInfoToVCenterDomainTransformer
                         .forEach(pciDevice -> returnVal.getPciDevices().add(transformHostPciDevice(pciDevice, returnVal)));
             });
 
-            Optional.ofNullable(hostHardwareInfo.getHostSystemInfo()).ifPresent(hostSystemInfo -> {
-
-                Optional.ofNullable(hostSystemInfo.getHostSystemIdentificationInfo()).ifPresent(hostSystemIdentificationInfo -> {
-                    returnVal.setServiceTag(hostSystemIdentificationInfo.getServiceTag());
-                });
-            });
+            Optional.ofNullable(hostHardwareInfo.getHostSystemInfo()).ifPresent(hostSystemInfo -> Optional.ofNullable(hostSystemInfo.getHostSystemIdentificationInfo()).ifPresent(hostSystemIdentificationInfo -> returnVal.setServiceTag(hostSystemIdentificationInfo.getServiceTag())));
         });
         
         String model = hostSystem.getHostHardwareInfo().getHostSystemInfo().getModel();

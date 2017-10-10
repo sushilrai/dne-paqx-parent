@@ -12,7 +12,6 @@
         <version>1.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.dell.cpsd.paqx.dne</groupId>
     <artifactId>dne-paqx-packaging</artifactId>
     <packaging>pom</packaging>
     

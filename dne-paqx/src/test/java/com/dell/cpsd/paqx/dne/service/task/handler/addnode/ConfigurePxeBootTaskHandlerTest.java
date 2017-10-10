@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
  *
  * @since 1.0
  */
+@SuppressWarnings("ALL")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigurePxeBootTaskHandlerTest
 {
@@ -60,8 +61,6 @@ public class ConfigurePxeBootTaskHandlerTest
     private BootDeviceIdracStatus bootDeviceIdracStatus;
 
     private ConfigurePxeBootTaskHandler handler;
-    private String taskName = "configurePxeBootTask";
-    private String stepName = "configurePxeBootStep";
     private String symphonyUuid = "symphonyuuid";
     private String idracIpAddress = "1.2.3.4";
 
@@ -125,13 +124,15 @@ public class ConfigurePxeBootTaskHandlerTest
     public void testInitializeResponse_should_successfully_create_the_response()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "configurePxeBootTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "configurePxeBootStep";
+        doReturn(stepName).when(this.job).getStep();
 
         ConfigureBootDeviceIdracResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 

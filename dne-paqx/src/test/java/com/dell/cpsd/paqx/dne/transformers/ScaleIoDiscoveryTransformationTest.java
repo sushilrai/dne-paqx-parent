@@ -49,7 +49,7 @@ public class ScaleIoDiscoveryTransformationTest
         transformer = new ScaleIORestToScaleIODomainTransformer();
 
         final Message message = TestUtil.jsonMessage("com.dell.cpsd.list.storage.response",
-                "src/test/resources/scaleIODiscoveryResponsePayload.json");
+                "scaleIODiscoveryResponsePayload.json");
         entity = (ListStorageResponseMessage) converter.fromMessage(message);
     }
     @Test

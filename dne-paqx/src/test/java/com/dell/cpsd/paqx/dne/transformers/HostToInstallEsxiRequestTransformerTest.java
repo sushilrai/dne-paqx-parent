@@ -57,9 +57,6 @@ public class HostToInstallEsxiRequestTransformerTest
 
     private HostToInstallEsxiRequestTransformer transformer;
     private String                              esxiManagementHostName;
-    private String                              esxiManagementGateway;
-    private String                              esxiManagementIpAddress;
-    private String                              esxiManagementNetworkMask;
     private String                              symphonyUuid;
     private String                              vlanId;
     private IpV4Configuration                   ipv4Configuration;
@@ -72,15 +69,15 @@ public class HostToInstallEsxiRequestTransformerTest
     {
         this.transformer = new HostToInstallEsxiRequestTransformer(this.dataServiceRepository);
         this.esxiManagementHostName = "fpr1-h17";
-        this.esxiManagementGateway = "1.1.1.1";
-        this.esxiManagementIpAddress = "1.2.3.4";
-        this.esxiManagementNetworkMask = "255.255.255.224";
+        String esxiManagementGateway = "1.1.1.1";
+        String esxiManagementIpAddress = "1.2.3.4";
+        String esxiManagementNetworkMask = "255.255.255.224";
         this.symphonyUuid = UUID.randomUUID().toString();
         this.vlanId = "1628";
         this.ipv4Configuration = new IpV4Configuration();
-        this.ipv4Configuration.setEsxiManagementNetworkMask(this.esxiManagementNetworkMask);
-        this.ipv4Configuration.setEsxiManagementIpAddress(this.esxiManagementIpAddress);
-        this.ipv4Configuration.setEsxiManagementGateway(this.esxiManagementGateway);
+        this.ipv4Configuration.setEsxiManagementNetworkMask(esxiManagementNetworkMask);
+        this.ipv4Configuration.setEsxiManagementIpAddress(esxiManagementIpAddress);
+        this.ipv4Configuration.setEsxiManagementGateway(esxiManagementGateway);
         this.ntpServers = new ArrayList<>();
         this.ntpServers.add("2.2.2.2");
         this.ntpServers.add("3.3.3.3");

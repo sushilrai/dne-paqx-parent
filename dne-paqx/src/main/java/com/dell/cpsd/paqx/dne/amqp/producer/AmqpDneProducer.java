@@ -41,8 +41,7 @@ import java.util.Objects;
  * @since 1.0
  */
 
-public class AmqpDneProducer implements DneProducer
-{
+public class AmqpDneProducer implements DneProducer {
     @Autowired
     private String essRequestExchange;
 
@@ -50,11 +49,10 @@ public class AmqpDneProducer implements DneProducer
     private String essReqRoutingKeyPrefix;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpDneProducer.class);
-    private final RabbitTemplate   rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
     private final CapabilityBinder capabilityBinder;
 
-    public AmqpDneProducer(RabbitTemplate rabbitTemplate, CapabilityBinder capabilityBinder)
-    {
+    public AmqpDneProducer(RabbitTemplate rabbitTemplate, CapabilityBinder capabilityBinder) {
         this.rabbitTemplate = rabbitTemplate;
         this.capabilityBinder = capabilityBinder;
     }
@@ -63,27 +61,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishIdracNetwokSettings(IdracNetworkSettingsRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(IdracNetworkSettingsRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishIdracNetwokSettings");
-            return;
-        }
-
-        LOGGER.info("publishIdracNetwokSettings: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(IdracNetworkSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish idrac network settings request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish idrac network settings request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -91,27 +74,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishConfigureBootDeviceIdrac(ConfigureBootDeviceIdracRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ConfigureBootDeviceIdracRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishConfigureBootDeviceIdrac");
-            return;
-        }
-
-        LOGGER.info("publishConfigureBootDeviceIdrac: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ConfigureBootDeviceIdracRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish configure boot device idrac request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish configure boot device idrac request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -120,25 +88,11 @@ public class AmqpDneProducer implements DneProducer
      */
     @Override
     public void publishConfigurePxeBoot(ConfigurePxeBootRequestMessage request) {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ConfigurePxeBootRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishConfigurePxeboot");
-            return;
-        }
-
-        LOGGER.info("publishConfigurePxeBoot: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ConfigurePxeBootRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish configure Pxe Boot request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish configure Pxe Boot request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -146,28 +100,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishConfigureObmSettings(SetObmSettingsRequestMessage request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishConfigureObmSettings(SetObmSettingsRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(SetObmSettingsRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishConfigureObmSettings");
-            return;
-        }
-
-        LOGGER.info("publishConfigureObmSettings: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-
-            if (messageType(SetObmSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish configure obm settings request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish configure obm settings request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -175,427 +113,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishListScaleIoComponents(final ListComponentRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishListScaleIoComponents(final ListComponentRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListComponentRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishListScaleIoComponents");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ListComponentRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish List ScaleIO Components request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishListVCenterComponents(final ListComponentsRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishListVCenterComponents");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ListComponentsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish List VCenter Components request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishDiscoverScaleIo(final ListStorageRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishDiscoverScaleIo");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ListStorageRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Discover ScaleIO request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishDiscoverVcenter(final DiscoveryRequestInfoMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishDiscoverVcenter");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(DiscoveryRequestInfoMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Discover VCenter request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishInstallEsxiRequest(final InstallESXiRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishInstallEsxiRequest");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(InstallESXiRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Install ESXi License request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishAddHostToVCenter(final ClusterOperationRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishAddHostToVCenter");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ClusterOperationRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Add Host to VCenter request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishInstallScaleIoVib(final SoftwareVIBRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishInstallScaleIoVib");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(SoftwareVIBRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Install ScaleIo VIB request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishConfigureScaleIoVib");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(SoftwareVIBConfigureRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Configure ScaleIo VIB request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishAddHostToDvSwitch");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(AddHostToDvSwitchRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Add Host to DV Switch request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishDeployVmFromTemplate(final DeployVMFromTemplateRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishDeployVmFromTemplate");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(DeployVMFromTemplateRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish deploy VM from template request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishEnablePciPassthrough(final EnablePCIPassthroughRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishEnablePciPassthrough");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(EnablePCIPassthroughRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish enable PCI pass through request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishRebootHost(final HostPowerOperationRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishRebootHost");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(HostPowerOperationRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish reboot host request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishSetPciPassthrough(final UpdatePCIPassthruSVMRequestMessage request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishSetPciPassthrough");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(UpdatePCIPassthruSVMRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish Set PCI Pass through request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishApplyEsxiLicense(final AddEsxiHostVSphereLicenseRequest request)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishApplyEsxiLicense");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(AddEsxiHostVSphereLicenseRequest.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish apply ESXi license request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishListExsiCredentialDetails");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ListEsxiCredentialDetailsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish list esxi credential details request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
-    {
-        final Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishHostMaintenanceMode");
-            return;
-        }
-
-        capabilities.stream().filter(Objects::nonNull).forEach(capabilityData -> {
-            final ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            final AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(HostMaintenanceModeRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish ESXi host maintenance mode request from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publishListNodes(ListNodes request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
-
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishListNodes");
-            return;
-        }
-
-        LOGGER.info("publishListNodes: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ListNodes.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send node discovery request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish List ScaleIO Components request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -603,27 +126,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishListVCenterComponents(final ListComponentsRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListComponentsRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishDiscoverClusters");
-            return;
-        }
-
-        LOGGER.info("publishDiscoverClusters: found list of capablities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(DiscoverClusterRequestInfoMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send discover cluster request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Publish List VCenter Components request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -631,8 +139,217 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishValidateClusters(ValidateVcenterClusterRequestMessage request)
-    {
+    public void publishDiscoverScaleIo(final ListStorageRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListStorageRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Discover ScaleIO request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishDiscoverVcenter(final DiscoveryRequestInfoMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(DiscoveryRequestInfoMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Discover VCenter request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishInstallEsxiRequest(final InstallESXiRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(InstallESXiRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Install ESXi License request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishAddHostToVCenter(final ClusterOperationRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ClusterOperationRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Add Host to VCenter request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishInstallScaleIoVib(final SoftwareVIBRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(SoftwareVIBRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Install ScaleIo VIB request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(SoftwareVIBConfigureRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Configure ScaleIo VIB request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(AddHostToDvSwitchRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Add Host to DV Switch request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishDeployVmFromTemplate(final DeployVMFromTemplateRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(DeployVMFromTemplateRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish deploy VM from template request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishEnablePciPassthrough(final EnablePCIPassthroughRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(EnablePCIPassthroughRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish enable PCI pass through request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishRebootHost(final HostPowerOperationRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(HostPowerOperationRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish reboot host request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishSetPciPassthrough(final UpdatePCIPassthruSVMRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(UpdatePCIPassthruSVMRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Set PCI Pass through request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishApplyEsxiLicense(final AddEsxiHostVSphereLicenseRequest request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(AddEsxiHostVSphereLicenseRequest.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish apply ESXi license request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishListExsiCredentialDetails(final ListEsxiCredentialDetailsRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListEsxiCredentialDetailsRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish list esxi credential details request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(HostMaintenanceModeRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish ESXi host maintenance mode request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishListNodes(ListNodes request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListNodes.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Send node discovery request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishDiscoverClusters(DiscoverClusterRequestInfoMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(DiscoverClusterRequestInfoMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Send discover cluster request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishValidateClusters(ValidateVcenterClusterRequestMessage request) {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, request);
     }
@@ -641,16 +358,14 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage)
-    {
+    public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage) {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         LOGGER.info("Send request to ESS validation for storage pools.");
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
     }
 
     @Override
-    public void publishValidateProtectionDomain(EssValidateProtectionDomainsRequestMessage requestMessage)
-    {
+    public void publishValidateProtectionDomain(EssValidateProtectionDomainsRequestMessage requestMessage) {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
         LOGGER.info("Send request to ESS validation for protection domains.");
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
@@ -660,24 +375,10 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(CompleteNodeAllocationRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishCompleteNodeAllocation");
-            return;
-        }
-
-        CapabilityData capabilityData = capabilities.stream()
-                .filter((data) -> "manage-node-allocation".equals(data.getCapability().getProfile())).findFirst().orElse(null);
-
-        if (capabilityData != null)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-
+        if (endpointHelper != null) {
             LOGGER.info("Send complete node allocation request message from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
@@ -687,19 +388,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request)
-    {
-        Collection<CapabilityData> capabilityDatas = capabilityBinder.getCurrentCapabilities();
-        LOGGER.info("publishChangeIdracCrdentials: found list of capablities with size {}", capabilityDatas.size());
-        for (CapabilityData capabilityData : capabilityDatas)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ChangeIdracCredentialsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Publish change idrac credentials request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-            }
+    public void publishChangeIdracCredentials(ChangeIdracCredentialsRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ChangeIdracCredentialsRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish change idrac credentials request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -707,28 +401,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishNodeInventoryDiscovery(final NodeInventoryRequestMessage request)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishNodeInventoryDiscovery(final NodeInventoryRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(NodeInventoryRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishNodeInventoryDiscovery");
-            return;
-        }
-
-        LOGGER.info("publishNodeInventoryDiscovery: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(NodeInventoryRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send node inventory discovery request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send node inventory discovery request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
 
@@ -736,28 +414,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishDatastoreRename(DatastoreRenameRequestMessage requestMessage)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishDatastoreRename(DatastoreRenameRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(DatastoreRenameRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishDatastoreRename");
-            return;
-        }
-
-        LOGGER.info("publishDatastoreRename: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(DatastoreRenameRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send datastore rename request message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send datastore rename request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 
@@ -765,28 +427,12 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(VCenterUpdateSoftwareAcceptanceRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishUpdateSoftwareAcceptance");
-            return;
-        }
-
-        LOGGER.info("publishUpdateSoftwareAcceptance: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(VCenterUpdateSoftwareAcceptanceRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send update software acceptance message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send update software acceptance message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 
@@ -794,85 +440,57 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
-    public void publishVmPowerOperation(VmPowerOperationsRequestMessage requestMessage)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishVmPowerOperation(VmPowerOperationsRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(VmPowerOperationsRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishVmPowerOperation");
-            return;
-        }
-
-        LOGGER.info("publishVmPowerOperation: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(VmPowerOperationsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send vm power operation message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send vm power operation message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 
     @Override
-    public void publishConfigureVmNetworkSettings(final ConfigureVmNetworkSettingsRequestMessage requestMessage)
-    {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+    public void publishConfigureVmNetworkSettings(final ConfigureVmNetworkSettingsRequestMessage requestMessage) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ConfigureVmNetworkSettingsRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishConfigureVmNetworkSettings");
-            return;
-        }
-
-        LOGGER.info("publishConfigureVmNetworkSettings: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(ConfigureVmNetworkSettingsRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send configure vm setwork settings message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send configure vm setwork settings message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 
     @Override
     public void publishRemoteCommandExecution(final RemoteCommandExecutionRequestMessage requestMessage)
     {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(RemoteCommandExecutionRequestMessage.class);
 
-        if (capabilities == null)
-        {
-            LOGGER.error("No Capabilities found for publishRemoteCommandExecution");
-            return;
-        }
-
-        LOGGER.info("publishRemoteCommandExecution: found list of capabilities with size {}", capabilities.size());
-
-        for (CapabilityData capabilityData : capabilities)
-        {
-            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
-            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
-            if (messageType(RemoteCommandExecutionRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
-            {
-                LOGGER.info("Send execute remote command message from DNE paqx.");
-                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
-                break;
-            }
+        if (endpointHelper != null) {
+            LOGGER.info("Send execute remote command message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 
-    private String messageType(Class messageClass)
-    {
+    private AmqpProviderEndpointHelper findEndpointHelper(Class inputClass) {
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null) {
+            LOGGER.error("No Capabilities found for " + inputClass.getName());
+            return null;
+        }
+
+        LOGGER.info(inputClass.getName() + ": found list of capabilities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities) {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(inputClass).equals(endpointHelper.getRequestMessageType())) {
+                return endpointHelper;
+            }
+        }
+        return null;
+    }
+
+    private String messageType(Class messageClass) {
         Message messageAnnotation = (Message) messageClass.getAnnotation(Message.class);
         return messageAnnotation.value();
     }

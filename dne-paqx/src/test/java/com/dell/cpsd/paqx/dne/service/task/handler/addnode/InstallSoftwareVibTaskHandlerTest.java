@@ -73,16 +73,13 @@ public class InstallSoftwareVibTaskHandlerTest
     private Map<String, TaskResponse> taskResponseMap;
 
     private String hostname = "hostname_1.2.3.4";
-    private String taskName = "installSoftwareVibTask";
-    private String stepName = "installSoftwareVibStep";
 
     private InstallScaleIoVibTaskHandler handler;
-
-    private String vibUrl = "test.vib";
 
     @Before
     public void setUp() throws Exception
     {
+        String vibUrl = "test.vib";
         this.handler = spy(new InstallScaleIoVibTaskHandler(this.service, this.repository, vibUrl));
     }
 
@@ -174,13 +171,15 @@ public class InstallSoftwareVibTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "installSoftwareVibTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "installSoftwareVibStep";
+        doReturn(stepName).when(this.job).getStep();
 
         final InstallScaleIoVibTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

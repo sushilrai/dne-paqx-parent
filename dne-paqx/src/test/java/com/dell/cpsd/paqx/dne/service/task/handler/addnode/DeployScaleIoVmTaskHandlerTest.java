@@ -93,8 +93,6 @@ public class DeployScaleIoVmTaskHandlerTest
     private String clusterName                    = "cluster_01";
     private String dataCenterName                 = "datacenter_01";
     private String scaleIOSVMManagementIpAddress  = "1.2.3.4";
-    private String taskName                       = "deployScaleIoVmTask";
-    private String stepName                       = "deployScaleIoVmStep";
     private String esxiManagementGatewayIpAddress = "4.3.2.1";
     private String sioMgmtSubnetMask = "255.255.255.0";
     private String sioData1IpAddress = "4.4.4.4";
@@ -478,13 +476,15 @@ public class DeployScaleIoVmTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "deployScaleIoVmTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "deployScaleIoVmStep";
+        doReturn(stepName).when(this.job).getStep();
 
         DeployScaleIoVmTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 

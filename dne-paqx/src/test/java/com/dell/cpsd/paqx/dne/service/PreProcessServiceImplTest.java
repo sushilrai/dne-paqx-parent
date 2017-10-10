@@ -26,7 +26,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class PreProcessServiceImplTest {
 
-    private WorkflowServiceImpl workflowServiceUnderTest;
     private PreProcessService   preProcessServiceUnderTest;
     private Map<String, WorkflowTask> workFlowTasks;
     @Before
@@ -39,8 +38,7 @@ public class PreProcessServiceImplTest {
         workflowSteps.put("startPreProcessWorkflow", new Step("completed", true));
         workflowSteps.put("completed", null);
 
-        this.workflowServiceUnderTest =
-                new WorkflowServiceImpl(inMemoryJobRepository, workflowSteps);
+        WorkflowServiceImpl workflowServiceUnderTest = new WorkflowServiceImpl(inMemoryJobRepository, workflowSteps);
 
         this.preProcessServiceUnderTest = new PreProcessService();
         preProcessServiceUnderTest.setWorkflowService(workflowServiceUnderTest);
@@ -75,7 +73,7 @@ public class PreProcessServiceImplTest {
     public void testPreProcessWorkFlowTask_setup()
     {
         Assert.assertNotNull(workFlowTasks);
-        Assert.assertEquals(13, workFlowTasks.size());
+        Assert.assertEquals(11, workFlowTasks.size());
     }
 
     @Test

@@ -27,6 +27,7 @@ import com.dell.cpsd.PxeBootConfig;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.SetObmSettingsResponseMessage;
 import com.dell.cpsd.common.logging.ILogger;
+import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
@@ -36,6 +37,7 @@ import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
+import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToDvSwitchResponseAdapter;
@@ -149,9 +151,10 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -176,7 +179,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     /*
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpNodeService.class);
+    private static ILogger LOGGER = DneLoggingManager.getLogger(ServiceConfig.class);
+
+    private static final long timeout = 1800000L;
 
     /*
      * The <code>DelegatingMessageConsumer</code>
@@ -192,15 +197,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * The replyTo queue name
      */
     private final String replyTo;
-    private final long timeout = 1800000L;
-    private final long installEsxiTimeout = 2700000L;
 
     private final DataServiceRepository repository;
 
     private final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer;
-    private final ScaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer;
-    private final StoragePoolEssRequestTransformer        storagePoolEssRequestTransformer;
 
+    private final ScaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer;
+
+    private final StoragePoolEssRequestTransformer        storagePoolEssRequestTransformer;
 
     @Value("${rackhd.boot.proto.share.name}")
     private String                                 shareName;
@@ -220,7 +224,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     /**
      * AmqpNodeService constructor.
      *
-     * @param logger                                  - The logger instance.
      * @param consumer                                - The <code>DelegatingMessageConsumer</code> instance.
      * @param producer                                - The <code>DneProducer</code> instance.
      * @param replyTo                                 - The replyTo queue name.
@@ -229,12 +232,12 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * @param scaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer
      * @since 1.0
      */
-    public AmqpNodeService(ILogger logger, DelegatingMessageConsumer consumer, DneProducer producer, String replyTo,
+    public AmqpNodeService( DelegatingMessageConsumer consumer, DneProducer producer, String replyTo,
             final DataServiceRepository repository, final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer,
             final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer,
             final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer)
     {
-        super(logger);
+        super(LOGGER);
 
         this.consumer = consumer;
         this.producer = producer;
@@ -292,7 +295,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     @Override
     public IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
-            throws ServiceTimeoutException, ServiceExecutionException
+            throws ServiceExecutionException
     {
         IdracInfo idracInfo = new IdracInfo();
 
@@ -424,7 +427,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                     repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
                 }
             } else {
-                LOGGER.info("There is no node inventory for UUID ", node.getConvergedUuid());
+                LOGGER.info("There is no node inventory for UUID " + node.getConvergedUuid());
             }
         }
 
@@ -485,7 +488,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         DiscoverClusterResponseInfoMessage responseInfo = processResponse(response, DiscoverClusterResponseInfoMessage.class);
 
-        if (responseInfo.getStatus() == DiscoverClusterResponseInfoMessage.Status.SUCCESS)
+        if ( responseInfo!= null && responseInfo.getStatus() == DiscoverClusterResponseInfoMessage.Status.SUCCESS)
         {
             DiscoverClusterResponseInfo clusterResponseInfo = responseInfo.getDiscoverClusterResponseInfo();
             return clusterResponseInfo != null ? clusterResponseInfo.getClusters() : Collections.emptyList();
@@ -498,13 +501,13 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public List<ScaleIOData> listScaleIOData() throws ServiceTimeoutException, ServiceExecutionException
+    public List<ScaleIOData> listScaleIOData() throws ServiceExecutionException
     {
         LOGGER.info("Listing scaleIO data ...");
 
         ScaleIOData scaleIOData = repository.getScaleIoData();
 
-        return Arrays.asList(scaleIOData);
+        return Collections.singletonList(scaleIOData);
     }
 
     /**
@@ -543,9 +546,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             }
         });
 
-        EssValidateStoragePoolResponseMessage responseInfo = processResponse(response, EssValidateStoragePoolResponseMessage.class);
+        return processResponse(response, EssValidateStoragePoolResponseMessage.class);
 
-        return responseInfo;
     }
 
     /**
@@ -582,9 +584,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             }
         });
 
-        EssValidateProtectionDomainsResponseMessage responseInfo = processResponse(response, EssValidateProtectionDomainsResponseMessage.class);
-
-        return responseInfo;
+        return processResponse(response, EssValidateProtectionDomainsResponseMessage.class);
     }
 
 
@@ -625,8 +625,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             }
         });
 
-        ValidateVcenterClusterResponseMessage responseInfo = processResponse(response, ValidateVcenterClusterResponseMessage.class);
-        return responseInfo;
+        return processResponse(response, ValidateVcenterClusterResponseMessage.class);
     }
 
     /**
@@ -659,7 +658,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         CompleteNodeAllocationResponseMessage responseInfo = processResponse(response, CompleteNodeAllocationResponseMessage.class);
 
-        if (CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        if ( responseInfo != null && CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
         {
             LOGGER.error("Error response from notify node allocation complete: " + responseInfo.getNodeAllocationErrors());
         }
@@ -673,10 +672,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * @param response         - The <code>ServiceResponse</code> to process.
      * @param expectedResponse - The expected response <code>Class</code>
      * @return The response.
-     * @throws ServiceExecutionException
      * @since 1.0
      */
-    private <R> R processResponse(ServiceResponse<?> response, Class<R> expectedResponse) throws ServiceExecutionException
+    private <R> R processResponse(ServiceResponse<?> response, Class<R> expectedResponse)
     {
         Object responseMessage = response.getResponse();
         if (responseMessage == null)
@@ -810,11 +808,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         List<ConfigureBootDeviceIdracError> errors = resp.getConfigureBootDeviceIdracErrors();
                         if (!CollectionUtils.isEmpty(errors))
                         {
-                            List<String> errorMsgs = new ArrayList<String>();
-                            for (ConfigureBootDeviceIdracError error : errors)
-                            {
-                                errorMsgs.add(error.getMessage());
-                            }
+                            List<String> errorMsgs = errors.stream().map(ConfigureBootDeviceIdracError::getMessage).collect(Collectors.toList());
                             bootDeviceIdracStatus.setErrors(errorMsgs);
                         }
                     }
@@ -887,11 +881,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         List<ConfigurePxeBootError> errors = resp.getConfigurePxeBootErrors();
                         if (!CollectionUtils.isEmpty(errors))
                         {
-                            List<String> errorMsgs = new ArrayList<String>();
-                            for (ConfigurePxeBootError error : errors)
-                            {
-                                errorMsgs.add(error.getMessage());
-                            }
+                            List<String> errorMsgs = errors.stream().map(ConfigurePxeBootError::getMessage).collect(Collectors.toList());
                             bootDeviceIdracStatus.setErrors(errorMsgs);
                         }
                     }
@@ -959,7 +949,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestScaleIoComponents() throws ServiceTimeoutException, ServiceExecutionException
+    public boolean requestScaleIoComponents() throws ServiceExecutionException
     {
         final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
@@ -1136,7 +1126,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public boolean requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds, final String jobId)
-            throws ServiceTimeoutException, ServiceExecutionException
+            throws ServiceExecutionException
     {
         try
         {
@@ -1188,7 +1178,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public boolean requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
-            throws ServiceTimeoutException, ServiceExecutionException
+            throws ServiceExecutionException
     {
         try
         {
@@ -1247,6 +1237,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
             requestMessage.setEsxiInstallationInfo(esxiInstallationInfo);
 
+            long installEsxiTimeout = 2700000L;
             ServiceResponse<?> callbackResponse = processRequest(installEsxiTimeout, new ServiceRequestCallback()
             {
                 @Override

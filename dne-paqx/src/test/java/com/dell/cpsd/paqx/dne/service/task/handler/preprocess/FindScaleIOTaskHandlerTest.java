@@ -94,7 +94,7 @@ public class FindScaleIOTaskHandlerTest {
     {
         FindScaleIOTaskHandler handler = new FindScaleIOTaskHandler(this.nodeService);
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
-        storageResponseMessage.setValidStorage(Arrays.asList("Sp-1"));
+        storageResponseMessage.setValidStorage(Collections.singletonList("Sp-1"));
         ScaleIOData scaleIOData =  new ScaleIOData();
         ScaleIOStoragePool scaleIOStoragePool = new ScaleIOStoragePool();
         ScaleIOProtectionDomain scaleIOProtectionDomain = new ScaleIOProtectionDomain();
@@ -103,10 +103,10 @@ public class FindScaleIOTaskHandlerTest {
         scaleIOStoragePool.addDevice(new ScaleIODevice("1", "scaleIOName1", "deviceCurrentPathName", "Normal"));
         scaleIOStoragePool.addDevice(new ScaleIODevice("2", "scaleIOName2", "deviceCurrentPathName", "Normal"));
         scaleIOProtectionDomain.addStoragePool(scaleIOStoragePool);
-        scaleIOData.setProtectionDomains(Arrays.asList(scaleIOProtectionDomain));
+        scaleIOData.setProtectionDomains(Collections.singletonList(scaleIOProtectionDomain));
 
-        when(this.nodeService.listScaleIOData()).thenReturn(Arrays.asList(scaleIOData));
-        when(this.nodeService.validateStoragePools(Arrays.asList(scaleIOStoragePool))).thenReturn(storageResponseMessage);
+        when(this.nodeService.listScaleIOData()).thenReturn(Collections.singletonList(scaleIOData));
+        when(this.nodeService.validateStoragePools(Collections.singletonList(scaleIOStoragePool))).thenReturn(storageResponseMessage);
 
 
         boolean expectedResult = true;

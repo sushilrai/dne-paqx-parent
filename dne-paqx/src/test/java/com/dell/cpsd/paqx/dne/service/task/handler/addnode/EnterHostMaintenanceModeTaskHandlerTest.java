@@ -75,8 +75,6 @@ public class EnterHostMaintenanceModeTaskHandlerTest
     private Map<String, TaskResponse> taskResponseMap;
 
     private String hostname = "hostname_1.2.3.4";
-    private String taskName = "enterHostMaintenanceModeTask";
-    private String stepName = "enterHostMaintenanceModeStep";
 
     private EnterHostMaintenanceModeTaskHandler handler;
 
@@ -177,13 +175,15 @@ public class EnterHostMaintenanceModeTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "enterHostMaintenanceModeTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "enterHostMaintenanceModeStep";
+        doReturn(stepName).when(this.job).getStep();
 
         HostMaintenanceModeTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

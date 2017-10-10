@@ -36,7 +36,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
  */
 
 @Configuration
-@Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class})
+@Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class, RabbitConfig.class})
 public class CapabilityConfig
 {
     /*
@@ -139,25 +139,15 @@ public class CapabilityConfig
     public ApplicationListener<ContextRefreshedEvent> contextRefreshedEventListener(
             @Autowired CapabilityBinder capabilityBinder)
     {
-        return new ApplicationListener<ContextRefreshedEvent>()
-        {
-            /**
-             * When spring context is fully loaded, do the binding
-             *
-             * @param contextRefreshedEvent
-             */
-            @Override
-            public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent)
+        return contextRefreshedEvent -> {
+            try
             {
-                try
-                {
-                    capabilityBinder.bind();
-                    LOGGER.info("found list of capablities with size {} after bind", capabilityBinder.getCurrentCapabilities().size());
-                }
-                catch (ServiceTimeoutException | CapabilityRegistryException e)
-                {
-                    LOGGER.error("Unable to bind for capability", e);
-                }
+                capabilityBinder.bind();
+                LOGGER.info("found list of capablities with size {} after bind", capabilityBinder.getCurrentCapabilities().size());
+            }
+            catch (ServiceTimeoutException | CapabilityRegistryException e)
+            {
+                LOGGER.error("Unable to bind for capability", e);
             }
         };
     }

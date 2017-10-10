@@ -51,13 +51,6 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
      */
     private final NodeService           nodeService;
     private final DataServiceRepository repository;
-    private final String DVSWITCH0_NAME = "dvswitch0";
-    private final String DVSWITCH1_NAME = "dvswitch1";
-    private final String DVSWITCH2_NAME = "dvswitch2";
-    private final String DVPORT_GROUP_ESXI_MGMT = "esx-mgmt";
-    private final String DVPORT_GROUP_VMOTION = "vmotion";
-    private final String DVPORT_GROUP_SIO_DATA1 = "sio-data1";
-    private final String DVPORT_GROUP_SIO_DATA2 = "sio-data2";
 
     public AddHostToDvSwitchTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
     {
@@ -148,16 +141,19 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
                 throw new IllegalStateException("DV Switch Names are null");
             }
 
+            String DVSWITCH0_NAME = "dvswitch0";
             if (StringUtils.isEmpty(dvSwitchNames.get(DVSWITCH0_NAME)))
             {
                 throw new IllegalStateException("DVSwitch0 name is null or empty");
             }
 
+            String DVSWITCH1_NAME = "dvswitch1";
             if (StringUtils.isEmpty(dvSwitchNames.get(DVSWITCH1_NAME)))
             {
                 throw new IllegalStateException("DVSwitch1 name is null or empty");
             }
 
+            String DVSWITCH2_NAME = "dvswitch2";
             if (StringUtils.isEmpty(dvSwitchNames.get(DVSWITCH2_NAME)))
             {
                 throw new IllegalStateException("DVSwitch2 name is null or empty");
@@ -170,21 +166,25 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
                 throw new IllegalStateException("DV Port Group Names are null");
             }
 
+            String DVPORT_GROUP_ESXI_MGMT = "esx-mgmt";
             if (StringUtils.isEmpty(dvPortGroupNames.get(DVPORT_GROUP_ESXI_MGMT)))
             {
                 throw new IllegalStateException("DV Port Group name for ESXI-MGMT is null");
             }
 
+            String DVPORT_GROUP_VMOTION = "vmotion";
             if (StringUtils.isEmpty(dvPortGroupNames.get(DVPORT_GROUP_VMOTION)))
             {
                 throw new IllegalStateException("DV Port Group name for VMOTION is null");
             }
 
+            String DVPORT_GROUP_SIO_DATA1 = "sio-data1";
             if (StringUtils.isEmpty(dvPortGroupNames.get(DVPORT_GROUP_SIO_DATA1)))
             {
                 throw new IllegalStateException("DV Port Group name for ScaleIO Data1 is null");
             }
 
+            String DVPORT_GROUP_SIO_DATA2 = "sio-data2";
             if (StringUtils.isEmpty(dvPortGroupNames.get(DVPORT_GROUP_SIO_DATA2)))
             {
                 throw new IllegalStateException("DV Port Group name for ScaleIO Data2 is null");

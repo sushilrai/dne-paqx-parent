@@ -59,8 +59,6 @@ public class ChangeIdracCredentialsTaskHandlerTest
 
     private ChangeIdracCredentialsTaskHandler handler;
     private String symphonyUuid = "symphonyUuid";
-    private String taskName = "changeIdracCredentialsTask";
-    private String stepName = "changeIdracCredentialsStep";
 
     /**
      * The test setup.
@@ -136,13 +134,15 @@ public class ChangeIdracCredentialsTaskHandlerTest
     public void testInitializeResponse_should_successfully_create_the_response()
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "changeIdracCredentialsTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "changeIdracCredentialsStep";
+        doReturn(stepName).when(this.job).getStep();
 
         TaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

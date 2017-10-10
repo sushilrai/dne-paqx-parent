@@ -16,6 +16,7 @@ import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import java.util.Map;
  *
  * @since 1.0
  */
+@Service
 public class OrchestrationService implements IOrchestrationService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestrationService.class);
@@ -58,6 +60,7 @@ public class OrchestrationService implements IOrchestrationService
                             }
                             catch (Exception e)
                             {
+                                LOGGER.error("exception in Thread.sleep : {}", e.getMessage());
                             }
                         }
                         if (task.getTaskHandler().postExecute(job))
@@ -92,7 +95,6 @@ public class OrchestrationService implements IOrchestrationService
         }
         job.setStatus(Status.SUCCEEDED);
         LOGGER.info("Finished Orchestration on job:" + job);
-        return;
     }
 
     private Status getTaskResponseStatus(Job job)

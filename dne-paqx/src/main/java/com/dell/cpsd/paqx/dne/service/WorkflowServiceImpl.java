@@ -25,7 +25,6 @@ import java.util.UUID;
  * @version 1.0
  * @since 1.0
  */
-@Service
 public class WorkflowServiceImpl implements WorkflowService
 {
     /*

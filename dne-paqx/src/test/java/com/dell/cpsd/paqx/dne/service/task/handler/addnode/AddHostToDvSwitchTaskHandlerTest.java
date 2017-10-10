@@ -80,9 +80,7 @@ public class AddHostToDvSwitchTaskHandlerTest
     private Map<String, String> dvPortGroupNames;
 
     private AddHostToDvSwitchTaskHandler handler;
-    private String hostname = "hostname_1.2.3.4";
-    private String taskName = "addHostToDvSwitchTask";
-    private String stepName = "addHostToDvSwitchStep";
+    private static final String hostname = "hostname_1.2.3.4";
 
     /**
      * The test setup.
@@ -246,13 +244,15 @@ public class AddHostToDvSwitchTaskHandlerTest
     public void initializeResponse() throws Exception
     {
         doReturn(this.task).when(this.job).getCurrentTask();
-        doReturn(this.taskName).when(this.task).getTaskName();
-        doReturn(this.stepName).when(this.job).getStep();
+        String taskName = "addHostToDvSwitchTask";
+        doReturn(taskName).when(this.task).getTaskName();
+        String stepName = "addHostToDvSwitchStep";
+        doReturn(stepName).when(this.job).getStep();
 
         AddHostToDvSwitchTaskResponse response = this.handler.initializeResponse(this.job);
         
         assertNotNull(response);
-        assertEquals(this.taskName, response.getWorkFlowTaskName());
+        assertEquals(taskName, response.getWorkFlowTaskName());
         assertEquals(Status.IN_PROGRESS, response.getWorkFlowTaskStatus());
     }
 }

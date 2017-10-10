@@ -51,7 +51,7 @@ public class VcenterDiscoveryTransformationTest
         final MessageConverter converter = config.dneMessageConverter();
 
         final Message message = TestUtil.jsonMessage("com.dell.cpsd.vcenter.discover.response",
-                "src/test/resources/vcenterResponseDiscoveryPayload.json");
+                "vcenterResponseDiscoveryPayload.json");
         entity = (DiscoveryResponseInfoMessage) converter.fromMessage(message);
     }
 

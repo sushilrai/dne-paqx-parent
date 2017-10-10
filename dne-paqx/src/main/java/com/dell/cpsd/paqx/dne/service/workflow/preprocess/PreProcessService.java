@@ -14,7 +14,6 @@ import com.dell.cpsd.paqx.dne.service.BaseService;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindDiscoveredNodesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,11 +53,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     private static final int PING_TIMEOUT = 120000; // 120 seconds
 
-    @Bean("findDiscoveredNodesTask")
-    private WorkflowTask findDiscoveredNodesTask()
-    {
-        return createTask("Finding discovered Nodes", new FindDiscoveredNodesTaskHandler(nodeService));
-    }
 
     @Bean("configureObmSettingsTask")
     private WorkflowTask configureObmSettingsTask(){
@@ -87,12 +81,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
     public WorkflowTask createVClusterTask()
     {
         return createTask("Find VCluster", new FindVClusterTaskHandler(nodeService));
-    }
-
-    @Bean("discoverNodeInventory")
-    public WorkflowTask discoverNodeInventory()
-    {
-        return createTask("Discover Rackhd Node Inventory", new DiscoverNodeInventoryHandler(nodeService, repository));
     }
 
     @Bean("findScaleIO")
@@ -136,7 +124,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-        workflowTasks.put("findAvailableNodes", findDiscoveredNodesTask());
         workflowTasks.put("listScaleIoComponents", listScaleIoComponentsTask());
         workflowTasks.put("listVCenterComponents", listVCenterComponentsTask());
         workflowTasks.put("discoverScaleIo", discoverScaleIoTask());
@@ -147,7 +134,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());
         workflowTasks.put("findScaleIO", createFindScaleIOTask());
         workflowTasks.put("findVCluster", createVClusterTask());
-        workflowTasks.put("discoverNodeInventory", discoverNodeInventory());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         return workflowTasks;
     }
@@ -156,15 +142,12 @@ public class PreProcessService extends BaseService implements IPreProcessService
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
     {
 
-        Job job = workflowService.createWorkflow(workflowType, startingStep, currentStatus, preProcessWorkflowTasks());
-        return job;
+        return workflowService.createWorkflow(workflowType, startingStep, currentStatus, preProcessWorkflowTasks());
     }
 
     public Job findJob(UUID jobId)
     {
-        final Job job = workflowService.findJob(jobId);
-
-        return job;
+        return workflowService.findJob(jobId);
     }
 
     public NodeExpansionResponse makeNodeExpansionResponse(final Job job)

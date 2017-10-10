@@ -59,8 +59,6 @@ public class NodeExpansionWebApplicationTest
 
     private MockMvc mockMvc;
 
-    private NodeExpansionRequest request;
-
     private String json;
 
     /**
@@ -69,7 +67,7 @@ public class NodeExpansionWebApplicationTest
      * @since   1.0
      */
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         MockitoAnnotations.initMocks(this);
 
@@ -77,7 +75,7 @@ public class NodeExpansionWebApplicationTest
                 .standaloneSetup(nodeExpansionController)
                 .build();
 
-        request = new NodeExpansionRequest();
+        NodeExpansionRequest request = new NodeExpansionRequest();
         request.setEsxiManagementIpAddress("1.1.1.1");
         request.setEsxiManagementGatewayIpAddress("2.2.2.2");
         request.setEsxiManagementHostname("vCenter_1_2_3_4");
@@ -187,7 +185,7 @@ public class NodeExpansionWebApplicationTest
         final String jobId = "anyString";
 
         this.mockMvc.perform(get("/dne/preprocess/{jobId}", jobId)
-                .param("jobId", jobId.toString())
+                .param("jobId", jobId)
                 .param("servletRequest", ""))
                 .andExpect(status().isNotFound());
         verify(preProcessService, times(0)).findJob(null);
@@ -197,7 +195,7 @@ public class NodeExpansionWebApplicationTest
 
     @Test
     public void getGetNodeJobIdForPreprocess() throws Exception {
-        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<>());
         Mockito.when(preProcessService.findJob(Mockito.any(UUID.class))).thenReturn(mockJob);
         UUID jobId = mockJob.getId();
 
@@ -213,7 +211,7 @@ public class NodeExpansionWebApplicationTest
     @Test
     public void postStepForPreprocess() throws Exception {
         String stepName = "testStepWorkflow";
-        Job mockJob = new Job(UUID.randomUUID(), "test", stepName, "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "test", stepName, "status1", new HashMap<>());
         Mockito.when(preProcessService.createWorkflow(anyString(),anyString(),anyString())).thenReturn(mockJob);
 
         this.mockMvc.perform(post("/dne/preprocess/step/{stepName}", stepName)
@@ -239,7 +237,7 @@ public class NodeExpansionWebApplicationTest
 
     @Test
     public void testPostNodes() throws Exception {
-        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<>());
         Mockito.when(addNodeServiceUnderTest.createWorkflow(anyString(), anyString(),anyString())).thenReturn(mockJob);
 
 
@@ -271,7 +269,7 @@ public class NodeExpansionWebApplicationTest
         final String jobId = "anyString";
 
         this.mockMvc.perform(get("/dne/nodes/{jobId}", jobId)
-                .param("jobId", jobId.toString())
+                .param("jobId", jobId)
                 .param("servletRequest", ""))
                 .andExpect(status().isNotFound());
         verify(addNodeServiceUnderTest, times(0)).findJob(null);
@@ -280,7 +278,7 @@ public class NodeExpansionWebApplicationTest
 
     @Test
     public void getGetNodeJobIdForNodes() throws Exception {
-        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "test", "startAddNodeWorkflow", "status1", new HashMap<>());
         Mockito.when(addNodeServiceUnderTest.findJob(Mockito.any(UUID.class))).thenReturn(mockJob);
         UUID jobId = mockJob.getId();
 
@@ -296,7 +294,7 @@ public class NodeExpansionWebApplicationTest
     @Test
     public void postStepForNodes() throws Exception {
         String stepName = "testStepWorkflow";
-        Job mockJob = new Job(UUID.randomUUID(), "test", stepName, "status1", new HashMap<String, WorkflowTask>());
+        Job mockJob = new Job(UUID.randomUUID(), "test", stepName, "status1", new HashMap<>());
         Mockito.when(addNodeServiceUnderTest.createWorkflow(anyString(),anyString(),anyString())).thenReturn(mockJob);
 
         this.mockMvc.perform(post("/dne/nodes/step/{stepName}", stepName)
