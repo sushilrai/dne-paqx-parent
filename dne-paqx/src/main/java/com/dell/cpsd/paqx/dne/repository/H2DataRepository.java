@@ -495,7 +495,8 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public List<Host> getVCenterHosts() throws NoResultException {
+    public List<Host> getVCenterHosts() throws NoResultException
+    {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
         return query.getResultList();
     }
@@ -616,25 +617,22 @@ public class H2DataRepository implements DataServiceRepository
         }
     }
 
-
-
     @Override
     public String getDomainName()
     {
-        final TypedQuery<HostDnsConfig> hostDnsConfigQuery = entityManager.createQuery(
-                "select hostDnsConfig from HostDnsConfig as hostDnsConfig", HostDnsConfig.class
-        );
+        final TypedQuery<HostDnsConfig> hostDnsConfigQuery = entityManager
+                .createQuery("select hostDnsConfig from HostDnsConfig as hostDnsConfig", HostDnsConfig.class);
 
         final List<HostDnsConfig> configs = hostDnsConfigQuery.getResultList();
 
-        if(configs == null)
+        if (configs == null)
         {
             return null;
         }
 
         HostDnsConfig config = configs.stream().filter(Objects::nonNull).findFirst().orElse(null);
 
-        if(config == null)
+        if (config == null)
         {
             return null;
         }
@@ -659,19 +657,16 @@ public class H2DataRepository implements DataServiceRepository
         try
         {
 
-            final TypedQuery<String> typedQueryDvSwitch0 = entityManager.createQuery(
-                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch0%'",
-                    String.class);
+            final TypedQuery<String> typedQueryDvSwitch0 = entityManager
+                    .createQuery("select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch0%'", String.class);
             switchNames.put("dvswitch0", typedQueryDvSwitch0.getSingleResult());
 
-            final TypedQuery<String> typedQueryDvSwitch1 = entityManager.createQuery(
-                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch1%'",
-                    String.class);
+            final TypedQuery<String> typedQueryDvSwitch1 = entityManager
+                    .createQuery("select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch1%'", String.class);
             switchNames.put("dvswitch1", typedQueryDvSwitch1.getSingleResult());
 
-            final TypedQuery<String> typedQueryDvSwitch2 = entityManager.createQuery(
-                    "select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch2%'",
-                    String.class);
+            final TypedQuery<String> typedQueryDvSwitch2 = entityManager
+                    .createQuery("select dvs.name from DVSwitch as dvs where lower(dvs.name) like '%dvswitch2%'", String.class);
             switchNames.put("dvswitch2", typedQueryDvSwitch2.getSingleResult());
 
         }
@@ -693,27 +688,25 @@ public class H2DataRepository implements DataServiceRepository
         {
             final TypedQuery<String> typedQueryVmk0Management = entityManager.createQuery(
                     "select p.name from PortGroup as p " + "join VirtualNicDVPortGroup vnpg on p.id = vnpg.portGroupId "
-                            + "join VirtualNic vnic on vnic.uuid = vnpg.virtualNic.uuid " + "where vnic.device = :vNicDevice", String.class);
+                            + "join VirtualNic vnic on vnic.uuid = vnpg.virtualNic.uuid " + "where vnic.device = :vNicDevice",
+                    String.class);
 
             typedQueryVmk0Management.setParameter("vNicDevice", "vmk0");
             dvPortGroupAssociationMap.put("esx-mgmt", typedQueryVmk0Management.getSingleResult());
 
             final TypedQuery<String> typedQueryVmotionManagement = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch0") + "%' and LOWER(p.name) like '%vmotion%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitchMap.get("dvswitch0") + "%' and LOWER(p.name) like '%vmotion%'", String.class);
             dvPortGroupAssociationMap.put("vmotion", typedQueryVmotionManagement.getSingleResult());
 
             final TypedQuery<String> typedQuerySioData1 = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch1") + "%' and LOWER(p.name) like '%sio-data1%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitchMap.get("dvswitch1") + "%' and LOWER(p.name) like '%sio-data1%'", String.class);
             dvPortGroupAssociationMap.put("sio-data1", typedQuerySioData1.getSingleResult());
 
             final TypedQuery<String> typedQuerySioData2 = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitchMap.get("dvswitch2") + "%' and LOWER(p.name) like '%sio-data2%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitchMap.get("dvswitch2") + "%' and LOWER(p.name) like '%sio-data2%'", String.class);
             dvPortGroupAssociationMap.put("sio-data2", typedQuerySioData2.getSingleResult());
 
         }
@@ -738,21 +731,18 @@ public class H2DataRepository implements DataServiceRepository
         try
         {
             final TypedQuery<String> typedQueryScaleIoManagement = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitch0 + "%' and LOWER(p.name) like '%sio-mgmt%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitch0 + "%' and LOWER(p.name) like '%sio-mgmt%'", String.class);
             switchAndScaleIoNetworkMappings.put(dvSwitch0, typedQueryScaleIoManagement.getSingleResult());
 
             final TypedQuery<String> typedQuerySioData1 = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitch1 + "%' and LOWER(p.name) like '%sio-data1%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitch1 + "%' and LOWER(p.name) like '%sio-data1%'", String.class);
             switchAndScaleIoNetworkMappings.put(dvSwitch1, typedQuerySioData1.getSingleResult());
 
             final TypedQuery<String> typedQuerySioData2 = entityManager.createQuery(
-                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid "
-                            + "where dvs.name like '%" + dvSwitch2 + "%' and LOWER(p.name) like '%sio-data2%'",
-                    String.class);
+                    "select p.name from PortGroup as p join DVSwitch dvs on p.dvSwitch.uuid = dvs.uuid " + "where dvs.name like '%"
+                            + dvSwitch2 + "%' and LOWER(p.name) like '%sio-data2%'", String.class);
             switchAndScaleIoNetworkMappings.put(dvSwitch2, typedQuerySioData2.getSingleResult());
         }
         catch (Exception e)
@@ -767,7 +757,8 @@ public class H2DataRepository implements DataServiceRepository
     @Override
     public List<ScaleIOProtectionDomain> getScaleIoProtectionDomains()
     {
-        final TypedQuery<ScaleIOProtectionDomain> query = entityManager.createQuery("SELECT scaleio FROM ScaleIOProtectionDomain as scaleio", ScaleIOProtectionDomain.class);
+        final TypedQuery<ScaleIOProtectionDomain> query = entityManager
+                .createQuery("SELECT scaleio FROM ScaleIOProtectionDomain as scaleio", ScaleIOProtectionDomain.class);
 
         final List<ScaleIOProtectionDomain> scaleIOProtectionDomainList = query.getResultList();
 
@@ -808,7 +799,8 @@ public class H2DataRepository implements DataServiceRepository
     @Override
     public DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid)
     {
-        final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT n FROM DiscoveredNodeInfo as n where n.symphonyUuid=:symphonyUuid", DiscoveredNodeInfo.class);
+        final TypedQuery<DiscoveredNodeInfo> query = entityManager
+                .createQuery("SELECT n FROM DiscoveredNodeInfo as n where n.symphonyUuid=:symphonyUuid", DiscoveredNodeInfo.class);
         query.setParameter("symphonyUuid", uuid);
         return query.getSingleResult();
     }
@@ -816,7 +808,8 @@ public class H2DataRepository implements DataServiceRepository
     @Override
     public List<DiscoveredNodeInfo> getDiscoveredNodeInfo()
     {
-        final TypedQuery<DiscoveredNodeInfo> query = entityManager.createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
+        final TypedQuery<DiscoveredNodeInfo> query = entityManager
+                .createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
         return query.getResultList();
     }
 }

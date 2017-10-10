@@ -159,6 +159,7 @@ public class H2DataRepositoryTest
     private List<HostDnsConfig>     hostDnsConfigs;
     private String                  componentType;
     private String                  endpointType;
+    private String                  credentialName;
     private String                  componentUUID;
     private String                  endpointUUID;
     private String                  credentialUUID;
@@ -214,6 +215,7 @@ public class H2DataRepositoryTest
 
         this.componentType = "the_component_type";
         this.endpointType = "the_endpoint_type";
+        this.credentialName = "the_credential_name";
         this.componentUUID = UUID.randomUUID().toString();
         this.endpointUUID = UUID.randomUUID().toString();
         this.credentialUUID = UUID.randomUUID().toString();
@@ -359,6 +361,23 @@ public class H2DataRepositoryTest
     }
 
     @Test
+    public void getComponentEndpointIds_with_endpoint_type_and_credential_name() throws Exception
+    {
+        doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.componentDetailsList).when(this.componentDetailsTypedQuery).getResultList();
+        doReturn(this.endpointDetailsList).when(this.componentDetails).getEndpointDetails();
+        doReturn(this.endpointType).when(this.endpointDetails).getType();
+        doReturn(this.credentialDetailsList).when(this.endpointDetails).getCredentialDetailsList();
+        doReturn(this.credentialName).when(this.credentialDetails).getCredentialName();
+        doReturn(this.componentUUID).when(this.componentDetails).getComponentUuid();
+        doReturn(this.endpointUUID).when(this.endpointDetails).getEndpointUuid();
+        doReturn(this.credentialUUID).when(this.credentialDetails).getCredentialUuid();
+        doReturn(this.endpointURL).when(this.endpointDetails).getEndpointUrl();
+
+        assertNotNull(this.repository.getComponentEndpointIds(this.componentType, this.endpointType, this.credentialName));
+    }
+
+    @Test
     public void getComponentEndpointIds_component_details_list_is_empty() throws Exception
     {
         doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
@@ -374,6 +393,16 @@ public class H2DataRepositoryTest
 
         doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(this.componentDetailsList).when(this.componentDetailsTypedQuery).getResultList();
+
+        assertNull(this.repository.getComponentEndpointIds(this.componentType));
+    }
+
+    @Test
+    public void getComponentEndpointIds_endpoint_details_list_is_empty() throws Exception
+    {
+        doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(this.componentDetailsList).when(this.componentDetailsTypedQuery).getResultList();
+        doReturn(Collections.emptyList()).when(this.componentDetails).getEndpointDetails();
 
         assertNull(this.repository.getComponentEndpointIds(this.componentType));
     }
