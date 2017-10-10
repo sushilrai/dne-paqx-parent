@@ -182,7 +182,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         }
         catch (Exception e)
         {
-            LOGGER.info("", e);
+            LOGGER.error("Exception occurred", e);
             response.setWorkFlowTaskStatus(Status.FAILED);
             response.addError(e.toString());
         }
@@ -251,7 +251,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         }
         catch (Exception e)
         {
-            LOGGER.info("", e);
+            LOGGER.error("Error while getting the node inventory data", e);
         }
         return null;
     }
