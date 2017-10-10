@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.net.InetAddress;
+
 /**
  * Task responsible for changing the scaleio vm credentials.
  * <p>
@@ -51,6 +53,7 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
     private static final String ENDPOINT_TYPE       = "COMMON-SVM";
     private static final String FACTORY_CREDENTIALS = "SVM-FACTORY";
     private static final String COMMON_CREDENTIALS  = "SVM-COMMON";
+    private static final int INET_TIMEOUT = 180000;
 
     /**
      * ChangeSvmCredentialsTaskHandler constructor.
@@ -117,6 +120,12 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
             requestMessage.setComponentEndpointIds(
                     new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(commonComponentEndpointIds.getComponentUuid(),
                             commonComponentEndpointIds.getEndpointUuid(), commonComponentEndpointIds.getCredentialUuid()));
+
+            final InetAddress svmManagementInetAddr = InetAddress.getByName(scaleIoSvmManagementIpAddress);
+            if (!svmManagementInetAddr.isReachable(INET_TIMEOUT))
+            {
+                throw new IllegalStateException("ScaleIO VM is not reachable");
+            }
 
             final boolean succeeded = this.nodeService.requestRemoteCommandExecution(requestMessage);
 
