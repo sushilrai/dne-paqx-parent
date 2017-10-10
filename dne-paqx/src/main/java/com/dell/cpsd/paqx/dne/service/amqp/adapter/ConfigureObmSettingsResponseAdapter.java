@@ -1,6 +1,7 @@
 /**
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  */
+
 package com.dell.cpsd.paqx.dne.service.amqp.adapter;
 
 import com.dell.cpsd.SetObmSettingsResponseMessage;
@@ -16,7 +17,9 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
  *
  * @since 1.0
  */
-public class ConfigureObmSettingsResponseAdapter implements ServiceCallbackAdapter<SetObmSettingsResponseMessage, ServiceResponse<SetObmSettingsResponseMessage>> {
+public class ConfigureObmSettingsResponseAdapter
+        implements ServiceCallbackAdapter<SetObmSettingsResponseMessage, ServiceResponse<SetObmSettingsResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public ConfigureObmSettingsResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -27,7 +30,8 @@ public class ConfigureObmSettingsResponseAdapter implements ServiceCallbackAdapt
     @Override
     public ServiceResponse<SetObmSettingsResponseMessage> transform(SetObmSettingsResponseMessage setObmSettingsResponseMessage)
     {
-        return new ServiceResponse<>(setObmSettingsResponseMessage.getMessageProperties().getCorrelationId(), setObmSettingsResponseMessage, null);
+        return new ServiceResponse<>(setObmSettingsResponseMessage.getMessageProperties().getCorrelationId(), setObmSettingsResponseMessage,
+                null);
     }
 
     @Override

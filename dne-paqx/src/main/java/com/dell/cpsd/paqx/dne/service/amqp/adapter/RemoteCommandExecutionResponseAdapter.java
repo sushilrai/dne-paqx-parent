@@ -8,7 +8,7 @@ import com.dell.cpsd.service.common.client.callback.IServiceCallback;
 import com.dell.cpsd.service.common.client.callback.ServiceResponse;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
-import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionResponseMessage;
 
 /**
  * <p>
@@ -17,37 +17,37 @@ import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsR
  *
  * @since 1.0
  */
-public class ConfigureVmNetworkSettingsResponseAdapter implements
-        ServiceCallbackAdapter<ConfigureVmNetworkSettingsResponseMessage, ServiceResponse<ConfigureVmNetworkSettingsResponseMessage>>
+public class RemoteCommandExecutionResponseAdapter
+        implements ServiceCallbackAdapter<RemoteCommandExecutionResponseMessage, ServiceResponse<RemoteCommandExecutionResponseMessage>>
 {
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
-    public ConfigureVmNetworkSettingsResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
+    public RemoteCommandExecutionResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
     {
         this.serviceCallbackRegistry = serviceCallbackRegistry;
     }
 
     @Override
-    public ServiceResponse<ConfigureVmNetworkSettingsResponseMessage> transform(ConfigureVmNetworkSettingsResponseMessage responseMessage)
+    public ServiceResponse<RemoteCommandExecutionResponseMessage> transform(RemoteCommandExecutionResponseMessage responseMessage)
     {
         return new ServiceResponse<>(responseMessage.getMessageProperties().getCorrelationId(), responseMessage, null);
     }
 
     @Override
-    public void consume(IServiceCallback callback, ServiceResponse<ConfigureVmNetworkSettingsResponseMessage> responseMessage)
+    public void consume(IServiceCallback callback, ServiceResponse<RemoteCommandExecutionResponseMessage> responseMessage)
     {
         callback.handleServiceResponse(responseMessage);
     }
 
     @Override
-    public IServiceCallback take(ConfigureVmNetworkSettingsResponseMessage responseMessage)
+    public IServiceCallback take(RemoteCommandExecutionResponseMessage responseMessage)
     {
         return serviceCallbackRegistry.removeServiceCallback(responseMessage.getMessageProperties().getCorrelationId());
     }
 
     @Override
-    public Class<ConfigureVmNetworkSettingsResponseMessage> getSourceClass()
+    public Class<RemoteCommandExecutionResponseMessage> getSourceClass()
     {
-        return ConfigureVmNetworkSettingsResponseMessage.class;
+        return RemoteCommandExecutionResponseMessage.class;
     }
 }

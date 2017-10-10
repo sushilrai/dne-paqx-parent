@@ -17,7 +17,9 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
  *
  * @since 1.0
  */
-public class ConfigureBootDeviceIdracResponseAdapter implements ServiceCallbackAdapter<ConfigureBootDeviceIdracResponseMessage, ServiceResponse<ConfigureBootDeviceIdracResponseMessage>> {
+public class ConfigureBootDeviceIdracResponseAdapter
+        implements ServiceCallbackAdapter<ConfigureBootDeviceIdracResponseMessage, ServiceResponse<ConfigureBootDeviceIdracResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public ConfigureBootDeviceIdracResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -26,13 +28,16 @@ public class ConfigureBootDeviceIdracResponseAdapter implements ServiceCallbackA
     }
 
     @Override
-    public ServiceResponse<ConfigureBootDeviceIdracResponseMessage> transform(ConfigureBootDeviceIdracResponseMessage configureBootDeviceIdracResponseMessage)
+    public ServiceResponse<ConfigureBootDeviceIdracResponseMessage> transform(
+            ConfigureBootDeviceIdracResponseMessage configureBootDeviceIdracResponseMessage)
     {
-        return new ServiceResponse<>(configureBootDeviceIdracResponseMessage.getMessageProperties().getCorrelationId(), configureBootDeviceIdracResponseMessage, null);
+        return new ServiceResponse<>(configureBootDeviceIdracResponseMessage.getMessageProperties().getCorrelationId(),
+                configureBootDeviceIdracResponseMessage, null);
     }
 
     @Override
-    public void consume(IServiceCallback callback, ServiceResponse<ConfigureBootDeviceIdracResponseMessage> configureBootDeviceIdracResponseMessage)
+    public void consume(IServiceCallback callback,
+            ServiceResponse<ConfigureBootDeviceIdracResponseMessage> configureBootDeviceIdracResponseMessage)
     {
         callback.handleServiceResponse(configureBootDeviceIdracResponseMessage);
     }
@@ -40,7 +45,8 @@ public class ConfigureBootDeviceIdracResponseAdapter implements ServiceCallbackA
     @Override
     public IServiceCallback take(ConfigureBootDeviceIdracResponseMessage configureBootDeviceIdracResponseMessage)
     {
-        return serviceCallbackRegistry.removeServiceCallback(configureBootDeviceIdracResponseMessage.getMessageProperties().getCorrelationId());
+        return serviceCallbackRegistry
+                .removeServiceCallback(configureBootDeviceIdracResponseMessage.getMessageProperties().getCorrelationId());
     }
 
     @Override

@@ -15,7 +15,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRespons
 
 /**
  * Callback adapter class used to process the response message from find scaleIO task.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -23,8 +23,9 @@ import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRespons
  *
  * @since 1.0
  */
-
-public class ValidateStoragePoolResponseAdapter  implements ServiceCallbackAdapter<EssValidateStoragePoolResponseMessage, ServiceResponse<EssValidateStoragePoolResponseMessage>> {
+public class ValidateStoragePoolResponseAdapter
+        implements ServiceCallbackAdapter<EssValidateStoragePoolResponseMessage, ServiceResponse<EssValidateStoragePoolResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public ValidateStoragePoolResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -33,14 +34,17 @@ public class ValidateStoragePoolResponseAdapter  implements ServiceCallbackAdapt
     }
 
     @Override
-    public ServiceResponse<EssValidateStoragePoolResponseMessage> transform(EssValidateStoragePoolResponseMessage essValidateStorageResponseMessage)
+    public ServiceResponse<EssValidateStoragePoolResponseMessage> transform(
+            EssValidateStoragePoolResponseMessage essValidateStorageResponseMessage)
     {
-        return new ServiceResponse<>(essValidateStorageResponseMessage.getMessageProperties().getCorrelationId(), essValidateStorageResponseMessage, null);
+        return new ServiceResponse<>(essValidateStorageResponseMessage.getMessageProperties().getCorrelationId(),
+                essValidateStorageResponseMessage, null);
 
     }
 
     @Override
-    public void consume(IServiceCallback callback, ServiceResponse<EssValidateStoragePoolResponseMessage> storageResponseMessageServiceResponse)
+    public void consume(IServiceCallback callback,
+            ServiceResponse<EssValidateStoragePoolResponseMessage> storageResponseMessageServiceResponse)
     {
         callback.handleServiceResponse(storageResponseMessageServiceResponse);
     }

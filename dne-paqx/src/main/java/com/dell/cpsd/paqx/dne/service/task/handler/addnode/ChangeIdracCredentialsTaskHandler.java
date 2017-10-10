@@ -7,16 +7,6 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
 
-/**
- * Task responsible for changing the idrac credentials.
- * 
- * <p>
- * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
- * </p>
- *
- * @since 1.0
- */
-
 import com.dell.cpsd.paqx.dne.service.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +17,16 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.springframework.util.StringUtils;
 
-public class ChangeIdracCredentialsTaskHandler  extends BaseTaskHandler implements IWorkflowTaskHandler
+/**
+ * Task responsible for changing the idrac credentials.
+ *
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @since 1.0
+ */
+public class ChangeIdracCredentialsTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
     /*
      * The logger instance

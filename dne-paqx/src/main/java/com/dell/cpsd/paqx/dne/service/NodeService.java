@@ -356,4 +356,10 @@ public interface NodeService
      * @return
      */
     boolean requestConfigureVmNetworkSettings(ConfigureVmNetworkSettingsRequestMessage requestMessage);
+
+    /**
+     * @param requestMessage - The <code>RemoteCommandExecutionRequestMessage</code> instance
+     * @return
+     */
+    boolean requestRemoteCommandExecution(RemoteCommandExecutionRequestMessage requestMessage);
 }

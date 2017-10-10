@@ -15,7 +15,7 @@ import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameResponseMess
 
 /**
  * Callback adapter class used to process the response message from datastore rename task.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -23,8 +23,9 @@ import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameResponseMess
  *
  * @since 1.0
  */
-
-public class DatastoreRenameResponseAdapter implements ServiceCallbackAdapter<DatastoreRenameResponseMessage, ServiceResponse<DatastoreRenameResponseMessage>> {
+public class DatastoreRenameResponseAdapter
+        implements ServiceCallbackAdapter<DatastoreRenameResponseMessage, ServiceResponse<DatastoreRenameResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public DatastoreRenameResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -35,7 +36,8 @@ public class DatastoreRenameResponseAdapter implements ServiceCallbackAdapter<Da
     @Override
     public ServiceResponse<DatastoreRenameResponseMessage> transform(DatastoreRenameResponseMessage datastoreRenameResponseMessage)
     {
-        return new ServiceResponse<>(datastoreRenameResponseMessage.getMessageProperties().getCorrelationId(), datastoreRenameResponseMessage, null);
+        return new ServiceResponse<>(datastoreRenameResponseMessage.getMessageProperties().getCorrelationId(),
+                datastoreRenameResponseMessage, null);
     }
 
     @Override

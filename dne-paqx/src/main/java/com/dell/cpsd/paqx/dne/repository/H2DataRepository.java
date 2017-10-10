@@ -155,6 +155,12 @@ public class H2DataRepository implements DataServiceRepository
     @Override
     public ComponentEndpointIds getComponentEndpointIds(final String componentType)
     {
+        return this.getComponentEndpointIds(componentType, null, null);
+    }
+
+    @Override
+    public ComponentEndpointIds getComponentEndpointIds(final String componentType, final String endpointType, final String credentialName)
+    {
         final TypedQuery<ComponentDetails> typedQuery = entityManager
                 .createQuery("select ceids from ComponentDetails as ceids where ceids.componentType = :componentType",
                         ComponentDetails.class);
@@ -164,7 +170,6 @@ public class H2DataRepository implements DataServiceRepository
 
         if (!CollectionUtils.isEmpty(componentDetailsList))
         {
-            //For MVP, fetching the first component, 1st endpoint, 1st credential
             final ComponentDetails componentDetails = componentDetailsList.get(0);
 
             if (componentDetails == null)
@@ -179,7 +184,10 @@ public class H2DataRepository implements DataServiceRepository
                 return null;
             }
 
-            final EndpointDetails endpointDetails = endpointDetailsList.get(0);
+            final EndpointDetails endpointDetails = endpointType != null ?
+                    endpointDetailsList.stream().filter(Objects::nonNull).filter(ep -> ep.getType().equalsIgnoreCase(endpointType))
+                            .findFirst().orElse(null) :
+                    endpointDetailsList.get(0);
 
             if (endpointDetails == null)
             {
@@ -193,7 +201,10 @@ public class H2DataRepository implements DataServiceRepository
                 return null;
             }
 
-            final CredentialDetails credentialDetails = credentialDetailsList.get(0);
+            final CredentialDetails credentialDetails = credentialName != null ?
+                    credentialDetailsList.stream().filter(Objects::nonNull)
+                            .filter(c -> c.getCredentialName().equalsIgnoreCase(credentialName)).findFirst().orElse(null) :
+                    credentialDetailsList.get(0);
 
             if (credentialDetails == null)
             {
@@ -202,7 +213,6 @@ public class H2DataRepository implements DataServiceRepository
 
             return new ComponentEndpointIds(componentDetails.getComponentUuid(), endpointDetails.getEndpointUuid(),
                     endpointDetails.getEndpointUrl(), credentialDetails.getCredentialUuid());
-
         }
 
         LOG.error("No Component Endpoints found in the database");

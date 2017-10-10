@@ -15,7 +15,7 @@ import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAccept
 
 /**
  * Callback adapter class used to process the response message from update software acceptance task.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -23,7 +23,6 @@ import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAccept
  *
  * @since 1.0
  */
-
 public class VCenterUpdateSoftwareAcceptanceResponseAdapter implements
         ServiceCallbackAdapter<VCenterUpdateSoftwareAcceptanceResponseMessage, ServiceResponse<VCenterUpdateSoftwareAcceptanceResponseMessage>>
 {
@@ -35,14 +34,17 @@ public class VCenterUpdateSoftwareAcceptanceResponseAdapter implements
     }
 
     @Override
-    public ServiceResponse<VCenterUpdateSoftwareAcceptanceResponseMessage> transform(VCenterUpdateSoftwareAcceptanceResponseMessage vCenterUpdateSoftwareAcceptanceResponseMessage)
+    public ServiceResponse<VCenterUpdateSoftwareAcceptanceResponseMessage> transform(
+            VCenterUpdateSoftwareAcceptanceResponseMessage vCenterUpdateSoftwareAcceptanceResponseMessage)
     {
-        return new ServiceResponse<>(vCenterUpdateSoftwareAcceptanceResponseMessage.getMessageProperties().getCorrelationId(), vCenterUpdateSoftwareAcceptanceResponseMessage, null);
+        return new ServiceResponse<>(vCenterUpdateSoftwareAcceptanceResponseMessage.getMessageProperties().getCorrelationId(),
+                vCenterUpdateSoftwareAcceptanceResponseMessage, null);
 
     }
 
     @Override
-    public void consume(IServiceCallback callback, ServiceResponse<VCenterUpdateSoftwareAcceptanceResponseMessage> storageResponseMessageServiceResponse)
+    public void consume(IServiceCallback callback,
+            ServiceResponse<VCenterUpdateSoftwareAcceptanceResponseMessage> storageResponseMessageServiceResponse)
     {
         callback.handleServiceResponse(storageResponseMessageServiceResponse);
     }
@@ -50,7 +52,8 @@ public class VCenterUpdateSoftwareAcceptanceResponseAdapter implements
     @Override
     public IServiceCallback take(VCenterUpdateSoftwareAcceptanceResponseMessage vCenterUpdateSoftwareAcceptanceResponseMessage)
     {
-        return serviceCallbackRegistry.removeServiceCallback(vCenterUpdateSoftwareAcceptanceResponseMessage.getMessageProperties().getCorrelationId());
+        return serviceCallbackRegistry
+                .removeServiceCallback(vCenterUpdateSoftwareAcceptanceResponseMessage.getMessageProperties().getCorrelationId());
 
     }
 

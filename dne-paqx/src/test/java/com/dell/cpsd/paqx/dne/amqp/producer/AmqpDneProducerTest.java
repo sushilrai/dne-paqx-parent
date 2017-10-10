@@ -36,6 +36,7 @@ import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestM
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
@@ -479,6 +480,18 @@ public class AmqpDneProducerTest
     public void publishConfigureVmNetworkSettings_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(ConfigureVmNetworkSettingsRequestMessage.class), this.producer::publishConfigureVmNetworkSettings);
+    }
+
+    @Test
+    public void publishRemoteCommandExecution()
+    {
+        this.executeTest(mock(RemoteCommandExecutionRequestMessage.class), this.producer::publishRemoteCommandExecution);
+    }
+
+    @Test
+    public void publishRemoteCommandExecution_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(RemoteCommandExecutionRequestMessage.class), this.producer::publishRemoteCommandExecution);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

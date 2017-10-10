@@ -845,6 +845,32 @@ public class AmqpDneProducer implements DneProducer
         }
     }
 
+    @Override
+    public void publishRemoteCommandExecution(final RemoteCommandExecutionRequestMessage requestMessage)
+    {
+        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+
+        if (capabilities == null)
+        {
+            LOGGER.error("No Capabilities found for publishRemoteCommandExecution");
+            return;
+        }
+
+        LOGGER.info("publishRemoteCommandExecution: found list of capabilities with size {}", capabilities.size());
+
+        for (CapabilityData capabilityData : capabilities)
+        {
+            ProviderEndpoint endpoint = capabilityData.getCapability().getProviderEndpoint();
+            AmqpProviderEndpointHelper endpointHelper = new AmqpProviderEndpointHelper(endpoint);
+            if (messageType(RemoteCommandExecutionRequestMessage.class).equals(endpointHelper.getRequestMessageType()))
+            {
+                LOGGER.info("Send execute remote command message from DNE paqx.");
+                rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+                break;
+            }
+        }
+    }
+
     private String messageType(Class messageClass)
     {
         Message messageAnnotation = (Message) messageClass.getAnnotation(Message.class);

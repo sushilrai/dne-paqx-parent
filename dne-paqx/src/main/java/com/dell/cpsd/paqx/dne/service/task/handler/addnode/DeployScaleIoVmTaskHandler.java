@@ -114,6 +114,8 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             requestMessage.setNewVMName(newScaleIoVmName);
             requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
 
+            Thread.sleep(30000);// TODO for test purpose
+
             final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 
             if (!succeeded)

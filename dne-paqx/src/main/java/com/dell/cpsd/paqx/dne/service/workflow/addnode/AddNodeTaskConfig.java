@@ -41,6 +41,8 @@ public class AddNodeTaskConfig
                 "setPciPassthroughSioVm",
                 "configureVmNetworkSettings",
                 "powerOnSVM",
+                "changeSvmCredentials",
+                "installSvmPackages",
                 "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");

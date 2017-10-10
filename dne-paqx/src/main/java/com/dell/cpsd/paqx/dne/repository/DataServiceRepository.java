@@ -47,6 +47,17 @@ public interface DataServiceRepository
     ComponentEndpointIds getComponentEndpointIds(String componentType);
 
     /**
+     * This method can be used for the MVP, fetches the specified
+     * component, with the specified endpoint, and its credentials.
+     *
+     * @param componentType
+     * @param endpointType
+     * @param credentialName
+     * @return ComponentEndpointIds
+     */
+    ComponentEndpointIds getComponentEndpointIds(String componentType, String endpointType, String credentialName);
+
+    /**
      * This method returns the component endpoint uuids based on
      * the endpoint type defined in the System Definition File.
      *

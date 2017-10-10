@@ -17,7 +17,9 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
  *
  * @since 1.0
  */
-public class ConfigurePxeBootResponseAdapter implements ServiceCallbackAdapter<ConfigurePxeBootResponseMessage, ServiceResponse<ConfigurePxeBootResponseMessage>> {
+public class ConfigurePxeBootResponseAdapter
+        implements ServiceCallbackAdapter<ConfigurePxeBootResponseMessage, ServiceResponse<ConfigurePxeBootResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public ConfigurePxeBootResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -28,7 +30,8 @@ public class ConfigurePxeBootResponseAdapter implements ServiceCallbackAdapter<C
     @Override
     public ServiceResponse<ConfigurePxeBootResponseMessage> transform(ConfigurePxeBootResponseMessage configurePxeBootResponseMessage)
     {
-        return new ServiceResponse<>(configurePxeBootResponseMessage.getMessageProperties().getCorrelationId(), configurePxeBootResponseMessage, null);
+        return new ServiceResponse<>(configurePxeBootResponseMessage.getMessageProperties().getCorrelationId(),
+                configurePxeBootResponseMessage, null);
     }
 
     @Override

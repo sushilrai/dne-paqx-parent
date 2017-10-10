@@ -15,6 +15,7 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToVCenterTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ChangeSvmCredentialsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureVmNetworkSettingsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DatastoreRenameTaskHandler;
@@ -24,6 +25,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnterHostMaintenanceM
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceModeTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallSvmPackagesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PowerOnScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
@@ -117,11 +119,25 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("addNewHostToScaleIO", null);*/
         workflowTasks.put("datastoreRename", datastoreRenameTask());
         workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
+        workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
+        workflowTasks.put("installSvmPackages", installSvmPackagesTask());
         workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;
+    }
+
+    @Bean("installSvmPackagesTask")
+    private WorkflowTask installSvmPackagesTask()
+    {
+        return createTask("Install SVM Packages", new InstallSvmPackagesTaskHandler(nodeService, repository));
+    }
+
+    @Bean("changeSvmCredentialsTask")
+    private WorkflowTask changeSvmCredentialsTask()
+    {
+        return createTask("Change SVM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository));
     }
 
     @Bean("configureVmNetworkSettingsTask")

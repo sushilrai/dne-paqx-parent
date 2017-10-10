@@ -254,4 +254,11 @@ public interface DneProducer
      * @param requestMessage
      */
     void publishConfigureVmNetworkSettings(ConfigureVmNetworkSettingsRequestMessage requestMessage);
+
+    /**
+     * Execute a remote command on a host
+     *
+     * @param requestMessage
+     */
+    void publishRemoteCommandExecution(RemoteCommandExecutionRequestMessage requestMessage);
 }

@@ -15,7 +15,7 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 
 /**
  * Callback adapter class used to process the response message from discover node inventory task.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -23,8 +23,9 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
  *
  * @since 1.0
  */
-
-public class NodeInventoryResponseMessageAdapter  implements ServiceCallbackAdapter<NodeInventoryResponseMessage, ServiceResponse<NodeInventoryResponseMessage>> {
+public class NodeInventoryResponseMessageAdapter
+        implements ServiceCallbackAdapter<NodeInventoryResponseMessage, ServiceResponse<NodeInventoryResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public NodeInventoryResponseMessageAdapter(ServiceCallbackRegistry serviceCallbackRegistry)
@@ -35,12 +36,14 @@ public class NodeInventoryResponseMessageAdapter  implements ServiceCallbackAdap
     @Override
     public ServiceResponse<NodeInventoryResponseMessage> transform(NodeInventoryResponseMessage nodeInventoryResponseMessage)
     {
-        return new ServiceResponse<>(nodeInventoryResponseMessage.getMessageProperties().getCorrelationId(), nodeInventoryResponseMessage, null);
+        return new ServiceResponse<>(nodeInventoryResponseMessage.getMessageProperties().getCorrelationId(), nodeInventoryResponseMessage,
+                null);
 
     }
 
     @Override
-    public void consume(IServiceCallback callback, ServiceResponse<NodeInventoryResponseMessage> nodeInventoryResponseMessageServiceResponse)
+    public void consume(IServiceCallback callback,
+            ServiceResponse<NodeInventoryResponseMessage> nodeInventoryResponseMessageServiceResponse)
     {
         callback.handleServiceResponse(nodeInventoryResponseMessageServiceResponse);
     }

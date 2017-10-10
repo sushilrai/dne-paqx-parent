@@ -1,6 +1,7 @@
 /**
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  */
+
 package com.dell.cpsd.paqx.dne.service.amqp.adapter;
 
 import com.dell.cpsd.service.common.client.callback.IServiceCallback;
@@ -11,7 +12,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
 
 /**
  * TODO: Document Usage
- *
+ * <p>
  * <p/>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * <p/>
@@ -19,7 +20,8 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
  * @version 1.0
  * @since 1.0
  */
-public class ValidateClusterResponseAdapter implements ServiceCallbackAdapter<ValidateVcenterClusterResponseMessage, ServiceResponse<ValidateVcenterClusterResponseMessage>>
+public class ValidateClusterResponseAdapter
+        implements ServiceCallbackAdapter<ValidateVcenterClusterResponseMessage, ServiceResponse<ValidateVcenterClusterResponseMessage>>
 {
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
@@ -29,8 +31,11 @@ public class ValidateClusterResponseAdapter implements ServiceCallbackAdapter<Va
     }
 
     @Override
-    public ServiceResponse<ValidateVcenterClusterResponseMessage> transform(ValidateVcenterClusterResponseMessage validateVcenterClusterResponseMessage) {
-        return new ServiceResponse<>(validateVcenterClusterResponseMessage.getMessageProperties().getCorrelationId(), validateVcenterClusterResponseMessage, null);
+    public ServiceResponse<ValidateVcenterClusterResponseMessage> transform(
+            ValidateVcenterClusterResponseMessage validateVcenterClusterResponseMessage)
+    {
+        return new ServiceResponse<>(validateVcenterClusterResponseMessage.getMessageProperties().getCorrelationId(),
+                validateVcenterClusterResponseMessage, null);
 
     }
 
@@ -41,13 +46,16 @@ public class ValidateClusterResponseAdapter implements ServiceCallbackAdapter<Va
     }
 
     @Override
-    public IServiceCallback take(ValidateVcenterClusterResponseMessage validateVcenterClusterResponseMessage) {
-        return serviceCallbackRegistry.removeServiceCallback(validateVcenterClusterResponseMessage.getMessageProperties().getCorrelationId());
+    public IServiceCallback take(ValidateVcenterClusterResponseMessage validateVcenterClusterResponseMessage)
+    {
+        return serviceCallbackRegistry
+                .removeServiceCallback(validateVcenterClusterResponseMessage.getMessageProperties().getCorrelationId());
 
     }
 
     @Override
-    public Class<ValidateVcenterClusterResponseMessage> getSourceClass() {
+    public Class<ValidateVcenterClusterResponseMessage> getSourceClass()
+    {
         return ValidateVcenterClusterResponseMessage.class;
     }
 

@@ -60,6 +60,8 @@ import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessag
 import com.dell.cpsd.virtualization.capabilities.api.ListComponentsResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
@@ -333,6 +335,9 @@ public class RabbitConfig
 
         messageClasses.add(VmPowerOperationsRequestMessage.class);
         messageClasses.add(VmPowerOperationsResponseMessage.class);
+
+        messageClasses.add(RemoteCommandExecutionRequestMessage.class);
+        messageClasses.add(RemoteCommandExecutionResponseMessage.class);
 
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);

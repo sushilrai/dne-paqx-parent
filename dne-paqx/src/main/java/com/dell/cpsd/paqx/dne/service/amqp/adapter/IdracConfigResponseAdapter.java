@@ -1,6 +1,10 @@
 /**
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
+ * <p>
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
  */
 
 /**
@@ -24,8 +28,9 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
  *
  * @since 1.0
  */
-
-public class IdracConfigResponseAdapter implements ServiceCallbackAdapter<IdracNetworkSettingsResponseMessage, ServiceResponse<IdracNetworkSettingsResponseMessage>> {
+public class IdracConfigResponseAdapter
+        implements ServiceCallbackAdapter<IdracNetworkSettingsResponseMessage, ServiceResponse<IdracNetworkSettingsResponseMessage>>
+{
     private ServiceCallbackRegistry serviceCallbackRegistry;
 
     public IdracConfigResponseAdapter(ServiceCallbackRegistry serviceCallbackRegistry)

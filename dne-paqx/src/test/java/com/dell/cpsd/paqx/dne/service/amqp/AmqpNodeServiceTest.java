@@ -1669,4 +1669,55 @@ public class AmqpNodeServiceTest
         assertFalse(result);
         Mockito.verify(dneProducer).publishConfigureVmNetworkSettings(any(ConfigureVmNetworkSettingsRequestMessage.class));
     }
+
+    @Test
+    public void testRequestRemoteCommandExecutionSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+        final RemoteCommandExecutionResponseMessage responseMessage = mock(RemoteCommandExecutionResponseMessage.class);
+        final RemoteCommandExecutionRequestMessage requestMessage = mock(RemoteCommandExecutionRequestMessage.class);
+        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
+        when(responseMessage.getStatus()).thenReturn(RemoteCommandExecutionResponseMessage.Status.SUCCESS);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", repository, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        boolean result = nodeService.requestRemoteCommandExecution(requestMessage);
+
+        assertTrue(result);
+        Mockito.verify(dneProducer).publishRemoteCommandExecution(any(RemoteCommandExecutionRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestRemoteCommandExecutionException() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final RemoteCommandExecutionRequestMessage requestMessage = mock(RemoteCommandExecutionRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(null, consumer, dneProducer, "replyToMe", null, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        boolean result = nodeService.requestRemoteCommandExecution(requestMessage);
+
+        assertFalse(result);
+        Mockito.verify(dneProducer).publishRemoteCommandExecution(any(RemoteCommandExecutionRequestMessage.class));
+    }
 }
