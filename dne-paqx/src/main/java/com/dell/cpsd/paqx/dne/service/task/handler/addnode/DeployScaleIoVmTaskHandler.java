@@ -60,7 +60,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     private static final int    SCALEIO_VM_NUM_CPU       = 8;
     private static final int    SCALEIO_VM_RAM           = 8192;
     private static final long   SLEEP_PERIOD             = 30000L;
-
+    
     /**
      * The <code>DataServiceRepository</code> instance
      */
