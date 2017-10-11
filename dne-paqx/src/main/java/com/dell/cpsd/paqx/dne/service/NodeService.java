@@ -7,20 +7,27 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
+import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.service.model.*;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Node service interface.
@@ -96,11 +103,13 @@ public interface NodeService
      *
      * @param scaleIOStoragePools
      *
+     * @param newDevices
      * @return
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools) throws ServiceTimeoutException, ServiceExecutionException;
+    EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools, List<Device> newDevices,
+            Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap) throws ServiceTimeoutException, ServiceExecutionException;
 
     /**
      * Validate protection domains
@@ -361,4 +370,27 @@ public interface NodeService
      * @return
      */
     boolean requestRemoteCommandExecution(RemoteCommandExecutionRequestMessage requestMessage);
+
+    /**
+     *
+     * Method to retrive the node inventory data
+     *
+     * @param job
+     * @return
+     */
+    String getNodeInventoryData(Job job);
+
+    /**
+     * Retrieves vCenter hosts from H2 database
+     * @return List of <code>Host</code>
+     * @throws Exception
+     */
+    List<Host> findVcenterHosts() throws NoResultException;
+
+    /**
+     * Converts vCenter host data to hostName:storageDeviceName,isSsd
+     * @param hosts vCenter hosts
+     * @return
+     */
+    Map<String, Map<String, HostStorageDevice>> getHostToStorageDeviceMap(List<Host> hosts);
 }

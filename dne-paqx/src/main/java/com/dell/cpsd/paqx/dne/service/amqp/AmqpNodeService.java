@@ -32,10 +32,13 @@ import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.CredentialDetails;
 import com.dell.cpsd.paqx.dne.domain.EndpointDetails;
+import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
@@ -94,6 +97,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.common.client.rpc.AbstractServiceClient;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.ServiceRequestCallback;
+import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
@@ -162,6 +166,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import javax.persistence.NoResultException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -524,21 +530,24 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * Implementation of storage pool validation
      *
      * @param scaleIOStoragePools
+     * @param newDevices
      * @return
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
     @Override
-    public EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools)
-            throws ServiceTimeoutException, ServiceExecutionException
+    public EssValidateStoragePoolResponseMessage validateStoragePools(List<ScaleIOStoragePool> scaleIOStoragePools, List<Device> newDevices,
+            Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap) throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.service.engineering.standards.MessageProperties messageProperties = new com.dell.cpsd.service.engineering.standards.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
         messageProperties.setReplyTo(replyTo);
 
-        EssValidateStoragePoolRequestMessage storageRequestMessage = storagePoolEssRequestTransformer.transform(scaleIOStoragePools);
+        EssValidateStoragePoolRequestMessage storageRequestMessage = storagePoolEssRequestTransformer
+                .transform(scaleIOStoragePools, hostToStorageDeviceMap);
         storageRequestMessage.setMessageProperties(messageProperties);
+        storageRequestMessage.setNewDevices(newDevices);
 
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
@@ -2013,5 +2022,42 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return false;
+    }
+
+    /**
+     * get node inventory json string from Node_info table
+     * @param job
+     * @return
+     */
+    public String getNodeInventoryData(Job job) {
+        String symphonyUUID = job.getInputParams().getSymphonyUuid();
+        LOGGER.info("Node Inventory UUID="+symphonyUUID);
+        NodeInventory nodeInventory = repository.getNodeInventory(symphonyUUID);
+
+        return nodeInventory == null ? null : nodeInventory.getNodeInventory();
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    public List<Host> findVcenterHosts() throws NoResultException
+    {
+        List<Host> vCenterHosts = null;
+        try
+        {
+            vCenterHosts = repository.getVCenterHosts();
+        }
+        catch (NoResultException e)
+        {
+            LOGGER.error("Could not find any vCenter.", e);
+            throw new IllegalStateException("Could not find any vCenter.");
+        }
+
+        return vCenterHosts;
+    }
+
+    public Map<String, Map<String, HostStorageDevice>> getHostToStorageDeviceMap(List<Host> hosts)
+    {
+        return storagePoolEssRequestTransformer.getHostToStorageDeviceMap(hosts);
     }
 }

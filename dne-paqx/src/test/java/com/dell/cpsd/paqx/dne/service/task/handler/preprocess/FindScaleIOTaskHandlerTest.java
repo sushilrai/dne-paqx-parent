@@ -7,8 +7,8 @@
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
-import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIODevice;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
@@ -23,16 +23,24 @@ import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.service.engineering.standards.Error;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
+import com.dell.cpsd.service.engineering.standards.Warning;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,14 +60,34 @@ public class FindScaleIOTaskHandlerTest {
     @Mock
     private NodeService nodeService = null;
 
+
+
     /*
      * The job running the add node to system definition task handler.
      */
     private Job job         = null;
 
+    private String NODE_INVENTORY_JSON;
+
     @Before
-    public void setUp()
+    public void setUp() throws IOException
     {
+        //read json string from file
+        BufferedReader reader = new BufferedReader(new FileReader("src/test/resources/node_inventory.json"));
+        String         line = null;
+        StringBuilder  stringBuilder = new StringBuilder();
+
+        try {
+            while((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            NODE_INVENTORY_JSON = stringBuilder.toString();
+        } finally {
+            reader.close();
+        }
+
+
         PreProcessTaskConfig preprocessConfig = new PreProcessTaskConfig();
         WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preprocessConfig.preProcessWorkflowSteps());
 
@@ -80,11 +108,11 @@ public class FindScaleIOTaskHandlerTest {
         Map<String, String> results = new HashMap<>();
 
         results.put("symphonyUUID", nodeInfo.getSymphonyUuid());
-         results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
+        results.put("nodeStatus", nodeInfo.getNodeStatus().toString());
 
         response.setResults(results);
 
-        this.job.addTaskResponse("findScaleIO", response);
+        this.job.addTaskResponse("findAvailableNodes", response);
 
         this.job.changeToNextStep("findScaleIO");
     }
@@ -93,26 +121,62 @@ public class FindScaleIOTaskHandlerTest {
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
         FindScaleIOTaskHandler handler = new FindScaleIOTaskHandler(this.nodeService);
+        NodeInventory nodeInventory = new NodeInventory();
+        nodeInventory.setSymphonyUUID("symphonyUUID");
+        nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
+
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
-        storageResponseMessage.setValidStorage(Collections.singletonList("Sp-1"));
+        Map<String, String> deviceToPoolMap = new HashMap<>();
+        deviceToPoolMap.put("device1","pool1");
+        storageResponseMessage.setDeviceToStoragePoolMap(deviceToPoolMap);
+        storageResponseMessage.setWarnings(Arrays.asList(new Warning("1","No message")));
+
         ScaleIOData scaleIOData =  new ScaleIOData();
         ScaleIOStoragePool scaleIOStoragePool = new ScaleIOStoragePool();
         ScaleIOProtectionDomain scaleIOProtectionDomain = new ScaleIOProtectionDomain();
         scaleIOStoragePool.setId("1");
         scaleIOStoragePool.setName("Sp-1");
-        scaleIOStoragePool.addDevice(new ScaleIODevice("1", "scaleIOName1", "deviceCurrentPathName", "Normal"));
-        scaleIOStoragePool.addDevice(new ScaleIODevice("2", "scaleIOName2", "deviceCurrentPathName", "Normal"));
         scaleIOProtectionDomain.addStoragePool(scaleIOStoragePool);
-        scaleIOData.setProtectionDomains(Collections.singletonList(scaleIOProtectionDomain));
+        scaleIOData.setProtectionDomains(Arrays.asList(scaleIOProtectionDomain));
 
-        when(this.nodeService.listScaleIOData()).thenReturn(Collections.singletonList(scaleIOData));
-        when(this.nodeService.validateStoragePools(Collections.singletonList(scaleIOStoragePool))).thenReturn(storageResponseMessage);
-
+        when(this.nodeService.getNodeInventoryData(job)).thenReturn(NODE_INVENTORY_JSON);
+        when(this.nodeService.listScaleIOData()).thenReturn(Arrays.asList(scaleIOData));
+        when(this.nodeService.validateStoragePools(anyList(), anyList(), anyMap())).thenReturn(storageResponseMessage);
 
         boolean expectedResult = true;
         boolean actualResult = handler.executeTask(job);
 
-        assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult,actualResult);
+        assertEquals("SUCCEEDED", job.getTaskResponseMap().get(job.getStep()).getWorkFlowTaskStatus().toString());
+    }
 
+    @Test
+    public void testExecuteTask_error_case() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        FindScaleIOTaskHandler handler = new FindScaleIOTaskHandler(this.nodeService);
+        NodeInventory nodeInventory = new NodeInventory();
+        nodeInventory.setSymphonyUUID("symphonyUUID");
+        nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
+
+        EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
+        storageResponseMessage.setErrors(Arrays.asList(new Error("TypeError","No storage pool found containing all SSDs.")));
+
+        ScaleIOData scaleIOData =  new ScaleIOData();
+        ScaleIOStoragePool scaleIOStoragePool = new ScaleIOStoragePool();
+        ScaleIOProtectionDomain scaleIOProtectionDomain = new ScaleIOProtectionDomain();
+        scaleIOStoragePool.setId("1");
+        scaleIOStoragePool.setName("Sp-1");
+        scaleIOProtectionDomain.addStoragePool(scaleIOStoragePool);
+        scaleIOData.setProtectionDomains(Arrays.asList(scaleIOProtectionDomain));
+
+        when(this.nodeService.getNodeInventoryData(job)).thenReturn(NODE_INVENTORY_JSON);
+        when(this.nodeService.listScaleIOData()).thenReturn(Arrays.asList(scaleIOData));
+        when(this.nodeService.validateStoragePools(anyList(), anyList(), anyMap())).thenReturn(storageResponseMessage);
+
+        boolean expectedResult = false;
+        boolean actualResult = handler.executeTask(job);
+
+        assertEquals(expectedResult,actualResult);
+        assertEquals("FAILED", job.getTaskResponseMap().get(job.getStep()).getWorkFlowTaskStatus().toString());
     }
 }

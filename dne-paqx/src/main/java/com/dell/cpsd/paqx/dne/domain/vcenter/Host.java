@@ -92,6 +92,10 @@ public class Host
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "host", orphanRemoval = true)
     private List<PciDevice> pciDevices = new ArrayList<>();
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "host", orphanRemoval = true)
+    private List<HostStorageDevice> hostStorageDeviceList = new ArrayList<>();
+
     public Host()
     {
     }
@@ -292,6 +296,16 @@ public class Host
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<HostStorageDevice> getHostStorageDeviceList()
+    {
+        return hostStorageDeviceList;
+    }
+
+    public void setHostStorageDeviceList(final List<HostStorageDevice> hostStorageDeviceList)
+    {
+        this.hostStorageDeviceList = hostStorageDeviceList;
     }
 
 }

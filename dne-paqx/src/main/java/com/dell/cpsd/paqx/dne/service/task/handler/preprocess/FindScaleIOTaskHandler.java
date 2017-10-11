@@ -10,24 +10,30 @@ import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
+import com.dell.cpsd.paqx.dne.util.NodeInventoryParsingUtil;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+
+import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * This class implements the logic to find Storage pool entries
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -66,46 +72,77 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
 
         try
         {
+            List<Device> newDevices = NodeInventoryParsingUtil.parseNewDevices(nodeService.getNodeInventoryData(job));
+
+            // retrieve scale IO data
             List<ScaleIOData> scaleIODataList = nodeService.listScaleIOData();
 
-            if (scaleIODataList != null && scaleIODataList.size() > 0)
+            // retrieve vCenter data
+            Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = nodeService
+                    .getHostToStorageDeviceMap(nodeService.findVcenterHosts());
+
+            if (!CollectionUtils.isEmpty(newDevices) && !CollectionUtils.isEmpty(scaleIODataList))
             {
                 ScaleIOData scaleIOData = scaleIODataList.get(0);
                 List<ScaleIOProtectionDomain> protectionDomains = scaleIOData.getProtectionDomains();
-                EssValidateStoragePoolResponseMessage storageResponseMessage = null;
                 if (protectionDomains != null)
                 {
-                    for (ScaleIOProtectionDomain protectionDomain : protectionDomains)
-                    {
-                        storageResponseMessage = nodeService.validateStoragePools(protectionDomain.getStoragePools());
-                        if (storageResponseMessage.getInvalidStorage().size() > 0)
-                        {
-                            response.setWorkFlowTaskStatus(Status.FAILED);
-                            storageResponseMessage.getInvalidStorage().stream().forEach(response::addError);
-                            return false;
-                        }
-                        else if (storageResponseMessage.getValidStorage().size() > 0)
-                        {
-                            Map<String, String> result = new HashMap<>();
-                            result.put("storagePool", storageResponseMessage.getValidStorage().get(0));
-                            response.setResults(result);
-
-                            LOGGER.info("Storage pool validated successfully.");
-                            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
-                        }
-                    }
+                    validateStoragePoolsAndSetResponse(response, newDevices, hostToStorageDeviceMap, protectionDomains);
                 }
 
-                return true;
+                if (CollectionUtils.isEmpty(response.getErrors()))
+                {
+                    return true;
+                }
+                return false;
             }
         }
         catch (ServiceTimeoutException | ServiceExecutionException exception)
         {
-            LOGGER.error("Error listing scaleIO data.");
-            LOGGER.error(exception.getMessage());
+            LOGGER.error("Error listing scaleIO data.", exception);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Error listing scaleIO data.", e);
         }
 
         return false;
+    }
+
+    private void validateStoragePoolsAndSetResponse(final TaskResponse response, final List<Device> newDevices,
+            final Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap, final List<ScaleIOProtectionDomain> protectionDomains)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
+        for (ScaleIOProtectionDomain protectionDomain : protectionDomains)
+        {
+            EssValidateStoragePoolResponseMessage storageResponseMessage = nodeService
+                    .validateStoragePools(protectionDomain.getStoragePools(), newDevices, hostToStorageDeviceMap);
+
+            if (storageResponseMessage != null)
+            {
+                response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+                if (MapUtils.isNotEmpty(storageResponseMessage.getDeviceToStoragePoolMap()))
+                {
+                    LOGGER.info("Storage pool validated successfully.");
+                    response.setResults(storageResponseMessage.getDeviceToStoragePoolMap());
+                }
+                if (!CollectionUtils.isEmpty(storageResponseMessage.getWarnings()))
+                {
+                    storageResponseMessage.getWarnings().stream().forEach(f -> {
+                        response.addWarning(f.getMessage());
+                    });
+                }
+                if (!CollectionUtils.isEmpty(storageResponseMessage.getErrors()))
+                {
+                    response.setWorkFlowTaskStatus(Status.FAILED);
+                    storageResponseMessage.getErrors().stream().forEach(f -> {
+                        LOGGER.info("Storage pool validation error - " + f.getMessage());
+                        response.addError(f.getMessage());
+                    });
+                }
+
+            }
+        }
     }
 
 }

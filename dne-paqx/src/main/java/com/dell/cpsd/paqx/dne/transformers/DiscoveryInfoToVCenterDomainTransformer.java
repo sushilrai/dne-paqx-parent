@@ -21,6 +21,8 @@ import com.dell.cpsd.virtualization.capabilities.api.DistributedVirtualSwicthPor
 import com.dell.cpsd.virtualization.capabilities.api.DvSwitch;
 import com.dell.cpsd.virtualization.capabilities.api.GuestNicInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostPciDevice;
+import com.dell.cpsd.virtualization.capabilities.api.HostScsiDisk;
+import com.dell.cpsd.virtualization.capabilities.api.HostStorageDeviceInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostSystem;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualNic;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualSwitch;
@@ -275,6 +277,17 @@ public class DiscoveryInfoToVCenterDomainTransformer
                 });
             });
 
+            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> {
+
+                returnVal.setNtpServers(hostDateTimeInfo.getNtpServers());
+            });
+
+            Optional.ofNullable(hostConfigInfo.getHostStorageDeviceInfo()).ifPresent(hostStorageDeviceInfo -> {
+
+                final List<HostStorageDevice> hostStorageDeviceList = hostStorageDeviceInfo.getScsiLun().stream().map(hostScsiDisk -> transformHostStorageDevice(hostScsiDisk, returnVal))
+                        .collect(Collectors.toList());
+                returnVal.setHostStorageDeviceList(hostStorageDeviceList);
+            });
             Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> returnVal.setNtpServers(hostDateTimeInfo.getNtpServers()));
         });
 
@@ -309,6 +322,18 @@ public class DiscoveryInfoToVCenterDomainTransformer
         returnVal.setCluster(cluster);
 
         return returnVal;
+    }
+
+    private HostStorageDevice transformHostStorageDevice(final HostScsiDisk hostScsiDisk, final Host host)
+    {
+        HostStorageDevice hostStorageDevice = new HostStorageDevice();
+        hostStorageDevice.setDisplayName(hostScsiDisk.getDisplayName());
+        hostStorageDevice.setSsd(hostScsiDisk.getSsd());
+        hostStorageDevice.setSerialNumber(hostScsiDisk.getSerialNumber());
+        hostStorageDevice.setCanonicalName(hostScsiDisk.getCanonicalName());
+        hostStorageDevice.setHost(host);
+
+        return hostStorageDevice;
     }
 
     private PciDevice transformHostPciDevice(final HostPciDevice pciDevice, final Host host)

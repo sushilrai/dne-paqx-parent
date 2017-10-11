@@ -322,6 +322,7 @@ public class H2DataRepository implements DataServiceRepository
         catch (NoResultException noResultEx)
         {
             //  Do not do anything as the result will be null indicating that no result found.
+            LOG.info("No results found for NodeInventory.");
         }
 
         return result;

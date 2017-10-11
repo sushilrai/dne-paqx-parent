@@ -9,6 +9,7 @@ import com.dell.cpsd.*;
 import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.model.*;
@@ -16,6 +17,7 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.transformers.DiscoveryInfoToVCenterDomainTransformer;
 import com.dell.cpsd.paqx.dne.transformers.ScaleIORestToScaleIODomainTransformer;
+import com.dell.cpsd.paqx.dne.transformers.StoragePoolEssRequestTransformer;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.service.common.client.callback.ServiceCallback;
@@ -27,6 +29,8 @@ import com.dell.cpsd.service.common.client.rpc.DefaultMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.*;
 import com.dell.cpsd.virtualization.capabilities.api.*;
@@ -34,6 +38,7 @@ import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 
 import java.util.*;
 
@@ -1719,5 +1724,70 @@ public class AmqpNodeServiceTest
 
         assertFalse(result);
         Mockito.verify(dneProducer).publishRemoteCommandExecution(any(RemoteCommandExecutionRequestMessage.class));
+    }
+
+    @Test
+    public void testValidateStoragePoolsSuccess() throws Exception{
+        final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+
+        final List<ScaleIOStoragePool> scaleIOStoragePools = new ArrayList<ScaleIOStoragePool>();
+        final List<com.dell.cpsd.service.engineering.standards.Device > newDevices = new ArrayList<com.dell.cpsd.service.engineering.standards.Device>();
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final EssValidateStoragePoolResponseMessage responseMessage = mock(EssValidateStoragePoolResponseMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null,null,new StoragePoolEssRequestTransformer())
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+        EssValidateStoragePoolResponseMessage response = nodeService.validateStoragePools(scaleIOStoragePools,newDevices, anyMap());
+        Assert.assertNotNull(response);
+    }
+
+    @Test(expected = ServiceTimeoutException.class)
+    public void testvalidateStoragepools() throws Exception{
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final List<ScaleIOStoragePool> scaleIOStoragePools = new ArrayList<ScaleIOStoragePool>();
+        final List<com.dell.cpsd.service.engineering.standards.Device > newDevices = new ArrayList<com.dell.cpsd.service.engineering.standards.Device>();
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer,dneProducer,"replyToMe",null,null,null,new StoragePoolEssRequestTransformer())
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+        nodeService.validateStoragePools(scaleIOStoragePools,newDevices, anyMap());
+        Mockito.verify(dneProducer).publishValidateStorage(any(EssValidateStoragePoolRequestMessage.class));
+    }
+
+    @Test(expected = ServiceExecutionException.class)
+    public void testValidateStoragePoolFailure() throws Exception{
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final List<ScaleIOStoragePool> scaleIOStoragePools = new ArrayList<ScaleIOStoragePool>();
+        final List<com.dell.cpsd.service.engineering.standards.Device > newDevices = new ArrayList<com.dell.cpsd.service.engineering.standards.Device>();
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null,
+                null, null,new StoragePoolEssRequestTransformer())
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
+                                                  long timeout) throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.validateStoragePools(scaleIOStoragePools,newDevices, anyMap());
+        Mockito.verify(dneProducer, Mockito.times(1)).publishValidateStorage(any());
     }
 }
