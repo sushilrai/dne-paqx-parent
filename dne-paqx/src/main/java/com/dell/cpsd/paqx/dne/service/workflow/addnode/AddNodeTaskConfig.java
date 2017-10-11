@@ -43,6 +43,7 @@ public class AddNodeTaskConfig
                 "powerOnSVM",
                 "changeSvmCredentials",
                 "installSvmPackages",
+                "performanceTuneSvm",
                 "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");

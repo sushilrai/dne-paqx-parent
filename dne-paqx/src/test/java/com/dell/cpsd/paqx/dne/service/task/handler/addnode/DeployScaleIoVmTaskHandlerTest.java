@@ -94,18 +94,18 @@ public class DeployScaleIoVmTaskHandlerTest
     private String dataCenterName                 = "datacenter_01";
     private String scaleIOSVMManagementIpAddress  = "1.2.3.4";
     private String esxiManagementGatewayIpAddress = "4.3.2.1";
-    private String sioMgmtSubnetMask = "255.255.255.0";
-    private String sioData1IpAddress = "4.4.4.4";
-    private String sioData1SubnetMask = "255.255.255.0";
-    private String sioData2IpAddress = "5.5.5.5";
-    private String sioData2SubnetMask = "255.255.255.0";
+    private String sioMgmtSubnetMask              = "255.255.255.0";
+    private String sioData1IpAddress              = "4.4.4.4";
+    private String sioData1SubnetMask             = "255.255.255.0";
+    private String sioData2IpAddress              = "5.5.5.5";
+    private String sioData2SubnetMask             = "255.255.255.0";
 
     private List<String> dnsConfigIps;
 
     @Before
     public void setUp() throws Exception
     {
-        this.handler = spy(new DeployScaleIoVmTaskHandler(this.service, this.repository));
+        this.handler = spy(new DeployScaleIoVmTaskHandler(this.service, this.repository, 0));
 
         this.dnsConfigIps = new ArrayList<>();
         this.dnsConfigIps.add("1.1.1.1");

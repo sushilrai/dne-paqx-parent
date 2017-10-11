@@ -29,7 +29,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
- * The tests for the ChangeSvmCredentialsTaskHandler class.
+ * The tests for the PerformanceTuneSvmTaskHandler class.
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ChangeSvmCredentialsTaskHandlerTest
+public class PerformanceTuneSvmTaskHandlerTest
 {
     @Mock
     private Job job;
@@ -52,29 +52,25 @@ public class ChangeSvmCredentialsTaskHandlerTest
     private TaskResponse taskResponse;
 
     @Mock
-    private ComponentEndpointIds factoryComponentEndpointIds;
-
-    @Mock
-    private ComponentEndpointIds commonComponentEndpointIds;
+    private ComponentEndpointIds componentEndpointIds;
 
     @Mock
     private NodeExpansionRequest nodeExpansionRequest;
 
-    private ChangeSvmCredentialsTaskHandler handler;
-    private String scaleIoSvmManagementIpAddress = "127.0.0.1";
+    private PerformanceTuneSvmTaskHandler handler;
+    private String scaleIoSvmManagementIpAddress = "1.2.3.4";
 
     @Before
     public void setUp()
     {
-        this.handler = spy(new ChangeSvmCredentialsTaskHandler(this.nodeService, this.repository, 0));
+        this.handler = spy(new PerformanceTuneSvmTaskHandler(this.nodeService, this.repository));
     }
 
     @Test
-    public void executeTask_should_successfully_request_the_svm_credentials_change() throws Exception
+    public void executeTask_should_successfully_request_the_svm_performance_tuning() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
-        doReturn(this.factoryComponentEndpointIds, this.commonComponentEndpointIds).when(this.repository)
-                .getComponentEndpointIds(anyString(), anyString(), anyString());
+        doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
         doReturn(this.scaleIoSvmManagementIpAddress).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
         doReturn(true).when(this.nodeService).requestRemoteCommandExecution(any());
@@ -87,7 +83,7 @@ public class ChangeSvmCredentialsTaskHandlerTest
     }
 
     @Test
-    public void executeTask_should_fail_the_work_flow_if_the_factory_component_ids_are_null() throws Exception
+    public void executeTask_should_fail_the_work_flow_if_the_component_ids_are_null() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
         doReturn(null).when(this.repository).getComponentEndpointIds(anyString(), anyString(), anyString());
@@ -100,25 +96,10 @@ public class ChangeSvmCredentialsTaskHandlerTest
     }
 
     @Test
-    public void executeTask_should_fail_the_work_flow_if_the_common_component_ids_are_null() throws Exception
-    {
-        doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
-        doReturn(this.factoryComponentEndpointIds, null).when(this.repository)
-                .getComponentEndpointIds(anyString(), anyString(), anyString());
-
-        final boolean result = this.handler.executeTask(this.job);
-
-        assertThat(result, is(false));
-        verify(this.taskResponse).setWorkFlowTaskStatus(Status.FAILED);
-        verify(this.taskResponse).addError(anyString());
-    }
-
-    @Test
     public void executeTask_should_fail_the_work_flow_if_the_job_input_params_is_null() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
-        doReturn(this.factoryComponentEndpointIds, this.commonComponentEndpointIds).when(this.repository)
-                .getComponentEndpointIds(anyString(), anyString(), anyString());
+        doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(null).when(this.job).getInputParams();
 
         final boolean result = this.handler.executeTask(this.job);
@@ -132,8 +113,7 @@ public class ChangeSvmCredentialsTaskHandlerTest
     public void executeTask_should_fail_the_work_flow_if_the_scaleio_svm_management_ip_address_is_null() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
-        doReturn(this.factoryComponentEndpointIds, this.commonComponentEndpointIds).when(this.repository)
-                .getComponentEndpointIds(anyString(), anyString(), anyString());
+        doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
         doReturn(null).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
 
@@ -145,11 +125,10 @@ public class ChangeSvmCredentialsTaskHandlerTest
     }
 
     @Test
-    public void executeTask_should_fail_the_work_flow_if_the_change_svm_credentials_request_fails() throws Exception
+    public void executeTask_should_fail_the_work_flow_if_the_svm_performance_tuning_request_fails() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
-        doReturn(this.factoryComponentEndpointIds, this.commonComponentEndpointIds).when(this.repository)
-                .getComponentEndpointIds(anyString(), anyString(), anyString());
+        doReturn(this.componentEndpointIds).when(this.repository).getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
         doReturn(this.scaleIoSvmManagementIpAddress).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
         doReturn(false).when(this.nodeService).requestRemoteCommandExecution(any());

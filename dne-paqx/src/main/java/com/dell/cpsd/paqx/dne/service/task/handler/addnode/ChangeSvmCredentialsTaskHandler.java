@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import java.net.InetAddress;
-
 /**
  * Task responsible for changing the scaleio vm credentials.
  * <p>
@@ -49,22 +47,30 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
      */
     private final DataServiceRepository repository;
 
+    /*
+    * The time to wait before sending the request to change the svm credentials
+    */
+    private final int waitTime;
+
     private static final String COMPONENT_TYPE      = "COMMON-SERVER";
     private static final String ENDPOINT_TYPE       = "COMMON-SVM";
     private static final String FACTORY_CREDENTIALS = "SVM-FACTORY";
     private static final String COMMON_CREDENTIALS  = "SVM-COMMON";
-    private static final int    SLEEP_PERIOD        = 75000; // 75 seconds
 
     /**
      * ChangeSvmCredentialsTaskHandler constructor.
      *
      * @param nodeService - The <code>NodeService</code> instance
      * @param repository  - The <code>DataServiceRepository</code> instance
+     * @param waitTime  - The time to wait before sending the request to change the SVM credentials.
+     *                  We need this because after a SVM is deployed and powered up for the first time
+     *                  it does a reboot, which makes any other solution for pinging the vm unreliable.
      */
-    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository, int waitTime)
     {
         this.nodeService = nodeService;
         this.repository = repository;
+        this.waitTime = waitTime;
     }
 
     @Override
@@ -103,7 +109,7 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
 
             if (StringUtils.isEmpty(scaleIoSvmManagementIpAddress))
             {
-                throw new IllegalStateException("ScaleIO SVM Management IP Address is null");
+                throw new IllegalStateException("ScaleIO VM Management IP Address is null");
             }
 
             VmPasswordUpdateRequest vmPasswordUpdateRequest = new VmPasswordUpdateRequest();
@@ -121,7 +127,7 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
                     new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(commonComponentEndpointIds.getComponentUuid(),
                             commonComponentEndpointIds.getEndpointUuid(), commonComponentEndpointIds.getCredentialUuid()));
 
-            Thread.sleep(SLEEP_PERIOD);
+            Thread.sleep(this.waitTime);
 
             final boolean succeeded = this.nodeService.requestRemoteCommandExecution(requestMessage);
 

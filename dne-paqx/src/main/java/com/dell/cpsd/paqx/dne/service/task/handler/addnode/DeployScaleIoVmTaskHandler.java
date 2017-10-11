@@ -45,31 +45,43 @@ import static java.util.Collections.singletonList;
  */
 public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
-    /**
+    /*
      * The logger instance
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeployScaleIoVmTaskHandler.class);
 
-    /**
+    /*
      * The <code>NodeService</code> instance
      */
     private final NodeService nodeService;
+
+    /*
+    * The time to wait before sending the request to deploy the scaleio vm
+    */
+    private final int waitTime;
 
     private static final String SCALEIO_VM_PREFIX        = "ScaleIO-";
     private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
     private static final int    SCALEIO_VM_NUM_CPU       = 8;
     private static final int    SCALEIO_VM_RAM           = 8192;
-    private static final long   SLEEP_PERIOD             = 30000L;
     
     /**
      * The <code>DataServiceRepository</code> instance
      */
     private final DataServiceRepository repository;
 
-    public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    /**
+     * DeployScaleIoVmTaskHandler constructor
+     *
+     * @param nodeService - The <code>DataServiceRepository</code> instance
+     * @param repository - The <code>NodeService</code> instance
+     * @param waitTime - Before deploying the SVM need to wait for services to be up and running on the new host
+     */
+    public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, int waitTime)
     {
         this.nodeService = nodeService;
         this.repository = repository;
+        this.waitTime = waitTime;
     }
 
     @Override
@@ -115,7 +127,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             requestMessage.setNewVMName(newScaleIoVmName);
             requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
 
-            Thread.sleep(SLEEP_PERIOD);// TODO for test purpose
+            Thread.sleep(this.waitTime);// TODO for test purpose
 
             final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 

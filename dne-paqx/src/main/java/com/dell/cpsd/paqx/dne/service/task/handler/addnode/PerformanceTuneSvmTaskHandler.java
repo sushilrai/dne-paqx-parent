@@ -21,19 +21,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Task responsible for installing ScaleIO packages such as sds, lia etc.
+ * Task responsible for performance tuning the scaleio vm.
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  *
  * @since 1.0
  */
-public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+public class PerformanceTuneSvmTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
     /*
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstallSvmPackagesTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceTuneSvmTaskHandler.class);
 
     /*
      * The <code>NodeService</code> instance
@@ -50,12 +51,12 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
     private static final String COMMON_CREDENTIALS = "SVM-COMMON";
 
     /**
-     * InstallSvmPackagesTaskHandler constructor.
+     * PerformanceTuneSvmTaskHandler constructor.
      *
      * @param nodeService - The <code>NodeService</code> instance
      * @param repository  - The <code>DataServiceRepository</code> instance
      */
-    public InstallSvmPackagesTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    public PerformanceTuneSvmTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
     {
         this.nodeService = nodeService;
         this.repository = repository;
@@ -64,7 +65,7 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
     @Override
     public boolean executeTask(final Job job)
     {
-        LOGGER.info("Execute InstallSvmPackagesTaskHandler task");
+        LOGGER.info("Execute PerformanceTuneSvmTaskHandler task");
 
         TaskResponse response = initializeResponse(job);
 
@@ -89,12 +90,12 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
 
             if (StringUtils.isEmpty(scaleIoSvmManagementIpAddress))
             {
-                throw new IllegalStateException("ScaleIO VM Management IP Address is null is null");
+                throw new IllegalStateException("ScaleIO VM Management IP Address is null");
             }
 
             RemoteCommandExecutionRequestMessage requestMessage = new RemoteCommandExecutionRequestMessage();
+            requestMessage.setRemoteCommand(RemoteCommandExecutionRequestMessage.RemoteCommand.PERFORMANCE_TUNING_SVM);
             requestMessage.setRemoteHost(scaleIoSvmManagementIpAddress);
-            requestMessage.setRemoteCommand(RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
             requestMessage.setOsType(RemoteCommandExecutionRequestMessage.OsType.LINUX);
             requestMessage.setComponentEndpointIds(
                     new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
@@ -104,7 +105,7 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
 
             if (!succeeded)
             {
-                throw new IllegalStateException("Install ScaleIO packages request failed");
+                throw new IllegalStateException("Performance tune ScaleIO vm request failed");
             }
 
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
@@ -112,7 +113,7 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
         }
         catch (Exception ex)
         {
-            LOGGER.error("Error while installing the svm packages", ex);
+            LOGGER.error("Error while performance tuning the scaleio vm", ex);
             response.addError(ex.toString());
         }
 

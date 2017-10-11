@@ -27,6 +27,7 @@ import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandle
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallSvmPackagesTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PerformanceTuneSvmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PowerOnScaleIoVmTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
@@ -86,6 +87,9 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Value("${rackhd.sdc.vib.install.repo.url}")
     private String sdcVibUrl;
 
+    private static final int DEPLOY_SVM_WAIT_TIME           = 30000; // 30 seconds
+    private static final int CHANGE_SVM_CREDENTIALS_TIMEOUT = 75000; // 75 seconds
+
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
     {
@@ -120,6 +124,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
         workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
         workflowTasks.put("installSvmPackages", installSvmPackagesTask());
+        workflowTasks.put("performanceTuneSvm", performanceTuneSvm());
         workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
@@ -127,16 +132,22 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return workflowTasks;
     }
 
+    @Bean("performanceTuneSvm")
+    private WorkflowTask performanceTuneSvm()
+    {
+        return createTask("Performance Tune the ScaleIO VM", new PerformanceTuneSvmTaskHandler(nodeService, repository));
+    }
+
     @Bean("installSvmPackagesTask")
     private WorkflowTask installSvmPackagesTask()
     {
-        return createTask("Install SVM Packages", new InstallSvmPackagesTaskHandler(nodeService, repository));
+        return createTask("Install ScaleIO VM Packages", new InstallSvmPackagesTaskHandler(nodeService, repository));
     }
 
     @Bean("changeSvmCredentialsTask")
     private WorkflowTask changeSvmCredentialsTask()
     {
-        return createTask("Change SVM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository));
+        return createTask("Change ScaleIO VM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository, CHANGE_SVM_CREDENTIALS_TIMEOUT));
     }
 
     @Bean("configureVmNetworkSettingsTask")
@@ -213,7 +224,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("deploySVMTask")
     private WorkflowTask deploySVMTask()
     {
-        return createTask("Deploy ScaleIO VM", new DeployScaleIoVmTaskHandler(this.nodeService, repository));
+        return createTask("Deploy ScaleIO VM", new DeployScaleIoVmTaskHandler(this.nodeService, repository, DEPLOY_SVM_WAIT_TIME));
     }
 
     @Bean("enablePciPassthroughHostTask")
