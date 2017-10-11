@@ -23,14 +23,32 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.*;
+import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
+import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoverClusterRequestInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.DiscoveryRequestInfoMessage;
+import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListComponentsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ListEsxiCredentialDetailsRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * <p>

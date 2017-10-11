@@ -10,7 +10,6 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.JobRepository;
 import com.dell.cpsd.paqx.dne.service.model.Step;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.UUID;

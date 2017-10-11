@@ -59,6 +59,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
     private static final int    SCALEIO_VM_NUM_CPU       = 8;
     private static final int    SCALEIO_VM_RAM           = 8192;
+    private static final long   SLEEP_PERIOD             = 30000L;
 
     /**
      * The <code>DataServiceRepository</code> instance
@@ -114,7 +115,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             requestMessage.setNewVMName(newScaleIoVmName);
             requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
 
-            Thread.sleep(30000);// TODO for test purpose
+            Thread.sleep(SLEEP_PERIOD);// TODO for test purpose
 
             final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 

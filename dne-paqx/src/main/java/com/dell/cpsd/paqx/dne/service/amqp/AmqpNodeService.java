@@ -151,10 +151,7 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -181,8 +178,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     private static ILogger LOGGER = DneLoggingManager.getLogger(ServiceConfig.class);
 
-    private static final long timeout = 1800000L;
-
     /*
      * The <code>DelegatingMessageConsumer</code>
      */
@@ -198,28 +193,43 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     private final String replyTo;
 
+    /*
+     * The <code>DataServiceRepository</code>
+     */
     private final DataServiceRepository repository;
 
+    /*
+     * The <code>DiscoveryInfoToVCenterDomainTransformer</code>
+     */
     private final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer;
 
-    private final ScaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer;
+    /*
+     * The <code>ScaleIORestToScaleIODomainTransformer</code>
+     */
+    private final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer;
 
-    private final StoragePoolEssRequestTransformer        storagePoolEssRequestTransformer;
+    /*
+     * The <code>StoragePoolEssRequestTransformer</code>
+     */
+    private final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer;
 
     @Value("${rackhd.boot.proto.share.name}")
-    private String                                 shareName;
+    private String shareName;
 
     @Value("${rackhd.boot.proto.share.type}")
-    private Integer                                shareType;
+    private Integer shareType;
 
     @Value("${rackhd.boot.proto.fqdds}")
-    private String[]                               fqdds;
+    private String[] fqdds;
 
     @Value("${rackhd.boot.proto.name}")
-    private String                                 bootProtoName;
+    private String bootProtoName;
 
     @Value("${rackhd.boot.proto.value}")
-    private String                                 bootProtoValue;
+    private String bootProtoValue;
+
+    private static final long timeout            = 1800000L;
+    private static final long installEsxiTimeout = 2700000L;
 
     /**
      * AmqpNodeService constructor.
@@ -1237,7 +1247,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
             requestMessage.setEsxiInstallationInfo(esxiInstallationInfo);
 
-            long installEsxiTimeout = 2700000L;
             ServiceResponse<?> callbackResponse = processRequest(installEsxiTimeout, new ServiceRequestCallback()
             {
                 @Override
