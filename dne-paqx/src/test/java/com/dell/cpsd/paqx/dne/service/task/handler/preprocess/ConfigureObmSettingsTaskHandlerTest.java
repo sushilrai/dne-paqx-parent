@@ -76,7 +76,7 @@ public class ConfigureObmSettingsTaskHandlerTest
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
                 "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
+                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
                 "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
         this.job.setInputParams(nodeExpansionRequest);
 

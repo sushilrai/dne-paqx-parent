@@ -169,6 +169,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
         private       String                  hostname;
         private       String                  dataCenterName;
         private       String                  newScaleIoVmIpAddress;
+        private       String                  newScaleIoVmGatewayAddress;
         private       String                  newScaleIoVmName;
         private       String                  newScaleIoVmHostname;
         private       String                  newScaleIoVmDomainName;
@@ -198,6 +199,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             this.hostname = this.queryHostname();
             this.dataCenterName = this.queryDatacenterName();
             this.newScaleIoVmIpAddress = this.queryScaleIOSVMManagementIpAddress();
+            this.newScaleIoVmGatewayAddress = this.queryScaleIOSVMManagementGatewayAddress();
             this.newScaleIoVmName = SCALEIO_VM_PREFIX + this.newScaleIoVmIpAddress;
             this.newScaleIoVmHostname = this.newScaleIoVmName.replace(".", "-");
             this.newScaleIoVmDomainName = this.queryDomainName();
@@ -282,6 +284,18 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             return scaleIOSVMManagementIpAddress;
         }
 
+        String queryScaleIOSVMManagementGatewayAddress()
+        {
+            final String scaleIOSVMManagementGatewayAddress = this.inputParams.getEsxiManagementGatewayIpAddress();
+
+            if (StringUtils.isEmpty(scaleIOSVMManagementGatewayAddress))
+            {
+                throw new IllegalStateException("ScaleIO Management Gateway Address is null");
+            }
+
+            return scaleIOSVMManagementGatewayAddress;
+        }
+
         String queryDatacenterName()
         {
             final String clusterName = this.inputParams.getClusterName();
@@ -343,6 +357,13 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
                 throw new IllegalStateException("ScaleIO VM Management IP Address is null");
             }
 
+            final String scaleIoSvmManagementGatewayAddress = this.inputParams.getScaleIoSvmManagementGatewayAddress();
+
+            if (StringUtils.isEmpty(scaleIoSvmManagementGatewayAddress))
+            {
+                throw new IllegalStateException("ScaleIO VM Management Gateway is null");
+            }
+
             final String scaleIoSvmManagementSubnetMask = this.inputParams.getScaleIoSvmManagementSubnetMask();
 
             if (StringUtils.isEmpty(scaleIoSvmManagementSubnetMask))
@@ -380,8 +401,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
             final NicSetting nicSettingScaleIoMgmt = new NicSetting();
             nicSettingScaleIoMgmt.setIpAddress(this.newScaleIoVmIpAddress);
-            //TODO: This needs to come from the UI
-            nicSettingScaleIoMgmt.setGateway(singletonList("10.239.139.33"));
+            nicSettingScaleIoMgmt.setGateway(singletonList(scaleIoSvmManagementGatewayAddress));
             nicSettingScaleIoMgmt.setSubnetMask(scaleIoSvmManagementSubnetMask);
 
             final NicSetting nicSettingScaleIoData1 = new NicSetting();

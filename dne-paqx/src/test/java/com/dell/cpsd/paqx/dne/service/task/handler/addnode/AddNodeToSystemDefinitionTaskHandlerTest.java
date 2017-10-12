@@ -76,7 +76,8 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname",
                 "scaleIoData1SvmIpAddress", "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIoData2SvmIpAddress", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIoSvmManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clusterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
+                "scaleIoData2KernelAndSvmSubnetMask", "scaleIoSvmManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask",
+                "symphonyUuid", "clusterName","vMotionManagementIpAddress", "vMotionManagementSubnetMask");
         jobIn.setInputParams(nodeExpansionRequest);
         Map<String, WorkflowTask> taskMap = new HashMap<>();
         WorkflowTask task = new WorkflowTask();

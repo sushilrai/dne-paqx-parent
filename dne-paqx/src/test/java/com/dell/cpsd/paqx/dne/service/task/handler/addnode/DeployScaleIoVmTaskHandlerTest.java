@@ -93,6 +93,7 @@ public class DeployScaleIoVmTaskHandlerTest
     private String clusterName                    = "cluster_01";
     private String dataCenterName                 = "datacenter_01";
     private String scaleIOSVMManagementIpAddress  = "1.2.3.4";
+    private String scaleIOSVMManagementGatewayAddress  = "1.2.3.5";
     private String esxiManagementGatewayIpAddress = "4.3.2.1";
     private String sioMgmtSubnetMask              = "255.255.255.0";
     private String sioData1IpAddress              = "4.4.4.4";
@@ -135,6 +136,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.dnsConfigIps).when(this.hostDnsConfig).getDnsConfigIPs();
         doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
         doReturn(this.sioMgmtSubnetMask).when(this.request).getScaleIoSvmManagementSubnetMask();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
         doReturn(this.sioData1IpAddress).when(this.request).getScaleIoData1SvmIpAddress();
         doReturn(this.sioData1SubnetMask).when(this.request).getScaleIoData1KernelAndSvmSubnetMask();
         doReturn(this.sioData2IpAddress).when(this.request).getScaleIoData2SvmIpAddress();
@@ -317,6 +319,31 @@ public class DeployScaleIoVmTaskHandlerTest
      * @throws Exception
      */
     @Test
+    public void executeTask_should_fail_the_workflow_when_there_is_no_scaleIOSVMManagementGatewayAddress() throws Exception
+    {
+        doReturn(this.response).when(this.handler).initializeResponse(this.job);
+        doReturn(this.taskResponseMap).when(this.job).getTaskResponseMap();
+        doReturn(this.installEsxiTaskResponse).when(this.taskResponseMap).get(anyString());
+        doReturn(this.request).when(this.job).getInputParams();
+        doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
+        doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
+        doReturn(this.clusterName).when(this.request).getClusterName();
+        doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
+
+        boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
+        verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.response, never()).setNewVMName(anyString());
+        verify(this.response).addError(anyString());
+    }
+
+    /**
+     * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
+     *
+     * @throws Exception
+     */
+    @Test
     public void executeTask_should_fail_the_workflow_when_there_is_no_domainname() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
@@ -328,7 +355,6 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
-        doReturn(null).when(this.repository).getDomainName();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -355,10 +381,6 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
-        doReturn(this.domainName).when(this.repository).getDomainName();
-        doReturn(this.host).when(this.repository).getExistingVCenterHost();
-        doReturn(this.hostDnsConfig).when(this.host).getHostDnsConfig();
-        doReturn(Collections.emptyList()).when(this.hostDnsConfig).getDnsConfigIPs();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -385,10 +407,6 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
-        doReturn(this.domainName).when(this.repository).getDomainName();
-        doReturn(this.host).when(this.repository).getExistingVCenterHost();
-        doReturn(this.hostDnsConfig).when(this.host).getHostDnsConfig();
-        doReturn(this.dnsConfigIps).when(this.hostDnsConfig).getDnsConfigIPs();
         doReturn(null).when(this.request).getEsxiManagementGatewayIpAddress();
 
         boolean result = this.handler.executeTask(this.job);
@@ -447,6 +465,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
         doReturn(this.domainName).when(this.repository).getDomainName();
         doReturn(this.host).when(this.repository).getExistingVCenterHost();
         doReturn(this.hostDnsConfig).when(this.host).getHostDnsConfig();
