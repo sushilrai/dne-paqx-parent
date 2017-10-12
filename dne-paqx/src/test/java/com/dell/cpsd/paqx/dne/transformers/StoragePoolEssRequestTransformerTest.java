@@ -9,21 +9,21 @@ package com.dell.cpsd.paqx.dne.transformers;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIODevice;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOSDS;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
+import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.service.engineering.standards.StoragePool;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 
 import java.util.ArrayList;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -97,25 +97,7 @@ public class StoragePoolEssRequestTransformerTest
     @Test
     public void correlateScaleIOAndVcenterData_success()
     {
-        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = new HashMap<>();
-
-        Map<String, HostStorageDevice> hostStorageDeviceMap1 = new HashMap<>();
-        hostStorageDeviceMap1.put("displayName1", buildHostStorageDevice("1", true));
-        hostStorageDeviceMap1.put("displayName2", buildHostStorageDevice("2", true));
-        hostStorageDeviceMap1.put("displayName3", buildHostStorageDevice("3", true));
-        hostToStorageDeviceMap.put("fpr1-h11.lab.vce.com", hostStorageDeviceMap1);
-
-        Map<String, HostStorageDevice> hostStorageDeviceMap2 = new HashMap<>();
-        hostStorageDeviceMap2.put("displayName4", buildHostStorageDevice("4", true));
-        hostStorageDeviceMap2.put("displayName5", buildHostStorageDevice("5", true));
-        hostStorageDeviceMap2.put("displayName6", buildHostStorageDevice("6", true));
-        hostToStorageDeviceMap.put("fpr1-h12.lab.vce.com", hostStorageDeviceMap2);
-
-        Map<String, HostStorageDevice> hostStorageDeviceMap3 = new HashMap<>();
-        hostStorageDeviceMap3.put("displayName7", buildHostStorageDevice("7", true));
-        hostStorageDeviceMap3.put("displayName8", buildHostStorageDevice("8", true));
-        hostStorageDeviceMap3.put("displayName9", buildHostStorageDevice("9", true));
-        hostToStorageDeviceMap.put("fpr1-h13.lab.vce.com", hostStorageDeviceMap3);
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
 
         ScaleIOSDS sds = buildScaleIOSDS("fpr1-h12.lab.vce.com-ESX");
 
@@ -124,30 +106,78 @@ public class StoragePoolEssRequestTransformerTest
         assertNotNull(actual);
         assertEquals(3, actual.size());
         actual.forEach((key, value) -> {
-            assertThat(key, anyOf(is("displayName4"), is("displayName5"), is("displayName6")));
+            assertThat(key, anyOf(is("displayName6"), is("displayName7"), is("displayName8")));
         });
     }
 
     @Test
     public void correlateScaleIOAndVcenterData_notFound()
     {
-        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = new HashMap<>();
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
+        ScaleIOSDS sds = buildScaleIOSDS("fpr1-h14.lab.vce.com-ESX");
 
-        Map<String, HostStorageDevice> hostStorageDeviceMap1 = new HashMap<>();
-        hostStorageDeviceMap1.put("displayName1", buildHostStorageDevice("1", true));
-        hostStorageDeviceMap1.put("displayName2", buildHostStorageDevice("2", true));
-        hostStorageDeviceMap1.put("displayName3", buildHostStorageDevice("3", true));
-        hostToStorageDeviceMap.put("fpr1-h11.lab.vce.com", hostStorageDeviceMap1);
-
-
-        ScaleIOSDS sds = buildScaleIOSDS("fpr1-h12.lab.vce.com-ESX");
-
-        try {
+        try
+        {
             Map<String, HostStorageDevice> actual = transformer.correlateScaleIOAndVcenterData(sds, hostToStorageDeviceMap);
             fail("Expecting error but did not error.");
-        } catch (NoSuchElementException ex) {
+        }
+        catch (NoSuchElementException ex)
+        {
             assertEquals("No value present", ex.getLocalizedMessage());
         }
+    }
+
+    @Test
+    public void collectDevicesInPool_allFlash()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 12);
+
+        StoragePool storagePool = transformer.collectDevicesInPool(scaleIOStoragePool, hostToStorageDeviceMap);
+
+        assertNotNull(storagePool);
+        assertEquals("1", storagePool.getId());
+        assertEquals("SP-1", storagePool.getName());
+        assertEquals("12", storagePool.getNumberOfDevices());
+        assertEquals(12, storagePool.getDevices().size());
+        assertEquals(StoragePool.Type.SSD, storagePool.getType());
+
+        storagePool.getDevices().stream().forEach(device -> {
+            assertEquals(Device.Type.SSD, device.getType());
+        });
+    }
+
+    @Test
+    public void collectDevicesInPool_noFlash()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(false);
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 12);
+
+        StoragePool storagePool = transformer.collectDevicesInPool(scaleIOStoragePool, hostToStorageDeviceMap);
+
+        assertNotNull(storagePool);
+        assertEquals("1", storagePool.getId());
+        assertEquals("SP-1", storagePool.getName());
+        assertEquals("12", storagePool.getNumberOfDevices());
+        assertEquals(12, storagePool.getDevices().size());
+        assertEquals(StoragePool.Type.HDD, storagePool.getType());
+
+        storagePool.getDevices().stream().forEach(device -> {
+            assertEquals(Device.Type.HDD, device.getType());
+        });
+    }
+
+    @Test
+    public void transform_success()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 12);
+
+        EssValidateStoragePoolRequestMessage request = transformer.transform(Collections.singletonList(scaleIOStoragePool), hostToStorageDeviceMap);
+        assertNotNull(request.getStoragePools());
+        assertEquals(1, request.getStoragePools().size());
+        assertNotNull(request.getStoragePools().get(0).getDevices());
+        assertEquals(12, request.getStoragePools().get(0).getDevices().size());
     }
 
     private ScaleIOStoragePool buildScaleIOStoragePool(String id, int numberOfDevices)
@@ -157,12 +187,19 @@ public class StoragePoolEssRequestTransformerTest
         storagePool.setName("SP-" + id);
         List<ScaleIODevice> devices = new ArrayList<>();
         ScaleIODevice device = null;
+        int j = 0;
         for (int i = 0; i < numberOfDevices; i++)
         {
-            device = new ScaleIODevice("" + i, "Dv-" + i, null, "Normal");
+            device = new ScaleIODevice("" + i, "displayName" + i, null, "Normal");
+            device.setSds(new ScaleIOSDS());
+            device.getSds().setName("fpr1-h1" + j + ".lab.vce.com-ESX");
+            if ((i + 1) % 3 == 0)
+            {
+                j++;
+            }
             devices.add(device);
         }
-
+        storagePool.setDevices(devices);
         return storagePool;
     }
 
@@ -175,7 +212,7 @@ public class StoragePoolEssRequestTransformerTest
         HostStorageDevice hostStorageDevice = null;
         for (int i = 0; i < numberOfDevices; i++)
         {
-            hostStorageDeviceList.add(buildHostStorageDevice(""+i, allFlash));
+            hostStorageDeviceList.add(buildHostStorageDevice("" + i, allFlash));
         }
         host.setHostStorageDeviceList(hostStorageDeviceList);
         return host;
@@ -183,12 +220,43 @@ public class StoragePoolEssRequestTransformerTest
 
     private HostStorageDevice buildHostStorageDevice(String id, boolean ssd)
     {
-        return new HostStorageDevice("displayName" + id, ssd, "sn" + id, null);
+        return new HostStorageDevice("displayName" + id, ssd, "sn" + id, "naa." + id);
     }
 
     private ScaleIOSDS buildScaleIOSDS(String id)
     {
-        return new ScaleIOSDS("id-"+id, id, null, 8800);
+        return new ScaleIOSDS("id-" + id, id, null, 8800);
+    }
+
+    private Map<String, Map<String, HostStorageDevice>> buildHostToStorageDeviceMap(boolean allFlash)
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = new HashMap<>();
+
+        Map<String, HostStorageDevice> hostStorageDeviceMap1 = new HashMap<>();
+        hostStorageDeviceMap1.put("displayName0", buildHostStorageDevice("0", allFlash));
+        hostStorageDeviceMap1.put("displayName1", buildHostStorageDevice("1", allFlash));
+        hostStorageDeviceMap1.put("displayName2", buildHostStorageDevice("2", allFlash));
+        hostToStorageDeviceMap.put("fpr1-h10.lab.vce.com", hostStorageDeviceMap1);
+
+        Map<String, HostStorageDevice> hostStorageDeviceMap2 = new HashMap<>();
+        hostStorageDeviceMap2.put("displayName3", buildHostStorageDevice("3", allFlash));
+        hostStorageDeviceMap2.put("displayName4", buildHostStorageDevice("4", allFlash));
+        hostStorageDeviceMap2.put("displayName5", buildHostStorageDevice("5", allFlash));
+        hostToStorageDeviceMap.put("fpr1-h11.lab.vce.com", hostStorageDeviceMap2);
+
+        Map<String, HostStorageDevice> hostStorageDeviceMap3 = new HashMap<>();
+        hostStorageDeviceMap3.put("displayName6", buildHostStorageDevice("6", allFlash));
+        hostStorageDeviceMap3.put("displayName7", buildHostStorageDevice("7", allFlash));
+        hostStorageDeviceMap3.put("displayName8", buildHostStorageDevice("8", allFlash));
+        hostToStorageDeviceMap.put("fpr1-h12.lab.vce.com", hostStorageDeviceMap3);
+
+        Map<String, HostStorageDevice> hostStorageDeviceMap4 = new HashMap<>();
+        hostStorageDeviceMap4.put("displayName9", buildHostStorageDevice("9", allFlash));
+        hostStorageDeviceMap4.put("displayName10", buildHostStorageDevice("10", allFlash));
+        hostStorageDeviceMap4.put("displayName11", buildHostStorageDevice("11", allFlash));
+        hostToStorageDeviceMap.put("fpr1-h13.lab.vce.com", hostStorageDeviceMap4);
+
+        return hostToStorageDeviceMap;
     }
 
 }
