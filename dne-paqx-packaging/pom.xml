@@ -113,7 +113,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.dell.cpsd.ess</includeGroupIds>
+                            <includeGroupIds>com.dell.cpsd</includeGroupIds>
                             <includeArtifactIds>engineering-standards-service-distribution</includeArtifactIds>
                             <includes>**</includes>
                         </configuration>
