@@ -126,7 +126,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("vcenter-configure-vm-network"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("vcenter-execute-remote-ssh-commands")
+                        .withProfile("vcenter-execute-remote-ssh-commands"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("scaleio-add-host-to-protection-domain")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

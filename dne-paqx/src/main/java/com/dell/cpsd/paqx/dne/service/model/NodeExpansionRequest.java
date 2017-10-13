@@ -29,6 +29,7 @@ public class NodeExpansionRequest
     private String symphonyUuid;
     private String vMotionManagementIpAddress;
     private String vMotionManagementSubnetMask;
+    private String protectionDomain;
 
     public NodeExpansionRequest()
     {
@@ -248,6 +249,14 @@ public class NodeExpansionRequest
     public void setvMotionManagementSubnetMask(final String vMotionManagementSubnetMask)
     {
         this.vMotionManagementSubnetMask = vMotionManagementSubnetMask;
+    }
+
+    public String getProtectionDomain() {
+        return protectionDomain;
+    }
+
+    public void setProtectionDomain(String protectionDomain) {
+        this.protectionDomain = protectionDomain;
     }
 
     @Override

@@ -1790,4 +1790,56 @@ public class AmqpNodeServiceTest
         nodeService.validateStoragePools(scaleIOStoragePools,newDevices, anyMap());
         Mockito.verify(dneProducer, Mockito.times(1)).publishValidateStorage(any());
     }
+
+    @Test
+    public void testRequestAddHostToProtectionDomainSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
+        final AddHostToProtectionDomainRequestMessage requestMessage = mock(AddHostToProtectionDomainRequestMessage.class);
+        final AddHostToProtectionDomainResponseMessage responseMessage = mock(AddHostToProtectionDomainResponseMessage.class);
+        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
+        when(responseMessage.getStatus()).thenReturn(AddHostToProtectionDomainResponseMessage.Status.SUCCESS);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        boolean result = nodeService.requestAddHostToProtectionDomain(requestMessage);
+
+        assertTrue(result);
+        Mockito.verify(dneProducer).publishAddHostToProtectionDomain(any(AddHostToProtectionDomainRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestAddHostToProtectionDomainException() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final AddHostToProtectionDomainRequestMessage requestMessage = mock(AddHostToProtectionDomainRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        boolean result = nodeService.requestAddHostToProtectionDomain(requestMessage);
+
+        assertFalse(result);
+        Mockito.verify(dneProducer).publishAddHostToProtectionDomain(any(AddHostToProtectionDomainRequestMessage.class));
+    }
 }

@@ -21,6 +21,7 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -496,6 +497,18 @@ public class AmqpDneProducerTest
     public void publishRemoteCommandExecution_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(RemoteCommandExecutionRequestMessage.class), this.producer::publishRemoteCommandExecution);
+    }
+
+    @Test
+    public void publishAddHostToProtectionDomain()
+    {
+        this.executeTest(mock(AddHostToProtectionDomainRequestMessage.class), this.producer::publishAddHostToProtectionDomain);
+    }
+
+    @Test
+    public void publishAddHostToProtectionDomain_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(AddHostToProtectionDomainRequestMessage.class), this.producer::publishAddHostToProtectionDomain);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

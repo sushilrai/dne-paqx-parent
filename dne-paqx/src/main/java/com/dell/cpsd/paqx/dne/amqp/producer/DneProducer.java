@@ -16,6 +16,7 @@ import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
@@ -142,6 +143,13 @@ public interface DneProducer
      * @param request
      */
     void publishAddHostToVCenter(ClusterOperationRequestMessage request);
+
+    /**
+     * Add ESXi host to Protection Domain
+     *
+     * @param request
+     */
+    void publishAddHostToProtectionDomain(AddHostToProtectionDomainRequestMessage request);
 
     /**
      * Install ScaleIO VIB

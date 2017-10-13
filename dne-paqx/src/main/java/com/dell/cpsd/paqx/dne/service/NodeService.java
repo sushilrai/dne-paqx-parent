@@ -22,6 +22,7 @@ import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -252,6 +253,14 @@ public interface NodeService
      * @return
      */
     boolean requestAddHostToVCenter(ClusterOperationRequestMessage requestMessage);
+
+    /**
+     * Request a host to be added to ProtectionDomain.
+     *
+     * @param requestMessage - The <code>ClusterOperationRequestMessage</code> instance
+     * @return
+     */
+    boolean requestAddHostToProtectionDomain(AddHostToProtectionDomainRequestMessage requestMessage);
 
     /**
      * Request installation of a ScaleIO SDC.

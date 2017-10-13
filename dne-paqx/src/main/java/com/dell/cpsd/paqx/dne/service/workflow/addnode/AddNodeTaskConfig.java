@@ -27,6 +27,7 @@ public class AddNodeTaskConfig
                 //"changeIdracCredentials", currently has a bug so leave out for now...
                 "installEsxi",
                 "addHostToVcenter",
+                "addHostToProtectionDomain",
                 "applyEsxiLicense",
                 "datastoreRename",
                 "exitHostMaintenanceMode1",

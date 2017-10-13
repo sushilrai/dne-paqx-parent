@@ -21,6 +21,7 @@ import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointH
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -201,6 +202,19 @@ public class AmqpDneProducer implements DneProducer {
 
         if (endpointHelper != null) {
             LOGGER.info("Publish Add Host to VCenter request from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishAddHostToProtectionDomain(final AddHostToProtectionDomainRequestMessage request) {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(AddHostToProtectionDomainRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Publish Add Host to ProtectionDomain request from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
