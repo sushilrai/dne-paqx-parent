@@ -329,6 +329,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.hostname).when(this.installEsxiTaskResponse).getHostname();
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
+        doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -355,6 +356,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -381,6 +383,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -407,7 +410,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
-        doReturn(null).when(this.request).getEsxiManagementGatewayIpAddress();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
 
         boolean result = this.handler.executeTask(this.job);
 
@@ -434,11 +437,7 @@ public class DeployScaleIoVmTaskHandlerTest
         doReturn(this.clusterName).when(this.request).getClusterName();
         doReturn(this.dataCenterName).when(this.repository).getDataCenterName(anyString());
         doReturn(this.scaleIOSVMManagementIpAddress).when(this.request).getScaleIoSvmManagementIpAddress();
-        doReturn(this.domainName).when(this.repository).getDomainName();
-        doReturn(this.host).when(this.repository).getExistingVCenterHost();
-        doReturn(this.hostDnsConfig).when(this.host).getHostDnsConfig();
-        doReturn(this.dnsConfigIps).when(this.hostDnsConfig).getDnsConfigIPs();
-        doReturn(this.esxiManagementGatewayIpAddress).when(this.request).getEsxiManagementGatewayIpAddress();
+        doReturn(this.scaleIOSVMManagementGatewayAddress).when(this.request).getScaleIoSvmManagementGatewayAddress();
 
         boolean result = this.handler.executeTask(this.job);
 

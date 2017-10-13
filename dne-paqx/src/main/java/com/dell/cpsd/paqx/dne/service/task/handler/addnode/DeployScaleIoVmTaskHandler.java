@@ -286,7 +286,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
 
         String queryScaleIOSVMManagementGatewayAddress()
         {
-            final String scaleIOSVMManagementGatewayAddress = this.inputParams.getEsxiManagementGatewayIpAddress();
+            final String scaleIOSVMManagementGatewayAddress = this.inputParams.getScaleIoSvmManagementGatewayAddress();
 
             if (StringUtils.isEmpty(scaleIOSVMManagementGatewayAddress))
             {

@@ -119,6 +119,7 @@ import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMes
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -392,8 +393,10 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
+    @Transactional
     public List<DiscoveredNodeInfo> listDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
         List<DiscoveredNode> discoveredNodes = listDiscoveredNodes();
+        List<DiscoveredNodeInfo> retList = new ArrayList<>();
 
         for (DiscoveredNode node : discoveredNodes) {
             Object nodeInventoryResponse = listNodeInventory(node.getConvergedUuid());
@@ -405,6 +408,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 if ( isNodeInventorySaved && discoveredNodeInfo != null) {
                     discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
                     repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
+                    retList.add(discoveredNodeInfo);
                 }
             } else {
                 LOGGER.info("There is no node inventory for UUID " + node.getConvergedUuid());
@@ -412,8 +416,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         LOGGER.info("Listing DiscoveredNodeInfo data ...");
-        return repository.getDiscoveredNodeInfo();
-
+        return retList;
     }
 
     @Override
