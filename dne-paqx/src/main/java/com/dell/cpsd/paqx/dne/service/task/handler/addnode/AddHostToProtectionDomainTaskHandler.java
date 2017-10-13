@@ -38,7 +38,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
     /**
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(FindProtectionDomainTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddHostToProtectionDomainTaskHandler.class);
 
     /**
      * The <code>NodeService</code> instance
@@ -155,7 +155,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
             name = (job.getInputParams().getEsxiManagementHostname() + "-ESX");
         }
         else if (job.getInputParams().getEsxiManagementIpAddress() != null){
-            name = (job.getInputParams().getEsxiManagementIpAddress());
+            name = (job.getInputParams().getEsxiManagementIpAddress() + "-ESX");
         }
         return name;
     }

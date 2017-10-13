@@ -12,27 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToVCenterTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ChangeSvmCredentialsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureVmNetworkSettingsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DatastoreRenameTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnterHostMaintenanceModeTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceModeTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallSvmPackagesTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PerformanceTuneSvmTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PowerOnScaleIoVmTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSoftwareAcceptanceTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigurePxeBootTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.*;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +28,6 @@ import com.dell.cpsd.paqx.dne.service.BaseService;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ChangeIdracCredentialsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryToUpdateStatusTaskHandler;
 import com.dell.cpsd.sdk.AMQPClient;
 
 /**
@@ -125,6 +102,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
         workflowTasks.put("installSvmPackages", installSvmPackagesTask());
         workflowTasks.put("performanceTuneSvm", performanceTuneSvm());
+        workflowTasks.put("addHostToProtectionDomain", addHostToProtectionDomainTask());
         workflowTasks.put("configurePxeBoot", configurePxeBoot());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
@@ -136,6 +114,11 @@ public class AddNodeService extends BaseService implements IAddNodeService
     private WorkflowTask performanceTuneSvm()
     {
         return createTask("Performance Tune the ScaleIO VM", new PerformanceTuneSvmTaskHandler(nodeService, repository));
+    }
+    @Bean("addHostToProtectionDomain")
+    private WorkflowTask addHostToProtectionDomainTask()
+    {
+        return createTask("Add Host To Protection Domain", new AddHostToProtectionDomainTaskHandler(nodeService, repository));
     }
 
     @Bean("installSvmPackagesTask")
