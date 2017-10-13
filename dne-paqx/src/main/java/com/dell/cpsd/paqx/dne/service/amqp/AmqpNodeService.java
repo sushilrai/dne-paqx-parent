@@ -384,7 +384,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             if (nodes.getDiscoveredNodes() != null)
             {
-                return nodes.getDiscoveredNodes().stream().map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
+                return nodes.getDiscoveredNodes().stream().filter(d->d.getAllocationStatus() == com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED).map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
                         .collect(Collectors.toList());
             }
         }

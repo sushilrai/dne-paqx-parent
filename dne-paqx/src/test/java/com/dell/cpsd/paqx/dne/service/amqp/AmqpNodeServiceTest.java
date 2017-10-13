@@ -93,8 +93,6 @@ public class AmqpNodeServiceTest
     public void testListDiscoveredNodesSuccess() throws Exception
     {
         String convergedUuid = UUID.randomUUID().toString();
-        String nodeId = UUID.randomUUID().toString();
-
         DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         DneProducer dneProducer = mock(DneProducer.class);
 
@@ -105,16 +103,12 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId,
                                                   long timeout) throws ServiceTimeoutException
             {
-                // default status of discovered
-                com.dell.cpsd.DiscoveredNode node =
-                        new com.dell.cpsd.DiscoveredNode(convergedUuid,
-                                com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED);
 
                 com.dell.cpsd.MessageProperties messageProperties =
                         new com.dell.cpsd.MessageProperties(Calendar.getInstance().getTime(),
                                 UUID.randomUUID().toString(), "replyToMe");
 
-                NodesListed listed = new NodesListed(messageProperties, Collections.singletonList(node));
+                NodesListed listed = new NodesListed(messageProperties, buildNodeList(convergedUuid));
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, listed, null));
             }
         };
@@ -127,6 +121,22 @@ public class AmqpNodeServiceTest
         Assert.assertEquals(convergedUuid, discovered.getConvergedUuid());
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishListNodes(any());
+    }
+
+    private List<com.dell.cpsd.DiscoveredNode> buildNodeList(String uuid)
+    {
+        com.dell.cpsd.DiscoveredNode discoveredNode =
+                new com.dell.cpsd.DiscoveredNode(uuid,
+                        com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED);
+        com.dell.cpsd.DiscoveredNode addedNode =
+                new com.dell.cpsd.DiscoveredNode(UUID.randomUUID().toString(),
+                        com.dell.cpsd.DiscoveredNode.AllocationStatus.ADDED);
+
+        List<com.dell.cpsd.DiscoveredNode> nodeList = new ArrayList<>();
+        nodeList.add(discoveredNode);
+        nodeList.add(addedNode);
+
+        return nodeList;
     }
 
     /**
@@ -165,14 +175,11 @@ public class AmqpNodeServiceTest
         H2DataRepository repository = mock(H2DataRepository.class);
 
         String convergedUuid1 = UUID.randomUUID().toString();
-        com.dell.cpsd.DiscoveredNode node = new com.dell.cpsd.DiscoveredNode(convergedUuid1,
-                com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED);
-
         com.dell.cpsd.MessageProperties messageProperties =
                 new com.dell.cpsd.MessageProperties(Calendar.getInstance().getTime(),
                         UUID.randomUUID().toString(), "replyToMe");
 
-        NodesListed listed = new NodesListed(messageProperties, Collections.singletonList(node));
+        NodesListed listed = new NodesListed(messageProperties, buildNodeList(convergedUuid1));
 
         NodeInventoryResponseMessage nodeInventoryResponseMessage = new NodeInventoryResponseMessage(messageProperties, buildNodeInventory());
         AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository,
