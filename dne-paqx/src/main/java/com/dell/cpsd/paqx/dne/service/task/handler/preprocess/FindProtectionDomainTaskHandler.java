@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -156,20 +157,23 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
              * Creating the response.
              */
             EssValidateProtectionDomainsResponseMessage protectionDomainResponse = nodeService.validateProtectionDomains(requestMessage);
+            if (protectionDomainResponse.getValidProtectionDomains().size() == 0 )
+            {
+                response.addError(protectionDomainResponse.getError().getMessage());
+                throw new IllegalStateException("No valid protection domain found");
+            }
 
             /**
              * Mapping the actual response to local response
              */
             ValidateProtectionDomainResponse validateProtectionDomainResponse = new ValidateProtectionDomainResponse();
             String protectionDomainId = protectionDomainResponse.getValidProtectionDomains().get(0).getProtectionDomainID();
-            if (protectionDomainId == null)
-            {
 
-                response.addError(protectionDomainResponse.getError().getMessage());
-                throw new IllegalStateException("No valid protection domain found");
-            }
+            // find protection domain based on id
+            List<String> protectionDomainNameList = protectionDomainList.stream().filter(p->p.getId().equalsIgnoreCase(protectionDomainId))
+                        .map(p->p.getName()).collect(Collectors.toList());
 
-            validateProtectionDomainResponse.setProtectionDomains(protectionDomainId);
+            validateProtectionDomainResponse.setProtectionDomains(protectionDomainNameList.size() == 1 ? protectionDomainList.get(0).getName(): protectionDomainId);
             response.setResults(buildResponseResult(validateProtectionDomainResponse));
             for (Integer n = 0 ;n < protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().size(); n++)
             {
