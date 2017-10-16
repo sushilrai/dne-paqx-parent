@@ -13,6 +13,8 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.model.FindScaleIOResponse;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsResponseInfo;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
@@ -68,7 +70,7 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
     public boolean executeTask(final Job job)
     {
         LOGGER.info("Execute FindScaleIOTaskHandler task");
-        TaskResponse response = initializeResponse(job);
+        FindScaleIOResponse response = initializeResponse(job);
 
         try
         {
@@ -109,7 +111,7 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
         return false;
     }
 
-    private void validateStoragePoolsAndSetResponse(final TaskResponse response, final List<Device> newDevices,
+    private void validateStoragePoolsAndSetResponse(final FindScaleIOResponse response, final List<Device> newDevices,
             final Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap, final List<ScaleIOProtectionDomain> protectionDomains)
             throws ServiceTimeoutException, ServiceExecutionException
     {
@@ -124,7 +126,7 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
                 if (MapUtils.isNotEmpty(storageResponseMessage.getDeviceToStoragePoolMap()))
                 {
                     LOGGER.info("Storage pool validated successfully.");
-                    response.setResults(storageResponseMessage.getDeviceToStoragePoolMap());
+                    response.setDeviceToStoragePoolMap(storageResponseMessage.getDeviceToStoragePoolMap());
                 }
                 if (!CollectionUtils.isEmpty(storageResponseMessage.getWarnings()))
                 {
@@ -143,6 +145,16 @@ public class FindScaleIOTaskHandler extends BaseTaskHandler implements IWorkflow
 
             }
         }
+    }
+
+    @Override
+    public FindScaleIOResponse initializeResponse(Job job)
+    {
+        FindScaleIOResponse response = new FindScaleIOResponse();
+        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
+        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
+        job.addTaskResponse(job.getStep(), response);
+        return response;
     }
 
 }

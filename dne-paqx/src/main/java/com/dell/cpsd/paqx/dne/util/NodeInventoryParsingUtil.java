@@ -67,6 +67,7 @@ public class NodeInventoryParsingUtil {
             String deviceName = null;
             String ssdDeviceType = null;
             String serialNumber = null;
+            String devicePath=null;
             for(int iCount=0;iCount<length;iCount++) {
                 source = context.read("$[" + iCount + "]['source']", String.class);
                 if (SMART_SOURCE.equalsIgnoreCase(source)) {
@@ -80,6 +81,12 @@ public class NodeInventoryParsingUtil {
                                 deviceName = context.read("$[" + iCount + "]['data'][" + iDataCount + "]['os device name']", String.class);
                                 serialNumber = context.read("$[" + iCount + "]['data'][" + iDataCount + "]['smart']['identity']['serial number']", String.class);
                                 // skip SATADOM-ML drives, they are not scaleio data disks
+
+                                if (deviceName!=null)
+                                {
+                                    //Take off the scsi part if it exists.
+                                    devicePath = deviceName.split(" ")[0];
+                                }
                                 try
                                 {
                                     deviceId = context.read("$[" + iCount + "]['data'][" + iDataCount + "]['smart']['identity']['logical unit id']",
@@ -90,7 +97,7 @@ public class NodeInventoryParsingUtil {
                                 if (deviceId != null) {
                                     // remove 0x prefix
                                     deviceId = deviceId.substring(2);
-                                    Device newDevice = new Device(deviceId, deviceName, null, serialNumber, null, Device.Type.SSD);
+                                    Device newDevice = new Device(deviceId, deviceName, null, serialNumber, null, devicePath, Device.Type.SSD);
                                     newDevices.add(newDevice);
                                 }
                             }

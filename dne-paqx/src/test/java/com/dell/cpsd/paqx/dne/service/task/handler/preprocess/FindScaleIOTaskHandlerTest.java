@@ -23,6 +23,7 @@ import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
 import com.dell.cpsd.service.engineering.standards.Error;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.service.engineering.standards.Warning;
@@ -127,8 +128,10 @@ public class FindScaleIOTaskHandlerTest {
         nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
 
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
-        Map<String, String> deviceToPoolMap = new HashMap<>();
-        deviceToPoolMap.put("device1","pool1");
+        Map<String, DeviceAssignment> deviceToPoolMap = new HashMap<>();
+
+        DeviceAssignment assignment = new DeviceAssignment("devId1", "devSer1", "/dev/sda", "pool1", "pool1Name");
+        deviceToPoolMap.put("device1",assignment);
         storageResponseMessage.setDeviceToStoragePoolMap(deviceToPoolMap);
         storageResponseMessage.setWarnings(Arrays.asList(new Warning("1","No message")));
 
