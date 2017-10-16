@@ -6,15 +6,13 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
+import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
-import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
@@ -27,7 +25,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -63,7 +63,7 @@ public class FindVClusterTaskHandlerTest
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
                 "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress","scaleIoSvmManagementGatewayAddress",  "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
+                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
 
         this.job.changeToNextStep("findVCluster");

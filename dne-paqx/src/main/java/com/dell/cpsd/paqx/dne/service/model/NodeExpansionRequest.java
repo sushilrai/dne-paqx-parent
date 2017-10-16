@@ -5,6 +5,10 @@
 
 package com.dell.cpsd.paqx.dne.service.model;
 
+import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
+
+import java.util.Map;
+
 public class NodeExpansionRequest
 {
     private String idracIpAddress;
@@ -31,6 +35,8 @@ public class NodeExpansionRequest
     private String vMotionManagementSubnetMask;
     private String protectionDomain;
 
+    Map<String, DeviceAssignment> deviceToDeviceStoragePool;
+
     public NodeExpansionRequest()
     {
     }
@@ -39,7 +45,7 @@ public class NodeExpansionRequest
             String esxiManagementGatewayIpAddress, String esxiManagementSubnetMask, String esxiManagementHostname, String scaleIoData1SvmIpAddress, String scaleIoData1KernelIpAddress,
             String scaleIoData1KernelAndSvmSubnetMask, String scaleIoData2SvmIpAddress, String scaleIoData2KernelIpAddress, String scaleIoData2KernelAndSvmSubnetMask,
             String scaleIoSvmManagementIpAddress, String scaleIoSvmManagementGatewayAddress, String scaleIoSvmManagementSubnetMask, String symphonyUuid, String clusterName,
-            String vMotionManagementIpAddress, String vMotionManagementSubnetMask) {
+            String vMotionManagementIpAddress, String vMotionManagementSubnetMask, Map<String, DeviceAssignment> deviceToDeviceStoragePool) {
         this.idracIpAddress = idracIpAddress;
         this.idracGatewayIpAddress = idracGatewayIpAddress;
         this.idracSubnetMask = idracSubnetMask;
@@ -60,6 +66,17 @@ public class NodeExpansionRequest
         this.clusterName = clusterName;
         this.vMotionManagementIpAddress = vMotionManagementIpAddress;
         this.vMotionManagementSubnetMask = vMotionManagementSubnetMask;
+        this.deviceToDeviceStoragePool = deviceToDeviceStoragePool;
+    }
+
+    public Map<String, DeviceAssignment> getDeviceToDeviceStoragePool()
+    {
+        return deviceToDeviceStoragePool;
+    }
+
+    public void setDeviceToDeviceStoragePool(final Map<String, DeviceAssignment> deviceToDeviceStoragePool)
+    {
+        this.deviceToDeviceStoragePool = deviceToDeviceStoragePool;
     }
 
     public String getIdracIpAddress()

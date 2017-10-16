@@ -16,6 +16,7 @@ import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindProtectionDomainTaskHandler;
+import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
 import com.dell.cpsd.storage.capabilities.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -83,6 +86,8 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
              */
             List<SdsIp> sdsIpList = createSdsIps(job);
 
+            List<DeviceInfo> deviceInfoList = createDeviceAssignmentList(job);
+
             final com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds("SCALEIO-CLUSTER");
 
             /**
@@ -93,7 +98,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
             componentEndpoints.setComponentUuid(componentEndpointIds.getComponentUuid());
             componentEndpoints.setCredentialUuid(componentEndpointIds.getCredentialUuid());
 
-            HostToProtectionDomain hostToProtectionDomain = setHostToProtectionDomain(protectionDomain, name, sdsIpList);
+            HostToProtectionDomain hostToProtectionDomain = setHostToProtectionDomain(protectionDomain, name, sdsIpList, deviceInfoList);
 
             /**
              * Adding the endpoint url
@@ -130,9 +135,11 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
      * @param protectionDomain
      * @param name
      * @param sdsIpList
+     * @param deviceInfoList
      * @return
      */
-    private HostToProtectionDomain setHostToProtectionDomain(String protectionDomain, String name, List<SdsIp> sdsIpList) {
+    private HostToProtectionDomain setHostToProtectionDomain(String protectionDomain, String name, List<SdsIp> sdsIpList,
+            final List<DeviceInfo> deviceInfoList) {
         /**
          * Creating the request message
          */
@@ -140,6 +147,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
         hostToProtectionDomain.setProtectionDomainId(protectionDomain);
         hostToProtectionDomain.setName(name);
         hostToProtectionDomain.setSdsIpList(sdsIpList);
+        hostToProtectionDomain.setDeviceInfoList(deviceInfoList);
         return hostToProtectionDomain;
     }
 
@@ -185,5 +193,18 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
         sdsIpList.add(0,sdsIp1);
         sdsIpList.add(1,sdsIp2);
         return sdsIpList;
+    }
+
+    private List<DeviceInfo> createDeviceAssignmentList(Job job) {
+
+        List<DeviceInfo> returnVal=null;
+        Map<String, DeviceAssignment> deviceToDeviceStoragePoolAssignment = job.getInputParams().getDeviceToDeviceStoragePool();
+
+        if (deviceToDeviceStoragePoolAssignment != null)
+        {
+            returnVal = deviceToDeviceStoragePoolAssignment.values().stream().filter(Objects::nonNull)
+                    .map(ddspa -> new DeviceInfo(ddspa.getLogicalName(), ddspa.getStoragePoolId(), null)).collect(Collectors.toList());
+        }
+        return returnVal;
     }
 }

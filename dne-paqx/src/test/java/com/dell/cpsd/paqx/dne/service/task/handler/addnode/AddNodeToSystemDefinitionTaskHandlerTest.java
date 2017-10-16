@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.addnode;
 
+import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
@@ -13,7 +14,10 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.sdk.AMQPClient;
-import com.dell.cpsd.service.system.definition.api.*;
+import com.dell.cpsd.service.system.definition.api.Component;
+import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
+import com.dell.cpsd.service.system.definition.api.Definition;
+import com.dell.cpsd.service.system.definition.api.Identity;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,14 +27,20 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The tests for the AddNodeToSystemDefinitionTaskHandler class.
@@ -72,13 +82,15 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     public void setUp()
     {
         handler = new AddNodeToSystemDefinitionTaskHandler(this.client, repository);
+
+
+
         jobIn = new Job(UUID.randomUUID(), "testWorkflow", "updateSystemDefinition", "in-progress", null);
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname",
                 "scaleIoData1SvmIpAddress", "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIoData2SvmIpAddress", "scaleIoData2KernelIpAddress",
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIoSvmManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask",
-                "symphonyUuid", "clusterName","vMotionManagementIpAddress", "vMotionManagementSubnetMask");
-        jobIn.setInputParams(nodeExpansionRequest);
+                "symphonyUuid", "clusterName","vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());        jobIn.setInputParams(nodeExpansionRequest);
         Map<String, WorkflowTask> taskMap = new HashMap<>();
         WorkflowTask task = new WorkflowTask();
         taskMap.put("updateSystemDefinition", task);

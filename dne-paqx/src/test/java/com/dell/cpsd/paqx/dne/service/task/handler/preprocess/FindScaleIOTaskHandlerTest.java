@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
+import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
@@ -36,12 +37,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -102,7 +104,7 @@ public class FindScaleIOTaskHandlerTest {
                 "scaleIoData1SvmGatewayAddress",
                 "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
                 "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask");
+                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
 
         TaskResponse response = new TaskResponse();
