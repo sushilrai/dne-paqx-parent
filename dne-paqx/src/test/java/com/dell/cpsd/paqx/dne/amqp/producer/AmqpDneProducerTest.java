@@ -6,12 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
-import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
-import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.cpsd.InstallESXiRequestMessage;
-import com.dell.cpsd.ListNodes;
-import com.dell.cpsd.NodeInventoryRequestMessage;
+import com.dell.cpsd.*;
 import com.dell.cpsd.common.rabbitmq.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.Capability;
 import com.dell.cpsd.hdp.capability.registry.api.EndpointProperty;
@@ -144,6 +139,30 @@ public class AmqpDneProducerTest
     {
         this.executeTest_no_capabilities(mock(ConfigureBootDeviceIdracRequestMessage.class), this.producer::publishConfigureBootDeviceIdrac);
     }
+    @Test
+    public void publishConfigurePxeBoot()
+    {
+        this.executeTest(mock(ConfigurePxeBootRequestMessage.class), this.producer::publishConfigurePxeBoot);
+    }
+
+    @Test
+    public void publishConfigurePxeBoot_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(ConfigurePxeBootRequestMessage.class), this.producer::publishConfigurePxeBoot);
+    }
+
+    @Test
+    public void publishConfigureObmSettings()
+    {
+        this.executeTest(mock(SetObmSettingsRequestMessage.class), this.producer::publishConfigureObmSettings);
+    }
+
+    @Test
+    public void publishConfigureObmSettings_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(SetObmSettingsRequestMessage.class), this.producer::publishConfigureObmSettings);
+    }
+
 
     @Test
     public void publishListScaleIoComponents()
@@ -420,6 +439,13 @@ public class AmqpDneProducerTest
     {
         this.executeTest(mock(ChangeIdracCredentialsRequestMessage.class), this.producer::publishChangeIdracCredentials);
     }
+
+    @Test
+    public void publishChangeIdracCredentials_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(ChangeIdracCredentialsRequestMessage.class), this.producer::publishChangeIdracCredentials);
+    }
+
 
     @Test
     public void publishNodeInventoryDiscovery()
