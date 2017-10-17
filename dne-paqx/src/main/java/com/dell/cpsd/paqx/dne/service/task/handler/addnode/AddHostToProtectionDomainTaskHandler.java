@@ -205,7 +205,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
         if (deviceToDeviceStoragePoolAssignment != null)
         {
             returnVal = deviceToDeviceStoragePoolAssignment.values().stream().filter(Objects::nonNull)
-                    .map(ddspa -> new DeviceInfo(ddspa.getLogicalName(), ddspa.getStoragePoolId(), null)).collect(Collectors.toList());
+                    .map(ddspa -> new DeviceInfo(ddspa.getLogicalName(), ddspa.getStoragePoolId(), ddspa.getDeviceName())).collect(Collectors.toList());
         }
         return returnVal;
     }
