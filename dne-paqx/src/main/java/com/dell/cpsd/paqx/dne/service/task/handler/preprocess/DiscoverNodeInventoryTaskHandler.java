@@ -35,12 +35,12 @@ import java.util.List;
  *
  * @since 1.0
  */
-public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWorkflowTaskHandler
+public class DiscoverNodeInventoryTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
     /*
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiscoverNodeInventoryHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscoverNodeInventoryTaskHandler.class);
 
     /*
      * Node Service instance used to find and validate Storage pool entries
@@ -57,7 +57,7 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
      *
      * @param nodeService
      */
-    public DiscoverNodeInventoryHandler(final NodeService nodeService, final DataServiceRepository repository)
+    public DiscoverNodeInventoryTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
     {
         this.nodeService = nodeService;
         this.repository = repository;
@@ -65,7 +65,7 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
 
     @Override
     public boolean executeTask(final Job job)  {
-        LOGGER.info("Execute DiscoverNodeInventoryHandler task.");
+        LOGGER.info("Execute DiscoverNodeInventoryTaskHandler task.");
 
         TaskResponse response = initializeResponse(job);
 
@@ -94,29 +94,6 @@ public class DiscoverNodeInventoryHandler extends BaseTaskHandler implements IWo
 
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
-    }
-
-    /*
-     * Find Node previously configured on the workflow execution.
-     */
-    private NodeInfo findNodeInfo(List<TaskResponse> taskResponses)
-    {
-        NodeInfo result = null;
-
-        if (taskResponses != null)
-        {
-            for (TaskResponse taskResponse : taskResponses)
-            {
-                //Search for Discovered node response
-                if (taskResponse instanceof FirstAvailableDiscoveredNodeResponse)
-                {
-                    result = ((FirstAvailableDiscoveredNodeResponse) taskResponse).getNodeInfo();
-                    break;
-                }
-            }
-        }
-
-        return result;
     }
 
 }

@@ -5,11 +5,12 @@
  * </p>
  */
 
-package com.dell.cpsd.paqx.dne.service;
+package com.dell.cpsd.paqx.dne.service.workflow.preprocess;
 
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
 
