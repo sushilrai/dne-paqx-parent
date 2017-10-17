@@ -39,7 +39,7 @@ public class PreProcessTaskConfig {
                 "pingIdrac",
                 "configureObmSettings",
                 "configureBootDeviceIdrac",
-                //"findScaleIO",
+                "findScaleIO",
                 "findVCluster",
                 "findProtectionDomain");
 
