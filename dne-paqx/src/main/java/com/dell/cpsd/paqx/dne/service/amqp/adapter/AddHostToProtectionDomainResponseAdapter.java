@@ -10,7 +10,6 @@ import com.dell.cpsd.service.common.client.callback.ServiceResponse;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
 import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainResponseMessage;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationResponseMessage;
 
 /**
  *

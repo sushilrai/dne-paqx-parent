@@ -169,7 +169,7 @@ public class ApplyEsxiLicenseTaskHandlerTest
      * {@link com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler#executeTask(com.dell.cpsd.paqx.dne.domain.Job)}.
      */
     @Test
-    public void executeTask_failed_applyEsxiLicense_request() throws Exception
+    public void executeTask_should_still_pass_the_workflow_when_the_request_to_apply_esxi_license_fails_but_log_a_warning() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.componentEndpointIds).when(this.repository).getVCenterComponentEndpointIdsByEndpointType(anyString());
@@ -180,9 +180,9 @@ public class ApplyEsxiLicenseTaskHandlerTest
 
         boolean result = this.handler.executeTask(this.job);
 
-        assertThat(result, is(false));
-        verify(this.response).setWorkFlowTaskStatus(Status.FAILED);
-        verify(this.response).addError(anyString());
+        assertThat(result, is(true));
+        verify(this.response).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.response).addWarning(anyString());
     }
 
     /**

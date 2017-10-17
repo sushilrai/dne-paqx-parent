@@ -35,18 +35,33 @@ import static java.util.Collections.singletonList;
  */
 public class InstallScaleIoVibTaskHandler extends BaseTaskHandler implements IWorkflowTaskHandler
 {
-    /**
+    /*
      * The logger instance
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallScaleIoVibTaskHandler.class);
 
-    /**
+    /*
      * The <code>NodeService</code> instance
      */
-    private final NodeService           nodeService;
+    private final NodeService nodeService;
+
+    /*
+     * The <code>DataServiceRepository</code> instance
+     */
     private final DataServiceRepository repository;
+
+    /*
+    * The remote URL location of the SDC VIB
+    */
     private final String sdcVibRemoteUrl;
 
+    /**
+     * InstallScaleIoVibTaskHandler constructor
+     *
+     * @param nodeService - The <code>NodeService</code> instance
+     * @param repository - The <code>DataServiceRepository</code> instance
+     * @param sdcVibRemoteUrl - The remote URL location of the SDC VIB
+     */
     public InstallScaleIoVibTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final String sdcVibRemoteUrl)
     {
         this.nodeService = nodeService;

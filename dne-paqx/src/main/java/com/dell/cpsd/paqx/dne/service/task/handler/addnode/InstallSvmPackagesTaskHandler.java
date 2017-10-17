@@ -89,7 +89,7 @@ public class InstallSvmPackagesTaskHandler extends BaseTaskHandler implements IW
 
             if (StringUtils.isEmpty(scaleIoSvmManagementIpAddress))
             {
-                throw new IllegalStateException("ScaleIO VM Management IP Address is null is null");
+                throw new IllegalStateException("ScaleIO VM Management IP Address is null");
             }
 
             RemoteCommandExecutionRequestMessage requestMessage = new RemoteCommandExecutionRequestMessage();

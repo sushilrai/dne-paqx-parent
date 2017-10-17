@@ -1831,7 +1831,7 @@ public class AmqpNodeServiceTest
     }
 
     @Test(expected = ServiceTimeoutException.class)
-    public void testvalidateStoragepools() throws Exception{
+    public void testValidateStoragepools() throws Exception{
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
         final List<ScaleIOStoragePool> scaleIOStoragePools = new ArrayList<>();
@@ -1922,5 +1922,57 @@ public class AmqpNodeServiceTest
 
         assertFalse(result);
         Mockito.verify(dneProducer).publishAddHostToProtectionDomain(any(AddHostToProtectionDomainRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestUpdateSdcPerformanceProfileSuccess() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final DataServiceRepository repository = mock(DataServiceRepository.class);
+        final com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties(
+                new Date(), UUID.randomUUID().toString(), "test");
+        final SioSdcUpdatePerformanceProfileResponseMessage responseMessage = mock(SioSdcUpdatePerformanceProfileResponseMessage.class);
+        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = mock(SioSdcUpdatePerformanceProfileRequestMessage.class);
+        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
+        when(responseMessage.getStatus()).thenReturn(SioSdcUpdatePerformanceProfileResponseMessage.Status.SUCCESS);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        boolean result = nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
+
+        assertTrue(result);
+        Mockito.verify(dneProducer).publishUpdateSdcPerformanceProfile(any(SioSdcUpdatePerformanceProfileRequestMessage.class));
+    }
+
+    @Test
+    public void testRequestUpdateSdcPerformanceProfileException() throws Exception
+    {
+        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        final DneProducer dneProducer = mock(DneProducer.class);
+        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = mock(SioSdcUpdatePerformanceProfileRequestMessage.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null,null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                throw new ServiceTimeoutException("TIMEOUT_TEST");
+            }
+        };
+
+        boolean result = nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
+
+        assertFalse(result);
+        Mockito.verify(dneProducer).publishUpdateSdcPerformanceProfile(any(SioSdcUpdatePerformanceProfileRequestMessage.class));
     }
 }

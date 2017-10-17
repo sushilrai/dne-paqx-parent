@@ -68,6 +68,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
     public boolean executeTask(final Job job)
     {
         LOGGER.info("Execute Configure ScaleIO VIB task");
+
         final ConfigureScaleIoVibTaskResponse response = initializeResponse(job);
 
         try
@@ -101,8 +102,10 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
                 throw new IllegalStateException("Default ESXi Host Credential Details are null.");
             }
 
+            final String ioctlIniGuidStr = UUID.randomUUID().toString();
+
             final SoftwareVIBConfigureRequestMessage requestMessage = getSoftwareVIBConfigureRequestMessage(componentEndpointIds, hostname,
-                    listEsxiDefaultCredentialDetailsTaskResponse);
+                    listEsxiDefaultCredentialDetailsTaskResponse, ioctlIniGuidStr);
 
             final boolean success = this.nodeService.requestConfigureScaleIoVib(requestMessage);
 
@@ -112,6 +115,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
             }
 
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+            response.setIoctlIniGuidStr(ioctlIniGuidStr);
 
             return true;
         }
@@ -126,7 +130,8 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
     }
 
     private SoftwareVIBConfigureRequestMessage getSoftwareVIBConfigureRequestMessage(final ComponentEndpointIds vCenterComponentEndpointIds,
-            final String hostname, final ListESXiCredentialDetailsTaskResponse esxiHostComponentEndpointIds) throws Exception
+            final String hostname, final ListESXiCredentialDetailsTaskResponse esxiHostComponentEndpointIds, final String ioctlIniGuidStr)
+            throws Exception
     {
         final SoftwareVIBConfigureRequestMessage requestMessage = new SoftwareVIBConfigureRequestMessage();
         requestMessage.setCredentials(new Credentials(vCenterComponentEndpointIds.getEndpointUrl(), null, null));
@@ -137,7 +142,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
         final SoftwareVIBConfigureRequest softwareVIBConfigureRequest = new SoftwareVIBConfigureRequest();
         softwareVIBConfigureRequest.setHostName(hostname);
         softwareVIBConfigureRequest.setModuleName(SOFTWARE_VIB_MODULE);
-        softwareVIBConfigureRequest.setModuleOptions(buildModuleOptions());
+        softwareVIBConfigureRequest.setModuleOptions(buildModuleOptions(ioctlIniGuidStr));
         softwareVIBConfigureRequest.setComponentEndpointIds(
                 new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(esxiHostComponentEndpointIds.getComponentUuid(),
                         esxiHostComponentEndpointIds.getEndpointUuid(), esxiHostComponentEndpointIds.getCredentialUuid()));
@@ -156,7 +161,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
         return response;
     }
 
-    private String buildModuleOptions() throws Exception
+    private String buildModuleOptions(final String ioctlIniGuidStr) throws Exception
     {
         try
         {
@@ -194,11 +199,10 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
             final StringBuilder builder = new StringBuilder();
             builder.append(IOCTL_INI_GUID_STRING);
             builder.append(EQUALS_STRING);
-            final String randomGuidString = UUID.randomUUID().toString();
 
-            LOGGER.info("IoctlIniGuidStr is [{}]", randomGuidString);
+            LOGGER.info("IoctlIniGuidStr is [{}]", ioctlIniGuidStr);
 
-            builder.append(randomGuidString);
+            builder.append(ioctlIniGuidStr);
             builder.append(SPACE_STRING);
             builder.append(IOCTL_MDM_IP_STRING);
             builder.append(EQUALS_STRING);

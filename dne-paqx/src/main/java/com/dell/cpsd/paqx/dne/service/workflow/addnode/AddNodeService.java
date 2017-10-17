@@ -101,17 +101,24 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
         workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
         workflowTasks.put("installSvmPackages", installSvmPackagesTask());
-        workflowTasks.put("performanceTuneSvm", performanceTuneSvm());
+        workflowTasks.put("performanceTuneSvm", performanceTuneSvmTask());
         workflowTasks.put("addHostToProtectionDomain", addHostToProtectionDomainTask());
-        workflowTasks.put("configurePxeBoot", configurePxeBoot());
+        workflowTasks.put("updateSdcPerformanceProfile", updateSdcPerformanceProfileTask());
+        workflowTasks.put("configurePxeBoot", configurePxeBootTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;
     }
 
-    @Bean("performanceTuneSvm")
-    private WorkflowTask performanceTuneSvm()
+    @Bean("updateSdcPerformanceProfileTask")
+    private WorkflowTask updateSdcPerformanceProfileTask()
+    {
+        return createTask("Update ScaleIO SDC Performance Profile", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository));
+    }
+
+    @Bean("performanceTuneSvmTask")
+    private WorkflowTask performanceTuneSvmTask()
     {
         return createTask("Performance Tune the ScaleIO VM", new PerformanceTuneSvmTaskHandler(nodeService, repository));
     }
@@ -169,8 +176,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return createTask("Change Out of Band Management Credentials", new ChangeIdracCredentialsTaskHandler(this.nodeService));
     }
 
-    @Bean("configurePxeBoot")
-    private WorkflowTask configurePxeBoot(){
+    @Bean("configurePxeBootTask")
+    private WorkflowTask configurePxeBootTask(){
         return createTask("Configure Pxe boot", new ConfigurePxeBootTaskHandler(nodeService));
     }
 

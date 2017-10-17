@@ -339,6 +339,9 @@ public class RabbitConfig
         messageClasses.add(AddHostToProtectionDomainRequestMessage.class);
         messageClasses.add(AddHostToProtectionDomainResponseMessage.class);
 
+        messageClasses.add(SioSdcUpdatePerformanceProfileRequestMessage.class);
+        messageClasses.add(SioSdcUpdatePerformanceProfileResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         

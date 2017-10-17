@@ -17,5 +17,15 @@ package com.dell.cpsd.paqx.dne.service.model;
  */
 public class ConfigureScaleIoVibTaskResponse extends TaskResponse
 {
+    private String ioctlIniGuidStr;
 
+    public String getIoctlIniGuidStr()
+    {
+        return this.ioctlIniGuidStr;
+    }
+
+    public void setIoctlIniGuidStr(final String ioctlIniGuidStr)
+    {
+        this.ioctlIniGuidStr = ioctlIniGuidStr;
+    }
 }

@@ -10,23 +10,25 @@ import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.AddHostToProtectionDomainResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindProtectionDomainTaskHandler;
 import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
-import com.dell.cpsd.storage.capabilities.api.*;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.DeviceInfo;
+import com.dell.cpsd.storage.capabilities.api.HostToProtectionDomain;
+import com.dell.cpsd.storage.capabilities.api.SdsIp;
+import com.dell.cpsd.storage.capabilities.api.SdsIpDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 
 /**
  * <p>

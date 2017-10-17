@@ -132,7 +132,7 @@ public class FindScaleIOTaskHandlerTest {
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
         Map<String, DeviceAssignment> deviceToPoolMap = new HashMap<>();
 
-        DeviceAssignment assignment = new DeviceAssignment("devId1", "devSer1", "/dev/sda", "pool1", "pool1Name");
+        DeviceAssignment assignment = new DeviceAssignment("devId1", "devSer1", "/dev/sda", "deviceName", "pool1", "pool1Name");
         deviceToPoolMap.put("device1",assignment);
         storageResponseMessage.setDeviceToStoragePoolMap(deviceToPoolMap);
         storageResponseMessage.setWarnings(Arrays.asList(new Warning("1","No message")));

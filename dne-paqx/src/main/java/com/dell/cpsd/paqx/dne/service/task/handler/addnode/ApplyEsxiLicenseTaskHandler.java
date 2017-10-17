@@ -85,7 +85,11 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
 
             if (!success)
             {
-                throw new IllegalStateException("Apply ESXi Host License Failed");
+                // Don't want to fail the workflow for this task handler because ESXi
+                // comes with an evaluation license for 60 days so no need to fail it.
+                final String msg = "ESXi license application failed. This step needs to be performed manually";
+                LOGGER.warn(msg);
+                response.addWarning(msg);
             }
 
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);

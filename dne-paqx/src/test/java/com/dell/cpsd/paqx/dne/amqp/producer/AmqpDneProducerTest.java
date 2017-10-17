@@ -19,6 +19,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequest
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
@@ -535,6 +536,18 @@ public class AmqpDneProducerTest
     public void publishAddHostToProtectionDomain_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(AddHostToProtectionDomainRequestMessage.class), this.producer::publishAddHostToProtectionDomain);
+    }
+
+    @Test
+    public void publishUpdateSdcPerformanceProfile()
+    {
+        this.executeTest(mock(SioSdcUpdatePerformanceProfileRequestMessage.class), this.producer::publishUpdateSdcPerformanceProfile);
+    }
+
+    @Test
+    public void publishUpdateSdcPerformanceProfile_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(SioSdcUpdatePerformanceProfileRequestMessage.class), this.producer::publishUpdateSdcPerformanceProfile);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

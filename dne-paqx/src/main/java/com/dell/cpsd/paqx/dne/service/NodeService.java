@@ -10,7 +10,6 @@ import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
-import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
@@ -23,6 +22,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -402,4 +402,10 @@ public interface NodeService
      * @return
      */
     Map<String, Map<String, HostStorageDevice>> getHostToStorageDeviceMap(List<Host> hosts);
+
+    /**
+     * @param requestMessage - The <code>SioSdcUpdatePerformanceProfileRequestMessage</code> instance
+     * @return
+     */
+    boolean requestUpdateSdcPerformanceProfile(SioSdcUpdatePerformanceProfileRequestMessage requestMessage);
 }

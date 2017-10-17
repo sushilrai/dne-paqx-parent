@@ -269,6 +269,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new ConfigureVmNetworkSettingsResponseAdapter(this));
         this.consumer.addAdapter(new RemoteCommandExecutionResponseAdapter(this));
         this.consumer.addAdapter(new AddHostToProtectionDomainResponseAdapter(this));
+        this.consumer.addAdapter(new SioSdcUpdatePerformanceProfileResponseAdapter(this));
     }
 
     /**
@@ -2071,5 +2072,48 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     public Map<String, Map<String, HostStorageDevice>> getHostToStorageDeviceMap(List<Host> hosts)
     {
         return storagePoolEssRequestTransformer.getHostToStorageDeviceMap(hosts);
+    }
+
+    @Override
+    public boolean requestUpdateSdcPerformanceProfile(final SioSdcUpdatePerformanceProfileRequestMessage requestMessage)
+    {
+        try
+        {
+            com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishUpdateSdcPerformanceProfile(requestMessage);
+                }
+            });
+
+            SioSdcUpdatePerformanceProfileResponseMessage sioSdcUpdatePerformanceProfileResponseMessage = processResponse(response,
+                    SioSdcUpdatePerformanceProfileResponseMessage.class);
+
+            if (sioSdcUpdatePerformanceProfileResponseMessage != null)
+            {
+                return sioSdcUpdatePerformanceProfileResponseMessage.getStatus().equals(SioSdcUpdatePerformanceProfileResponseMessage.Status.SUCCESS);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("Exception occurred", ex);
+        }
+
+        return false;
     }
 }

@@ -19,6 +19,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequest
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 
 /**
@@ -269,4 +270,11 @@ public interface DneProducer
      * @param requestMessage
      */
     void publishRemoteCommandExecution(RemoteCommandExecutionRequestMessage requestMessage);
+
+    /**
+     * Update the ScaleIO SDC Performance Profile
+     *
+     * @param requestMessage
+     */
+    void publishUpdateSdcPerformanceProfile(SioSdcUpdatePerformanceProfileRequestMessage requestMessage);
 }

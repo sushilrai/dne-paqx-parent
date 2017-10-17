@@ -48,8 +48,9 @@ public class TestUtil
         String storagePoolId="sp1Id";
         String storagePoolName="sp1Name";
         String logicalPath="/dev/sda";
+        String deviceName = "deviceName";
 
-        DeviceAssignment deviceAssignment = new DeviceAssignment(deviceId, deviceSerial, logicalPath, storagePoolId, storagePoolName);
+        DeviceAssignment deviceAssignment = new DeviceAssignment(deviceId, deviceSerial, logicalPath, deviceName, storagePoolId, storagePoolName);
 
         deviceToDeviceAssignment.put(deviceId, deviceAssignment);
 

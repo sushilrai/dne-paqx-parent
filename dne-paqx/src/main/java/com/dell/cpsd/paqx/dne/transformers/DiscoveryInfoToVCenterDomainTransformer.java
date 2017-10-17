@@ -22,7 +22,6 @@ import com.dell.cpsd.virtualization.capabilities.api.DvSwitch;
 import com.dell.cpsd.virtualization.capabilities.api.GuestNicInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostPciDevice;
 import com.dell.cpsd.virtualization.capabilities.api.HostScsiDisk;
-import com.dell.cpsd.virtualization.capabilities.api.HostStorageDeviceInfo;
 import com.dell.cpsd.virtualization.capabilities.api.HostSystem;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualNic;
 import com.dell.cpsd.virtualization.capabilities.api.HostVirtualSwitch;
