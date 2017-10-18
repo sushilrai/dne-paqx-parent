@@ -49,6 +49,14 @@ public class UpdateSdcPerformanceProfileTaskHandler extends BaseTaskHandler impl
      */
     private final DataServiceRepository repository;
 
+    /*
+    * The time to wait before sending the request to update the sdc performance profile
+    */
+    private final long waitTime;
+
+    /*
+    * ScaleIO gateway credential components
+    */
     private static final String COMPONENT_TYPE = "SCALEIO-CLUSTER";
 
     /**
@@ -56,11 +64,13 @@ public class UpdateSdcPerformanceProfileTaskHandler extends BaseTaskHandler impl
      *
      * @param nodeService - The <code>NodeService</code> instance
      * @param repository  - The <code>DataServiceRepository</code> instance
+     * @param waitTime    - Time to wait before requesting the ScaleIO SDC performance profile update.
      */
-    public UpdateSdcPerformanceProfileTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    public UpdateSdcPerformanceProfileTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime)
     {
         this.nodeService = nodeService;
         this.repository = repository;
+        this.waitTime = waitTime;
     }
 
     @Override
@@ -119,6 +129,8 @@ public class UpdateSdcPerformanceProfileTaskHandler extends BaseTaskHandler impl
             requestMessage.setComponentEndpointIds(
                     new com.dell.cpsd.storage.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
                             componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
+
+            Thread.sleep(this.waitTime);
 
             final boolean succeeded = this.nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
 

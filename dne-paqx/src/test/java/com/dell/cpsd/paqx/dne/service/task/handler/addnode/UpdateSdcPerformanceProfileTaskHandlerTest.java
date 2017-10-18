@@ -77,7 +77,7 @@ public class UpdateSdcPerformanceProfileTaskHandlerTest
     @Before
     public void setUp()
     {
-        this.handler = spy(new UpdateSdcPerformanceProfileTaskHandler(this.nodeService, this.repository));
+        this.handler = spy(new UpdateSdcPerformanceProfileTaskHandler(this.nodeService, this.repository, 0));
     }
 
     @Test

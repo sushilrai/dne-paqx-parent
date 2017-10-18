@@ -10,6 +10,7 @@ package com.dell.cpsd.paqx.dne.service.workflow.addnode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.task.handler.addnode.*;
@@ -64,8 +65,9 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Value("${rackhd.sdc.vib.install.repo.url}")
     private String sdcVibUrl;
 
-    private static final int DEPLOY_SVM_WAIT_TIME           = 30000; // 30 seconds
-    private static final int CHANGE_SVM_CREDENTIALS_TIMEOUT = 75000; // 75 seconds
+    private static final long DEPLOY_SVM_WAIT_TIME              = TimeUnit.SECONDS.toMillis(30L);
+    private static final long CHANGE_SVM_CREDENTIALS_WAIT_TIME  = TimeUnit.SECONDS.toMillis(60L);
+    private static final long SDC_PERF_PROFILE_UPDATE_WAIT_TIME = TimeUnit.SECONDS.toMillis(15L);
 
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
@@ -114,7 +116,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("updateSdcPerformanceProfileTask")
     private WorkflowTask updateSdcPerformanceProfileTask()
     {
-        return createTask("Update ScaleIO SDC Performance Profile", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository));
+        return createTask("Update ScaleIO SDC Performance Profile", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository, SDC_PERF_PROFILE_UPDATE_WAIT_TIME));
     }
 
     @Bean("performanceTuneSvmTask")
@@ -137,7 +139,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("changeSvmCredentialsTask")
     private WorkflowTask changeSvmCredentialsTask()
     {
-        return createTask("Change ScaleIO VM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository, CHANGE_SVM_CREDENTIALS_TIMEOUT));
+        return createTask("Change ScaleIO VM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository, CHANGE_SVM_CREDENTIALS_WAIT_TIME));
     }
 
     @Bean("configureVmNetworkSettingsTask")

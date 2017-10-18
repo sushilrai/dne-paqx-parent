@@ -50,8 +50,11 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
     /*
     * The time to wait before sending the request to change the svm credentials
     */
-    private final int waitTime;
+    private final long waitTime;
 
+    /**
+     * ScaleIO SVM credential components
+     */
     private static final String COMPONENT_TYPE      = "COMMON-SERVER";
     private static final String ENDPOINT_TYPE       = "COMMON-SVM";
     private static final String FACTORY_CREDENTIALS = "SVM-FACTORY";
@@ -66,7 +69,7 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
      *                  We need this because after a SVM is deployed and powered up for the first time
      *                  it does a reboot, which makes any other solution for pinging the vm unreliable.
      */
-    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository, int waitTime)
+    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime)
     {
         this.nodeService = nodeService;
         this.repository = repository;

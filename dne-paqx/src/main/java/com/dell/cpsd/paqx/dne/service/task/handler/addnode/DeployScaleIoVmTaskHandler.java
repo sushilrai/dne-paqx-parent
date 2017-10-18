@@ -58,7 +58,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     /*
     * The time to wait before sending the request to deploy the scaleio vm
     */
-    private final int waitTime;
+    private final long waitTime;
 
     private static final String SCALEIO_VM_PREFIX        = "ScaleIO-";
     private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
@@ -77,7 +77,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
      * @param repository - The <code>NodeService</code> instance
      * @param waitTime - Before deploying the SVM need to wait for services to be up and running on the new host
      */
-    public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, int waitTime)
+    public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime)
     {
         this.nodeService = nodeService;
         this.repository = repository;
@@ -127,7 +127,7 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             requestMessage.setNewVMName(newScaleIoVmName);
             requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
 
-            Thread.sleep(this.waitTime);// TODO for test purpose
+            Thread.sleep(this.waitTime);
 
             final boolean succeeded = this.nodeService.requestDeployScaleIoVm(requestMessage);
 
