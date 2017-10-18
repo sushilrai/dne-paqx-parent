@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -74,7 +75,7 @@ public class PreProcessServiceImplTest {
     public void testPreProcessWorkFlowTask_setup()
     {
         Assert.assertNotNull(workFlowTasks);
-        Assert.assertEquals(11, workFlowTasks.size());
+        Assert.assertThat(workFlowTasks.size(), greaterThan(0));
     }
 
     @Test
@@ -122,5 +123,10 @@ public class PreProcessServiceImplTest {
     @Test
     public void testTaskName_assignDefaultCredentials() {
     	Assert.assertEquals("Assign Default Credentials", workFlowTasks.get("assignDefaultCredentials").getTaskName());
+    }
+
+    @Test
+    public void testTaskName_changeIdracCredentials() {
+        Assert.assertEquals("Change Out of Band Management Credentials", workFlowTasks.get("changeIdracCredentials").getTaskName());
     }
 }

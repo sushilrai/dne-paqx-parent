@@ -51,8 +51,13 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Value("${obm.services}")
     private String[] obmServices;
 
-    private static final int PING_TIMEOUT = 120000; // 120 seconds
+    private static final int PING_IDRAC_TIMEOUT = 120000; // 120 seconds
 
+    @Bean("changeIdracCredentialsTask")
+    private WorkflowTask changeIdracCredentialsTask()
+    {
+        return createTask("Change Out of Band Management Credentials", new ChangeIdracCredentialsTaskHandler(this.nodeService));
+    }
 
     @Bean("configureObmSettingsTask")
     private WorkflowTask configureObmSettingsTask(){
@@ -68,7 +73,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("pingIdracTask")
     private WorkflowTask pingIdracTask()
     {
-        return createTask("Ping Out of Band Management IP Address", new PingIdracTaskHandler(PING_TIMEOUT));
+        return createTask("Ping Out of Band Management IP Address", new PingIdracTaskHandler(PING_IDRAC_TIMEOUT));
     }
 
     @Bean("configureBootDeviceIdrac")
@@ -124,6 +129,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
+        workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
         workflowTasks.put("listScaleIoComponents", listScaleIoComponentsTask());
         workflowTasks.put("listVCenterComponents", listVCenterComponentsTask());
         workflowTasks.put("discoverScaleIo", discoverScaleIoTask());

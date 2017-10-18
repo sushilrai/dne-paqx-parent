@@ -24,7 +24,6 @@ public class AddNodeTaskConfig
         final Map<String, Step> workflowSteps = new HashMap<>();
         addWorkflowSteps(workflowSteps,
                 "retrieveEsxiDefaultCredentialDetails",
-                //"changeIdracCredentials", currently has a bug so leave out for now...
                 "installEsxi",
                 "addHostToVcenter",
                 "applyEsxiLicense",

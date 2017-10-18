@@ -80,7 +80,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-		workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
         workflowTasks.put("installEsxi", installEsxiTask());
         workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
         workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
@@ -124,6 +123,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         return createTask("Performance Tune the ScaleIO VM", new PerformanceTuneSvmTaskHandler(nodeService, repository));
     }
+
     @Bean("addHostToProtectionDomain")
     private WorkflowTask addHostToProtectionDomainTask()
     {
@@ -170,12 +170,6 @@ public class AddNodeService extends BaseService implements IAddNodeService
     private WorkflowTask updateSystemDefinitionTask()
     {
         return createTask("Update System Definition", new AddNodeToSystemDefinitionTaskHandler(this.sdkAMQPClient, repository));
-    }
-    
-    @Bean("changeIdracCredentialsTask")
-    private WorkflowTask changeIdracCredentialsTask()
-    {
-        return createTask("Change Out of Band Management Credentials", new ChangeIdracCredentialsTaskHandler(this.nodeService));
     }
 
     @Bean("configurePxeBootTask")

@@ -35,7 +35,7 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
     /*
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChangeIdracCredentialsTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChangeSvmCredentialsTaskHandler.class);
 
     /*
      * The <code>NodeService</code> instance

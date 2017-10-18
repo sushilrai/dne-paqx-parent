@@ -11,7 +11,6 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
-import com.dell.cpsd.paqx.dne.service.workflow.addnode.AddNodeService;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,9 +21,11 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.greaterThan;
 
-public class AddNodeServiceImplTest {
-    private AddNodeService addNodeServiceUnderTest;
+public class AddNodeServiceImplTest
+{
+    private AddNodeService            addNodeServiceUnderTest;
     private Map<String, WorkflowTask> workFlowTasks;
+
     @Before
     public void setUp()
     {
@@ -39,16 +40,14 @@ public class AddNodeServiceImplTest {
 
         this.addNodeServiceUnderTest = new AddNodeService();
         addNodeServiceUnderTest.setWorkflowService(workflowServiceUnderTest);
-        
+
         workFlowTasks = addNodeServiceUnderTest.addNodeWorkflowTasks();
     }
 
     @Test
     public void testCreateWorkflow()
     {
-
-        Job initialJob = addNodeServiceUnderTest.createWorkflow(
-                "addNode", "startAddNodeWorkflow", "status1");
+        Job initialJob = addNodeServiceUnderTest.createWorkflow("addNode", "startAddNodeWorkflow", "status1");
 
         Assert.assertNotNull(initialJob);
         Assert.assertNotNull(initialJob.getId());
@@ -57,42 +56,36 @@ public class AddNodeServiceImplTest {
     @Test
     public void testFindJob()
     {
-        Job initialJob = addNodeServiceUnderTest.createWorkflow(
-                "addNode", "startAddNodeWorkflow", "status1");
+        Job initialJob = addNodeServiceUnderTest.createWorkflow("addNode", "startAddNodeWorkflow", "status1");
 
         Job foundJob = addNodeServiceUnderTest.findJob(initialJob.getId());
         Assert.assertNotNull(initialJob);
         Assert.assertNotNull(foundJob);
         Assert.assertEquals(initialJob, foundJob);
     }
-    
+
     @Test
-    public void testAddNodeWorkFlowTasks_setup() 
+    public void testAddNodeWorkFlowTasks_setup()
     {
         Assert.assertNotNull(workFlowTasks);
         Assert.assertThat(workFlowTasks.size(), greaterThan(0));
     }
-    
 
     @Test
     public void testTaskName_updateSystemDefinitionTask()
     {
         Assert.assertEquals("Update System Definition", workFlowTasks.get("updateSystemDefinition").getTaskName());
     }
-    
-    @Test
-    public void testTaskName_changeIdracCredentials() {
-    	Assert.assertEquals("Change Out of Band Management Credentials", workFlowTasks.get("changeIdracCredentials").getTaskName());
-    }
-    
-    @Test
-    public void testTaskName_notifyNodeDiscoveryToUpdateStatus() {
-    	Assert.assertEquals("Notify Node Discovery To Update Status", workFlowTasks.get("notifyNodeDiscoveryToUpdateStatus").getTaskName());
-    }
-
 
     @Test
-    public void testTaskName_findConfigurePxeBoot() {
+    public void testTaskName_notifyNodeDiscoveryToUpdateStatus()
+    {
+        Assert.assertEquals("Notify Node Discovery To Update Status", workFlowTasks.get("notifyNodeDiscoveryToUpdateStatus").getTaskName());
+    }
+
+    @Test
+    public void testTaskName_findConfigurePxeBoot()
+    {
         Assert.assertEquals("Configure Pxe boot", workFlowTasks.get("configurePxeBoot").getTaskName());
     }
 }
