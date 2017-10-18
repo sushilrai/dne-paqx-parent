@@ -393,7 +393,7 @@ public class AmqpDneProducer implements DneProducer {
     @Override
     public void publishValidateStorage(EssValidateStoragePoolRequestMessage requestMessage) {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
-        LOGGER.info("Send request to ESS validation for storage pools.");
+        LOGGER.info("Send request to ESS validation for storage pools: " + requestMessage);
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, requestMessage);
     }
 

@@ -16,6 +16,7 @@ import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.service.engineering.standards.StoragePool;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,42 +72,48 @@ public class StoragePoolEssRequestTransformer
         storagePool.setId(scaleIOStoragePool.getId());
         storagePool.setName(scaleIOStoragePool.getName());
         storagePool.setNumberOfDevices("" + scaleIOStoragePool.getDevices().size());
-        storagePool.setType(StoragePool.Type.HDD);
 
+        // for empty storage pools, set the type to SSD
         List<Device> devices = new ArrayList<>();
-        for (ScaleIODevice scaleIODevice : scaleIOStoragePool.getDevices())
-        {
+        if (CollectionUtils.isEmpty(scaleIOStoragePool.getDevices())) {
+            storagePool.setType(StoragePool.Type.SSD);
+        } else {
+            storagePool.setType(StoragePool.Type.HDD);
 
-            if (scaleIODevice == null)
+            for (ScaleIODevice scaleIODevice : scaleIOStoragePool.getDevices())
             {
-                continue;
-            }
-            Device device = new Device();
-            device.setName(scaleIODevice.getName());
-            device.setType(Device.Type.HDD);
 
-            // correlate the vCenter and scaleIO data
-            Map<String, HostStorageDevice> displayNameToSsdMap = correlateScaleIOAndVcenterData(scaleIODevice.getSds(),
-                    hostToStorageDeviceMap);
-
-            // for the matching hosts in vCenter, extract the information like serialNumber, disk type
-            HostStorageDevice hostStorageDevice = displayNameToSsdMap.get(device.getName());
-            if (hostStorageDevice != null)
-            {
-                device.setSerialNumber(hostStorageDevice.getSerialNumber());
-                device.setId(hostStorageDevice.getCanonicalName() != null ? hostStorageDevice.getCanonicalName().split("\\.")[1] : null);
-                if (hostStorageDevice.isSsd())
+                if (scaleIODevice == null)
                 {
-                    device.setType(Device.Type.SSD);
-                    // if type = SSD already set on the pool, don't set it again
-                    if (StoragePool.Type.HDD.equals(storagePool.getType()))
+                    continue;
+                }
+                Device device = new Device();
+                device.setName(scaleIODevice.getName());
+                device.setType(Device.Type.HDD);
+
+                // correlate the vCenter and scaleIO data
+                Map<String, HostStorageDevice> displayNameToSsdMap = correlateScaleIOAndVcenterData(scaleIODevice.getSds(),
+                        hostToStorageDeviceMap);
+
+                // for the matching hosts in vCenter, extract the information like serialNumber, disk type
+                HostStorageDevice hostStorageDevice = displayNameToSsdMap.get(device.getName());
+                if (hostStorageDevice != null)
+                {
+                    device.setSerialNumber(hostStorageDevice.getSerialNumber());
+                    device.setId(hostStorageDevice.getCanonicalName() != null ? hostStorageDevice.getCanonicalName().split("\\.")[1] : null);
+                    if (hostStorageDevice.isSsd())
                     {
-                        storagePool.setType(StoragePool.Type.SSD);
+                        device.setType(Device.Type.SSD);
+                        // if type = SSD already set on the pool, don't set it again
+                        if (StoragePool.Type.HDD.equals(storagePool.getType()))
+                        {
+                            storagePool.setType(StoragePool.Type.SSD);
+                        }
                     }
                 }
-            }
 
-            devices.add(device);
+                devices.add(device);
+            }
         }
 
         storagePool.setDevices(devices);
