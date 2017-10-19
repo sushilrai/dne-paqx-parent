@@ -1,32 +1,59 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
+
 package com.dell.cpsd.paqx.dne.service.model;
 
-public class ValidateProtectionDomainResponse extends TaskResponse {
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @version 1.0
+ * @since 1.0
+ */
+public class ValidateProtectionDomainResponse extends TaskResponse
+{
 
-    private String protectionDomains;
+    private String protectionDomainName;
+    private String protectionDomainId;
 
-    public ValidateProtectionDomainResponse() {}
-
-    public ValidateProtectionDomainResponse(String protectionDomains) {
-        this.protectionDomains = protectionDomains;
+    public ValidateProtectionDomainResponse()
+    {
     }
 
-    public String getProtectionDomains() {
-        return protectionDomains;
+    public ValidateProtectionDomainResponse(String protectionDomainName, String protectionDomainId)
+    {
+        this.protectionDomainName = protectionDomainName;
+        this.protectionDomainId = protectionDomainId;
     }
 
-    public void setProtectionDomains(String protectionDomains) {
-        this.protectionDomains = protectionDomains;
+    public String getProtectionDomainName()
+    {
+        return protectionDomainName;
     }
 
-    public String toString(){
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("ProtectionDomains{");
-        builder.append("protectionDomains=").append(this.protectionDomains);
-        builder.append("}");
-
-        return builder.toString();
-
+    public void setProtectionDomainName(String protectionDomainName)
+    {
+        this.protectionDomainName = protectionDomainName;
     }
 
+    public String getProtectionDomainId()
+    {
+        return protectionDomainId;
+    }
+
+    public void setProtectionDomainId(final String protectionDomainId)
+    {
+        this.protectionDomainId = protectionDomainId;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ProtectionDomain{" + "protectionDomainName='" + protectionDomainName + '\'' + ", protectionDomainId='" + protectionDomainId
+                + '\'' + '}';
+    }
 }

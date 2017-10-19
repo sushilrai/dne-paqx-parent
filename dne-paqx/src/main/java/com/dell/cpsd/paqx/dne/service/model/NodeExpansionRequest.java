@@ -33,7 +33,8 @@ public class NodeExpansionRequest
     private String symphonyUuid;
     private String vMotionManagementIpAddress;
     private String vMotionManagementSubnetMask;
-    private String protectionDomain;
+    private String protectionDomainName;
+    private String protectionDomainId;
 
     Map<String, DeviceAssignment> deviceToDeviceStoragePool;
 
@@ -42,10 +43,13 @@ public class NodeExpansionRequest
     }
 
     public NodeExpansionRequest(String idracIpAddress, String idracGatewayIpAddress, String idracSubnetMask, String esxiManagementIpAddress,
-            String esxiManagementGatewayIpAddress, String esxiManagementSubnetMask, String esxiManagementHostname, String scaleIoData1SvmIpAddress, String scaleIoData1KernelIpAddress,
-            String scaleIoData1KernelAndSvmSubnetMask, String scaleIoData2SvmIpAddress, String scaleIoData2KernelIpAddress, String scaleIoData2KernelAndSvmSubnetMask,
-            String scaleIoSvmManagementIpAddress, String scaleIoSvmManagementGatewayAddress, String scaleIoSvmManagementSubnetMask, String symphonyUuid, String clusterName,
-            String vMotionManagementIpAddress, String vMotionManagementSubnetMask, Map<String, DeviceAssignment> deviceToDeviceStoragePool) {
+            String esxiManagementGatewayIpAddress, String esxiManagementSubnetMask, String esxiManagementHostname,
+            String scaleIoData1SvmIpAddress, String scaleIoData1KernelIpAddress, String scaleIoData1KernelAndSvmSubnetMask,
+            String scaleIoData2SvmIpAddress, String scaleIoData2KernelIpAddress, String scaleIoData2KernelAndSvmSubnetMask,
+            String scaleIoSvmManagementIpAddress, String scaleIoSvmManagementGatewayAddress, String scaleIoSvmManagementSubnetMask,
+            String symphonyUuid, String clusterName, String vMotionManagementIpAddress, String vMotionManagementSubnetMask,
+            Map<String, DeviceAssignment> deviceToDeviceStoragePool)
+    {
         this.idracIpAddress = idracIpAddress;
         this.idracGatewayIpAddress = idracGatewayIpAddress;
         this.idracSubnetMask = idracSubnetMask;
@@ -124,14 +128,18 @@ public class NodeExpansionRequest
         return esxiManagementGatewayIpAddress;
     }
 
-    public void setEsxiManagementGatewayIpAddress(String esxiManagementGatewayIpAddress) { this.esxiManagementGatewayIpAddress = esxiManagementGatewayIpAddress; }
+    public void setEsxiManagementGatewayIpAddress(String esxiManagementGatewayIpAddress)
+    {
+        this.esxiManagementGatewayIpAddress = esxiManagementGatewayIpAddress;
+    }
 
     public String getEsxiManagementSubnetMask()
     {
         return esxiManagementSubnetMask;
     }
 
-    public void setEsxiManagementSubnetMask(String esxiManagementSubnetMask) {
+    public void setEsxiManagementSubnetMask(String esxiManagementSubnetMask)
+    {
         this.esxiManagementSubnetMask = esxiManagementSubnetMask;
     }
 
@@ -140,7 +148,8 @@ public class NodeExpansionRequest
         return esxiManagementHostname;
     }
 
-    public void setEsxiManagementHostname(String esxiManagementHostname) {
+    public void setEsxiManagementHostname(String esxiManagementHostname)
+    {
         this.esxiManagementHostname = esxiManagementHostname;
     }
 
@@ -174,19 +183,23 @@ public class NodeExpansionRequest
         this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
     }
 
-    public String getClusterName() {
+    public String getClusterName()
+    {
         return clusterName;
     }
 
-    public void setClusterName(String clusterName) {
+    public void setClusterName(String clusterName)
+    {
         this.clusterName = clusterName;
     }
 
-    public String getSymphonyUuid() {
+    public String getSymphonyUuid()
+    {
         return symphonyUuid;
     }
 
-    public void setSymphonyUuid(String symphonyUuid) {
+    public void setSymphonyUuid(String symphonyUuid)
+    {
         this.symphonyUuid = symphonyUuid;
     }
 
@@ -245,11 +258,13 @@ public class NodeExpansionRequest
         return vMotionManagementIpAddress;
     }
 
-    public String getScaleIoSvmManagementGatewayAddress() {
+    public String getScaleIoSvmManagementGatewayAddress()
+    {
         return scaleIoSvmManagementGatewayAddress;
     }
 
-    public void setScaleIoSvmManagementGatewayAddress(String scaleIoSvmManagementGatewayAddress) {
+    public void setScaleIoSvmManagementGatewayAddress(String scaleIoSvmManagementGatewayAddress)
+    {
         this.scaleIoSvmManagementGatewayAddress = scaleIoSvmManagementGatewayAddress;
     }
 
@@ -268,12 +283,24 @@ public class NodeExpansionRequest
         this.vMotionManagementSubnetMask = vMotionManagementSubnetMask;
     }
 
-    public String getProtectionDomain() {
-        return protectionDomain;
+    public String getProtectionDomainName()
+    {
+        return protectionDomainName;
     }
 
-    public void setProtectionDomain(String protectionDomain) {
-        this.protectionDomain = protectionDomain;
+    public void setProtectionDomainName(String protectionDomainName)
+    {
+        this.protectionDomainName = protectionDomainName;
+    }
+
+    public String getProtectionDomainId()
+    {
+        return protectionDomainId;
+    }
+
+    public void setProtectionDomainId(final String protectionDomainId)
+    {
+        this.protectionDomainId = protectionDomainId;
     }
 
     @Override
@@ -284,13 +311,14 @@ public class NodeExpansionRequest
                 + ", esxiManagementGatewayIpAddress='" + esxiManagementGatewayIpAddress + '\'' + ", esxiManagementSubnetMask='"
                 + esxiManagementSubnetMask + '\'' + ", esxiManagementHostname='" + esxiManagementHostname + '\''
                 + ", scaleIoData1SvmIpAddress='" + scaleIoData1SvmIpAddress + '\'' + ", scaleIoData1KernelIpAddress='"
-                + scaleIoData1KernelIpAddress + '\'' + ", scaleIoData1KernelAndSvmGatewayAddress='" + scaleIoSvmManagementGatewayAddress +
-                ", scaleIoData1KernelAndSvmSubnetMask='" + scaleIoData1KernelAndSvmSubnetMask +'\''
+                + scaleIoData1KernelIpAddress + '\'' + ", scaleIoData1KernelAndSvmSubnetMask='" + scaleIoData1KernelAndSvmSubnetMask + '\''
                 + ", scaleIoData2SvmIpAddress='" + scaleIoData2SvmIpAddress + '\'' + ", scaleIoData2KernelIpAddress='"
                 + scaleIoData2KernelIpAddress + '\'' + ", scaleIoData2KernelAndSvmSubnetMask='" + scaleIoData2KernelAndSvmSubnetMask + '\''
-                + ", scaleIoSvmManagementIpAddress='" + scaleIoSvmManagementIpAddress + '\'' + ", scaleIoSvmManagementSubnetMask='"
-                + scaleIoSvmManagementSubnetMask + '\'' + ", clusterName='" + clusterName + '\''
-                + '\'' + ", symphonyUuid='" + symphonyUuid + '\'' + ", vMotionManagementIpAddress='" + vMotionManagementIpAddress + '\''
-                + ", vMotionManagementSubnetMask='" + vMotionManagementSubnetMask + '\'' + '}';
+                + ", scaleIoSvmManagementIpAddress='" + scaleIoSvmManagementIpAddress + '\'' + ", scaleIoSvmManagementGatewayAddress='"
+                + scaleIoSvmManagementGatewayAddress + '\'' + ", scaleIoSvmManagementSubnetMask='" + scaleIoSvmManagementSubnetMask + '\''
+                + ", clusterName='" + clusterName + '\'' + ", symphonyUuid='" + symphonyUuid + '\'' + ", vMotionManagementIpAddress='"
+                + vMotionManagementIpAddress + '\'' + ", vMotionManagementSubnetMask='" + vMotionManagementSubnetMask + '\''
+                + ", protectionDomainName='" + protectionDomainName + '\'' + ", protectionDomainId='" + protectionDomainId + '\''
+                + ", deviceToDeviceStoragePool=" + deviceToDeviceStoragePool + '}';
     }
 }

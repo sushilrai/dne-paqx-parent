@@ -71,9 +71,9 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
              * Getting the protection domain id from FindProtectionDomainTaskHandler
              */
             final NodeExpansionRequest inputParams = job.getInputParams();
-            final String protectionDomain = inputParams.getProtectionDomain();
+            final String protectionDomainId = inputParams.getProtectionDomainId();
 
-            if (protectionDomain == null)
+            if (protectionDomainId == null)
             {
                 throw new IllegalStateException("No Protection domain provided");
             }
@@ -100,7 +100,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
             componentEndpoints.setComponentUuid(componentEndpointIds.getComponentUuid());
             componentEndpoints.setCredentialUuid(componentEndpointIds.getCredentialUuid());
 
-            HostToProtectionDomain hostToProtectionDomain = setHostToProtectionDomain(protectionDomain, name, sdsIpList, deviceInfoList);
+            HostToProtectionDomain hostToProtectionDomain = setHostToProtectionDomain(protectionDomainId, name, sdsIpList, deviceInfoList);
 
             /**
              * Adding the endpoint url

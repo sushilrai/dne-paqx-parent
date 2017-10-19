@@ -64,7 +64,7 @@ public class AddHostToProtectionDomainTaskHandlerTest
 
     private static final String esxiManagementHostname = "fpr1-h17.lab.vce.com";
 
-    private static final String protectionDomain = "756edc5b00000000";
+    private static final String protectionDomainId = "756edc5b00000000";
 
     private static final String scaleIoData1SvmIpAddress = "192.168.152.24";
 
@@ -80,13 +80,12 @@ public class AddHostToProtectionDomainTaskHandlerTest
         this.handler = spy(new AddHostToProtectionDomainTaskHandler(this.service, this.repository));
     }
 
-
     @Test
     public void executeTask_successful_case() throws Exception
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.inputParams).when(this.job).getInputParams();
-        when(this.inputParams.getProtectionDomain()).thenReturn(this.protectionDomain);
+        when(this.inputParams.getProtectionDomainId()).thenReturn(this.protectionDomainId);
         when(this.inputParams.getEsxiManagementHostname()).thenReturn(this.esxiManagementHostname);
         when(this.inputParams.getScaleIoData1SvmIpAddress()).thenReturn(this.scaleIoData1SvmIpAddress);
         when(this.inputParams.getScaleIoData2SvmIpAddress()).thenReturn(this.scaleIoData2SvmIpAddress);
@@ -106,7 +105,7 @@ public class AddHostToProtectionDomainTaskHandlerTest
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.inputParams).when(this.job).getInputParams();
-        when(this.inputParams.getProtectionDomain()).thenReturn(this.protectionDomain);
+        when(this.inputParams.getProtectionDomainId()).thenReturn(this.protectionDomainId);
         when(this.inputParams.getEsxiManagementIpAddress()).thenReturn(this.esxiManagementIpAddress);
         when(this.inputParams.getScaleIoData1SvmIpAddress()).thenReturn(this.scaleIoData1SvmIpAddress);
         when(this.inputParams.getScaleIoData2SvmIpAddress()).thenReturn(this.scaleIoData2SvmIpAddress);
@@ -126,7 +125,7 @@ public class AddHostToProtectionDomainTaskHandlerTest
     {
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.inputParams).when(this.job).getInputParams();
-        when(this.inputParams.getProtectionDomain()).thenReturn(this.protectionDomain);
+        when(this.inputParams.getProtectionDomainId()).thenReturn(this.protectionDomainId);
         when(this.inputParams.getEsxiManagementIpAddress()).thenReturn(this.esxiManagementIpAddress);
         when(this.inputParams.getScaleIoData1SvmIpAddress()).thenReturn(this.scaleIoData1SvmIpAddress);
         when(this.inputParams.getScaleIoData2SvmIpAddress()).thenReturn(this.scaleIoData2SvmIpAddress);
@@ -148,7 +147,7 @@ public class AddHostToProtectionDomainTaskHandlerTest
 
         doReturn(this.response).when(this.handler).initializeResponse(this.job);
         doReturn(this.inputParams).when(this.job).getInputParams();
-        when(this.inputParams.getProtectionDomain()).thenReturn(this.protectionDomain);
+        when(this.inputParams.getProtectionDomainId()).thenReturn(this.protectionDomainId);
         when(this.inputParams.getEsxiManagementHostname()).thenReturn(this.esxiManagementHostname);
         when(this.inputParams.getScaleIoData1SvmIpAddress()).thenReturn(this.scaleIoData1SvmIpAddress);
         when(this.inputParams.getScaleIoData2SvmIpAddress()).thenReturn(this.scaleIoData2SvmIpAddress);

@@ -132,11 +132,13 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
                             scaleIODataServer.setName(scaleIOSDS.getName());
                             scaleIODataServers.add(scaleIODataServer);
 
-                            if (scaleIOSDS.getName().contains(job.getInputParams().getEsxiManagementHostname()) || scaleIOSDS.getName().contains(job.getInputParams().getEsxiManagementIpAddress()))
+                            if (scaleIOSDS.getName().contains(job.getInputParams().getEsxiManagementHostname()) || scaleIOSDS.getName()
+                                    .contains(job.getInputParams().getEsxiManagementIpAddress()))
                             {
                                 nodeData.setProtectionDomainId(scaleIOProtectionDomain.getId());
                             }
-                            else{
+                            else
+                            {
                                 nodeData.setProtectionDomainId("");
                             }
                         }
@@ -157,7 +159,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
              * Creating the response.
              */
             EssValidateProtectionDomainsResponseMessage protectionDomainResponse = nodeService.validateProtectionDomains(requestMessage);
-            if (protectionDomainResponse.getValidProtectionDomains().size() == 0 )
+            if (protectionDomainResponse.getValidProtectionDomains().size() == 0)
             {
                 response.addError(protectionDomainResponse.getError().getMessage());
                 throw new IllegalStateException("No valid protection domain found");
@@ -170,12 +172,14 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             String protectionDomainId = protectionDomainResponse.getValidProtectionDomains().get(0).getProtectionDomainID();
 
             // find protection domain based on id
-            List<String> protectionDomainNameList = protectionDomainList.stream().filter(p->p.getId().equalsIgnoreCase(protectionDomainId))
-                        .map(p->p.getName()).collect(Collectors.toList());
+            List<String> protectionDomainNameList = protectionDomainList.stream()
+                    .filter(p -> p.getId().equalsIgnoreCase(protectionDomainId)).map(p -> p.getName()).collect(Collectors.toList());
 
-            validateProtectionDomainResponse.setProtectionDomains(protectionDomainNameList.size() == 1 ? protectionDomainList.get(0).getName(): protectionDomainId);
+            validateProtectionDomainResponse.setProtectionDomainName(
+                    protectionDomainNameList.size() == 1 ? protectionDomainList.get(0).getName() : protectionDomainId);
+            validateProtectionDomainResponse.setProtectionDomainId(protectionDomainId);
             response.setResults(buildResponseResult(validateProtectionDomainResponse));
-            for (Integer n = 0 ;n < protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().size(); n++)
+            for (Integer n = 0; n < protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().size(); n++)
             {
                 response.addWarning(protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().get(n).getMessage());
             }
@@ -203,10 +207,16 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             return result;
         }
 
-        if (validateProtectionDomainResponse.getProtectionDomains() != null)
+        if (validateProtectionDomainResponse.getProtectionDomainName() != null)
         {
-            result.put("protectionDomain", validateProtectionDomainResponse.getProtectionDomains());
+            result.put("protectionDomainName", validateProtectionDomainResponse.getProtectionDomainName());
         }
+
+        if (validateProtectionDomainResponse.getProtectionDomainId() != null)
+        {
+            result.put("protectionDomainId", validateProtectionDomainResponse.getProtectionDomainId());
+        }
+
         return result;
     }
 
@@ -234,9 +244,10 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         {
             if (nodeInventory != null && nodeInventory.getNodeInventory() != null)
             {
-                JSONArray productNames= JsonPath.read(nodeInventory.getNodeInventory(), "$..data..['System Information']['Product Name']");
+                JSONArray productNames = JsonPath.read(nodeInventory.getNodeInventory(), "$..data..['System Information']['Product Name']");
                 String productName;
-                if(CollectionUtils.isEmpty(productNames)) {
+                if (CollectionUtils.isEmpty(productNames))
+                {
                     throw new InvalidNameException("No product name found for node " + nodeInventory.getSymphonyUUID());
                 }
 
