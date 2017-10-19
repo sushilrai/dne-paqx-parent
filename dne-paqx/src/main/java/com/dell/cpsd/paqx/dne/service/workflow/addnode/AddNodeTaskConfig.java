@@ -32,9 +32,8 @@ public class AddNodeTaskConfig
                 "enablePciPassthroughHost",
                 "installScaleIoVib",
                 "enterHostMaintenanceMode",
-                "configurePxeBoot",
-                //"rebootHost",
-                //"exitHostMaintenanceMode2",
+                "rebootHost",
+                "exitHostMaintenanceMode2",
                 "configureScaleIoVib",
                 "updateSdcPerformanceProfile",
                 "addHostToDvSwitch",
@@ -46,6 +45,7 @@ public class AddNodeTaskConfig
                 "installSvmPackages",
                 "performanceTuneSvm",
                 "addHostToProtectionDomain",
+                "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
 
