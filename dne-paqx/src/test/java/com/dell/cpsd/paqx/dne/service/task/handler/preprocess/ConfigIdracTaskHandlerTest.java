@@ -53,11 +53,11 @@ public class ConfigIdracTaskHandlerTest
     /*
      * The job running the add node to system definition task handler.
      */
-    private Job         job         = null;
+    private Job job = null;
 
     /**
      * The test setup.
-     * 
+     *
      * @since 1.0
      */
     @Before
@@ -73,19 +73,18 @@ public class ConfigIdracTaskHandlerTest
 
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress","scaleIoSvmManagementGatewayAddress",  "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
+                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
         this.job.changeToNextStep("configIdrac");
     }
 
     /**
      * Test successful execution of ConfigIdracTaskHandler.executeTask() method
-     * 
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
      * @since 1.0
      */
     @Test
@@ -106,10 +105,9 @@ public class ConfigIdracTaskHandlerTest
     /**
      * Test error execution of ConfigIdracTaskHandler.executeTask() method - test error case where the NodeService idracNetworkSettings
      * experiences an error.
-     * 
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
      * @since 1.0
      */
     @Test

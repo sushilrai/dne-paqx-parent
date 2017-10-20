@@ -3,6 +3,7 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.SetObmSettingsRequestMessage;
@@ -68,7 +69,8 @@ public class ConfigureObmSettingsTaskHandlerTest
     public void setUp()
     {
         PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preProcessTaskConfig.preProcessWorkflowSteps());
+        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(),
+                preProcessTaskConfig.preProcessWorkflowSteps());
 
         PreProcessService preProcessService = new PreProcessService();
         preProcessService.setWorkflowService(workflowService);
@@ -76,9 +78,9 @@ public class ConfigureObmSettingsTaskHandlerTest
         this.job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
+                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
 
         this.job.changeToNextStep("configureObmSettings");
@@ -89,13 +91,12 @@ public class ConfigureObmSettingsTaskHandlerTest
      *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("SUCCESS",null);
+        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("SUCCESS", null);
         ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
         when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
 
@@ -112,13 +113,12 @@ public class ConfigureObmSettingsTaskHandlerTest
      *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("FAILED",null);
+        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("FAILED", null);
         ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
         when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
 

@@ -3,6 +3,7 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
 import com.dell.cpsd.paqx.dne.TestUtil;
@@ -40,7 +41,8 @@ import static org.mockito.Mockito.when;
  */
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConfigureBootDeviceIdracTaskHandlerTest {
+public class ConfigureBootDeviceIdracTaskHandlerTest
+{
 
     /*
      * The <code>NodeService</code> instance.
@@ -52,16 +54,19 @@ public class ConfigureBootDeviceIdracTaskHandlerTest {
     /*
      * The job running the add node to system definition task handler.
      */
-    private Job job         = null;
+    private Job job = null;
+
     /**
      * The test setup.
      *
      * @since 1.0
      */
     @Before
-    public void setUp(){
+    public void setUp()
+    {
         PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preProcessTaskConfig.preProcessWorkflowSteps());
+        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(),
+                preProcessTaskConfig.preProcessWorkflowSteps());
 
         PreProcessService preProcessService = new PreProcessService();
         preProcessService.setWorkflowService(workflowService);
@@ -69,24 +74,24 @@ public class ConfigureBootDeviceIdracTaskHandlerTest {
         this.job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
+                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
         this.job.changeToNextStep("configureBootDeviceIdrac");
     }
+
     /**
      * Test successful execution of ConfigureBootDeviceIdracTaskHandler.executeTask() method
      *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("SUCCESS",null);
+        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("SUCCESS", null);
         ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
         when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
 
@@ -103,13 +108,12 @@ public class ConfigureBootDeviceIdracTaskHandlerTest {
      *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     *
      * @since 1.0
      */
     @Test
     public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("FAILED",null);
+        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("FAILED", null);
         ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
         when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
 

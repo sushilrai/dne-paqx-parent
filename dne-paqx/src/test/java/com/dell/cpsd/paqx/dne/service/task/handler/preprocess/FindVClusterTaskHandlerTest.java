@@ -41,11 +41,11 @@ public class FindVClusterTaskHandlerTest
     /*
      * The job running the add node to system definition task handler.
      */
-    private Job         job         = null;
+    private Job job = null;
 
     /**
      * The test setup.
-     * 
+     *
      * @since 1.0
      */
     @Before
@@ -61,9 +61,9 @@ public class FindVClusterTaskHandlerTest
 
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress","scaleIoSvmManagementGatewayAddress",  "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
+                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
 
         this.job.changeToNextStep("findVCluster");
@@ -71,14 +71,14 @@ public class FindVClusterTaskHandlerTest
 
     /**
      * Test successful execution of FindVClusterTaskHandler.executeTask() method
-     * 
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
      * @since 1.0
      */
     @Test
-    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException {
+    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
+    {
         ClusterInfo vCluster = new ClusterInfo("clusterTest1", 2);
         List<ClusterInfo> vClusters = new ArrayList<>();
         vClusters.add(vCluster);
@@ -100,14 +100,14 @@ public class FindVClusterTaskHandlerTest
 
     /**
      * Test unsuccessful execution of FindVClusterTaskHandler.executeTask() method
-     * 
+     *
      * @throws ServiceExecutionException
      * @throws ServiceTimeoutException
-     * 
      * @since 1.0
      */
     @Test
-    public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException {
+    public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
+    {
         ClusterInfo vCluster = new ClusterInfo("clusterTest1", 2);
         List<ClusterInfo> vClusters = new ArrayList<>();
         vClusters.add(vCluster);
@@ -121,7 +121,6 @@ public class FindVClusterTaskHandlerTest
 
         when(this.nodeService.listClusters()).thenReturn(vClusters);
         when(this.nodeService.validateClusters(vClusters)).thenReturn(resMsg);
-
 
         FindVClusterTaskHandler instance = new FindVClusterTaskHandler(this.nodeService);
         boolean expectedResult = false;

@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Uni test for find scaleio task.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -58,17 +58,16 @@ import static org.mockito.Mockito.when;
  */
 
 @RunWith(MockitoJUnitRunner.class)
-public class FindScaleIOTaskHandlerTest {
+public class FindScaleIOTaskHandlerTest
+{
 
     @Mock
     private NodeService nodeService = null;
 
-
-
     /*
      * The job running the add node to system definition task handler.
      */
-    private Job job         = null;
+    private Job job = null;
 
     private String NODE_INVENTORY_JSON;
 
@@ -77,19 +76,22 @@ public class FindScaleIOTaskHandlerTest {
     {
         //read json string from file
         BufferedReader reader = new BufferedReader(new FileReader("src/test/resources/node_inventory.json"));
-        String         line = null;
-        StringBuilder  stringBuilder = new StringBuilder();
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
 
-        try {
-            while((line = reader.readLine()) != null) {
+        try
+        {
+            while ((line = reader.readLine()) != null)
+            {
                 stringBuilder.append(line);
             }
 
             NODE_INVENTORY_JSON = stringBuilder.toString();
-        } finally {
+        }
+        finally
+        {
             reader.close();
         }
-
 
         PreProcessTaskConfig preprocessConfig = new PreProcessTaskConfig();
         WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preprocessConfig.preProcessWorkflowSteps());
@@ -101,10 +103,9 @@ public class FindScaleIOTaskHandlerTest {
 
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
                 "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1SvmGatewayAddress",
-                "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid", "clausterName",
-                "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+                "scaleIoData1SvmGatewayAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2",
+                "scaleIoData2KernelAndSvmSubnetMask", "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
         this.job.setInputParams(nodeExpansionRequest);
 
         TaskResponse response = new TaskResponse();
@@ -132,12 +133,12 @@ public class FindScaleIOTaskHandlerTest {
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
         Map<String, DeviceAssignment> deviceToPoolMap = new HashMap<>();
 
-        DeviceAssignment assignment = new DeviceAssignment("devId1", "devSer1", "/dev/sda", "test device","pool1", "pool1Name");
-        deviceToPoolMap.put("device1",assignment);
+        DeviceAssignment assignment = new DeviceAssignment("devId1", "devSer1", "/dev/sda", "test device", "pool1", "pool1Name");
+        deviceToPoolMap.put("device1", assignment);
         storageResponseMessage.setDeviceToStoragePoolMap(deviceToPoolMap);
-        storageResponseMessage.setWarnings(Arrays.asList(new Warning("1","No message")));
+        storageResponseMessage.setWarnings(Arrays.asList(new Warning("1", "No message")));
 
-        ScaleIOData scaleIOData =  new ScaleIOData();
+        ScaleIOData scaleIOData = new ScaleIOData();
         ScaleIOStoragePool scaleIOStoragePool = new ScaleIOStoragePool();
         ScaleIOProtectionDomain scaleIOProtectionDomain = new ScaleIOProtectionDomain();
         scaleIOStoragePool.setId("1");
@@ -152,7 +153,7 @@ public class FindScaleIOTaskHandlerTest {
         boolean expectedResult = true;
         boolean actualResult = handler.executeTask(job);
 
-        assertEquals(expectedResult,actualResult);
+        assertEquals(expectedResult, actualResult);
         assertEquals("SUCCEEDED", job.getTaskResponseMap().get(job.getStep()).getWorkFlowTaskStatus().toString());
     }
 
@@ -165,9 +166,9 @@ public class FindScaleIOTaskHandlerTest {
         nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
 
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
-        storageResponseMessage.setErrors(Arrays.asList(new Error("TypeError","No storage pool found containing all SSDs.")));
+        storageResponseMessage.setErrors(Arrays.asList(new Error("TypeError", "No storage pool found containing all SSDs.")));
 
-        ScaleIOData scaleIOData =  new ScaleIOData();
+        ScaleIOData scaleIOData = new ScaleIOData();
         ScaleIOStoragePool scaleIOStoragePool = new ScaleIOStoragePool();
         ScaleIOProtectionDomain scaleIOProtectionDomain = new ScaleIOProtectionDomain();
         scaleIOStoragePool.setId("1");
@@ -182,7 +183,7 @@ public class FindScaleIOTaskHandlerTest {
         boolean expectedResult = false;
         boolean actualResult = handler.executeTask(job);
 
-        assertEquals(expectedResult,actualResult);
+        assertEquals(expectedResult, actualResult);
         assertEquals("FAILED", job.getTaskResponseMap().get(job.getStep()).getWorkFlowTaskStatus().toString());
     }
 }

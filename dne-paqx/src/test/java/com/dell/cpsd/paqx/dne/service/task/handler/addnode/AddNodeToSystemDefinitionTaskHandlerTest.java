@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * The tests for the AddNodeToSystemDefinitionTaskHandler class.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -83,14 +83,13 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     {
         handler = new AddNodeToSystemDefinitionTaskHandler(this.client, repository);
 
-
-
         jobIn = new Job(UUID.randomUUID(), "testWorkflow", "updateSystemDefinition", "in-progress", null);
         NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname",
-                "scaleIoData1SvmIpAddress", "scaleIoData1KernelIpAddress", "scaleIoData1KernelAndSvmSubnetMask", "scaleIoData2SvmIpAddress", "scaleIoData2KernelIpAddress",
-                "scaleIoData2KernelAndSvmSubnetMask", "scaleIoSvmManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask",
-                "symphonyUuid", "clusterName","vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());        jobIn.setInputParams(nodeExpansionRequest);
+                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
+                "scaleIoData1KernelAndSvmSubnetMask", "scaleIoData2SvmIpAddress", "scaleIoData2KernelAndSvmSubnetMask",
+                "scaleIoSvmManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
+                "clusterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
+        jobIn.setInputParams(nodeExpansionRequest);
         Map<String, WorkflowTask> taskMap = new HashMap<>();
         WorkflowTask task = new WorkflowTask();
         taskMap.put("updateSystemDefinition", task);
@@ -140,7 +139,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     {
         when(client.getConvergedSystems()).thenReturn(convergedSystems);
         when(client.getComponents(any())).thenReturn(convergedSystems, updatedConvergedSystems);
-        when( repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
+        when(repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
 
         boolean result = this.handler.executeTask(jobIn);
 
@@ -246,7 +245,7 @@ public class AddNodeToSystemDefinitionTaskHandlerTest
     {
         when(client.getConvergedSystems()).thenReturn(convergedSystems);
         when(client.getComponents(any())).thenReturn(convergedSystems, convergedSystems);
-        when( repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
+        when(repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
 
         boolean result = this.handler.executeTask(jobIn);
 
