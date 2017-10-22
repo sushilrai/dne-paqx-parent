@@ -115,7 +115,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("updateSdcPerformanceProfileTask")
     private WorkflowTask updateSdcPerformanceProfileTask()
     {
-        return createTask("Update ScaleIO SDC Performance Profile", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository, SDC_PERF_PROFILE_UPDATE_WAIT_TIME));
+        return createTask("Configure SDC profile for High Performance", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository, SDC_PERF_PROFILE_UPDATE_WAIT_TIME));
     }
 
     @Bean("performanceTuneSvmTask")
@@ -133,7 +133,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("installSvmPackagesTask")
     private WorkflowTask installSvmPackagesTask()
     {
-        return createTask("Install ScaleIO VM Packages", new InstallSvmPackagesTaskHandler(nodeService, repository));
+        return createTask("Install SDS and LIA Packages", new InstallSvmPackagesTaskHandler(nodeService, repository));
     }
 
     @Bean("changeSvmCredentialsTask")
@@ -145,7 +145,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("configureVmNetworkSettingsTask")
     private WorkflowTask configureVmNetworkSettingsTask()
     {
-        return createTask("Configure VM Network Settings", new ConfigureVmNetworkSettingsTaskHandler(nodeService, repository));
+        return createTask("Configure ScaleIO VM Network Settings", new ConfigureVmNetworkSettingsTaskHandler(nodeService, repository));
     }
 
     @Bean("powerOnSVMTask")
@@ -192,31 +192,31 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("installScaleIoVibTask")
     private WorkflowTask installScaleIoVibTask()
     {
-        return createTask("Install ScaleIO VIB", new InstallScaleIoVibTaskHandler(this.nodeService, repository, sdcVibUrl));
+        return createTask("Install SDC VIB", new InstallScaleIoVibTaskHandler(this.nodeService, repository, sdcVibUrl));
     }
 
     @Bean("configureScaleIoVibTask")
     private WorkflowTask configureScaleIoVibTask()
     {
-        return createTask("Configure ScaleIO VIB", new ConfigureScaleIoVibTaskHandler(this.nodeService, repository));
+        return createTask("Configure SDC VIB", new ConfigureScaleIoVibTaskHandler(this.nodeService, repository));
     }
 
     @Bean("addHostToDvSwitchTask")
     private WorkflowTask addHostToDvSwitchTask()
     {
-        return createTask("Add Host to DV Switch", new AddHostToDvSwitchTaskHandler(this.nodeService, repository));
+        return createTask("ESXi Host DVSwitch Configuration", new AddHostToDvSwitchTaskHandler(this.nodeService, repository));
     }
 
     @Bean("deploySVMTask")
     private WorkflowTask deploySVMTask()
     {
-        return createTask("Deploy ScaleIO VM", new DeployScaleIoVmTaskHandler(this.nodeService, repository, DEPLOY_SVM_WAIT_TIME));
+        return createTask("Clone and Deploy ScaleIO VM", new DeployScaleIoVmTaskHandler(this.nodeService, repository, DEPLOY_SVM_WAIT_TIME));
     }
 
     @Bean("enablePciPassthroughHostTask")
     private WorkflowTask enablePciPassthroughHostTask()
     {
-        return createTask("Enable PCI pass through", new EnablePciPassthroughTaskHandler(this.nodeService, repository));
+        return createTask("Enable PCI Passthrough ESXi host", new EnablePciPassthroughTaskHandler(this.nodeService, repository));
     }
 
     @Bean("rebootHostTask")
@@ -228,7 +228,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("setPciPassthroughSioVmTask")
     private WorkflowTask setPciPassthroughSioVmTask()
     {
-        return createTask("Set PCI Pass through ScaleIO VM", new UpdatePciPassThroughTaskHandler(this.nodeService, repository));
+        return createTask("Configure PCI Passthrough ScaleIO VM", new UpdatePciPassThroughTaskHandler(this.nodeService, repository));
     }
 
     @Bean("applyEsxiLicenseTask")
