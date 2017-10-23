@@ -59,11 +59,6 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
     private final NodeService nodeService;
 
     /*
-     * The <code>DataServiceRepository</code> instance
-     */
-    private final DataServiceRepository repository;
-
-    /*
     * ScaleIO gateway credential components
     */
     private static final String COMPONENT_TYPE = "SCALEIO-CLUSTER";
@@ -78,10 +73,9 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
      *
      * @param nodeService
      */
-    public FindOrCreateValidStoragePoolTaskHandler(NodeService nodeService, final DataServiceRepository repository)
+    public FindOrCreateValidStoragePoolTaskHandler(NodeService nodeService)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
     }
 
     @Override
@@ -98,6 +92,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
             if (CollectionUtils.isEmpty(newDevices))
             {
                 response.addError("No disks found in the node inventory data.");
+                response.setWorkFlowTaskStatus(Status.FAILED);
                 return false;
             }
 
@@ -121,7 +116,8 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         catch (Exception ex)
         {
             LOGGER.error("Error finding or creating a valid storage pool", ex);
-            response.addError(ex.getMessage());
+            response.setWorkFlowTaskStatus(Status.FAILED);
+            response.addError("Error finding or creating a valid storage pool " + ex.getMessage());
         }
 
         return false;
@@ -137,6 +133,16 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         return response;
     }
 
+    /**
+     * Validate if the existing storage pools are valid, if not create new one.
+     * @param response Response back to the client
+     * @param newDevices Device list from new node inventory
+     * @param hostToStorageDeviceMap Map consisting of host name : displayName : HostStorageDevice
+     * @param protectionDomains Protection domains from current scale io data
+     * @param job Curent DNE job
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
     private void validateStoragePoolsAndSetResponse(final FindScaleIOResponse response, final List<Device> newDevices,
             final Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap, final List<ScaleIOProtectionDomain> protectionDomains,
             final Job job) throws ServiceTimeoutException, ServiceExecutionException
@@ -173,12 +179,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         if (!findValidStoragePool(response, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain))
         {
             // Go through the scaleio adapter to create new storage pool
-            final CreateStoragePoolResponseMessage validStoragePool = createValidStoragePool(protectionDomainId);
-
-            // Sync up the same storage pool into H2 db
-            ScaleIOStoragePool newlyCreatedStoragePool = nodeService
-                    .createStoragePool(DEFAULT_STORAGE_POOL_NAME, validStoragePool.getStoragePoolId(), protectionDomainId);
-            scaleIOProtectionDomain.addStoragePool(newlyCreatedStoragePool);
+            createValidStoragePool(scaleIOProtectionDomain);
 
             if (!findValidStoragePool(response, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain))
             {
@@ -187,6 +188,17 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         }
     }
 
+
+    /**
+     * Finds if the storage pools within the protection domain is valid
+     * @param response Response back to the client
+     * @param newDevices Device list from new node inventory
+     * @param hostToStorageDeviceMap Map consisting of host name : displayName : HostStorageDevice
+     * @param protectionDomain Protection domains from current scale io data
+     * @return true if the response is successful else false
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
     private boolean findValidStoragePool(final FindScaleIOResponse response, final List<Device> newDevices,
             final Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap, ScaleIOProtectionDomain protectionDomain)
             throws ServiceTimeoutException, ServiceExecutionException
@@ -215,18 +227,22 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         return false;
     }
 
-    private CreateStoragePoolResponseMessage createValidStoragePool(final String protectionDomainId)
+    /**
+     * Cerates a valid storage pool through scaleio adapter and saves the same to H2 database
+     * @param scaleIOProtectionDomain Protection domain for which to create the storage pool
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    private void createValidStoragePool(final ScaleIOProtectionDomain scaleIOProtectionDomain)
             throws ServiceTimeoutException, ServiceExecutionException
     {
-        final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds(COMPONENT_TYPE);
+        final ComponentEndpointIds componentEndpointIds = nodeService.getComponentEndpointIds(COMPONENT_TYPE);
 
         if (componentEndpointIds == null)
         {
             throw new IllegalStateException("No component ids found.");
         }
 
-        // create a pool for any other error, it can be due to not having enough remaining slots in the pool
-        // or unavailable pool itself
         CreateStoragePoolRequestMessage requestMessage = new CreateStoragePoolRequestMessage();
         requestMessage.setEndpointUrl("https://" + componentEndpointIds.getEndpointUrl());
         requestMessage.setComponentEndpointIds(
@@ -234,7 +250,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
                         componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
 
         StoragePoolSpec storagePoolSpec = new StoragePoolSpec();
-        storagePoolSpec.setProtectionDomainId(protectionDomainId);
+        storagePoolSpec.setProtectionDomainId(scaleIOProtectionDomain.getId());
         storagePoolSpec.setRmCacheWriteHandlingMode(StoragePoolSpec.RmCacheWriteHandlingMode.PASSTHROUGH);
         storagePoolSpec.setStoragePoolName(DEFAULT_STORAGE_POOL_NAME);
         storagePoolSpec.setUseRmcache(false);
@@ -248,7 +264,11 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
             throw new IllegalStateException("Create storage pool request failed");
         }
 
-        return responseMessage;
+        // Sync up the same storage pool into H2 db
+        ScaleIOStoragePool newlyCreatedStoragePool = nodeService
+                .createStoragePool(DEFAULT_STORAGE_POOL_NAME, responseMessage.getStoragePoolId(), scaleIOProtectionDomain.getId());
+        scaleIOProtectionDomain.addStoragePool(newlyCreatedStoragePool);
+
     }
 
 }

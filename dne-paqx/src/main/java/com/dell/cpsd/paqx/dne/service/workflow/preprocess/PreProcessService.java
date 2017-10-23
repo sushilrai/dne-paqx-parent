@@ -91,7 +91,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
     @Bean("findOrCreateValidStoragePoolTask")
     public WorkflowTask findOrCreateValidStoragePoolTask()
     {
-        return createTask("Find or Create Valid Storage Pool", new FindOrCreateValidStoragePoolTaskHandler(nodeService, this.repository));
+        return createTask("Find or Create Valid Storage Pool", new FindOrCreateValidStoragePoolTaskHandler(nodeService));
     }
 
     @Bean("findProtectionDomainTask")

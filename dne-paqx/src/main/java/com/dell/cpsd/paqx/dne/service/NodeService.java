@@ -428,4 +428,11 @@ public interface NodeService
      * @return Storage pool instance
      */
     ScaleIOStoragePool createStoragePool(String poolName, String poolId, String protectionDomainId);
+
+    /**
+     * Retrieves the component endpoints based on component type.
+     * @param componentType VCenter/ScaleIO
+     * @return
+     */
+    ComponentEndpointIds getComponentEndpointIds(String componentType);
 }

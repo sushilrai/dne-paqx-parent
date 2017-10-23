@@ -2153,4 +2153,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     {
         return repository.createStoragePool(protectionDomainId, storagePoolId, storagePoolName);
     }
+
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    public ComponentEndpointIds getComponentEndpointIds(String componentType)
+    {
+        return repository.getComponentEndpointIds(componentType);
+    }
 }

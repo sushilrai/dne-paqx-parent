@@ -131,7 +131,7 @@ public class FindOrCreateValidStoragePoolTaskHandlerTest
     @Ignore("temporarily ignoring this test until we get the task handler working")
     public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
     {
-        FindOrCreateValidStoragePoolTaskHandler handler = new FindOrCreateValidStoragePoolTaskHandler(this.nodeService, this.repository);
+        FindOrCreateValidStoragePoolTaskHandler handler = new FindOrCreateValidStoragePoolTaskHandler(this.nodeService);
         NodeInventory nodeInventory = new NodeInventory();
         nodeInventory.setSymphonyUUID("symphonyUUID");
         nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
@@ -167,7 +167,7 @@ public class FindOrCreateValidStoragePoolTaskHandlerTest
     @Ignore("temporarily ignoring this test until we get the task handler working")
     public void testExecuteTask_new_pool() throws ServiceTimeoutException, ServiceExecutionException
     {
-        FindOrCreateValidStoragePoolTaskHandler handler = new FindOrCreateValidStoragePoolTaskHandler(this.nodeService, this.repository);
+        FindOrCreateValidStoragePoolTaskHandler handler = new FindOrCreateValidStoragePoolTaskHandler(this.nodeService);
         NodeInventory nodeInventory = new NodeInventory();
         nodeInventory.setSymphonyUUID("symphonyUUID");
         nodeInventory.setNodeInventory(NODE_INVENTORY_JSON);
