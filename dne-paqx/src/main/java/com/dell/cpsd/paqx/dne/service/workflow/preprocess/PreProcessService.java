@@ -88,16 +88,16 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Find VCluster", new FindVClusterTaskHandler(nodeService));
     }
 
-    @Bean("findScaleIO")
-    public WorkflowTask createFindScaleIOTask()
+    @Bean("findOrCreateValidStoragePoolTask")
+    public WorkflowTask findOrCreateValidStoragePoolTask()
     {
-        return createTask("Find ScaleIO", new FindScaleIOTaskHandler(nodeService));
+        return createTask("Find or Create Valid Storage Pool", new FindOrCreateValidStoragePoolTaskHandler(nodeService, this.repository));
     }
 
     @Bean("findProtectionDomainTask")
     public WorkflowTask findProtectionDomainTask()
     {
-        return createTask("Protection Domain", new FindProtectionDomainTaskHandler(nodeService, repository));
+        return createTask("Find Protection Domain", new FindProtectionDomainTaskHandler(nodeService, repository));
     }
 
     @Bean("listScaleIoComponentsTask")
@@ -138,7 +138,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());
         workflowTasks.put("configureBootDeviceIdrac", configureBootDeviceIdrac());
-        workflowTasks.put("findScaleIO", createFindScaleIOTask());
+        workflowTasks.put("findOrCreateValidStoragePool", findOrCreateValidStoragePoolTask());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         return workflowTasks;

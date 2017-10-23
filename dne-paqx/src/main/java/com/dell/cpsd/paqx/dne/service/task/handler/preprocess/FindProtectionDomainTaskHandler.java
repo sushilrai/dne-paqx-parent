@@ -19,7 +19,11 @@ import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.ValidateProtectionDomainResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
-import com.dell.cpsd.service.engineering.standards.*;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
+import com.dell.cpsd.service.engineering.standards.NodeData;
+import com.dell.cpsd.service.engineering.standards.ProtectionDomain;
+import com.dell.cpsd.service.engineering.standards.ScaleIODataServer;
 import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import org.slf4j.Logger;
@@ -66,7 +70,6 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     @Override
     public boolean executeTask(Job job)
     {
-
         LOGGER.info("Execute FindProtectionDomain task");
 
         TaskResponse response = initializeResponse(job);
@@ -178,7 +181,9 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             validateProtectionDomainResponse.setProtectionDomainName(
                     protectionDomainNameList.size() == 1 ? protectionDomainList.get(0).getName() : protectionDomainId);
             validateProtectionDomainResponse.setProtectionDomainId(protectionDomainId);
+
             response.setResults(buildResponseResult(validateProtectionDomainResponse));
+
             for (Integer n = 0; n < protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().size(); n++)
             {
                 response.addWarning(protectionDomainResponse.getValidProtectionDomains().get(0).getWarningMessages().get(n).getMessage());

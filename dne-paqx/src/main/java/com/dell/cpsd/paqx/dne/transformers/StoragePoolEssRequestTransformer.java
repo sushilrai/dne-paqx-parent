@@ -52,7 +52,8 @@ public class StoragePoolEssRequestTransformer
         EssValidateStoragePoolRequestMessage requestMessage = new EssValidateStoragePoolRequestMessage();
 
         List<StoragePool> storagePools = scaleIOStoragePools.stream().filter(Objects::nonNull)
-                .map(storagePool -> collectDevicesInPool(storagePool, hostToStorageDeviceMap)).collect(Collectors.toList());
+                .map(storagePool -> collectDevicesInPool(storagePool, hostToStorageDeviceMap)).filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         requestMessage.setStoragePools(storagePools);
         return requestMessage;
@@ -75,9 +76,21 @@ public class StoragePoolEssRequestTransformer
 
         // for empty storage pools, set the type to SSD
         List<Device> devices = new ArrayList<>();
-        if (CollectionUtils.isEmpty(scaleIOStoragePool.getDevices())) {
-            storagePool.setType(StoragePool.Type.SSD);
-        } else {
+
+        if (CollectionUtils.isEmpty(scaleIOStoragePool.getDevices()))
+        {
+            // for empty storage pools validate that it satisfies useRfcache = false, useRmcache = false, zeroPaddingEnabled = true;
+            if (!scaleIOStoragePool.isUseRfcache() && !scaleIOStoragePool.isUseRmcache() && scaleIOStoragePool.isZeroPaddingEnabled()) {
+                // set the type to SSD for empty pools
+                storagePool.setType(StoragePool.Type.SSD);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
             storagePool.setType(StoragePool.Type.HDD);
 
             for (ScaleIODevice scaleIODevice : scaleIOStoragePool.getDevices())
@@ -100,7 +113,10 @@ public class StoragePoolEssRequestTransformer
                 if (hostStorageDevice != null)
                 {
                     device.setSerialNumber(hostStorageDevice.getSerialNumber());
-                    device.setId(hostStorageDevice.getCanonicalName() != null ? hostStorageDevice.getCanonicalName().split("\\.")[1] : null);
+
+                    device.setId(
+                            hostStorageDevice.getCanonicalName() != null ? hostStorageDevice.getCanonicalName().split("\\.")[1] : null);
+
                     if (hostStorageDevice.isSsd())
                     {
                         device.setType(Device.Type.SSD);

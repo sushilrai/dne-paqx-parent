@@ -40,9 +40,9 @@ public class PreProcessTaskConfig {
                 "pingIdrac",
                 "configureObmSettings",
                 "configureBootDeviceIdrac",
-                "findScaleIO",
                 "findVCluster",
-                "findProtectionDomain");
+                "findProtectionDomain",
+                "findOrCreateValidStoragePool");
 
         return workflowSteps;
     }

@@ -342,6 +342,9 @@ public class RabbitConfig
         messageClasses.add(SioSdcUpdatePerformanceProfileRequestMessage.class);
         messageClasses.add(SioSdcUpdatePerformanceProfileResponseMessage.class);
 
+        messageClasses.add(CreateStoragePoolRequestMessage.class);
+        messageClasses.add(CreateStoragePoolResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         

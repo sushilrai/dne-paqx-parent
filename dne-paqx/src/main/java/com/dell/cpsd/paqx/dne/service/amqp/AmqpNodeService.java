@@ -270,6 +270,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new RemoteCommandExecutionResponseAdapter(this));
         this.consumer.addAdapter(new AddHostToProtectionDomainResponseAdapter(this));
         this.consumer.addAdapter(new SioSdcUpdatePerformanceProfileResponseAdapter(this));
+        this.consumer.addAdapter(new CreateStoragePoolAdapter(this));
     }
 
     /**
@@ -2115,5 +2116,41 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return false;
+    }
+
+    @Override
+    public CreateStoragePoolResponseMessage createStoragePool(CreateStoragePoolRequestMessage requestMessage)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
+        com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        requestMessage.setMessageProperties(messageProperties);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                LOGGER.info("publish create storage pool message.");
+                producer.publishCreateStoragePool(requestMessage);
+            }
+        });
+
+        return processResponse(response, CreateStoragePoolResponseMessage.class);
+    }
+
+    @Override
+    public ScaleIOStoragePool createStoragePool(final String storagePoolName, final String storagePoolId, String protectionDomainId)
+    {
+        return repository.createStoragePool(protectionDomainId, storagePoolId, storagePoolName);
     }
 }

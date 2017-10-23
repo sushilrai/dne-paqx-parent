@@ -22,6 +22,8 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -408,4 +410,22 @@ public interface NodeService
      * @return
      */
     boolean requestUpdateSdcPerformanceProfile(SioSdcUpdatePerformanceProfileRequestMessage requestMessage);
+
+    /**
+     * Creates new storage pool
+     * @param requestMessage - The <code>CreateStoragePoolRequestMessage</code> instance
+     * @return {@code: CreateStoragePoolResponseMessage} containing newly created storage pool id
+     * @throws ServiceTimeoutException
+     * @throws ServiceExecutionException
+     */
+    CreateStoragePoolResponseMessage createStoragePool(CreateStoragePoolRequestMessage requestMessage) throws ServiceTimeoutException, ServiceExecutionException;
+
+    /**
+     * Create storage pool based on the given attributes
+     * @param poolName Storage pool name
+     * @param poolId Storage pool id returned from scale io rest api
+     * @param protectionDomainId protection domain id to which this storage pool should be created
+     * @return Storage pool instance
+     */
+    ScaleIOStoragePool createStoragePool(String poolName, String poolId, String protectionDomainId);
 }

@@ -50,6 +50,15 @@ public class ScaleIOStoragePool
     @Column(name = "STORAGE_POOL_NUM_VOLUMES")
     private Integer numOfVolumes;
 
+    @Column(name = "RF_CACHE")
+    private boolean useRfcache;
+
+    @Column(name = "RM_CACHE")
+    private boolean useRmcache;
+
+    @Column(name = "ZERO_PADDING_ENABLED")
+    private boolean zeroPaddingEnabled;
+
     @ManyToOne(cascade = CascadeType.ALL)
     private ScaleIOProtectionDomain protectionDomain;
 
@@ -62,13 +71,16 @@ public class ScaleIOStoragePool
     }
 
     public ScaleIOStoragePool(final String id, final String storagePoolName, final int capacityAvailableForVolumeAllocationInKb,
-            final int maxCapacityInKb, final int numOfVolumes)
+            final int maxCapacityInKb, final int numOfVolumes, boolean useRfcache, boolean useRmcache, boolean zeroPaddingEnabled)
     {
         this.id = id;
         this.name = storagePoolName;
         this.capacityAvailableForVolumeAllocationInKb = capacityAvailableForVolumeAllocationInKb;
         this.maxCapacityInKb = maxCapacityInKb;
         this.numOfVolumes = numOfVolumes;
+        this.useRfcache = useRfcache;
+        this.useRmcache = useRmcache;
+        this.zeroPaddingEnabled = zeroPaddingEnabled;
     }
 
     public void setProtectionDomain(final ScaleIOProtectionDomain protectionDomain)
@@ -156,11 +168,42 @@ public class ScaleIOStoragePool
         this.devices = devices;
     }
 
+    public boolean isUseRfcache()
+    {
+        return useRfcache;
+    }
+
+    public void setUseRfcache(final boolean useRfcache)
+    {
+        this.useRfcache = useRfcache;
+    }
+
+    public boolean isUseRmcache()
+    {
+        return useRmcache;
+    }
+
+    public void setUseRmcache(final boolean useRmcache)
+    {
+        this.useRmcache = useRmcache;
+    }
+
+    public boolean isZeroPaddingEnabled()
+    {
+        return zeroPaddingEnabled;
+    }
+
+    public void setZeroPaddingEnabled(final boolean zeroPaddingEnabled)
+    {
+        this.zeroPaddingEnabled = zeroPaddingEnabled;
+    }
+
     @Override
     public int hashCode()
     {
         return new HashCodeBuilder().append(uuid).append(id).append(name).append(capacityAvailableForVolumeAllocationInKb)
-                .append(maxCapacityInKb).append(numOfVolumes).append(devices).toHashCode();
+                .append(maxCapacityInKb).append(numOfVolumes).append(devices).append(useRfcache).append(useRmcache)
+                .append(zeroPaddingEnabled).toHashCode();
     }
 
     /**
@@ -190,6 +233,7 @@ public class ScaleIOStoragePool
         return new EqualsBuilder().append(uuid, toot.uuid).append(id, toot.id).append(name, toot.name)
                 .append(capacityAvailableForVolumeAllocationInKb, toot.capacityAvailableForVolumeAllocationInKb)
                 .append(maxCapacityInKb, toot.maxCapacityInKb).append(numOfVolumes, toot.numOfVolumes).append(devices, toot.devices)
+                .append(useRfcache, toot.useRfcache).append(useRmcache, toot.useRmcache).append(zeroPaddingEnabled, toot.zeroPaddingEnabled)
                 .isEquals();
     }
 }

@@ -15,6 +15,7 @@ import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
@@ -32,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -812,5 +814,37 @@ public class H2DataRepository implements DataServiceRepository
         final TypedQuery<DiscoveredNodeInfo> query = entityManager
                 .createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
         return query.getResultList();
+    }
+
+
+    @Override
+    @Transactional
+    public ScaleIOStoragePool createStoragePool(String proptectionDomainId, String storagePoolId, String storagePoolName)
+    {
+        final TypedQuery<ScaleIOProtectionDomain> protectionDomainTypedQuery = entityManager
+                .createQuery("SELECT p from ScaleIOProtectionDomain as p where p.id =:proptectionDomainId", ScaleIOProtectionDomain.class);
+        protectionDomainTypedQuery.setParameter("proptectionDomainId", proptectionDomainId);
+
+        ScaleIOStoragePool storagePool = new ScaleIOStoragePool(storagePoolId, storagePoolName, -1, -1, 0, false, false, true);
+        storagePool.setDevices(Collections.EMPTY_LIST);
+
+        try
+        {
+            final ScaleIOProtectionDomain protectionDomain = protectionDomainTypedQuery.getSingleResult();
+
+            storagePool.setProtectionDomain(protectionDomain);
+
+            protectionDomain.addStoragePool(storagePool);
+
+            entityManager.merge(protectionDomain);
+
+            entityManager.flush();
+
+        }
+        catch (Exception e)
+        {
+            LOG.error("Error creating storage pool record. ", e);
+        }
+        return storagePool;
     }
 }

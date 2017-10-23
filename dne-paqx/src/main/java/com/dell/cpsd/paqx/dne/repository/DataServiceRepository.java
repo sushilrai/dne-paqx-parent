@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.domain.node.*;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
@@ -115,4 +116,5 @@ public interface DataServiceRepository
 
     Map<String, String> getScaleIoNetworkNames(Map<String, String> switchNames);
 
+    ScaleIOStoragePool createStoragePool(String proptectionDomainId, String storagePoolId, String storagePoolName);
 }

@@ -17,6 +17,7 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessa
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
@@ -548,6 +549,18 @@ public class AmqpDneProducerTest
     public void publishUpdateSdcPerformanceProfile_no_capabilities()
     {
         this.executeTest_no_capabilities(mock(SioSdcUpdatePerformanceProfileRequestMessage.class), this.producer::publishUpdateSdcPerformanceProfile);
+    }
+
+    @Test
+    public void publishCreateStoragePool()
+    {
+        this.executeTest(mock(CreateStoragePoolRequestMessage.class), this.producer::publishCreateStoragePool);
+    }
+
+    @Test
+    public void publishCreateStoragePool_no_capabilities()
+    {
+        this.executeTest_no_capabilities(mock(CreateStoragePoolRequestMessage.class), this.producer::publishCreateStoragePool);
     }
 
     private <T> void executeTest(T request, Consumer<T> consumer)

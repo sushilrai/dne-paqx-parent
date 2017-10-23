@@ -97,8 +97,8 @@ public class PreProcessServiceImplTest {
     }
 
     @Test
-    public void testTaskName_findScaleIO() {
-        Assert.assertEquals("Find ScaleIO", workFlowTasks.get("findScaleIO").getTaskName());
+    public void testTaskName_findOrCreateValidStoragePool() {
+        Assert.assertEquals("Find or Create Valid Storage Pool", workFlowTasks.get("findOrCreateValidStoragePool").getTaskName());
     }
 
     @Ignore

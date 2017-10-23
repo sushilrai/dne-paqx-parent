@@ -22,6 +22,7 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessa
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
@@ -510,6 +511,20 @@ public class AmqpDneProducer implements DneProducer {
 
         if (endpointHelper != null) {
             LOGGER.info("Send update ScaleIO SDC performance profile message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void publishCreateStoragePool(final CreateStoragePoolRequestMessage requestMessage)
+    {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(CreateStoragePoolRequestMessage.class);
+
+        if (endpointHelper != null) {
+            LOGGER.info("Sending create storage pool message: " + requestMessage);
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }

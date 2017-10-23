@@ -185,6 +185,9 @@ public class StoragePoolEssRequestTransformerTest
         ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
         storagePool.setId(id);
         storagePool.setName("SP-" + id);
+        storagePool.setUseRfcache(false);
+        storagePool.setUseRmcache(false);
+        storagePool.setZeroPaddingEnabled(true);
         List<ScaleIODevice> devices = new ArrayList<>();
         ScaleIODevice device = null;
         int j = 0;

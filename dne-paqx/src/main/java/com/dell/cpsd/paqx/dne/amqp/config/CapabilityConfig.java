@@ -130,7 +130,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("scaleio-add-host-to-protection-domain"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("scaleio-update-sdc-performance-profile")
+                        .withProfile("scaleio-update-sdc-performance-profile"),
+                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("scaleio-create-storage-pool")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");
