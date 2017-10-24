@@ -12,7 +12,6 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.FindScaleIOResponse;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * This class implements the logic to find or create a valid Storage pool.
@@ -133,11 +133,12 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
 
     /**
      * Validate if the existing storage pools are valid, if not create new one.
-     * @param response Response back to the client
-     * @param newDevices Device list from new node inventory
+     *
+     * @param response               Response back to the client
+     * @param newDevices             Device list from new node inventory
      * @param hostToStorageDeviceMap Map consisting of host name : displayName : HostStorageDevice
-     * @param protectionDomains Protection domains from current scale io data
-     * @param job Curent DNE job
+     * @param protectionDomains      Protection domains from current scale io data
+     * @param job                    Curent DNE job
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
@@ -186,13 +187,13 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         }
     }
 
-
     /**
      * Finds if the storage pools within the protection domain is valid
-     * @param response Response back to the client
-     * @param newDevices Device list from new node inventory
+     *
+     * @param response               Response back to the client
+     * @param newDevices             Device list from new node inventory
      * @param hostToStorageDeviceMap Map consisting of host name : displayName : HostStorageDevice
-     * @param protectionDomain Protection domains from current scale io data
+     * @param protectionDomain       Protection domains from current scale io data
      * @return true if the response is successful else false
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
@@ -227,6 +228,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
 
     /**
      * Cerates a valid storage pool through scaleio adapter and saves the same to H2 database
+     *
      * @param scaleIOProtectionDomain Protection domain for which to create the storage pool
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
@@ -250,7 +252,9 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         StoragePoolSpec storagePoolSpec = new StoragePoolSpec();
         storagePoolSpec.setProtectionDomainId(scaleIOProtectionDomain.getId());
         storagePoolSpec.setRmCacheWriteHandlingMode(StoragePoolSpec.RmCacheWriteHandlingMode.PASSTHROUGH);
-        storagePoolSpec.setStoragePoolName(DEFAULT_STORAGE_POOL_NAME);
+        // TODO temporarily addind a random string to the storage pool name
+        // TODO need to remove once issue sorted...
+        storagePoolSpec.setStoragePoolName(DEFAULT_STORAGE_POOL_NAME + "_" + UUID.randomUUID());
         storagePoolSpec.setUseRmcache(false);
         storagePoolSpec.setZeroPaddingEnabled(true);
         requestMessage.setStoragePoolSpec(storagePoolSpec);
