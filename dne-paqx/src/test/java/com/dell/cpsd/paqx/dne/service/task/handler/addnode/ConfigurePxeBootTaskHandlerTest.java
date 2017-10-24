@@ -9,7 +9,7 @@ import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
-import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracResponse;
+import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public class ConfigurePxeBootTaskHandlerTest
     private Job job;
 
     @Mock
-    private ConfigureBootDeviceIdracResponse response;
+    private ConfigureBootDeviceIdracTaskResponse response;
 
     @Mock
     private NodeExpansionRequest request;
@@ -129,7 +129,7 @@ public class ConfigurePxeBootTaskHandlerTest
         String stepName = "configurePxeBootStep";
         doReturn(stepName).when(this.job).getStep();
 
-        ConfigureBootDeviceIdracResponse response = this.handler.initializeResponse(this.job);
+        ConfigureBootDeviceIdracTaskResponse response = this.handler.initializeResponse(this.job);
 
         assertNotNull(response);
         assertEquals(taskName, response.getWorkFlowTaskName());

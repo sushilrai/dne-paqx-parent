@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ObmSettingsResponse;
+import com.dell.cpsd.paqx.dne.service.model.ObmSettingsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
@@ -25,7 +26,6 @@ import java.util.Map;
 
 /**
  * Task responsible for configuring obm settings.
- *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -51,11 +51,9 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     private final String[] obmServices;
 
     /**
-     *  ConfigureObmSettingsTaskHandler constructor.
+     * ConfigureObmSettingsTaskHandler constructor.
      *
-     * @param nodeService
-     *            - The <code>NodeService</code> instance.
-     *
+     * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0
      */
     public ConfigureObmSettingsTaskHandler(NodeService nodeService, String[] obmServices)
@@ -67,20 +65,18 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     /**
      * Perform the task of setting up obm settings.
      *
-     * @param job
-     *            - The <code>Job</code> this task is part of.
-     *
+     * @param job - The <code>Job</code> this task is part of.
      * @since 1.0
      */
     @Override
     public boolean executeTask(Job job)
     {
         LOGGER.info("Configuring Obm Settings Task");
+
         TaskResponse response = initializeResponse(job);
 
         try
         {
-
             String uuid = job.getInputParams().getSymphonyUuid();
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
@@ -103,26 +99,26 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
                 return true;
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LOGGER.error("Error showing obm settings", e);
             response.addError(e.toString());
         }
+
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
     }
 
     /**
-     * Create the <code>ObmSettingsResponse</code> instance and initialize it.
+     * Create the <code>ObmSettingsTaskResponse</code> instance and initialize it.
      *
-     * @param job
-     *            - The <code>Job</code> this task is part of.
+     * @param job - The <code>Job</code> this task is part of.
      */
     @Override
-    public ObmSettingsResponse initializeResponse(Job job)
+    public ObmSettingsTaskResponse initializeResponse(Job job)
     {
-        ObmSettingsResponse response = new ObmSettingsResponse();
-        setupResponse(job,response);
+        ObmSettingsTaskResponse response = new ObmSettingsTaskResponse();
+        setupResponse(job, response);
         return response;
     }
 

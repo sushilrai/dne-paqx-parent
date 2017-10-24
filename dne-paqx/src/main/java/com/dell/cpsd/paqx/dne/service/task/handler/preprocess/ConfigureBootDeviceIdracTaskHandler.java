@@ -9,7 +9,11 @@ package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
+import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
+import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * Task responsible for handling Boot Order Sequence
- *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -38,33 +41,31 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     private final NodeService nodeService;
 
     /**
-     *  SetBootOrderAndDisablePXETaskHandler constructor.
+     * SetBootOrderAndDisablePXETaskHandler constructor.
      *
-     * @param nodeService
-     *            - The <code>NodeService</code> instance.
-     *
+     * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0
      */
-    public ConfigureBootDeviceIdracTaskHandler(NodeService nodeService){
+    public ConfigureBootDeviceIdracTaskHandler(NodeService nodeService)
+    {
         this.nodeService = nodeService;
     }
 
     /**
      * Perform the task of setting up boot order and disabling PXE
      *
-     * @param job
-     *            - The <code>Job</code> this task is part of.
-     *
+     * @param job - The <code>Job</code> this task is part of.
      * @since 1.0
      */
     @Override
     public boolean executeTask(Job job)
-    {   LOGGER.info("Execute BootOrderSequence Task");
+    {
+        LOGGER.info("Execute BootOrderSequence Task");
+
         TaskResponse response = initializeResponse(job);
 
         try
         {
-
             String uuid = job.getInputParams().getSymphonyUuid();
             String ipAddress = job.getInputParams().getIdracIpAddress();
 
@@ -82,11 +83,12 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
                 return true;
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LOGGER.error("Error showing boot order status", e);
             response.addError(e.toString());
         }
+
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
     }
@@ -94,14 +96,13 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     /**
      * Create the <code>BootOrderSequenceResponse</code> instance and initialize it.
      *
-     * @param job
-     *            - The <code>Job</code> this task is part of.
+     * @param job - The <code>Job</code> this task is part of.
      */
     @Override
-    public ConfigureBootDeviceIdracResponse initializeResponse(Job job)
+    public ConfigureBootDeviceIdracTaskResponse initializeResponse(Job job)
     {
-        ConfigureBootDeviceIdracResponse response = new ConfigureBootDeviceIdracResponse();
-        setupResponse(job,response);
+        ConfigureBootDeviceIdracTaskResponse response = new ConfigureBootDeviceIdracTaskResponse();
+        setupResponse(job, response);
         return response;
     }
 }

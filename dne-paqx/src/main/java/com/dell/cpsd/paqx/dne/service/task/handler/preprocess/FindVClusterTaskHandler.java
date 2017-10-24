@@ -33,7 +33,7 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FindVClusterTaskHandler.class);
 
-    private NodeService         nodeService;
+    private NodeService nodeService;
 
     public FindVClusterTaskHandler(NodeService nodeService)
     {
@@ -44,12 +44,14 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
     public boolean executeTask(Job job)
     {
         LOGGER.info("Execute FindVCluster task");
+
         TaskResponse response = initializeResponse(job);
+
         try
         {
             List<ClusterInfo> clusterInfo = nodeService.listClusters();
             ValidateVcenterClusterResponseMessage responseMsg = nodeService.validateClusters(clusterInfo);
-            if ( responseMsg.getClusters().size() > 0 )
+            if (responseMsg.getClusters().size() > 0)
             {
                 Map<String, String> result = new HashMap<>();
                 result.put("clusterName", responseMsg.getClusters().get(0));
@@ -61,11 +63,11 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
             response.setWorkFlowTaskStatus(Status.FAILED);
             responseMsg.getFailedCluster().forEach(response::addError);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LOGGER.info("", e);
+            LOGGER.info("Error while finding vcluster", ex);
             response.setWorkFlowTaskStatus(Status.FAILED);
-            response.addError(e.toString());
+            response.addError(ex.toString());
         }
 
         return false;

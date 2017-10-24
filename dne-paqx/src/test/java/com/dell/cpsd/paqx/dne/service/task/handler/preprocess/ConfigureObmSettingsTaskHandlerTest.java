@@ -6,30 +6,31 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import com.dell.cpsd.SetObmSettingsRequestMessage;
-import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.ObmSettingsResponse;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.paqx.dne.service.model.ObmSettingsTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * The tests for ConfigureObmSettingsTaskHandler.
@@ -43,90 +44,95 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigureObmSettingsTaskHandlerTest
 {
-    /*
-     * The <code>NodeService</code> instance.
-     * @since 1.0
-     */
+    @Mock
+    private WorkflowTask task;
+
     @Mock
     private NodeService nodeService;
 
-    /*
-     * The current job.
-     */
-    private Job job = null;
+    @Mock
+    private Job job;
 
-    /*
-    * The obm services to be set/configured.
-    */
-    private String[] obmServices = {"onmService1", "obmService2"};
+    @Mock
+    private NodeExpansionRequest nodeExpansionRequest;
 
-    /**
-     * The test setup.
-     *
-     * @since 1.0
-     */
+    @Mock
+    private ObmSettingsTaskResponse obmSettingsTaskResponse;
+
+    @Mock
+    private ObmSettingsResponse obmSettingsResponse;
+
+    private ConfigureObmSettingsTaskHandler handler;
+    private final String[] obmServices    = {"onmService1", "obmService2"};
+    private final String   symphonyUuid   = "symphonyuuid-1";
+    private final String   idracIpAddress = "1.1.1.1";
+
     @Before
     public void setUp()
     {
-        PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(),
-                preProcessTaskConfig.preProcessWorkflowSteps());
-
-        PreProcessService preProcessService = new PreProcessService();
-        preProcessService.setWorkflowService(workflowService);
-
-        this.job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
-        NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
-                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
-                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
-        this.job.setInputParams(nodeExpansionRequest);
-
-        this.job.changeToNextStep("configureObmSettings");
+        this.handler = spy(new ConfigureObmSettingsTaskHandler(this.nodeService, this.obmServices));
     }
 
-    /**
-     * Test successful execution of ConfigureObmSettingsTaskHandlerTest.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_successfully_configure_obm_settings() throws ServiceTimeoutException, ServiceExecutionException
     {
-        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("SUCCESS", null);
-        ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
-        when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
+        doReturn(this.obmSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.obmSettingsResponse).when(this.nodeService).obmSettingsResponse(any());
+        doReturn("SUCCESS").when(this.obmSettingsResponse).getStatus();
 
-        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService, this.obmServices);
-        boolean expectedResult = true;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).obmSettingsResponse(requestCaptor.capture());
+        assertTrue(result);
+        verify(this.obmSettingsTaskResponse).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.obmSettingsTaskResponse, never()).addError(anyString());
     }
 
-    /**
-     * Test unsuccessful execution of ConfigureObmSettingsTaskHandlerTest.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_fail_the_workflow_if_the_configure_obm_settings_request_fails()
+            throws ServiceTimeoutException, ServiceExecutionException
     {
-        ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse("FAILED", null);
-        ArgumentCaptor<SetObmSettingsRequestMessage> requestCaptor = ArgumentCaptor.forClass(SetObmSettingsRequestMessage.class);
-        when(this.nodeService.obmSettingsResponse(requestCaptor.capture())).thenReturn(obmSettingsResponse);
+        doReturn(this.obmSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.obmSettingsResponse).when(this.nodeService).obmSettingsResponse(any());
+        doReturn("FAILED").when(this.obmSettingsResponse).getStatus();
 
-        ConfigureObmSettingsTaskHandler instance = new ConfigureObmSettingsTaskHandler(this.nodeService, this.obmServices);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).obmSettingsResponse(requestCaptor.capture());
+        assertFalse(result);
+        verify(this.obmSettingsTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.obmSettingsTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testExecuteTask_should_fail_the_work_flow_there_was_an_exception() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.obmSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doThrow(new IllegalStateException("some-error")).when(this.nodeService).obmSettingsResponse(any());
+
+        final boolean result = this.handler.executeTask(this.job);
+
+        assertFalse(result);
+        verify(this.obmSettingsTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.obmSettingsTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testInitializeResponse_should_create_the_task_response_object() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.task).when(this.job).getCurrentTask();
+        doReturn("configureObmSettingsTask").when(this.task).getTaskName();
+        doReturn("configureObmSettingsStep").when(this.job).getStep();
+
+        final ObmSettingsTaskResponse result = this.handler.initializeResponse(this.job);
+
+        assertNotNull(result);
     }
 }

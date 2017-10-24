@@ -93,9 +93,9 @@ public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWor
      *            - The <code>Job</code> this task is part of.
      */
     @Override
-    public ConfigureBootDeviceIdracResponse initializeResponse(Job job)
+    public ConfigureBootDeviceIdracTaskResponse initializeResponse(Job job)
     {
-        ConfigureBootDeviceIdracResponse response = new ConfigureBootDeviceIdracResponse();
+        ConfigureBootDeviceIdracTaskResponse response = new ConfigureBootDeviceIdracTaskResponse();
         setupResponse(job, response);
         return response;
     }

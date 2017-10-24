@@ -979,6 +979,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             LOGGER.error("Exception in boot order sequence: ", e);
         }
+
         return obmSettingsResponse;
     }
 

@@ -4,6 +4,7 @@
  * Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.model;
 
 /**
@@ -15,14 +16,17 @@ package com.dell.cpsd.paqx.dne.service.model;
  * @since 1.0
  */
 
-public class ConfigureBootDeviceIdracResponse extends TaskResponse {
+public class ConfigureBootDeviceIdracTaskResponse extends TaskResponse
+{
     private BootDeviceIdracStatus bootOrderStatus;
 
-    public BootDeviceIdracStatus getBootOrderStatus() {
+    public BootDeviceIdracStatus getBootOrderStatus()
+    {
         return bootOrderStatus;
     }
 
-    public void setBootOrderStatus(BootDeviceIdracStatus bootOrderStatus) {
+    public void setBootOrderStatus(BootDeviceIdracStatus bootOrderStatus)
+    {
         this.bootOrderStatus = bootOrderStatus;
     }
 }

@@ -10,7 +10,11 @@ package com.dell.cpsd.paqx.dne.service;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
-import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.model.LinkRepresentation;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
+import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.Step;
+import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -20,7 +24,7 @@ import java.util.Map;
 
 /**
  * Abstract base service implementation.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -48,13 +52,15 @@ public abstract class BaseService
         String stepName = job.getInitialStep();
 
         Step step = stepMap.get(stepName);
-        while(!step.isFinalStep()) {
+        while (!step.isFinalStep())
+        {
             TaskResponse taskResponse = taskResponseMap.get(stepName);
-            if (taskResponse != null && taskResponse.getWorkFlowTaskStatus() == Status.SUCCEEDED) {
-                final Step nextStep = workflowService.findNextStep(
-                        job.getWorkflow(), job.getStep());
+            if (taskResponse != null && taskResponse.getWorkFlowTaskStatus() == Status.SUCCEEDED)
+            {
+                final Step nextStep = workflowService.findNextStep(job.getWorkflow(), job.getStep());
 
-                if (nextStep != null) {
+                if (nextStep != null)
+                {
                     response.addLink(createNextStepLink(job, workflowService));
                 }
             }
@@ -64,7 +70,8 @@ public abstract class BaseService
         return response;
     }
 
-    public WorkflowTask createTask(String taskName, IWorkflowTaskHandler serviceBeanName){
+    public WorkflowTask createTask(String taskName, IWorkflowTaskHandler serviceBeanName)
+    {
         WorkflowTask task = new WorkflowTask();
         task.setTaskName(taskName);
         task.setTaskHandler(serviceBeanName);
@@ -74,8 +81,7 @@ public abstract class BaseService
     public LinkRepresentation createNextStepLink(final Job job, WorkflowService workflowService)
     {
 
-        final Step nextStep =
-                workflowService.findNextStep(job.getWorkflow(), job.getStep());
+        final Step nextStep = workflowService.findNextStep(job.getWorkflow(), job.getStep());
         final String path = nextStep.getNextStep(); //findPathFromStep(nextStep.getNextStep());
         final String type = findTypeFromStep(nextStep.getNextStep());
         final String method = findMethodFromStep(nextStep.getNextStep());
@@ -103,15 +109,13 @@ public abstract class BaseService
 
         if ((path == null) || (path.isEmpty()))
         {
-            uriComponents =
-                    UriComponentsBuilder.fromUriString("/nodes/{jobId}").
-                            buildAndExpand(job.getId().toString());
+            uriComponents = UriComponentsBuilder.fromUriString("/nodes/{jobId}").
+                    buildAndExpand(job.getId().toString());
         }
         else
         {
-            uriComponents =
-                    UriComponentsBuilder.fromUriString("/nodes/{jobId}/{path}").
-                            buildAndExpand(job.getId().toString(), path);
+            uriComponents = UriComponentsBuilder.fromUriString("/nodes/{jobId}/{path}").
+                    buildAndExpand(job.getId().toString(), path);
         }
 
         return uriComponents.toUriString();

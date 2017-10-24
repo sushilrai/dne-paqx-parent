@@ -6,15 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
@@ -25,107 +21,94 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FindVClusterTaskHandlerTest
 {
     @Mock
-    private NodeService nodeService = null;
+    private NodeService nodeService;
 
-    /*
-     * The job running the add node to system definition task handler.
-     */
-    private Job job = null;
+    @Mock
+    private Job job;
 
-    /**
-     * The test setup.
-     *
-     * @since 1.0
-     */
+    @Mock
+    private NodeExpansionRequest nodeExpansionRequest;
+
+    @Mock
+    private TaskResponse taskResponse;
+
+    @Mock
+    private ClusterInfo clusterInfo;
+
+    @Mock
+    private ValidateVcenterClusterResponseMessage validateVcenterClusterResponseMessage;
+
+    private FindVClusterTaskHandler handler;
+
     @Before
     public void setUp()
     {
-        PreProcessTaskConfig preprocessConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preprocessConfig.preProcessWorkflowSteps());
-
-        PreProcessService preprocessService = new PreProcessService();
-        preprocessService.setWorkflowService(workflowService);
-
-        this.job = preprocessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
-
-        NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
-                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
-                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
-        this.job.setInputParams(nodeExpansionRequest);
-
-        this.job.changeToNextStep("findVCluster");
+        this.handler = spy(new FindVClusterTaskHandler(this.nodeService));
     }
 
-    /**
-     * Test successful execution of FindVClusterTaskHandler.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_successfully_find_vcluster_data() throws ServiceTimeoutException, ServiceExecutionException
     {
-        ClusterInfo vCluster = new ClusterInfo("clusterTest1", 2);
-        List<ClusterInfo> vClusters = new ArrayList<>();
-        vClusters.add(vCluster);
+        doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(Arrays.asList(this.clusterInfo)).when(this.nodeService).listClusters();
+        doReturn(this.validateVcenterClusterResponseMessage).when(this.nodeService).validateClusters(any());
+        doReturn(Arrays.asList("cluster-1")).when(this.validateVcenterClusterResponseMessage).getClusters();
 
-        List<String> clusterNames = new ArrayList<>();
-        clusterNames.add("clusterTest1");
-        ValidateVcenterClusterResponseMessage resMsg = new ValidateVcenterClusterResponseMessage();
-        resMsg.setClusters(clusterNames);
+        final boolean result = this.handler.executeTask(this.job);
 
-        when(this.nodeService.listClusters()).thenReturn(vClusters);
-        when(this.nodeService.validateClusters(vClusters)).thenReturn(resMsg);
-
-        FindVClusterTaskHandler instance = new FindVClusterTaskHandler(this.nodeService);
-        boolean expectedResult = true;
-        boolean actualResult = instance.executeTask(this.job);
-
-        assertEquals(expectedResult, actualResult);
+        assertTrue(result);
+        verify(this.taskResponse).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.taskResponse).setResults(any());
+        verify(this.taskResponse, never()).addError(anyString());
     }
 
-    /**
-     * Test unsuccessful execution of FindVClusterTaskHandler.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_fail_the_work_flow_if_there_was_no_vclusters()
+            throws ServiceTimeoutException, ServiceExecutionException
     {
-        ClusterInfo vCluster = new ClusterInfo("clusterTest1", 2);
-        List<ClusterInfo> vClusters = new ArrayList<>();
-        vClusters.add(vCluster);
+        doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(Arrays.asList(this.clusterInfo)).when(this.nodeService).listClusters();
+        doReturn(this.validateVcenterClusterResponseMessage).when(this.nodeService).validateClusters(any());
+        doReturn(Collections.emptyList()).when(this.validateVcenterClusterResponseMessage).getClusters();
+        doReturn(Arrays.asList("No clusters found")).when(this.validateVcenterClusterResponseMessage).getFailedCluster();
 
-        List<String> failedClusterNames = new ArrayList<>();
-        failedClusterNames.add("REQUIRED:  No more than 1000 nodes per cluster -- Cluster test1 with 1000 nodes failed rule checking.\n");
-        failedClusterNames.add("REQUIRED:  No more than 1000 nodes per cluster -- Cluster test4 with 2000 nodes failed rule checking.\n");
-        ValidateVcenterClusterResponseMessage resMsg = new ValidateVcenterClusterResponseMessage();
-        resMsg.setClusters(Collections.emptyList());
-        resMsg.setFailedCluster(failedClusterNames);
+        final boolean result = this.handler.executeTask(this.job);
 
-        when(this.nodeService.listClusters()).thenReturn(vClusters);
-        when(this.nodeService.validateClusters(vClusters)).thenReturn(resMsg);
+        assertFalse(result);
+        verify(this.taskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.taskResponse, never()).setResults(any());
+        verify(this.taskResponse).addError(anyString());
+    }
 
-        FindVClusterTaskHandler instance = new FindVClusterTaskHandler(this.nodeService);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
+    @Test
+    public void testExecuteTask_should_fail_the_work_flow_if_there_is_an_exception()
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
+        doThrow(new IllegalStateException("some-error")).when(this.nodeService).listClusters();
 
-        assertEquals(expectedResult, actualResult);
+        final boolean result = this.handler.executeTask(this.job);
+
+        assertFalse(result);
+        verify(this.taskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.taskResponse, never()).setResults(any());
+        verify(this.taskResponse).addError(anyString());
     }
 }

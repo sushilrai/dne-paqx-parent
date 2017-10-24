@@ -24,7 +24,8 @@ import java.util.Map;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BaseTaskHandler {
+public abstract class BaseTaskHandler
+{
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTaskHandler.class);
 
     public TaskResponse initializeResponse(Job job)
@@ -34,25 +35,28 @@ public abstract class BaseTaskHandler {
         return response;
     }
 
-    protected void setupResponse(Job job, TaskResponse response){
+    protected void setupResponse(Job job, TaskResponse response)
+    {
         response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
         response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
         job.addTaskResponse(job.getStep(), response);
     }
 
-    public boolean preExecute(Job job) {
+    public boolean preExecute(Job job)
+    {
         LOGGER.info("preExecute: " + job.getCurrentTask().getTaskName());
         return true;
     }
 
-    public boolean postExecute(Job job) {
+    public boolean postExecute(Job job)
+    {
         LOGGER.info("postExecute: " + job.getCurrentTask().getTaskName());
         return true;
     }
 
     protected boolean processSuccessOrFailure(final String status, List<String> errors, final TaskResponse response, String type)
     {
-        boolean returnVal=true;
+        boolean returnVal = true;
         if ("SUCCESS".equalsIgnoreCase(status))
         {
             response.setResults(buildResponseResult(status, errors, type));
@@ -61,8 +65,9 @@ public abstract class BaseTaskHandler {
         else
         {
             response.addError(errors.toString());
-            returnVal=false;
+            returnVal = false;
         }
+
         return returnVal;
     }
 
@@ -75,12 +80,12 @@ public abstract class BaseTaskHandler {
 
         if (status != null)
         {
-            result.put(type+"Status", status);
+            result.put(type + "Status", status);
         }
 
         if (errors != null)
         {
-            result.put(type+"ErrorsList", errors.toString());
+            result.put(type + "ErrorsList", errors.toString());
         }
 
         return result;

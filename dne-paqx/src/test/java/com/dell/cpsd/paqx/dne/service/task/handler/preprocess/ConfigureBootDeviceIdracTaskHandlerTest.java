@@ -6,30 +6,31 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
-import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
+import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * The tests for ConfigureBootDeviceIdracTaskHandler.
@@ -39,89 +40,98 @@ import static org.mockito.Mockito.when;
  *
  * @since 1.0
  */
-
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigureBootDeviceIdracTaskHandlerTest
 {
-
-    /*
-     * The <code>NodeService</code> instance.
-     * @since 1.0
-     */
     @Mock
-    private NodeService nodeService = null;
+    private WorkflowTask task;
 
-    /*
-     * The job running the add node to system definition task handler.
-     */
-    private Job job = null;
+    @Mock
+    private NodeService nodeService;
 
-    /**
-     * The test setup.
-     *
-     * @since 1.0
-     */
+    @Mock
+    private Job job;
+
+    @Mock
+    private NodeExpansionRequest nodeExpansionRequest;
+
+    @Mock
+    private ConfigureBootDeviceIdracTaskResponse configureBootDeviceIdracTaskResponse;
+
+    @Mock
+    private BootDeviceIdracStatus bootDeviceIdracStatus;
+
+    private ConfigureBootDeviceIdracTaskHandler handler;
+    private final String symphonyUuid   = "symphonyuuid-1";
+    private final String idracIpAddress = "1.1.1.1";
+
     @Before
     public void setUp()
     {
-        PreProcessTaskConfig preProcessTaskConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(),
-                preProcessTaskConfig.preProcessWorkflowSteps());
-
-        PreProcessService preProcessService = new PreProcessService();
-        preProcessService.setWorkflowService(workflowService);
-
-        this.job = preProcessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
-        NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
-                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
-                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
-        this.job.setInputParams(nodeExpansionRequest);
-        this.job.changeToNextStep("configureBootDeviceIdrac");
+        this.handler = spy(new ConfigureBootDeviceIdracTaskHandler(this.nodeService));
     }
 
-    /**
-     * Test successful execution of ConfigureBootDeviceIdracTaskHandler.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_successfully_request_configure_idrac_boot_device()
+            throws ServiceTimeoutException, ServiceExecutionException
     {
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("SUCCESS", null);
-        ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
-        when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
+        doReturn(this.configureBootDeviceIdracTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.bootDeviceIdracStatus).when(this.nodeService).bootDeviceIdracStatus(any());
+        doReturn("SUCCESS").when(this.bootDeviceIdracStatus).getStatus();
 
-        ConfigureBootDeviceIdracTaskHandler instance = new ConfigureBootDeviceIdracTaskHandler(this.nodeService);
-        boolean expectedResult = true;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).bootDeviceIdracStatus(requestCaptor.capture());
+        assertTrue(result);
+        verify(this.configureBootDeviceIdracTaskResponse).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.configureBootDeviceIdracTaskResponse, never()).addError(anyString());
     }
 
-    /**
-     * Test unsuccessful execution of ConfigureBootDeviceIdracTaskHandler.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_unsuccessful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_fail_the_work_flow_if_the_configure_idrac_boot_device_request_failed()
+            throws ServiceTimeoutException, ServiceExecutionException
     {
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus("FAILED", null);
-        ArgumentCaptor<ConfigureBootDeviceIdracRequest> requestCaptor = ArgumentCaptor.forClass(ConfigureBootDeviceIdracRequest.class);
-        when(this.nodeService.bootDeviceIdracStatus(requestCaptor.capture())).thenReturn(bootDeviceIdracStatus);
+        doReturn(this.configureBootDeviceIdracTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.bootDeviceIdracStatus).when(this.nodeService).bootDeviceIdracStatus(any());
+        doReturn("FAILED").when(this.bootDeviceIdracStatus).getStatus();
 
-        ConfigureBootDeviceIdracTaskHandler instance = new ConfigureBootDeviceIdracTaskHandler(this.nodeService);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).bootDeviceIdracStatus(requestCaptor.capture());
+        assertFalse(result);
+        verify(this.configureBootDeviceIdracTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.configureBootDeviceIdracTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testExecuteTask_should_fail_the_work_flow_there_was_an_exception() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.configureBootDeviceIdracTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doThrow(new IllegalStateException("some-error")).when(this.nodeService).bootDeviceIdracStatus(any());
+
+        final boolean result = this.handler.executeTask(this.job);
+
+        assertFalse(result);
+        verify(this.configureBootDeviceIdracTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.configureBootDeviceIdracTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testInitializeResponse_should_create_the_task_response_object() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.task).when(this.job).getCurrentTask();
+        doReturn("configureBootDeviceIdracTask").when(this.task).getTaskName();
+        doReturn("configureBootDeviceIdracStep").when(this.job).getStep();
+
+        final ConfigureBootDeviceIdracTaskResponse result = this.handler.initializeResponse(this.job);
+
+        assertNotNull(result);
     }
 }

@@ -9,7 +9,11 @@ package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 import com.dell.cpsd.paqx.dne.domain.IWorkflowTaskHandler;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.model.*;
+import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.Status;
+import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +23,7 @@ import java.util.Map;
 
 /**
  * Task responsible for configuring the iDRAC network settings.
- * 
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -40,10 +44,8 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
 
     /**
      * ConfigIdracTaskHandler constructor.
-     * 
-     * @param nodeService
-     *            - The <code>NodeService</code> instance.
-     * 
+     *
+     * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0
      */
     public ConfigIdracTaskHandler(NodeService nodeService)
@@ -53,10 +55,8 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
 
     /**
      * Perform the task of configuring the iDRAC network settings.
-     * 
-     * @param job
-     *            - The <code>Job</code> this task is part of.
-     * 
+     *
+     * @param job - The <code>Job</code> this task is part of.
      * @since 1.0
      */
     @Override
@@ -110,39 +110,37 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
     {
         Map<String, String> result = new HashMap<>();
 
-        if (idracInfo == null)
+        if (idracInfo != null)
         {
-            return result;
-        }
+            if (idracInfo.getIdracIpAddress() != null)
+            {
+                result.put("idracIpAddress", idracInfo.getIdracIpAddress());
+            }
 
-        if (idracInfo.getIdracIpAddress() != null)
-        {
-            result.put("idracIpAddress", idracInfo.getIdracIpAddress());
-        }
+            if (idracInfo.getIdracGatewayIpAddress() != null)
+            {
+                result.put("idracGatewayIpAddress", idracInfo.getIdracGatewayIpAddress());
+            }
 
-        if (idracInfo.getIdracGatewayIpAddress() != null)
-        {
-            result.put("idracGatewayIpAddress", idracInfo.getIdracGatewayIpAddress());
-        }
-
-        if (idracInfo.getIdracSubnetMask() != null)
-        {
-            result.put("idracSubnetMask", idracInfo.getIdracSubnetMask());
+            if (idracInfo.getIdracSubnetMask() != null)
+            {
+                result.put("idracSubnetMask", idracInfo.getIdracSubnetMask());
+            }
         }
 
         return result;
     }
 
     /**
-     * Create the <code>IdracNetworkSettingsResponseInfo</code> instance and initialize it.
-     * 
-     * @param job
-     *            - The <code>Job</code> this task is part of.
+     * Create the <code>IdracNetworkSettingsTaskResponse</code> instance and initialize it.
+     *
+     * @param job - The <code>Job</code> this task is part of.
+     * @return <code>IdracNetworkSettingsTaskResponse</code>
      */
     @Override
-    public IdracNetworkSettingsResponseInfo initializeResponse(Job job)
+    public IdracNetworkSettingsTaskResponse initializeResponse(Job job)
     {
-        IdracNetworkSettingsResponseInfo response = new IdracNetworkSettingsResponseInfo();
+        IdracNetworkSettingsTaskResponse response = new IdracNetworkSettingsTaskResponse();
         setupResponse(job, response);
         return response;
     }

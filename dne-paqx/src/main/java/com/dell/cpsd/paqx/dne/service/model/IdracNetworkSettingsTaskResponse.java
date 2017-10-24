@@ -16,11 +16,17 @@ package com.dell.cpsd.paqx.dne.service.model;
  * @since 1.0
  */
 
-public class IdracNetworkSettingsResponseInfo extends TaskResponse {
-
+public class IdracNetworkSettingsTaskResponse extends TaskResponse
+{
     private IdracInfo idracInfo;
 
-    public IdracInfo getIdracInfo(){ return idracInfo; }
-    public void setIdracInfo(IdracInfo idracInfo) { this.idracInfo = idracInfo; }
+    public IdracInfo getIdracInfo()
+    {
+        return idracInfo;
+    }
 
+    public void setIdracInfo(IdracInfo idracInfo)
+    {
+        this.idracInfo = idracInfo;
+    }
 }

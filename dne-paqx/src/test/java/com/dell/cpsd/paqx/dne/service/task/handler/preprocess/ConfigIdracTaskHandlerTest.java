@@ -6,30 +6,31 @@
 
 package com.dell.cpsd.paqx.dne.service.task.handler.preprocess;
 
-import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
-import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
+import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessService;
-import com.dell.cpsd.paqx.dne.service.workflow.preprocess.PreProcessTaskConfig;
+import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * The tests for ConfigIdracTaskHandler.
@@ -42,85 +43,105 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigIdracTaskHandlerTest
 {
-
-    /*
-     * The <code>NodeService</code> instance.
-     * @since 1.0
-     */
     @Mock
-    private NodeService nodeService = null;
+    private WorkflowTask task;
 
-    /*
-     * The job running the add node to system definition task handler.
-     */
-    private Job job = null;
+    @Mock
+    private NodeService nodeService;
 
-    /**
-     * The test setup.
-     *
-     * @since 1.0
-     */
+    @Mock
+    private Job job;
+
+    @Mock
+    private NodeExpansionRequest nodeExpansionRequest;
+
+    @Mock
+    private IdracNetworkSettingsTaskResponse idracNetworkSettingsTaskResponse;
+
+    @Mock
+    private IdracInfo idracInfo;
+
+    private ConfigIdracTaskHandler handler;
+    private final String symphonyUuid          = "symphonyuuid-1";
+    private final String idracIpAddress        = "1.1.1.1";
+    private final String idracGatewayIpAddress = "2.2.2.2";
+    private final String idracSubnetMask       = "3.3.3.3";
+
     @Before
     public void setUp()
     {
-        PreProcessTaskConfig preprocessConfig = new PreProcessTaskConfig();
-        WorkflowService workflowService = new WorkflowServiceImpl(new InMemoryJobRepository(), preprocessConfig.preProcessWorkflowSteps());
-
-        PreProcessService preprocessService = new PreProcessService();
-        preprocessService.setWorkflowService(workflowService);
-
-        this.job = preprocessService.createWorkflow("preProcessWorkflow", "startPreProcessWorkflow", "submitted");
-
-        NodeExpansionRequest nodeExpansionRequest = new NodeExpansionRequest("idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask",
-                "managementIpAddress", "esxiKernelIpAddress1", "esxiKernelIpAddress2", "esxiManagementHostname", "scaleIoData1SvmIpAddress",
-                "scaleIoData1KernelAndSvmSubnetMask", "scaleIOSVMDataIpAddress2", "scaleIoData2KernelAndSvmSubnetMask",
-                "scaleIOSVMManagementIpAddress", "scaleIoSvmManagementGatewayAddress", "scaleIoSvmManagementSubnetMask", "symphonyUuid",
-                "clausterName", "vMotionManagementIpAddress", "vMotionManagementSubnetMask", TestUtil.createDeviceAssignmentMap());
-        this.job.setInputParams(nodeExpansionRequest);
-        this.job.changeToNextStep("configIdrac");
+        this.handler = spy(new ConfigIdracTaskHandler(this.nodeService));
     }
 
-    /**
-     * Test successful execution of ConfigIdracTaskHandler.executeTask() method
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_successful_case() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_successfully_configure_the_idrac() throws ServiceTimeoutException, ServiceExecutionException
     {
-        IdracInfo idracInfo = new IdracInfo("nodeId", "idracIpAddress", "idracGatewayIpAddress", "idracSubnetMask", "SUCCESS");
-        ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
-        when(this.nodeService.idracNetworkSettings(requestCaptor.capture())).thenReturn(idracInfo);
+        doReturn(this.idracNetworkSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.idracGatewayIpAddress).when(this.nodeExpansionRequest).getIdracGatewayIpAddress();
+        doReturn(this.idracSubnetMask).when(this.nodeExpansionRequest).getIdracSubnetMask();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.idracInfo).when(this.nodeService).idracNetworkSettings(any());
+        doReturn(this.idracIpAddress).when(this.idracInfo).getIdracIpAddress();
+        doReturn(this.idracGatewayIpAddress).when(this.idracInfo).getIdracGatewayIpAddress();
+        doReturn(this.idracSubnetMask).when(this.idracInfo).getIdracSubnetMask();
+        doReturn("SUCCESS").when(this.idracInfo).getMessage();
 
-        ConfigIdracTaskHandler instance = new ConfigIdracTaskHandler(this.nodeService);
-        boolean expectedResult = true;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).idracNetworkSettings(requestCaptor.capture());
+        assertTrue(result);
+        verify(this.idracNetworkSettingsTaskResponse).setWorkFlowTaskStatus(Status.SUCCEEDED);
+        verify(this.idracNetworkSettingsTaskResponse, never()).addError(anyString());
     }
 
-    /**
-     * Test error execution of ConfigIdracTaskHandler.executeTask() method - test error case where the NodeService idracNetworkSettings
-     * experiences an error.
-     *
-     * @throws ServiceExecutionException
-     * @throws ServiceTimeoutException
-     * @since 1.0
-     */
     @Test
-    public void testExecuteTask_network_settings_error() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_should_fail_the_work_flow_if_the_configure_idrac_request_failed()
+            throws ServiceTimeoutException, ServiceExecutionException
     {
-        ArgumentCaptor<IdracNetworkSettingsRequest> requestCaptor = ArgumentCaptor.forClass(IdracNetworkSettingsRequest.class);
-        when(this.nodeService.idracNetworkSettings(requestCaptor.capture())).thenReturn(null);
+        doReturn(this.idracNetworkSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.idracGatewayIpAddress).when(this.nodeExpansionRequest).getIdracGatewayIpAddress();
+        doReturn(this.idracSubnetMask).when(this.nodeExpansionRequest).getIdracSubnetMask();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doReturn(this.idracInfo).when(this.nodeService).idracNetworkSettings(any());
+        doReturn("FAILED").when(this.idracInfo).getMessage();
 
-        ConfigIdracTaskHandler instance = new ConfigIdracTaskHandler(this.nodeService);
-        boolean expectedResult = false;
-        boolean actualResult = instance.executeTask(this.job);
+        final boolean result = this.handler.executeTask(this.job);
 
-        assertEquals(expectedResult, actualResult);
-        verify(this.nodeService, times(1)).idracNetworkSettings(requestCaptor.capture());
+        assertFalse(result);
+        verify(this.idracNetworkSettingsTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.idracNetworkSettingsTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testExecuteTask_should_fail_the_work_flow_there_was_an_exception() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.idracNetworkSettingsTaskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.idracIpAddress).when(this.nodeExpansionRequest).getIdracIpAddress();
+        doReturn(this.idracGatewayIpAddress).when(this.nodeExpansionRequest).getIdracGatewayIpAddress();
+        doReturn(this.idracSubnetMask).when(this.nodeExpansionRequest).getIdracSubnetMask();
+        doReturn(this.symphonyUuid).when(this.nodeExpansionRequest).getSymphonyUuid();
+        doThrow(new IllegalStateException("some-error")).when(this.nodeService).idracNetworkSettings(any());
+
+        final boolean result = this.handler.executeTask(this.job);
+
+        assertFalse(result);
+        verify(this.idracNetworkSettingsTaskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.idracNetworkSettingsTaskResponse).addError(anyString());
+    }
+
+    @Test
+    public void testInitializeResponse_should_create_the_task_response_object() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        doReturn(this.task).when(this.job).getCurrentTask();
+        doReturn("configIdracTask").when(this.task).getTaskName();
+        doReturn("configIdracStep").when(this.job).getStep();
+
+        final IdracNetworkSettingsTaskResponse result = this.handler.initializeResponse(this.job);
+
+        assertNotNull(result);
     }
 }
