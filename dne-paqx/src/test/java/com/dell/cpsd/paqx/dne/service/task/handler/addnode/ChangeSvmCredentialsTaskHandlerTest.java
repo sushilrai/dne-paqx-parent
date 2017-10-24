@@ -14,7 +14,6 @@ import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -38,7 +37,6 @@ import static org.mockito.Mockito.verify;
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-@Ignore("Needs to be refactored failing on Jenkins")
 public class ChangeSvmCredentialsTaskHandlerTest
 {
     @Mock
@@ -63,12 +61,13 @@ public class ChangeSvmCredentialsTaskHandlerTest
     private NodeExpansionRequest nodeExpansionRequest;
 
     private ChangeSvmCredentialsTaskHandler handler;
-    private String scaleIoSvmManagementIpAddress = "127.0.0.1";
+    private String scaleIoSvmManagementIpAddress = "1.2.3.4";
+    private String esxiHostManagementIpAddress   = "127.0.0.1";
 
     @Before
     public void setUp()
     {
-        this.handler = spy(new ChangeSvmCredentialsTaskHandler(this.nodeService, this.repository, 0, 0));
+        this.handler = spy(new ChangeSvmCredentialsTaskHandler(this.nodeService, this.repository, 0, 1));
     }
 
     @Test
@@ -79,6 +78,7 @@ public class ChangeSvmCredentialsTaskHandlerTest
                 .getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
         doReturn(this.scaleIoSvmManagementIpAddress).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
+        doReturn(this.esxiHostManagementIpAddress).when(this.nodeExpansionRequest).getEsxiManagementIpAddress();
         doReturn(true).when(this.nodeService).requestRemoteCommandExecution(any());
 
         final boolean result = this.handler.executeTask(this.job);
@@ -147,6 +147,23 @@ public class ChangeSvmCredentialsTaskHandlerTest
     }
 
     @Test
+    public void executeTask_should_fail_the_work_flow_if_the_esxi_host_management_ip_address_is_null() throws Exception
+    {
+        doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
+        doReturn(this.factoryComponentEndpointIds, this.commonComponentEndpointIds).when(this.repository)
+                .getComponentEndpointIds(anyString(), anyString(), anyString());
+        doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
+        doReturn(this.scaleIoSvmManagementIpAddress).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
+        doReturn(null).when(this.nodeExpansionRequest).getEsxiManagementIpAddress();
+
+        final boolean result = this.handler.executeTask(this.job);
+
+        assertThat(result, is(false));
+        verify(this.taskResponse).setWorkFlowTaskStatus(Status.FAILED);
+        verify(this.taskResponse).addError(anyString());
+    }
+
+    @Test
     public void executeTask_should_fail_the_work_flow_if_the_change_svm_credentials_request_fails() throws Exception
     {
         doReturn(this.taskResponse).when(this.handler).initializeResponse(this.job);
@@ -154,6 +171,7 @@ public class ChangeSvmCredentialsTaskHandlerTest
                 .getComponentEndpointIds(anyString(), anyString(), anyString());
         doReturn(this.nodeExpansionRequest).when(this.job).getInputParams();
         doReturn(this.scaleIoSvmManagementIpAddress).when(this.nodeExpansionRequest).getScaleIoSvmManagementIpAddress();
+        doReturn(this.esxiHostManagementIpAddress).when(this.nodeExpansionRequest).getEsxiManagementIpAddress();
         doReturn(false).when(this.nodeService).requestRemoteCommandExecution(any());
 
         final boolean result = this.handler.executeTask(this.job);

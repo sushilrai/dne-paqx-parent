@@ -17,7 +17,6 @@ import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -45,7 +44,6 @@ import static org.mockito.Mockito.verify;
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-@Ignore("Needs to be refactored failing on Jenkins")
 public class PowerOnScaleIoVmTaskHandlerTest
 {
     @Mock
@@ -76,14 +74,14 @@ public class PowerOnScaleIoVmTaskHandlerTest
     private NodeExpansionRequest nodeExpansionRequest;
 
     private PowerOnScaleIoVmTaskHandler handler;
-    private String hostName      = "the-host-1";
-    private String scaleIoVmName = "scaleio-vm-1";
+    private       String hostName          = "the-host-1";
+    private       String scaleIoVmName     = "scaleio-vm-1";
     private final String esxiHostIpAddress = "127.0.0.1";
 
     @Before
     public void setUp() throws Exception
     {
-        this.handler = spy(new PowerOnScaleIoVmTaskHandler(this.nodeService, this.dataServiceRepository, 0));
+        this.handler = spy(new PowerOnScaleIoVmTaskHandler(this.nodeService, this.dataServiceRepository, 1));
     }
 
     @Test
