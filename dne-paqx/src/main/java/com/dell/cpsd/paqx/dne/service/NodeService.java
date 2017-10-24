@@ -79,9 +79,8 @@ public interface NodeService
      * List the virtualisation scaleio data
      *
      * @return
-     * @throws ServiceExecutionException
      */
-    List<ScaleIOData> listScaleIOData() throws  ServiceExecutionException;
+    List<ScaleIOData> listScaleIOData();
 
     /**
      * List the rackhd node inventory
@@ -143,11 +142,8 @@ public interface NodeService
      * @param idracNetworkSettingsRequest - The <code>IdracNetworkSettingsRequest</code> instance.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest);
 
     /**
      * Change Idrac credentials
@@ -155,10 +151,8 @@ public interface NodeService
      * @param nodeId - The <code>ChangeIdracCredentialsRequest</code> instance.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    ChangeIdracCredentialsResponse changeIdracCredentials(String nodeId) throws ServiceTimeoutException, ServiceExecutionException;
+    ChangeIdracCredentialsResponse changeIdracCredentials(String nodeId);
 
     /**
      * Configure OBM settings.
@@ -166,11 +160,8 @@ public interface NodeService
      * @param setObmSettingsRequestMessage - The <code>SetObmSettingsRequestMessage</code> instance.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage);
 
     /**
      * Configure the iDRAC boot device.
@@ -178,11 +169,8 @@ public interface NodeService
      * @param configureBootDeviceIdracRequest - The <code>ConfigureBootDeviceIdracRequest</code> instance.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest);
 
     /**
      *
@@ -191,29 +179,22 @@ public interface NodeService
      * @param ipAddress - The IP address of the iDRAC
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress);
 
     /**
      * Request a list of ScaleIO components.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    boolean requestScaleIoComponents() throws ServiceTimeoutException, ServiceExecutionException;
+    boolean requestScaleIoComponents();
 
     /**
      * Request a list of VCenter components.
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    boolean requestVCenterComponents() throws ServiceTimeoutException, ServiceExecutionException;
+    boolean requestVCenterComponents();
 
     /**
      * Request a discovery of ScaleIO data.
@@ -222,11 +203,8 @@ public interface NodeService
      * @param jobId - The job id
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    boolean requestDiscoverScaleIo(ComponentEndpointIds componentEndpointIds, String jobId)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    boolean requestDiscoverScaleIo(ComponentEndpointIds componentEndpointIds, String jobId);
 
     /**
      * Request a discovery of VCenter data.
@@ -235,11 +213,8 @@ public interface NodeService
      * @param jobId - The job id
      *
      * @return
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
      */
-    boolean requestDiscoverVCenter(ComponentEndpointIds componentEndpointIds, String jobId)
-            throws ServiceTimeoutException, ServiceExecutionException;
+    boolean requestDiscoverVCenter(ComponentEndpointIds componentEndpointIds, String jobId);
 
     /**
      * Request an installation of ESXi.
@@ -395,7 +370,7 @@ public interface NodeService
     /**
      * Retrieves vCenter hosts from H2 database
      * @return List of <code>Host</code>
-     * @throws Exception
+     * @throws NoResultException
      */
     List<Host> findVcenterHosts() throws NoResultException;
 

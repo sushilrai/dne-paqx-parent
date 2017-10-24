@@ -12,6 +12,10 @@ import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -44,5 +48,41 @@ public abstract class BaseTaskHandler {
     public boolean postExecute(Job job) {
         LOGGER.info("postExecute: " + job.getCurrentTask().getTaskName());
         return true;
+    }
+
+    protected boolean processSuccessOrFailure(final String status, List<String> errors, final TaskResponse response, String type)
+    {
+        boolean returnVal=true;
+        if ("SUCCESS".equalsIgnoreCase(status))
+        {
+            response.setResults(buildResponseResult(status, errors, type));
+            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
+        }
+        else
+        {
+            response.addError(errors.toString());
+            returnVal=false;
+        }
+        return returnVal;
+    }
+
+    /*
+     * This method add all the node information to the response object
+     */
+    private Map<String, String> buildResponseResult(String status, List<String> errors, String type)
+    {
+        Map<String, String> result = new HashMap<>();
+
+        if (status != null)
+        {
+            result.put(type+"Status", status);
+        }
+
+        if (errors != null)
+        {
+            result.put(type+"ErrorsList", errors.toString());
+        }
+
+        return result;
     }
 }

@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Task responsible for configuring obm settings.
@@ -96,15 +94,10 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
             configureObmSettingsRequest.setObmConfig(obmConfig);
 
             ObmSettingsResponse obmSettingsResponse = nodeService.obmSettingsResponse(configureObmSettingsRequest);
-            if ("SUCCESS".equalsIgnoreCase(obmSettingsResponse.getStatus()))
+
+            if (processSuccessOrFailure(obmSettingsResponse.getStatus(),obmSettingsResponse.getErrors(),response,"obmSettingsResponse"))
             {
-                response.setResults(buildResponseResult(obmSettingsResponse));
-                response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
-            }
-            else
-            {
-                response.addError(obmSettingsResponse.getErrors().toString());
             }
         }
         catch(Exception e)
@@ -114,31 +107,6 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
         }
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
-    }
-
-    /*
-     * This method add all the node information to the response object
-     */
-    private Map<String, String> buildResponseResult(ObmSettingsResponse obmSettingsResponse)
-    {
-        Map<String, String> result = new HashMap<>();
-
-        if (obmSettingsResponse == null)
-        {
-            return result;
-        }
-
-        if (obmSettingsResponse.getStatus() != null)
-        {
-            result.put("obmSettingsResponseStatus", obmSettingsResponse.getStatus());
-        }
-
-        if (obmSettingsResponse.getErrors() != null)
-        {
-            result.put("obmSettingsResponseErrorList", obmSettingsResponse.getErrors().toString());
-        }
-
-        return result;
     }
 
     /**

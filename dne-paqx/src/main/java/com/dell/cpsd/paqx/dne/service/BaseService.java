@@ -30,6 +30,13 @@ import java.util.Map;
  */
 public abstract class BaseService
 {
+    private final Map<String, String> stepToMethod = new HashMap<>();
+
+    protected BaseService()
+    {
+        stepToMethod.put("completed", "GET");
+    }
+
     public NodeExpansionResponse makeNodeExpansionResponse(final Job job, final WorkflowService workflowService)
     {
         final NodeExpansionResponse response = new NodeExpansionResponse(job);
@@ -82,21 +89,17 @@ public abstract class BaseService
 
     private String findTypeFromStep(final String step)
     {
-        final Map<String, String> stepToType = new HashMap<>();
-
-        return stepToType.getOrDefault(step, "application/json");
+        return "application/json";
     }
 
     private String findMethodFromStep(final String step)
     {
-        final Map<String, String> stepToMethod = new HashMap<>();
-        stepToMethod.put("completed", "GET");
         return stepToMethod.getOrDefault(step, HttpMethod.POST.toString());
     }
 
     private String formatUri(final Job job, final String path)
     {
-        UriComponents uriComponents = null;
+        UriComponents uriComponents;
 
         if ((path == null) || (path.isEmpty()))
         {

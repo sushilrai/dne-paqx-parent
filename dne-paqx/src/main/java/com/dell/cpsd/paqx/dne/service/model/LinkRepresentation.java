@@ -37,7 +37,7 @@ public class LinkRepresentation
      * @param   rel     The relationship
      * @param   href    The URI for the link
      * @param   type    The content type
-     * @param   method  The HTTP method.
+     * @param   httpMethod  The HTTP method.
      * 
      * @since   1.0
      */

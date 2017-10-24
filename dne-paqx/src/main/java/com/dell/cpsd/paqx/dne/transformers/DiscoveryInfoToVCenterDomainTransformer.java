@@ -5,17 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
-import com.dell.cpsd.paqx.dne.domain.vcenter.Cluster;
 import com.dell.cpsd.paqx.dne.domain.vcenter.*;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Datastore;
-import com.dell.cpsd.paqx.dne.domain.vcenter.HostDnsConfig;
-import com.dell.cpsd.paqx.dne.domain.vcenter.HostIpRouteConfig;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Network;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PhysicalNic;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PortGroup;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualMachine;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualNic;
-import com.dell.cpsd.paqx.dne.domain.vcenter.VirtualNicDVPortGroup;
 import com.dell.cpsd.virtualization.capabilities.api.DiscoveryResponseInfoMessage;
 import com.dell.cpsd.virtualization.capabilities.api.DistributedVirtualSwicthPortConnection;
 import com.dell.cpsd.virtualization.capabilities.api.DvSwitch;
@@ -276,10 +266,7 @@ public class DiscoveryInfoToVCenterDomainTransformer
                 });
             });
 
-            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> {
-
-                returnVal.setNtpServers(hostDateTimeInfo.getNtpServers());
-            });
+            Optional.ofNullable(hostConfigInfo.getHostDateTimeInfo()).ifPresent(hostDateTimeInfo -> returnVal.setNtpServers(hostDateTimeInfo.getNtpServers()));
 
             Optional.ofNullable(hostConfigInfo.getHostStorageDeviceInfo()).ifPresent(hostStorageDeviceInfo -> {
 

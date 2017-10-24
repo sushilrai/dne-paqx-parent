@@ -15,9 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Task responsible for handling Boot Order Sequence
  *
@@ -74,15 +71,10 @@ public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWor
             LOGGER.info("ipAddress:" + ipAddress);
 
             BootDeviceIdracStatus bootDeviceIdracStatus = nodeService.configurePxeBoot(uuid, ipAddress);
-            if ("SUCCESS".equalsIgnoreCase(bootDeviceIdracStatus.getStatus()))
+
+            if (processSuccessOrFailure(bootDeviceIdracStatus.getStatus(),bootDeviceIdracStatus.getErrors(),response,"bootDeviceIdrac"))
             {
-                response.setResults(buildResponseResult(bootDeviceIdracStatus));
-                response.setWorkFlowTaskStatus(Status.SUCCEEDED);
                 return true;
-            }
-            else
-            {
-                response.addError(bootDeviceIdracStatus.getErrors().toString());
             }
         }
         catch(Exception e)
@@ -92,31 +84,6 @@ public class ConfigurePxeBootTaskHandler extends BaseTaskHandler implements IWor
         }
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
-    }
-
-    /*
-     * This method add all the node information to the response object
-     */
-    private Map<String, String> buildResponseResult(BootDeviceIdracStatus bootDeviceIdracStatus)
-    {
-        Map<String, String> result = new HashMap<>();
-
-        if (bootDeviceIdracStatus == null)
-        {
-            return result;
-        }
-
-        if (bootDeviceIdracStatus.getStatus() != null)
-        {
-            result.put("bootDeviceIdracStatus", bootDeviceIdracStatus.getStatus());
-        }
-
-        if (bootDeviceIdracStatus.getErrors() != null)
-        {
-            result.put("bootDeviceIdracErrorsList", bootDeviceIdracStatus.getErrors().toString());
-        }
-
-        return result;
     }
 
     /**

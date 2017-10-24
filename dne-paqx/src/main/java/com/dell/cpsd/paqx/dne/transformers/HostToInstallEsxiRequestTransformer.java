@@ -64,7 +64,7 @@ public class HostToInstallEsxiRequestTransformer
             throw new IllegalArgumentException("Symphony Id is null");
         }
 
-        Host host = null;
+        Host host;
 
         try
         {

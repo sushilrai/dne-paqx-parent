@@ -111,7 +111,7 @@ public enum DneMessageCode
      */
     public String getMessageText(Object[] params)
     {
-        String message = null;
+        String message;
 
         try
         {

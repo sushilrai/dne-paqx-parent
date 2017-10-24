@@ -30,7 +30,8 @@ public interface WorkflowService
      * 
      * @param   workflowType    The type of workflow.
      * @param   startingStep    The starting step in the workflow.
-     * @param   startingStep    The current step in the workflow.
+     * @param   currentStatus   The current status
+     * @param   taskMap         The taskMap
      * 
      * @return  The job for the specified workflow.
      * 

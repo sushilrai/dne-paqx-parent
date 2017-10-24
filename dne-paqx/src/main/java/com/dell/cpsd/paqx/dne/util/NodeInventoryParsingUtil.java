@@ -61,12 +61,12 @@ public class NodeInventoryParsingUtil {
             newDevices = new ArrayList<>();
             DocumentContext context = JsonPath.parse(jsonString.toLowerCase());
             int length = context.read("$.length()");
-            String source = null;
-            int dataLen = 0;
-            String deviceId = null;
-            String deviceName = null;
-            String ssdDeviceType = null;
-            String serialNumber = null;
+            String source;
+            int dataLen;
+            String deviceId;
+            String deviceName;
+            String ssdDeviceType;
+            String serialNumber;
             String devicePath=null;
             for(int iCount=0;iCount<length;iCount++) {
                 source = context.read("$[" + iCount + "]['source']", String.class);

@@ -9,7 +9,6 @@ package com.dell.cpsd.paqx.dne.repository;
 
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
 import com.dell.cpsd.paqx.dne.domain.node.*;
-import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;

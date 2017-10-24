@@ -63,11 +63,7 @@ public class OrchestrationService implements IOrchestrationService
                                 LOGGER.error("exception in Thread.sleep : {}", e.getMessage());
                             }
                         }
-                        if (task.getTaskHandler().postExecute(job))
-                        {
-
-                        }
-                        else
+                        if (!task.getTaskHandler().postExecute(job))
                         {
                             //post execute failed
                             job.setStatus(Status.FAILED);

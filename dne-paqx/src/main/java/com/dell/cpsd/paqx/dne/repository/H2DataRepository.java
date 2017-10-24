@@ -826,7 +826,7 @@ public class H2DataRepository implements DataServiceRepository
         protectionDomainTypedQuery.setParameter("proptectionDomainId", proptectionDomainId);
 
         ScaleIOStoragePool storagePool = new ScaleIOStoragePool(storagePoolId, storagePoolName, -1, -1, 0, false, false, true);
-        storagePool.setDevices(Collections.EMPTY_LIST);
+        storagePool.setDevices(Collections.emptyList());
 
         try
         {

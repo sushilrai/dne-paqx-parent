@@ -75,7 +75,7 @@ public class DiscoverNodeInventoryTaskHandler extends BaseTaskHandler implements
                 if (isNodeInventorySaved) {
                     response.setWorkFlowTaskStatus(Status.SUCCEEDED);
 
-                    return isNodeInventorySaved;
+                    return true;
                 }
             } else {
                 LOGGER.info("There is no node inventory for UUID ", symphonyUUID);

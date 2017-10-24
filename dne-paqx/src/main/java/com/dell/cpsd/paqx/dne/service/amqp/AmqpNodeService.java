@@ -328,7 +328,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     @Override
     public IdracInfo idracNetworkSettings(IdracNetworkSettingsRequest idracNetworkSettingsRequest)
-            throws ServiceExecutionException
     {
         IdracInfo idracInfo = new IdracInfo();
 
@@ -536,7 +535,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public List<ScaleIOData> listScaleIOData() throws ServiceExecutionException
+    public List<ScaleIOData> listScaleIOData()
     {
         LOGGER.info("Listing scaleIO data ...");
 
@@ -701,7 +700,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             LOGGER.error("Error response from notify node allocation complete: " + responseInfo.getNodeAllocationErrors());
         }
 
-        return CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+        return responseInfo!=null && CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
     /**
@@ -734,7 +733,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * {@inheritDoc}
      */
     @Override
-    public ChangeIdracCredentialsResponse changeIdracCredentials(String uuid) throws ServiceTimeoutException, ServiceExecutionException
+    public ChangeIdracCredentialsResponse changeIdracCredentials(String uuid)
     {
         ChangeIdracCredentialsResponse responseMessage = new ChangeIdracCredentialsResponse();
 
@@ -800,7 +799,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
-            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
@@ -864,7 +862,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)
-            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
@@ -937,7 +934,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
-            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         ObmSettingsResponse obmSettingsResponse = new ObmSettingsResponse();
@@ -987,7 +983,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestScaleIoComponents() throws ServiceExecutionException
+    public boolean requestScaleIoComponents()
     {
         final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
@@ -1041,13 +1037,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                                 endpointDetails.setIdentifier(scaleIoEndpointDetails.getIdentifier());
                                 endpointDetails.setType(scaleIoEndpointDetails.getElementType());
                                 final List<CredentialNameId> credentialUuids = scaleIoEndpointDetails.getCredentialNameIds();
-                                credentialUuids.forEach(credential -> {
-                                    final CredentialDetails credentialDetails = new CredentialDetails();
-                                    credentialDetails.setCredentialName(credential.getCredentialName());
-                                    credentialDetails.setCredentialUuid(credential.getCredentialUuid());
-                                    credentialDetails.setEndpointDetails(endpointDetails);
-                                    endpointDetails.getCredentialDetailsList().add(credentialDetails);
-                                });
+                                credentialUuids.forEach(
+                                        credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
+                                                credential.getCredentialUuid()));
                                 endpointDetails.setComponentDetails(componentDetails);
                                 componentDetails.getEndpointDetails().add(endpointDetails);
                             });
@@ -1074,8 +1066,17 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return false;
     }
 
+    private void addCredentialsToEndpoint(final EndpointDetails endpointDetails, final String credentialName, final String credentialUuid)
+    {
+        final CredentialDetails credentialDetails = new CredentialDetails();
+        credentialDetails.setCredentialName(credentialName);
+        credentialDetails.setCredentialUuid(credentialUuid);
+        credentialDetails.setEndpointDetails(endpointDetails);
+        endpointDetails.getCredentialDetailsList().add(credentialDetails);
+    }
+
     @Override
-    public boolean requestVCenterComponents() throws ServiceTimeoutException, ServiceExecutionException
+    public boolean requestVCenterComponents()
     {
         final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
@@ -1129,13 +1130,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                                 endpointDetails.setIdentifier(vCenterEndpointDetails.getIdentifier());
                                 endpointDetails.setType(vCenterEndpointDetails.getType());
                                 final List<VCenterCredentialDetails> credentialDetailsList = vCenterEndpointDetails.getCredentialDetails();
-                                credentialDetailsList.stream().filter(Objects::nonNull).forEach(credential -> {
-                                    final CredentialDetails credentialDetails = new CredentialDetails();
-                                    credentialDetails.setCredentialName(credential.getCredentialName());
-                                    credentialDetails.setCredentialUuid(credential.getCredentialUuid());
-                                    credentialDetails.setEndpointDetails(endpointDetails);
-                                    endpointDetails.getCredentialDetailsList().add(credentialDetails);
-                                });
+                                credentialDetailsList.stream().filter(Objects::nonNull).forEach(
+                                        credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
+                                                credential.getCredentialUuid()));
                                 endpointDetails.setComponentDetails(componentDetails);
                                 componentDetails.getEndpointDetails().add(endpointDetails);
                             });
@@ -1164,7 +1161,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public boolean requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds, final String jobId)
-            throws ServiceExecutionException
     {
         try
         {
@@ -1216,7 +1212,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     public boolean requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
-            throws ServiceExecutionException
     {
         try
         {
@@ -1765,8 +1760,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse,
                     ListEsxiCredentialDetailsResponseMessage.class);
 
-            boolean validResponse = true;
-            validResponse = validResponse && responseMessage != null;
+            boolean validResponse = responseMessage != null;
             validResponse = validResponse && responseMessage.getMessageProperties() != null;
             validResponse = validResponse && responseMessage.getComponentUuid() != null;
             validResponse = validResponse && responseMessage.getEndpointUuid() != null;
@@ -2106,7 +2100,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     public List<Host> findVcenterHosts() throws NoResultException
     {
-        List<Host> vCenterHosts = null;
+        List<Host> vCenterHosts;
         try
         {
             vCenterHosts = repository.getVCenterHosts();

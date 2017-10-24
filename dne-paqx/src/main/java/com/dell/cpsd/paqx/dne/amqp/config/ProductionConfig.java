@@ -36,7 +36,7 @@ public class ProductionConfig {
     @Qualifier("rabbitConnectionFactory")
     public ConnectionFactory productionCachingConnectionFactory() {
 
-        com.rabbitmq.client.ConnectionFactory connectionFactory = null;
+        com.rabbitmq.client.ConnectionFactory connectionFactory;
 
         LOGGER.info("Rabbit connection properties : sslEnabled: [{}], host: [{}], port: [{}], tlsVersion:[{}]",
                 propertiesConfig.isSslEnabled(), propertiesConfig.rabbitHostname(),

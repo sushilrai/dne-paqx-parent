@@ -25,10 +25,6 @@ import java.util.Map;
 @Component("PropertySplitter")
 public class PropertySplitter {
     public Map<String, String> map(String property) {
-        return this.map(property, ",");
-    }
-
-    private Map<String, String> map(String property, String splitter) {
-        return Splitter.on(splitter).omitEmptyStrings().trimResults().withKeyValueSeparator(":").split(property);
+        return Splitter.on(",").omitEmptyStrings().trimResults().withKeyValueSeparator(":").split(property);
     }
 }

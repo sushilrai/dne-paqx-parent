@@ -160,9 +160,7 @@ public class StoragePoolEssRequestTransformer
      */
     public Map<String, Map<String, HostStorageDevice>> getHostToStorageDeviceMap(List<Host> hosts)
     {
-        return hosts.stream().collect(Collectors.toMap(host -> host.getName(), host -> {
-            return host.getHostStorageDeviceList().stream()
-                    .collect(Collectors.toMap(HostStorageDevice::getDisplayName, hostStorageDevice -> hostStorageDevice));
-        }));
+        return hosts.stream().collect(Collectors.toMap(Host::getName, host -> host.getHostStorageDeviceList().stream()
+                .collect(Collectors.toMap(HostStorageDevice::getDisplayName, hostStorageDevice -> hostStorageDevice))));
     }
 }
