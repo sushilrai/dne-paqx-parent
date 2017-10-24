@@ -51,9 +51,9 @@ public class PowerOnScaleIoVmTaskHandler extends BaseTaskHandler implements IWor
      */
     private final DataServiceRepository repository;
 
-    private final int PING_TIMEOUT;
+    private final Long PING_TIMEOUT;
 
-    public PowerOnScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final int ping_timeout)
+    public PowerOnScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final long ping_timeout)
     {
         this.nodeService = nodeService;
         this.repository = repository;
@@ -94,7 +94,7 @@ public class PowerOnScaleIoVmTaskHandler extends BaseTaskHandler implements IWor
 
             final InetAddress esxiHostIp = InetAddress.getByName(esxiManagementIpAddress);
 
-            if (!esxiHostIp.isReachable(this.PING_TIMEOUT))
+            if (!esxiHostIp.isReachable(this.PING_TIMEOUT.intValue()))
             {
                 throw new IllegalStateException("ESXi Host is not reachable");
             }

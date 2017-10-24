@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.net.InetAddress;
+
 /**
  * Task responsible for changing the scaleio vm credentials.
  * <p>
@@ -52,6 +54,11 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
     */
     private final long waitTime;
 
+    /*
+    * Timeput for pinging the ESXi host
+    */
+    private final Long esxiHostPingTimeout;
+
     /**
      * ScaleIO SVM credential components
      */
@@ -63,17 +70,20 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
     /**
      * ChangeSvmCredentialsTaskHandler constructor.
      *
-     * @param nodeService - The <code>NodeService</code> instance
-     * @param repository  - The <code>DataServiceRepository</code> instance
-     * @param waitTime  - The time to wait before sending the request to change the SVM credentials.
-     *                  We need this because after a SVM is deployed and powered up for the first time
-     *                  it does a reboot, which makes any other solution for pinging the vm unreliable.
+     * @param nodeService         - The <code>NodeService</code> instance
+     * @param repository          - The <code>DataServiceRepository</code> instance
+     * @param waitTime            - The time to wait before sending the request to change the SVM credentials.
+     *                            We need this because after a SVM is deployed and powered up for the first time
+     *                            it does a reboot, which makes any other solution for pinging the vm unreliable.
+     * @param esxiHostPingTimeout - The time to wait before timing out when checking if the ESXi host is reachable or not.
      */
-    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime)
+    public ChangeSvmCredentialsTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime,
+            long esxiHostPingTimeout)
     {
         this.nodeService = nodeService;
         this.repository = repository;
         this.waitTime = waitTime;
+        this.esxiHostPingTimeout = esxiHostPingTimeout;
     }
 
     @Override
@@ -113,6 +123,20 @@ public class ChangeSvmCredentialsTaskHandler extends BaseTaskHandler implements 
             if (StringUtils.isEmpty(scaleIoSvmManagementIpAddress))
             {
                 throw new IllegalStateException("ScaleIO VM Management IP Address is null");
+            }
+
+            final String esxiManagementIpAddress = nodeExpansionRequest.getEsxiManagementIpAddress();
+
+            if (StringUtils.isEmpty(esxiManagementIpAddress))
+            {
+                throw new IllegalStateException("ESXi Management IP Address is null");
+            }
+
+            final InetAddress esxiHostIp = InetAddress.getByName(esxiManagementIpAddress);
+
+            if (!esxiHostIp.isReachable(this.esxiHostPingTimeout.intValue()))
+            {
+                throw new IllegalStateException("ESXi Host is not reachable");
             }
 
             VmPasswordUpdateRequest vmPasswordUpdateRequest = new VmPasswordUpdateRequest();

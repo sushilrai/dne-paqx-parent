@@ -35,9 +35,9 @@ public class PreProcessTaskConfig {
                 "discoverScaleIo",
                 "discoverVCenter",
                 //"discoverNodeInventory",
-                //"changeIdracCredentials", currently has a bug so leave out for now...
                 "configIdrac",
                 "pingIdrac",
+                //"changeIdracCredentials", currently has a bug so leave out for now...
                 "configureObmSettings",
                 "configureBootDeviceIdrac",
                 "findVCluster",
