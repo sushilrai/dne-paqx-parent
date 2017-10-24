@@ -108,10 +108,7 @@ public class UpdatePciPassThroughTaskHandler extends BaseTaskHandler implements 
     public UpdatePciPassThroughTaskResponse initializeResponse(Job job)
     {
         final UpdatePciPassThroughTaskResponse response = new UpdatePciPassThroughTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 

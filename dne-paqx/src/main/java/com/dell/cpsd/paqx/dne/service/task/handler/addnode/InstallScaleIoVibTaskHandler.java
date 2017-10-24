@@ -141,10 +141,7 @@ public class InstallScaleIoVibTaskHandler extends BaseTaskHandler implements IWo
     public InstallScaleIoVibTaskResponse initializeResponse(Job job)
     {
         final InstallScaleIoVibTaskResponse response = new InstallScaleIoVibTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 }

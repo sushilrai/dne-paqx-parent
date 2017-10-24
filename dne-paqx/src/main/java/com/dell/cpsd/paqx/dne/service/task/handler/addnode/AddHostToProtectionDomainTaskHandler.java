@@ -48,7 +48,7 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
     /**
      * The <code>NodeService</code> instance
      */
-    private NodeService nodeService;
+    private final NodeService nodeService;
 
     private final DataServiceRepository repository;
 

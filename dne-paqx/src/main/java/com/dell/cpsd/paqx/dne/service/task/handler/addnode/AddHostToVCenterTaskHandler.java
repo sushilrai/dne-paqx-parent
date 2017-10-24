@@ -118,10 +118,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
     public AddHostToVCenterResponse initializeResponse(Job job)
     {
         final AddHostToVCenterResponse response = new AddHostToVCenterResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 
@@ -138,7 +135,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
             this.job = job;
         }
 
-        public Validate invoke()
+        Validate invoke()
         {
             componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
 
@@ -211,7 +208,7 @@ public class AddHostToVCenterTaskHandler extends BaseTaskHandler implements IWor
             return clusterId;
         }
 
-        public ListESXiCredentialDetailsTaskResponse getListESXiCredentialDetailsTaskResponse()
+        ListESXiCredentialDetailsTaskResponse getListESXiCredentialDetailsTaskResponse()
         {
             return listESXiCredentialDetailsTaskResponse;
         }

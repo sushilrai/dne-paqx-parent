@@ -122,10 +122,7 @@ public class ApplyEsxiLicenseTaskHandler extends BaseTaskHandler implements IWor
     public ApplyEsxiLicenseTaskResponse initializeResponse(Job job)
     {
         final ApplyEsxiLicenseTaskResponse response = new ApplyEsxiLicenseTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 }

@@ -171,10 +171,7 @@ public class InstallEsxiTaskHandler extends BaseTaskHandler implements IWorkflow
     public InstallEsxiTaskResponse initializeResponse(Job job)
     {
         final InstallEsxiTaskResponse response = new InstallEsxiTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 

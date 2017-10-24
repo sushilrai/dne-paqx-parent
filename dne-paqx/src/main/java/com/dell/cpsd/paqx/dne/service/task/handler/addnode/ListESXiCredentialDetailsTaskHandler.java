@@ -94,10 +94,7 @@ public class ListESXiCredentialDetailsTaskHandler extends BaseTaskHandler implem
     public ListESXiCredentialDetailsTaskResponse initializeResponse(Job job)
     {
         final ListESXiCredentialDetailsTaskResponse response = new ListESXiCredentialDetailsTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 }

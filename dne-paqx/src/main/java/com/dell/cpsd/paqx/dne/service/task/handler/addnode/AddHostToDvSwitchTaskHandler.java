@@ -258,10 +258,7 @@ public class AddHostToDvSwitchTaskHandler extends BaseTaskHandler implements IWo
     public AddHostToDvSwitchTaskResponse initializeResponse(Job job)
     {
         final AddHostToDvSwitchTaskResponse response = new AddHostToDvSwitchTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 }

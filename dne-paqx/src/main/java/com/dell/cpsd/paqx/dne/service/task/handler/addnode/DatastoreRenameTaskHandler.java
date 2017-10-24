@@ -131,14 +131,11 @@ public class DatastoreRenameTaskHandler extends BaseTaskHandler implements IWork
     public DatastoreRenameTaskResponse initializeResponse(Job job)
     {
         final DatastoreRenameTaskResponse response = new DatastoreRenameTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 
-    public static String buildDatastoreNewName(final String esxiManagementHostname)
+    private static String buildDatastoreNewName(final String esxiManagementHostname)
     {
         final StringBuilder builder = new StringBuilder();
         builder.append(DATASTORE_PREFIX_NAME);

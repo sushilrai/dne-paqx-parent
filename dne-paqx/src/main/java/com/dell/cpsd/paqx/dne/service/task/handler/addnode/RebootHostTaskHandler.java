@@ -122,10 +122,7 @@ public class RebootHostTaskHandler extends BaseTaskHandler implements IWorkflowT
     public RebootHostTaskResponse initializeResponse(Job job)
     {
         final RebootHostTaskResponse response = new RebootHostTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 }

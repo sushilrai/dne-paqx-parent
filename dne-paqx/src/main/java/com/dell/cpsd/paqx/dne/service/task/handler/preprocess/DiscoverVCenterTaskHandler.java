@@ -88,10 +88,7 @@ public class DiscoverVCenterTaskHandler extends BaseTaskHandler implements IWork
     public DiscoverVCenterTaskResponse initializeResponse(Job job)
     {
         final DiscoverVCenterTaskResponse response = new DiscoverVCenterTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 }

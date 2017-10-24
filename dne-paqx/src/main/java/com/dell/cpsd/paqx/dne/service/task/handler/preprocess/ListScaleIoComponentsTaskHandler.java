@@ -81,10 +81,7 @@ public class ListScaleIoComponentsTaskHandler extends BaseTaskHandler implements
     public ListScaleIoComponentsTaskResponse initializeResponse(Job job)
     {
         final ListScaleIoComponentsTaskResponse response = new ListScaleIoComponentsTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 

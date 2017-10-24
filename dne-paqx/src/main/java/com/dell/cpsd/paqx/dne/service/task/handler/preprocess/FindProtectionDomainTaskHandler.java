@@ -468,9 +468,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     public FindProtectionDomainTaskResponse initializeResponse(final Job job)
     {
         final FindProtectionDomainTaskResponse response = new FindProtectionDomainTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
+        setupResponse(job,response);
         return response;
     }
 }

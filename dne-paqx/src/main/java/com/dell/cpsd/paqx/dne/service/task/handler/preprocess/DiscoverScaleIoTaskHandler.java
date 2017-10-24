@@ -89,10 +89,7 @@ public class DiscoverScaleIoTaskHandler extends BaseTaskHandler implements IWork
     public DiscoverScaleIoTaskResponse initializeResponse(Job job)
     {
         final DiscoverScaleIoTaskResponse response = new DiscoverScaleIoTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 }

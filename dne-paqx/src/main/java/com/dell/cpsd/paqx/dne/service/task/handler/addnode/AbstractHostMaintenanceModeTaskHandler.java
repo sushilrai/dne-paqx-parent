@@ -62,7 +62,7 @@ public abstract class AbstractHostMaintenanceModeTaskHandler extends BaseTaskHan
      *
      * @since 1.0
      */
-    public AbstractHostMaintenanceModeTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final String taskName)
+    AbstractHostMaintenanceModeTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final String taskName)
     {
         this.nodeService = nodeService;
         this.repository = repository;
@@ -136,14 +136,11 @@ public abstract class AbstractHostMaintenanceModeTaskHandler extends BaseTaskHan
     public HostMaintenanceModeTaskResponse initializeResponse(Job job)
     {
         HostMaintenanceModeTaskResponse response = new HostMaintenanceModeTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 
-    protected HostMaintenanceModeRequestMessage getHostMaintenanceModeRequestMessage(final ComponentEndpointIds componentEndpointIds,
+    private HostMaintenanceModeRequestMessage getHostMaintenanceModeRequestMessage(final ComponentEndpointIds componentEndpointIds,
             final String hostname, final boolean maintenanceModeEnable)
     {
         final HostMaintenanceModeRequestMessage requestMessage = new HostMaintenanceModeRequestMessage();

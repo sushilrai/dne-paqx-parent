@@ -36,7 +36,7 @@ public class ChangeIdracCredentialsTaskHandler extends BaseTaskHandler implement
     /*
      * The <code>NodeService</code> instance
      */
-    private NodeService nodeService;
+    private final NodeService nodeService;
     
     /**
      * ChangeIdracCredentialsTaskHandler constructor.
@@ -106,10 +106,7 @@ public class ChangeIdracCredentialsTaskHandler extends BaseTaskHandler implement
     public ChangeIdracCredentialsResponse initializeResponse(Job job)
     {
         ChangeIdracCredentialsResponse response = new ChangeIdracCredentialsResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 

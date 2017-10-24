@@ -36,7 +36,7 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
     /*
      * The <code>NodeService</code> instance
      */
-    private NodeService         nodeService;
+    private final NodeService nodeService;
 
     /**
      * ConfigIdracTaskHandler constructor.
@@ -143,9 +143,7 @@ public class ConfigIdracTaskHandler extends BaseTaskHandler implements IWorkflow
     public IdracNetworkSettingsResponseInfo initializeResponse(Job job)
     {
         IdracNetworkSettingsResponseInfo response = new IdracNetworkSettingsResponseInfo();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
+        setupResponse(job, response);
         return response;
     }
 }

@@ -38,7 +38,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     /**
      * The <code>NodeService</code> instance
      */
-    private NodeService nodeService;
+    private final NodeService nodeService;
 
     /**
      *  SetBootOrderAndDisablePXETaskHandler constructor.
@@ -135,9 +135,7 @@ public class ConfigureBootDeviceIdracTaskHandler extends BaseTaskHandler impleme
     public ConfigureBootDeviceIdracResponse initializeResponse(Job job)
     {
         ConfigureBootDeviceIdracResponse response = new ConfigureBootDeviceIdracResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
+        setupResponse(job,response);
         return response;
     }
 }

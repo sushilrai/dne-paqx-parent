@@ -20,16 +20,20 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
-public class BaseTaskHandler {
+public abstract class BaseTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTaskHandler.class);
 
-    public TaskResponse initializeResponse(Job job){
+    public TaskResponse initializeResponse(Job job)
+    {
         TaskResponse response = new TaskResponse();
+        setupResponse(job, response);
+        return response;
+    }
+
+    protected void setupResponse(Job job, TaskResponse response){
         response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
         response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
         job.addTaskResponse(job.getStep(), response);
-
-        return response;
     }
 
     public boolean preExecute(Job job) {

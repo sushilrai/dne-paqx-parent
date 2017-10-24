@@ -136,10 +136,7 @@ public class EnablePciPassthroughTaskHandler extends BaseTaskHandler implements 
     public EnablePciPassThroughTaskResponse initializeResponse(Job job)
     {
         final EnablePciPassThroughTaskResponse response = new EnablePciPassThroughTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 

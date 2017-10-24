@@ -83,10 +83,7 @@ public class ListVCenterComponentsTaskHandler extends BaseTaskHandler implements
     public ListVCenterComponentsTaskResponse initializeResponse(Job job)
     {
         final ListVCenterComponentsTaskResponse response = new ListVCenterComponentsTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job, response);
         return response;
     }
 }

@@ -70,17 +70,4 @@ public class FindVClusterTaskHandler extends BaseTaskHandler implements IWorkflo
 
         return false;
     }
-
-
-    @Override
-    public TaskResponse initializeResponse(Job job)
-    {
-        TaskResponse response = new TaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
-        return response;
-    }
-
 }

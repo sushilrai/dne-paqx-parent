@@ -154,10 +154,7 @@ public class ConfigureScaleIoVibTaskHandler extends BaseTaskHandler implements I
     public ConfigureScaleIoVibTaskResponse initializeResponse(Job job)
     {
         final ConfigureScaleIoVibTaskResponse response = new ConfigureScaleIoVibTaskResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
-
+        setupResponse(job,response);
         return response;
     }
 

@@ -42,7 +42,7 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     /**
      * The <code>NodeService</code> instance
      */
-    private NodeService nodeService;
+    private final NodeService nodeService;
 
     /**
      * The obm services to set
@@ -151,9 +151,7 @@ public class ConfigureObmSettingsTaskHandler extends BaseTaskHandler implements 
     public ObmSettingsResponse initializeResponse(Job job)
     {
         ObmSettingsResponse response = new ObmSettingsResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
+        setupResponse(job,response);
         return response;
     }
 

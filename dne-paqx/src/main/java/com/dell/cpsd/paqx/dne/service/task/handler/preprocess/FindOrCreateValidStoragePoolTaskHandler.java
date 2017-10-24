@@ -127,9 +127,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
     public FindScaleIOResponse initializeResponse(Job job)
     {
         FindScaleIOResponse response = new FindScaleIOResponse();
-        response.setWorkFlowTaskName(job.getCurrentTask().getTaskName());
-        response.setWorkFlowTaskStatus(Status.IN_PROGRESS);
-        job.addTaskResponse(job.getStep(), response);
+        setupResponse(job, response);
         return response;
     }
 
