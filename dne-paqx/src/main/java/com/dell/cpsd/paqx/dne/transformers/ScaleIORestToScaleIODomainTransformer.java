@@ -41,6 +41,7 @@ import com.dell.cpsd.storage.capabilities.api.Volume;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -83,7 +84,8 @@ public class ScaleIORestToScaleIODomainTransformer
         linkMDMCluster(returnVal, scaleIOSystemDataRestRep);
 
         //Find protection domains and fault sets
-        final Set<ScaleIOProtectionDomain> protectionDomains = findProtectionDomainsFromSDS(scaleIOSystemDataRestRep.getSdsList());
+        final Set<ScaleIOProtectionDomain> protectionDomains = findProtectionDomainsFromSDS(scaleIOSystemDataRestRep.getSdsList(),
+                scaleIOSystemDataRestRep.getProtectionDomains());
         linkProtectionDomainsToData(protectionDomains, returnVal);
 
         final Set<ScaleIOFaultSet> faultSets = findFaultSetsFromSDS(scaleIOSystemDataRestRep.getSdsList());
@@ -329,12 +331,15 @@ public class ScaleIORestToScaleIODomainTransformer
                 scaleIOStoragePoolDataRestRep.getZeroPaddingEnabled());
     }
 
-    private Set<ScaleIOProtectionDomain> findProtectionDomainsFromSDS(final List<ScaleIOSDSDataRestRep> sdsList)
+    private Set<ScaleIOProtectionDomain> findProtectionDomainsFromSDS(final List<ScaleIOSDSDataRestRep> sdsList,
+            final List<ScaleIOProtectionDomainDataRestRep> protectionDomainDataRestRepList)
     {
-        return sdsList == null ?
-                null :
-                sdsList.stream().filter(Objects::nonNull).map(ScaleIOSDSDataRestRep::getScaleIOProtectionDomainDataRestRep)
-                        .map(this::createProtectionDomainFromRest).collect(Collectors.toSet());
+        final Set<ScaleIOProtectionDomain> protectionDomains = new HashSet<>();
+
+        protectionDomainDataRestRepList.stream().filter(Objects::nonNull)
+                .forEach(pd -> protectionDomains.add(new ScaleIOProtectionDomain(pd.getId(), pd.getName(), pd.getProtectionDomainState())));
+
+        return protectionDomains;
     }
 
     private Set<ScaleIOFaultSet> findFaultSetsFromSDS(final List<ScaleIOSDSDataRestRep> sdsList)
@@ -352,15 +357,6 @@ public class ScaleIORestToScaleIODomainTransformer
             return null;
         }
         return new ScaleIOFaultSet(y.getId(), y.getName());
-    }
-
-    private ScaleIOProtectionDomain createProtectionDomainFromRest(final ScaleIOProtectionDomainDataRestRep y)
-    {
-        if (y == null)
-        {
-            return null;
-        }
-        return new ScaleIOProtectionDomain(y.getId(), y.getName(), y.getProtectionDomainState());
     }
 
     private void linkMDMCluster(final ScaleIOData returnVal, final ScaleIOSystemDataRestRep scaleIOSystemDataRestRep)

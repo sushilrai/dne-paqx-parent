@@ -43,7 +43,42 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.*;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToDvSwitchResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToProtectionDomainResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.AddHostToVCenterResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ApplyEsxiLicenseResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureObmSettingsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureVmNetworkSettingsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateProtectionDomainResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateStoragePoolAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.DatastoreRenameResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.DeployScaleIoVmResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverScaleIoResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverVCenterResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.EnablePciPassthroughResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.HostMaintenanceModeResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListESXiCredentialDetailsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListScaleIoComponentsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListVCenterComponentsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodeInventoryResponseMessageAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.RemoteCommandExecutionResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.SioSdcUpdatePerformanceProfileResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.VCenterUpdateSoftwareAcceptanceResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateProtectionDomainResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -71,7 +106,21 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
-import com.dell.cpsd.storage.capabilities.api.*;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateProtectionDomainResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.CredentialNameId;
+import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
+import com.dell.cpsd.storage.capabilities.api.ScaleIOComponentDetails;
+import com.dell.cpsd.storage.capabilities.api.ScaleIoEndpointDetails;
+import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileResponseMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseResponse;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
@@ -122,16 +171,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.NoResultException;
-import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -271,6 +320,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new AddHostToProtectionDomainResponseAdapter(this));
         this.consumer.addAdapter(new SioSdcUpdatePerformanceProfileResponseAdapter(this));
         this.consumer.addAdapter(new CreateStoragePoolAdapter(this));
+        this.consumer.addAdapter(new CreateProtectionDomainResponseAdapter(this));
     }
 
     /**
@@ -2154,6 +2204,43 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return repository.createStoragePool(protectionDomainId, storagePoolId, storagePoolName);
     }
 
+    @Override
+    public String createProtectionDomain(final CreateProtectionDomainRequestMessage requestMessage)
+            throws ServiceTimeoutException, ServiceExecutionException
+    {
+        com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+
+        requestMessage.setMessageProperties(messageProperties);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                producer.publishCreateProtectionDomain(requestMessage);
+            }
+        });
+
+        final CreateProtectionDomainResponseMessage createProtectionDomainResponseMessage = processResponse(response,
+                CreateProtectionDomainResponseMessage.class);
+
+        if (createProtectionDomainResponseMessage == null)
+        {
+            LOGGER.error("Create Protection Domain Response Message is null");
+            return null;
+        }
+
+        return createProtectionDomainResponseMessage.getProtectionDomainId();
+     }
 
     /*
      * {@inheritDoc}

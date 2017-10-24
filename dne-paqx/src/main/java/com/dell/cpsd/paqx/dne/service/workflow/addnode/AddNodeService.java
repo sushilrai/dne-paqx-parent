@@ -7,14 +7,40 @@
 
 package com.dell.cpsd.paqx.dne.service.workflow.addnode;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
+import com.dell.cpsd.paqx.dne.domain.Job;
+import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.*;
+import com.dell.cpsd.paqx.dne.service.BaseService;
+import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.WorkflowService;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToDvSwitchTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToProtectionDomainTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddHostToVCenterTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.AddNodeToSystemDefinitionTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ApplyEsxiLicenseTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ChangeSvmCredentialsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigurePxeBootTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureScaleIoVibTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ConfigureVmNetworkSettingsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DatastoreRenameTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.DeployScaleIoVmTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnablePciPassthroughTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.EnterHostMaintenanceModeTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ExitHostMaintenanceModeTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallEsxiTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallScaleIoVibTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.InstallSvmPackagesTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.ListESXiCredentialDetailsTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.NotifyNodeDiscoveryToUpdateStatusTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PerformanceTuneSvmTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.PowerOnScaleIoVmTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdatePciPassThroughTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSdcPerformanceProfileTaskHandler;
+import com.dell.cpsd.paqx.dne.service.task.handler.addnode.UpdateSoftwareAcceptanceTaskHandler;
 import com.dell.cpsd.paqx.dne.transformers.HostToInstallEsxiRequestTransformer;
+import com.dell.cpsd.sdk.AMQPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +49,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import com.dell.cpsd.paqx.dne.domain.Job;
-import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
-import com.dell.cpsd.paqx.dne.service.BaseService;
-import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.WorkflowService;
-import com.dell.cpsd.paqx.dne.service.model.NodeExpansionResponse;
-import com.dell.cpsd.sdk.AMQPClient;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Add node workflow service.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -68,6 +91,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     private static final long DEPLOY_SVM_WAIT_TIME              = TimeUnit.SECONDS.toMillis(30L);
     private static final long CHANGE_SVM_CREDENTIALS_WAIT_TIME  = TimeUnit.SECONDS.toMillis(60L);
     private static final long SDC_PERF_PROFILE_UPDATE_WAIT_TIME = TimeUnit.SECONDS.toMillis(15L);
+    private static final int  ESXI_HOST_PING_TIMEOUT            = 240000;
 
     @Override
     public Job createWorkflow(final String workflowType, final String startingStep, final String currentStatus)
@@ -115,7 +139,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("updateSdcPerformanceProfileTask")
     private WorkflowTask updateSdcPerformanceProfileTask()
     {
-        return createTask("Configure SDC profile for High Performance", new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository, SDC_PERF_PROFILE_UPDATE_WAIT_TIME));
+        return createTask("Configure SDC profile for High Performance",
+                new UpdateSdcPerformanceProfileTaskHandler(nodeService, repository, SDC_PERF_PROFILE_UPDATE_WAIT_TIME));
     }
 
     @Bean("performanceTuneSvmTask")
@@ -139,7 +164,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("changeSvmCredentialsTask")
     private WorkflowTask changeSvmCredentialsTask()
     {
-        return createTask("Change ScaleIO VM Credentials", new ChangeSvmCredentialsTaskHandler(nodeService, repository, CHANGE_SVM_CREDENTIALS_WAIT_TIME));
+        return createTask("Change ScaleIO VM Credentials",
+                new ChangeSvmCredentialsTaskHandler(nodeService, repository, CHANGE_SVM_CREDENTIALS_WAIT_TIME));
     }
 
     @Bean("configureVmNetworkSettingsTask")
@@ -151,7 +177,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("powerOnSVMTask")
     private WorkflowTask powerOnSVMTask()
     {
-        return createTask("Power on the ScaleIO VM", new PowerOnScaleIoVmTaskHandler(nodeService, repository));
+        return createTask("Power on the ScaleIO VM", new PowerOnScaleIoVmTaskHandler(nodeService, repository, ESXI_HOST_PING_TIMEOUT));
     }
 
     @Bean("exitHostMaintenanceModeTask")
@@ -173,14 +199,16 @@ public class AddNodeService extends BaseService implements IAddNodeService
     }
 
     @Bean("configurePxeBootTask")
-    private WorkflowTask configurePxeBootTask(){
+    private WorkflowTask configurePxeBootTask()
+    {
         return createTask("Configure Pxe boot", new ConfigurePxeBootTaskHandler(nodeService));
     }
 
     @Bean("installEsxiTask")
     private WorkflowTask installEsxiTask()
     {
-        return createTask("Install ESXi", new InstallEsxiTaskHandler(this.nodeService, hostToInstallEsxiRequestTransformer, this.repository));
+        return createTask("Install ESXi",
+                new InstallEsxiTaskHandler(this.nodeService, hostToInstallEsxiRequestTransformer, this.repository));
     }
 
     @Bean("addHostToVcenterTask")
@@ -210,7 +238,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("deploySVMTask")
     private WorkflowTask deploySVMTask()
     {
-        return createTask("Clone and Deploy ScaleIO VM", new DeployScaleIoVmTaskHandler(this.nodeService, repository, DEPLOY_SVM_WAIT_TIME));
+        return createTask("Clone and Deploy ScaleIO VM",
+                new DeployScaleIoVmTaskHandler(this.nodeService, repository, DEPLOY_SVM_WAIT_TIME));
     }
 
     @Bean("enablePciPassthroughHostTask")
@@ -240,22 +269,19 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("notifyNodeDiscoveryToUpdateStatusTask")
     private WorkflowTask notifyNodeDiscoveryToUpdateStatusTask()
     {
-        return createTask("Notify Node Discovery To Update Status",
-                new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService));
+        return createTask("Notify Node Discovery To Update Status", new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService));
     }
 
     @Bean("datastoreRenameTask")
     private WorkflowTask datastoreRenameTask()
     {
-        return createTask("Datastore rename",
-                new DatastoreRenameTaskHandler(this.nodeService, this.repository));
+        return createTask("Datastore rename", new DatastoreRenameTaskHandler(this.nodeService, this.repository));
     }
 
     @Bean("updateSoftwareAcceptanceTask")
     private WorkflowTask updateSoftwareAcceptanceTask()
     {
-        return createTask("Update software acceptance",
-                new UpdateSoftwareAcceptanceTaskHandler(this.nodeService, this.repository));
+        return createTask("Update software acceptance", new UpdateSoftwareAcceptanceTaskHandler(this.nodeService, this.repository));
     }
 
     @Bean("enterHostMaintenanceModeTask")

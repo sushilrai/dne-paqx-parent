@@ -6,7 +6,7 @@
 package com.dell.cpsd.paqx.dne.service.model;
 
 /**
- * TODO: Document Usage
+ * Install ESXi Task Response
  * <p/>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * <p/>

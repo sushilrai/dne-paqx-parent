@@ -40,12 +40,12 @@ public class AddNodeTaskConfig
                 "deploySVM",
                 "setPciPassthroughSioVm",
                 "configureVmNetworkSettings",
-                "powerOnSVM",
+                "configurePxeBoot",
+                //"powerOnSVM", //VM Auto start enabled now upon host reboot
                 "changeSvmCredentials",
                 "installSvmPackages",
                 "performanceTuneSvm",
                 "addHostToProtectionDomain",
-                "configurePxeBoot",
                 "updateSystemDefinition",
                 "notifyNodeDiscoveryToUpdateStatus");
 

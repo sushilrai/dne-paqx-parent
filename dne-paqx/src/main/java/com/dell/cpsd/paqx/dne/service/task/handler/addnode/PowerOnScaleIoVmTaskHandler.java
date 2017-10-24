@@ -13,6 +13,7 @@ import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DeployScaleIoVmTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
+import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
@@ -20,6 +21,8 @@ import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationRequest;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
 
 /**
  * Task handler used for Powering on the ScaleIO VM.
@@ -48,10 +51,13 @@ public class PowerOnScaleIoVmTaskHandler extends BaseTaskHandler implements IWor
      */
     private final DataServiceRepository repository;
 
-    public PowerOnScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository)
+    private final int PING_TIMEOUT;
+
+    public PowerOnScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, final int ping_timeout)
     {
         this.nodeService = nodeService;
         this.repository = repository;
+        PING_TIMEOUT = ping_timeout;
     }
 
     @Override
@@ -83,12 +89,22 @@ public class PowerOnScaleIoVmTaskHandler extends BaseTaskHandler implements IWor
                 throw new IllegalStateException("No VCenter components found.");
             }
 
-            VmPowerOperationRequest powerOperationRequest = new VmPowerOperationRequest();
+            final NodeExpansionRequest inputParams = job.getInputParams();
+            final String esxiManagementIpAddress = inputParams.getEsxiManagementIpAddress();
+
+            final InetAddress esxiHostIp = InetAddress.getByName(esxiManagementIpAddress);
+
+            if (!esxiHostIp.isReachable(this.PING_TIMEOUT))
+            {
+                throw new IllegalStateException("ESXi Host is not reachable");
+            }
+
+            final VmPowerOperationRequest powerOperationRequest = new VmPowerOperationRequest();
             powerOperationRequest.setHostname(installEsxiTaskResponse.getHostname());
             powerOperationRequest.setVmName(deployScaleIoVmTaskResponse.getNewVMName());
             powerOperationRequest.setPowerOperation(VmPowerOperationRequest.PowerOperation.POWER_ON);
 
-            VmPowerOperationsRequestMessage requestMessage = new VmPowerOperationsRequestMessage();
+            final VmPowerOperationsRequestMessage requestMessage = new VmPowerOperationsRequestMessage();
             requestMessage.setVmPowerOperationRequest(powerOperationRequest);
             requestMessage.setEndpointUrl(componentEndpointIds.getEndpointUrl());
             requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),

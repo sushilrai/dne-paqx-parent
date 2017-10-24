@@ -345,6 +345,9 @@ public class RabbitConfig
         messageClasses.add(CreateStoragePoolRequestMessage.class);
         messageClasses.add(CreateStoragePoolResponseMessage.class);
 
+        messageClasses.add(CreateProtectionDomainRequestMessage.class);
+        messageClasses.add(CreateProtectionDomainResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         

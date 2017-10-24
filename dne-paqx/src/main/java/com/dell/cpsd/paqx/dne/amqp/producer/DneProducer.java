@@ -17,6 +17,7 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessa
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
@@ -284,5 +285,12 @@ public interface DneProducer
      *
      * @param requestMessage
      */
-    void publishCreateStoragePool(final CreateStoragePoolRequestMessage requestMessage);
+    void publishCreateStoragePool(CreateStoragePoolRequestMessage requestMessage);
+
+    /**
+     * Create protection domain
+     *
+     * @param requestMessage CreateProtectionDomainRequestMessage
+     */
+    void publishCreateProtectionDomain(CreateProtectionDomainRequestMessage requestMessage);
 }

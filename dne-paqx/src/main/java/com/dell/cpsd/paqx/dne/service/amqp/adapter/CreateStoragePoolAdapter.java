@@ -39,9 +39,9 @@ public class CreateStoragePoolAdapter implements ServiceCallbackAdapter<CreateSt
     }
 
     @Override
-    public IServiceCallback take(final CreateStoragePoolResponseMessage addHostToDvSwitchResponseMessage)
+    public IServiceCallback take(final CreateStoragePoolResponseMessage createStoragePoolResponseMessage)
     {
-        return serviceCallbackRegistry.removeServiceCallback(addHostToDvSwitchResponseMessage.getMessageProperties().getCorrelationId());
+        return serviceCallbackRegistry.removeServiceCallback(createStoragePoolResponseMessage.getMessageProperties().getCorrelationId());
     }
 
     @Override

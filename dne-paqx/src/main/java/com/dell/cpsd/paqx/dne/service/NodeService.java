@@ -22,6 +22,7 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
+import com.dell.cpsd.storage.capabilities.api.CreateProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
@@ -429,10 +430,14 @@ public interface NodeService
      */
     ScaleIOStoragePool createStoragePool(String poolName, String poolId, String protectionDomainId);
 
+    String createProtectionDomain(CreateProtectionDomainRequestMessage requestMessage)
+            throws ServiceTimeoutException, ServiceExecutionException;
+
     /**
      * Retrieves the component endpoints based on component type.
      * @param componentType VCenter/ScaleIO
      * @return
      */
     ComponentEndpointIds getComponentEndpointIds(String componentType);
+
 }

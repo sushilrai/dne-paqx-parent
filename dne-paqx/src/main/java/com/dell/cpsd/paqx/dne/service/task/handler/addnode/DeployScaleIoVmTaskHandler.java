@@ -18,11 +18,14 @@ import com.dell.cpsd.paqx.dne.service.model.InstallEsxiTaskResponse;
 import com.dell.cpsd.paqx.dne.service.model.NodeExpansionRequest;
 import com.dell.cpsd.paqx.dne.service.model.Status;
 import com.dell.cpsd.paqx.dne.service.task.handler.BaseTaskHandler;
+import com.dell.cpsd.virtualization.capabilities.api.AutoStartDefaults;
+import com.dell.cpsd.virtualization.capabilities.api.AutoStartPowerInfo;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.NicSetting;
 import com.dell.cpsd.virtualization.capabilities.api.VirtualMachineCloneSpec;
 import com.dell.cpsd.virtualization.capabilities.api.VirtualMachineConfigSpec;
+import com.dell.cpsd.virtualization.capabilities.api.VmAutoStartConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -60,11 +63,18 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
     */
     private final long waitTime;
 
-    private static final String SCALEIO_VM_PREFIX        = "ScaleIO-";
-    private static final String SCALEIO_TEMPLATE_VM_NAME = "EMC ScaleIO SVM Template.*";
-    private static final int    SCALEIO_VM_NUM_CPU       = 8;
-    private static final int    SCALEIO_VM_RAM           = 8192;
-    
+    private static final String  SCALEIO_VM_PREFIX             = "ScaleIO-";
+    private static final String  SCALEIO_TEMPLATE_VM_NAME      = "EMC ScaleIO SVM Template.*";
+    private static final int     SCALEIO_VM_NUM_CPU            = 8;
+    private static final int     SCALEIO_VM_RAM                = 8192;
+    private static final boolean CONFIGURE_VM_FOR_AUTO_STARTUP = true;
+    private static final boolean CONFIGURE_HOST_AUTO_STARTUP   = true;
+    private static final int     START_DELAY_VM                = 20;
+    private static final int     STOP_DELAY_VM                 = -1;
+    private static final int     START_DELAY_HOST              = 120;
+    private static final int     STOP_DELAY_HOST               = 120;
+    private static final int     START_ORDER                   = 1;
+
     /**
      * The <code>DataServiceRepository</code> instance
      */
@@ -74,8 +84,8 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
      * DeployScaleIoVmTaskHandler constructor
      *
      * @param nodeService - The <code>DataServiceRepository</code> instance
-     * @param repository - The <code>NodeService</code> instance
-     * @param waitTime - Before deploying the SVM need to wait for services to be up and running on the new host
+     * @param repository  - The <code>NodeService</code> instance
+     * @param waitTime    - Before deploying the SVM need to wait for services to be up and running on the new host
      */
     public DeployScaleIoVmTaskHandler(final NodeService nodeService, final DataServiceRepository repository, long waitTime)
     {
@@ -116,6 +126,25 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             virtualMachineConfigSpec.setNicSettings(nicSettings);
             virtualMachineCloneSpec.setVirtualMachineConfigSpec(virtualMachineConfigSpec);
 
+            final VmAutoStartConfig vmAutoStartConfig = new VmAutoStartConfig();
+
+            final AutoStartPowerInfo autoStartPowerInfo = new AutoStartPowerInfo();
+            autoStartPowerInfo.setStartAction(AutoStartPowerInfo.StartAction.POWER_ON);
+            autoStartPowerInfo.setWaitForHeartBeat(AutoStartPowerInfo.WaitForHeartBeat.SYSTEM_DEFAULT);
+            autoStartPowerInfo.setStartDelay(START_DELAY_VM);
+            autoStartPowerInfo.setStartOrder(START_ORDER);
+            autoStartPowerInfo.setStopDelay(STOP_DELAY_VM);
+            autoStartPowerInfo.setStopAction(AutoStartPowerInfo.StopAction.SYSTEM_DEFAULT);
+
+            final AutoStartDefaults autoStartDefaults = new AutoStartDefaults();
+            autoStartDefaults.setEnabled(CONFIGURE_HOST_AUTO_STARTUP);
+            autoStartDefaults.setStartDelay(START_DELAY_HOST);
+            autoStartDefaults.setStopAction(AutoStartDefaults.StopAction.POWER_OFF);
+            autoStartDefaults.setStopDelay(STOP_DELAY_HOST);
+
+            vmAutoStartConfig.setAutoStartDefaults(autoStartDefaults);
+            vmAutoStartConfig.setAutoStartPowerInfo(autoStartPowerInfo);
+
             final DeployVMFromTemplateRequestMessage requestMessage = new DeployVMFromTemplateRequestMessage();
             requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
             requestMessage.setComponentEndpointIds(
@@ -126,6 +155,8 @@ public class DeployScaleIoVmTaskHandler extends BaseTaskHandler implements IWork
             requestMessage.setDatacenterName(dataCenterName);
             requestMessage.setNewVMName(newScaleIoVmName);
             requestMessage.setVirtualMachineCloneSpec(virtualMachineCloneSpec);
+            requestMessage.setConfigureAutoStart(CONFIGURE_VM_FOR_AUTO_STARTUP);
+            requestMessage.setVmAutoStartConfig(vmAutoStartConfig);
 
             Thread.sleep(this.waitTime);
 
