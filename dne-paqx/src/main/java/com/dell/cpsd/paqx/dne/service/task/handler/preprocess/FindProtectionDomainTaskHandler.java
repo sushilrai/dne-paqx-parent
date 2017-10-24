@@ -307,8 +307,12 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
         for (Host host : hosts)
         {
-            if (scaleIOSDS.getName().contains(host.getName()))
-            {
+            String scaleIoName = scaleIOSDS.getName();
+            if (scaleIoName.endsWith("-ESX")) {
+                scaleIoName = scaleIoName.substring(0, scaleIoName.length() - 4);
+            }
+            String hostName =host.getName();
+            if (scaleIoName.equals(hostName))            {
                 type = host.getType();
             }
             else
