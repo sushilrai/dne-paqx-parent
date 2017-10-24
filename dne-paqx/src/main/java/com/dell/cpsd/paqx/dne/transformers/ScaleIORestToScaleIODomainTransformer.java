@@ -42,9 +42,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -89,12 +91,14 @@ public class ScaleIORestToScaleIODomainTransformer
         linkProtectionDomainsToData(protectionDomains, returnVal);
 
         final Set<ScaleIOFaultSet> faultSets = findFaultSetsFromSDS(scaleIOSystemDataRestRep.getSdsList());
-//        final Set<ScaleIOStoragePool> storagePools = findStoragePoolsFromSDS(scaleIOSystemDataRestRep.getSdsList());
         final Set<ScaleIOStoragePool> storagePools = findStoragePools(scaleIOSystemDataRestRep.getStoragePools());
         //Each of these will now be linked as we go through the SDS's
 
         //Iterate through SDS
         linkSDSs(returnVal, scaleIOSystemDataRestRep, protectionDomains, faultSets, storagePools);
+
+        // as empty pools do not have devices (disks), above logic would not detect them
+        linkEmptyStoragePools(scaleIOSystemDataRestRep, protectionDomains, storagePools);
 
         //FINALLY
         return returnVal;
@@ -166,6 +170,27 @@ public class ScaleIORestToScaleIODomainTransformer
             }
         }
 
+    }
+
+    private void linkEmptyStoragePools(final ScaleIOSystemDataRestRep scaleIOSystemDataRestRep,
+            final Set<ScaleIOProtectionDomain> protectionDomains, final Set<ScaleIOStoragePool> storagePools)
+    {
+        Map<String, ScaleIOStoragePool> storagePoolIdToStoragePoolMap = new HashMap<>();
+        storagePools.stream().filter(Objects::nonNull).forEach(sp -> storagePoolIdToStoragePoolMap.put(sp.getId(), sp));
+
+        scaleIOSystemDataRestRep.getStoragePools().stream().filter(Objects::nonNull).forEach(storagePool -> {
+            ScaleIOProtectionDomain protectionDomain = protectionDomains.stream().filter(Objects::nonNull)
+                    .filter(pd -> pd.getId().equals(storagePool.getProtectionDomainId())).findFirst().get();
+            boolean storagePoolFound = protectionDomain.getStoragePools().stream().filter(Objects::nonNull)
+                    .anyMatch(sp -> sp.getId().equals(storagePool.getId()));
+
+            ScaleIOStoragePool sp = storagePoolIdToStoragePoolMap.get(storagePool.getId());
+            if (!storagePoolFound && sp != null)
+            {
+                protectionDomain.addStoragePool(sp);
+                sp.setProtectionDomain(protectionDomain);
+            }
+        });
     }
 
     private void linkIPListToSDS(final ScaleIOSDS domainSDS, final ScaleIOSDSDataRestRep scaleIOSystemDataRestRep)
@@ -303,20 +328,8 @@ public class ScaleIORestToScaleIODomainTransformer
                         .collect(Collectors.toSet());
     }
 
-    /*private Set<ScaleIOStoragePool> findStoragePoolsFromSDS(final List<ScaleIOSDSDataRestRep> sdsList)
-    {
-        return sdsList == null ?
-                null :
-                sdsList.stream().filter(Objects::nonNull).map(ScaleIOSDSDataRestRep::getDeviceList).flatMap(List::stream)
-                        .map(y -> createStoragePoolFromRest(y.getScaleIOStoragePoolDataRestRep())).collect(Collectors.toSet());
-    }*/
-
     private ScaleIOStoragePool createStoragePoolFromRest(final ScaleIOStoragePoolDataRestRep scaleIOStoragePoolDataRestRep)
     {
-        /*if (scaleIOStoragePoolDataRestRep == null)
-        {
-            return null;
-        }*/
         return new ScaleIOStoragePool(scaleIOStoragePoolDataRestRep.getId(), scaleIOStoragePoolDataRestRep.getName(),
                 scaleIOStoragePoolDataRestRep.getCapacityAvailableForVolumeAllocationInKb() == null ?
                         -1 :
