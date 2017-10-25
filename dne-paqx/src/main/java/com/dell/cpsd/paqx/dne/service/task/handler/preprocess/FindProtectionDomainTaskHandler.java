@@ -152,9 +152,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
                 if (StringUtils.isEmpty(protectionDomainId))
                 {
-                    response.setWorkFlowTaskStatus(Status.FAILED);
-                    LOGGER.error("Unable to Create Protection Domain with name [{}]", protectionDomainName);
-                    return false;
+                    throw new IllegalStateException("Unable to Create Protection Domain with name: " + protectionDomainName);
                 }
 
                 response.setProtectionDomainName(protectionDomainName);
@@ -165,12 +163,12 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
             return true;
 
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LOGGER.error("Exception occurred", e);
-            response.setWorkFlowTaskStatus(Status.FAILED);
-            response.addError(e.toString());
+            LOGGER.error("Exception occurred", ex);
+            response.addError(ex.toString());
         }
+
         response.setWorkFlowTaskStatus(Status.FAILED);
         return false;
     }
@@ -283,19 +281,17 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     {
         final Map<String, String> result = new HashMap<>();
 
-        if (validateProtectionDomainResponse == null)
+        if (validateProtectionDomainResponse != null)
         {
-            return result;
-        }
+            if (validateProtectionDomainResponse.getProtectionDomainName() != null)
+            {
+                result.put("protectionDomainName", validateProtectionDomainResponse.getProtectionDomainName());
+            }
 
-        if (validateProtectionDomainResponse.getProtectionDomainName() != null)
-        {
-            result.put("protectionDomainName", validateProtectionDomainResponse.getProtectionDomainName());
-        }
-
-        if (validateProtectionDomainResponse.getProtectionDomainId() != null)
-        {
-            result.put("protectionDomainId", validateProtectionDomainResponse.getProtectionDomainId());
+            if (validateProtectionDomainResponse.getProtectionDomainId() != null)
+            {
+                result.put("protectionDomainId", validateProtectionDomainResponse.getProtectionDomainId());
+            }
         }
 
         return result;
@@ -308,11 +304,14 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         for (Host host : hosts)
         {
             String scaleIoName = scaleIOSDS.getName();
-            if (scaleIoName.endsWith("-ESX")) {
+            if (scaleIoName.endsWith("-ESX"))
+            {
                 scaleIoName = scaleIoName.substring(0, scaleIoName.length() - 4);
             }
-            String hostName =host.getName();
-            if (scaleIoName.equals(hostName))            {
+
+            String hostName = host.getName();
+            if (scaleIoName.equals(hostName))
+            {
                 type = host.getType();
             }
             else
@@ -320,6 +319,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
                 LOGGER.warn("ScaleIO Sds name does not match with Host name");
             }
         }
+
         return type;
     }
 
@@ -340,6 +340,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         {
             LOGGER.error("Error while getting the node inventory data", e);
         }
+
         return null;
     }
 
@@ -472,7 +473,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
     public FindProtectionDomainTaskResponse initializeResponse(final Job job)
     {
         final FindProtectionDomainTaskResponse response = new FindProtectionDomainTaskResponse();
-        setupResponse(job,response);
+        setupResponse(job, response);
         return response;
     }
 }
