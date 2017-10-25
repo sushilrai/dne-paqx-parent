@@ -252,9 +252,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         StoragePoolSpec storagePoolSpec = new StoragePoolSpec();
         storagePoolSpec.setProtectionDomainId(scaleIOProtectionDomain.getId());
         storagePoolSpec.setRmCacheWriteHandlingMode(StoragePoolSpec.RmCacheWriteHandlingMode.PASSTHROUGH);
-        // TODO temporarily addind a random string to the storage pool name
-        // TODO need to remove once issue sorted...
-        storagePoolSpec.setStoragePoolName(DEFAULT_STORAGE_POOL_NAME + "_" + UUID.randomUUID());
+        storagePoolSpec.setStoragePoolName(DEFAULT_STORAGE_POOL_NAME);
         storagePoolSpec.setUseRmcache(false);
         storagePoolSpec.setZeroPaddingEnabled(true);
         requestMessage.setStoragePoolSpec(storagePoolSpec);
