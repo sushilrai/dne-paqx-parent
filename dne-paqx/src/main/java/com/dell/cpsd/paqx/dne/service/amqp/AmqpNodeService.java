@@ -856,6 +856,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         {
             LOGGER.error("Exception in boot order sequence: ", e);
         }
+
         return bootDeviceIdracStatus;
     }
 
@@ -863,7 +864,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Override
     public BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)
     {
-
         BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
 
         try
@@ -924,10 +924,13 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LOGGER.error("Exception in boot order sequence: ", e);
+            LOGGER.error("Exception in boot order sequence: ", ex);
+            bootDeviceIdracStatus.setStatus(ConfigurePxeBootResponseMessage.Status.FAILED.toString());
+            bootDeviceIdracStatus.setErrors(Arrays.asList(ex.getMessage()));
         }
+
         return bootDeviceIdracStatus;
     }
 
