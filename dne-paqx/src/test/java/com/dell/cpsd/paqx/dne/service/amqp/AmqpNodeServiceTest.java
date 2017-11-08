@@ -364,7 +364,7 @@ public class AmqpNodeServiceTest
                         "replyToMe");
 
                 DiscoverClusterResponseInfoMessage responseInfoMessage = new DiscoverClusterResponseInfoMessage(messageProperties,
-                        responseInfo, DiscoverClusterResponseInfoMessage.Status.SUCCESS);
+                        responseInfo, DiscoverClusterResponseInfoMessage.Status.SUCCESS, "");
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseInfoMessage, null));
             }
         };
@@ -925,7 +925,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final DiscoveryResponseInfoMessage responseMessage = new DiscoveryResponseInfoMessage(messageProperties,
-                        Collections.singletonList(new Datacenter()));
+                        Collections.singletonList(new Datacenter()), "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -985,7 +985,7 @@ public class AmqpNodeServiceTest
                         new Date(), UUID.randomUUID().toString(), "test");
 
                 final ListStorageResponseMessage responseMessage = new ListStorageResponseMessage(messageProperties,
-                        new ScaleIOSystemDataRestRep());
+                        new ScaleIOSystemDataRestRep(), "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -1040,7 +1040,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final AddEsxiHostVSphereLicenseResponse responseMessage = new AddEsxiHostVSphereLicenseResponse(messageProperties,
-                        AddEsxiHostVSphereLicenseResponse.Status.SUCCESS);
+                        AddEsxiHostVSphereLicenseResponse.Status.SUCCESS, "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -1092,7 +1092,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final HostMaintenanceModeResponseMessage responseMessage = new HostMaintenanceModeResponseMessage(messageProperties,
-                        HostMaintenanceModeResponseMessage.Status.SUCCESS);
+                        HostMaintenanceModeResponseMessage.Status.SUCCESS, "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -1195,7 +1195,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final ClusterOperationResponseMessage responseMessage = new ClusterOperationResponseMessage(messageProperties,
-                        ClusterOperationResponseMessage.Status.SUCCESS);
+                        ClusterOperationResponseMessage.Status.SUCCESS, "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -1247,7 +1247,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final AddHostToDvSwitchResponseMessage responseMessage = new AddHostToDvSwitchResponseMessage(messageProperties,
-                        AddHostToDvSwitchResponseMessage.Status.SUCCESS);
+                        AddHostToDvSwitchResponseMessage.Status.SUCCESS, "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
@@ -1299,7 +1299,7 @@ public class AmqpNodeServiceTest
                 final MessageProperties messageProperties = new MessageProperties(new Date(), UUID.randomUUID().toString(), "test");
 
                 final DeployVMFromTemplateResponseMessage responseMessage = new DeployVMFromTemplateResponseMessage(messageProperties,
-                        DeployVMFromTemplateResponseMessage.Status.SUCCESS);
+                        DeployVMFromTemplateResponseMessage.Status.SUCCESS, "");
 
                 serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
             }
