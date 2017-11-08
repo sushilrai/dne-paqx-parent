@@ -9,9 +9,6 @@ import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
 import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
-import com.dell.cpsd.ConfigureBootDeviceIdracError;
-import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
-import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
@@ -50,7 +47,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ApplyEsxiLicenseResponseAdapt
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureObmSettingsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureVmNetworkSettingsResponseAdapter;
@@ -82,7 +78,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapt
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
@@ -290,7 +285,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new CompleteNodeAllocationResponseAdapter(this));
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
-        this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this));
         this.consumer.addAdapter(new ConfigurePxeBootResponseAdapter(this));
         this.consumer.addAdapter(new ConfigureObmSettingsResponseAdapter(this));
         this.consumer.addAdapter(new ValidateClusterResponseAdapter(this));
@@ -796,70 +790,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         return responseMessage;
     }
-
-    @Override
-    public BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
-    {
-
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
-
-        try
-        {
-            ConfigureBootDeviceIdracRequestMessage configureBootDeviceIdracRequestMessage = new ConfigureBootDeviceIdracRequestMessage();
-
-            com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
-            messageProperties.setCorrelationId(UUID.randomUUID().toString());
-            messageProperties.setTimestamp(Calendar.getInstance().getTime());
-            messageProperties.setReplyTo(replyTo);
-            configureBootDeviceIdracRequestMessage.setMessageProperties(messageProperties);
-
-            configureBootDeviceIdracRequestMessage.setUuid(configureBootDeviceIdracRequest.getUuid());
-            configureBootDeviceIdracRequestMessage.setIpAddress(configureBootDeviceIdracRequest.getIdracIpAddress());
-
-            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
-            {
-                @Override
-                public String getRequestId()
-                {
-                    return messageProperties.getCorrelationId();
-                }
-
-                @Override
-                public void executeRequest(String requestId) throws Exception
-                {
-                    producer.publishConfigureBootDeviceIdrac(configureBootDeviceIdracRequestMessage);
-                }
-            });
-
-            ConfigureBootDeviceIdracResponseMessage resp = processResponse(response, ConfigureBootDeviceIdracResponseMessage.class);
-            if (resp != null)
-            {
-                if (resp.getMessageProperties() != null)
-                {
-                    if (resp.getStatus() != null)
-                    {
-                        LOGGER.info("Response message is: " + resp.getStatus().toString());
-
-                        bootDeviceIdracStatus.setStatus(resp.getStatus().toString());
-                        List<ConfigureBootDeviceIdracError> errors = resp.getConfigureBootDeviceIdracErrors();
-                        if (!CollectionUtils.isEmpty(errors))
-                        {
-                            List<String> errorMsgs = errors.stream().map(ConfigureBootDeviceIdracError::getMessage).collect(Collectors.toList());
-                            bootDeviceIdracStatus.setErrors(errorMsgs);
-                        }
-                    }
-                }
-
-            }
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Exception in boot order sequence: ", e);
-        }
-
-        return bootDeviceIdracStatus;
-    }
-
 
     @Override
     public BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)

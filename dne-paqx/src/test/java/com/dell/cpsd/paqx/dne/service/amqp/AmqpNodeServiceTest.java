@@ -7,8 +7,6 @@ package com.dell.cpsd.paqx.dne.service.amqp;
 
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
-import com.dell.cpsd.ConfigureBootDeviceIdracError;
-import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
@@ -27,7 +25,6 @@ import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
 import com.dell.cpsd.paqx.dne.service.model.IdracInfo;
 import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
@@ -529,68 +526,6 @@ public class AmqpNodeServiceTest
 
         nodeService.notifyNodeAllocationComplete("elementIdentifier");
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
-    }
-
-    /**
-     * Test that the bootOrderStatus method can execute successfully.
-     *
-     * @throws ServiceTimeoutException
-     * @throws ServiceExecutionException
-     */
-    @Test
-    public void testBootOrderStatusSuccess() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        DneProducer dneProducer = mock(DneProducer.class);
-        ConfigureBootDeviceIdracRequest bootOrderSequenceRequest = new ConfigureBootDeviceIdracRequest("nodeId", "idracIpAddress");
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(Calendar.getInstance().getTime(),
-                        UUID.randomUUID().toString(), "replyToMe");
-
-                List<ConfigureBootDeviceIdracError> configureBootDeviceIdracErrors = new ArrayList<>();
-                ConfigureBootDeviceIdracResponseMessage responseMessage = new ConfigureBootDeviceIdracResponseMessage(messageProperties,
-                        ConfigureBootDeviceIdracResponseMessage.Status.SUCCESS, configureBootDeviceIdracErrors);
-
-                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
-            }
-        };
-
-        BootDeviceIdracStatus bootOrderStatus = nodeService.bootDeviceIdracStatus(bootOrderSequenceRequest);
-
-        Assert.assertNotNull(bootOrderStatus);
-        Assert.assertEquals("SUCCESS", bootOrderStatus.getStatus());
-        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(any());
-    }
-
-    /**
-     * Test that the bootOrderStatus method can handle any errors.
-     *
-     * @throws ServiceTimeoutException
-     */
-    @Test
-    public void testBootOrderStatusError() throws Exception
-    {
-        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        DneProducer dneProducer = mock(DneProducer.class);
-        ConfigureBootDeviceIdracRequest bootOrderSequenceRequest = new ConfigureBootDeviceIdracRequest("nodeId", "idracIpAddress");
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
-            }
-        };
-
-        nodeService.bootDeviceIdracStatus(bootOrderSequenceRequest);
-        Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureBootDeviceIdrac(any());
     }
 
     @Test

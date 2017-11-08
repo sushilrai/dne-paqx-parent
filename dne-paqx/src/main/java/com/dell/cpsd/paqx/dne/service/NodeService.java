@@ -164,15 +164,6 @@ public interface NodeService
     ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage);
 
     /**
-     * Configure the iDRAC boot device.
-     *
-     * @param configureBootDeviceIdracRequest - The <code>ConfigureBootDeviceIdracRequest</code> instance.
-     *
-     * @return
-     */
-    BootDeviceIdracStatus bootDeviceIdracStatus(ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest);
-
-    /**
      *
      *
      * @param uuid - The request message UUID
