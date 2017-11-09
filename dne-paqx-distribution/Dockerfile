@@ -7,8 +7,7 @@
 #
 
 # Start from base image with Java 8
-FROM java:8-jre-alpine
-
+FROM openjdk:8-jre-alpine
 # Install the service file(s) to run
 WORKDIR /opt/dell/cpsd/dne-paqx/
 
@@ -22,11 +21,21 @@ ARG GIT_COMMIT=unknown
 ARG BUILD_TYPE=dev
 ARG CPSD_SOFTWARE_VERSION=unknown
 
+RUN apk update \
+    && apk add ca-certificates \
+    java-cacerts \
+    curl \
+    ca-certificates-doc \
+    jq \
+    openssl \
+    && update-ca-certificates
+
 LABEL   com.dell.cpsd.version=$CPSD_SOFTWARE_VERSION\
         com.dell.cpsd.git_revision=$GIT_COMMIT\
         com.dell.cpsd.build_number=$BUILD_NUMBER\
         com.dell.cpsd.build_type=$BUILD_TYPE\
         com.dell.cpsd.java=$DELL_JAVA_VERSION
+        
 RUN mkdir ./logs \
 && chmod 755 ./bin/run.sh
       

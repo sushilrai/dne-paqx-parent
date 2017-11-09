@@ -3,7 +3,7 @@
 # Dell EMC Confidential/Proprietary Information
 #
 Summary: Dell Inc. DNE PAQX
-Name: cpsd-node-expansion-services
+Name: dell-cpsd-node-expansion-services
 Version: %_version
 Release: %_revision
 License: Commercial
