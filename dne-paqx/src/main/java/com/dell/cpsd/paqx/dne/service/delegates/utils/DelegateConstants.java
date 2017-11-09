@@ -24,6 +24,7 @@ public class DelegateConstants
 
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
+    public static final String INSTALL_ESXI_MESSAGE_ID = "installEsxiResponseReceived";
 
 
 
@@ -53,6 +54,7 @@ public class DelegateConstants
     public static final String VERIFY_NODE_DETAIL_FAILED = "Verify-Node-Detail-Failed";
     public static final String VERIFY_NODES_SELECTED_FAILED = "Verify-Nodes-Selected-Failed";
     public static final String SEND_CONFIGURE_BOOT_DEVICE_FAILED = "Send-Configure-Boot-Device-Failed";
+    public static final String SEND_INSTALL_ESXI_FAILED = "Send-Install-Esxi-Failed";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED = "Failed";

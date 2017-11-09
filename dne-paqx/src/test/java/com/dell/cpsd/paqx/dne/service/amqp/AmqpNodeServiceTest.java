@@ -10,8 +10,6 @@ import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
-import com.dell.cpsd.EsxiInstallationInfo;
-import com.dell.cpsd.InstallESXiResponseMessage;
 import com.dell.cpsd.NodeAllocationInfo;
 import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
 import com.dell.cpsd.NodeInventoryResponseMessage;
@@ -1037,58 +1035,6 @@ public class AmqpNodeServiceTest
 
         assertTrue(success);
         Mockito.verify(dneProducer, Mockito.times(1)).publishHostMaintenanceMode(request);
-    }
-
-    @Test
-    public void testInstallEsxiFailure() throws Exception
-    {
-        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        final DneProducer dneProducer = mock(DneProducer.class);
-        final DataServiceRepository repository = mock(DataServiceRepository.class);
-        final EsxiInstallationInfo info = mock(EsxiInstallationInfo.class);
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
-            }
-        };
-
-        nodeService.requestInstallEsxi(info);
-        Mockito.verify(dneProducer, Mockito.times(1)).publishInstallEsxiRequest(any());
-    }
-
-    @Test
-    public void testInstallEsxiSuccess() throws Exception
-    {
-        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        final DneProducer dneProducer = mock(DneProducer.class);
-        final DataServiceRepository repository = mock(DataServiceRepository.class);
-        final InstallESXiResponseMessage responseMessage = mock(InstallESXiResponseMessage.class);
-        final com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(new Date(),
-                UUID.randomUUID().toString(), "test");
-
-        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn("succeeded");
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
-            }
-        };
-
-        final boolean success = nodeService.requestInstallEsxi(any());
-
-        assertTrue(success);
-
-        Mockito.verify(dneProducer, Mockito.times(1)).publishInstallEsxiRequest(any());
     }
 
     @Test

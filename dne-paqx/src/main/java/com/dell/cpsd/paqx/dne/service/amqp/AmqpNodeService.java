@@ -12,9 +12,6 @@ import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
-import com.dell.cpsd.EsxiInstallationInfo;
-import com.dell.cpsd.InstallESXiRequestMessage;
-import com.dell.cpsd.InstallESXiResponseMessage;
 import com.dell.cpsd.ListNodes;
 import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.NodeInventoryRequestMessage;
@@ -59,7 +56,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverVCenterResponseAdapte
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.EnablePciPassthroughResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.HostMaintenanceModeResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListESXiCredentialDetailsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListScaleIoComponentsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListVCenterComponentsResponseAdapter;
@@ -294,7 +290,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new ListVCenterComponentsResponseAdapter(this));
         this.consumer.addAdapter(new DiscoverScaleIoResponseAdapter(this));
         this.consumer.addAdapter(new DiscoverVCenterResponseAdapter(this));
-        this.consumer.addAdapter(new InstallEsxiResponseAdapter(this));
         this.consumer.addAdapter(new AddHostToVCenterResponseAdapter(this));
         this.consumer.addAdapter(new SoftwareVibResponseAdapter(this));
         this.consumer.addAdapter(new AddHostToDvSwitchResponseAdapter(this));
@@ -1180,50 +1175,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 final VCenter vCenterData = discoveryInfoToVCenterDomainTransformer.transform(responseMessage);
 
                 return vCenterData != null && repository.saveVCenterData(jobId, vCenterData);
-            }
-            else
-            {
-                LOGGER.error("Message is null");
-            }
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Exception occurred", e);
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean requestInstallEsxi(final EsxiInstallationInfo esxiInstallationInfo)
-    {
-        try
-        {
-            final InstallESXiRequestMessage requestMessage = new InstallESXiRequestMessage();
-            final String correlationId = UUID.randomUUID().toString();
-            requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
-            requestMessage.setEsxiInstallationInfo(esxiInstallationInfo);
-
-            ServiceResponse<?> callbackResponse = processRequest(installEsxiTimeout, new ServiceRequestCallback()
-            {
-                @Override
-                public String getRequestId()
-                {
-                    return correlationId;
-                }
-
-                @Override
-                public void executeRequest(String requestId) throws Exception
-                {
-                    producer.publishInstallEsxiRequest(requestMessage);
-                }
-            });
-
-            InstallESXiResponseMessage responseMessage = processResponse(callbackResponse, InstallESXiResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
-            {
-                return "succeeded".equalsIgnoreCase(responseMessage.getStatus());
             }
             else
             {
