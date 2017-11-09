@@ -68,11 +68,14 @@ public class MultiNodeController
     @CrossOrigin
     @RequestMapping(path = "/preprocess", method = RequestMethod.POST, consumes = "application/json",
                     produces = "application/json")
-    public Job startPreProcessWorkflow() throws InterruptedException, ExecutionException
+    public Job startPreProcessWorkflow(@RequestBody List<NodeDetail> nodeList) throws InterruptedException, ExecutionException
     {
         Job responseJob = null;
 
-        String jobId = camundaWorkflowService.startWorkflow("preProcess", null);
+        Map<String, Object> inputVariables = new HashMap<>();
+        inputVariables.put(DelegateConstants.NODE_DETAILS, nodeList);
+
+        String jobId = camundaWorkflowService.startWorkflow("preProcess", inputVariables);
         if (jobId != null)
         {
             responseJob = new Job();

@@ -10,10 +10,10 @@
     </bpmn:serviceTask>
     <bpmn:serviceTask id="inventoryVCenter" name="Inventory VCenter" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${inventoryVCenter}">
       <bpmn:incoming>SequenceFlow_0tv1vs3</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_13a3p0g</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1mxy1g8</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_1cl1kmi" camunda:asyncBefore="true">
-      <bpmn:incoming>SequenceFlow_13a3p0g</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_116yf5e</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:boundaryEvent id="retrieveVCenterComponentsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="retrieveVCenterComponents">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
@@ -23,7 +23,6 @@
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1xg9b7l" sourceRef="StartEvent_1" targetRef="retrieveScaleIOComponents" />
     <bpmn:sequenceFlow id="SequenceFlow_1t43ys6" sourceRef="retrieveVCenterComponents" targetRef="inventoryScaleIO" />
-    <bpmn:sequenceFlow id="SequenceFlow_13a3p0g" sourceRef="inventoryVCenter" targetRef="EndEvent_1cl1kmi" />
     <bpmn:serviceTask id="retrieveScaleIOComponents" name="Retrieve Scale IO Components" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveScaleIoComponents}">
       <bpmn:incoming>SequenceFlow_1xg9b7l</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1n23832</bpmn:outgoing>
@@ -50,6 +49,39 @@
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_039pnxr" sourceRef="StartEvent_19l4h89" targetRef="EndEvent_0fze39b" />
     </bpmn:subProcess>
+    <bpmn:serviceTask id="inventoryRackHD" name="Inventory Rack HD" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${inventoryRackHD}">
+      <bpmn:incoming>SequenceFlow_1mxy1g8</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0o1foqs</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="$selectVCenterClusters}">
+      <bpmn:incoming>SequenceFlow_0o1foqs</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0qxxk7u</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="selectStoragePools" name="Select Storage Pools" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectStoragePools}">
+      <bpmn:incoming>SequenceFlow_08ayndm</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_116yf5e</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
+      <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1mxy1g8" sourceRef="inventoryVCenter" targetRef="inventoryRackHD" />
+    <bpmn:sequenceFlow id="SequenceFlow_0o1foqs" sourceRef="inventoryRackHD" targetRef="selectVCenterClusters" />
+    <bpmn:boundaryEvent id="inventoryRackHDError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="inventoryRackHD">
+      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="selectVCenterClustersError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="selectVCenterClusters">
+      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="selectStoragePoolsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="selectStoragePools">
+      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="selectProtectionDomainsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="selectProtectionDomains">
+      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0qxxk7u" sourceRef="selectVCenterClusters" targetRef="selectProtectionDomains" />
+    <bpmn:sequenceFlow id="SequenceFlow_08ayndm" sourceRef="selectProtectionDomains" targetRef="selectStoragePools" />
+    <bpmn:sequenceFlow id="SequenceFlow_116yf5e" sourceRef="selectStoragePools" targetRef="EndEvent_1cl1kmi" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="preProcess">
@@ -66,9 +98,9 @@
         <dc:Bounds x="932" y="501" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1cl1kmi_di" bpmnElement="EndEvent_1cl1kmi">
-        <dc:Bounds x="964" y="647" width="36" height="36" />
+        <dc:Bounds x="964" y="1162" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="937" y="687" width="90" height="12" />
+          <dc:Bounds x="937" y="1202" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_1rma49u_di" bpmnElement="retrieveVCenterComponentsError">
@@ -95,13 +127,6 @@
         <di:waypoint xsi:type="dc:Point" x="982" y="375" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="952" y="345" width="90" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_13a3p0g_di" bpmnElement="SequenceFlow_13a3p0g">
-        <di:waypoint xsi:type="dc:Point" x="982" y="581" />
-        <di:waypoint xsi:type="dc:Point" x="982" y="647" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="952" y="608" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_0j19c7a_di" bpmnElement="retrieveScaleIOComponents">
@@ -156,6 +181,77 @@
         <di:waypoint xsi:type="dc:Point" x="1205" y="308" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1177.5" y="287" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0exk25i_di" bpmnElement="inventoryRackHD">
+        <dc:Bounds x="932" y="633" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1o1mu6p_di" bpmnElement="selectVCenterClusters">
+        <dc:Bounds x="932" y="759" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0t5krno_di" bpmnElement="selectStoragePools">
+        <dc:Bounds x="932" y="1021" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1dyuci0_di" bpmnElement="selectProtectionDomains">
+        <dc:Bounds x="932" y="891" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mxy1g8_di" bpmnElement="SequenceFlow_1mxy1g8">
+        <di:waypoint xsi:type="dc:Point" x="982" y="581" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="633" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="601" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0o1foqs_di" bpmnElement="SequenceFlow_0o1foqs">
+        <di:waypoint xsi:type="dc:Point" x="982" y="713" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="759" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="730" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_0nlu7la_di" bpmnElement="inventoryRackHDError">
+        <dc:Bounds x="1014" y="695" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1020" y="735" width="25" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_11efhi9_di" bpmnElement="selectVCenterClustersError">
+        <dc:Bounds x="1014" y="821" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1020" y="861" width="25" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1yjxma0_di" bpmnElement="selectStoragePoolsError">
+        <dc:Bounds x="1014" y="1083" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1020" y="1123" width="25" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0lr8lzz_di" bpmnElement="selectProtectionDomainsError">
+        <dc:Bounds x="1014" y="953" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1020" y="993" width="25" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qxxk7u_di" bpmnElement="SequenceFlow_0qxxk7u">
+        <di:waypoint xsi:type="dc:Point" x="982" y="839" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="891" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="859" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_08ayndm_di" bpmnElement="SequenceFlow_08ayndm">
+        <di:waypoint xsi:type="dc:Point" x="982" y="971" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="1021" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="990" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_116yf5e_di" bpmnElement="SequenceFlow_116yf5e">
+        <di:waypoint xsi:type="dc:Point" x="982" y="1101" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="1162" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="1125.5" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
