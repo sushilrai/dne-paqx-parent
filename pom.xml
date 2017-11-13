@@ -47,7 +47,7 @@
         <!-- Common test libraries -->
         <!-- Maven plugins -->
         <plugin-maven-dependency-version>2.10</plugin-maven-dependency-version>
-        <plugin-jsonschema2pojo-version>0.4.27</plugin-jsonschema2pojo-version>
+        <plugin-jsonschema2pojo-version>0.4.37</plugin-jsonschema2pojo-version>
         <javax-validation-version>1.1.0.Final</javax-validation-version>
     </properties>
 
@@ -64,6 +64,12 @@
                 <groupId>com.dell.cpsd.paqx.dne</groupId>
                 <artifactId>dne-paqx</artifactId>
                 <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -72,6 +78,12 @@
                 <version>${project.version}</version>
                 <scope>test</scope>
                 <type>test-jar</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -80,6 +92,12 @@
                 <version>1.2-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -88,12 +106,24 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring-boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -101,6 +131,12 @@
                 <version>Camden.SR5</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.dell.cpsd.common.messaging</groupId>
+                        <artifactId>common-rabbitmq</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

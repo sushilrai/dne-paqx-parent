@@ -43,12 +43,24 @@
         <dependency>
             <groupId>com.dell.cpsd.paqx.dne</groupId>
             <artifactId>dne-paqx</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.dell.cpsd.paqx.dne</groupId>
             <artifactId>dne-paqx</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -63,32 +75,66 @@
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
             <version>2.6.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
             <version>2.6.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--<dependency>-->
@@ -98,33 +144,75 @@
         <dependency>
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>2.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -133,6 +221,12 @@
             <artifactId>common-testing</artifactId>
             <version>2.2.0-SNAPSHOT</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -141,6 +235,12 @@
             <version>2.2.0-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

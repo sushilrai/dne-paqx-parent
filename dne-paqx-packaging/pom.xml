@@ -33,6 +33,12 @@
             <version>${com.dell.cpsd.ess.version}</version>
             <type>tar</type>
             <classifier>service-tar</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
@@ -41,6 +47,12 @@
             <version>${project.parent.version}</version>
             <type>tar</type>
             <classifier>service-tar</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

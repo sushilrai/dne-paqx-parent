@@ -16,15 +16,6 @@ services:
       - "8555:8555"
     hostname: symphony-dne-paqx
     dns: 172.17.0.1
-    volumes:
-      - /opt/dell/cpsd/dne-paqx/logs/:/opt/dell/cpsd/dne-paqx/logs
-      - /etc/rabbitmq:/etc/rabbitmq
-    environment:
-      -  CREDENTIALS=${CREDENTIALS}
-      -  PASSPHRASES=${PASSPHRASES}
-      -  remote.dell.amqp.rabbitKeyStorePath=${KEYSTOREPATH}
-      -  remote.dell.amqp.rabbitTrustStorePath=${TRUSTSTOREPATH}
-      -  spring.cloud.consul.host=consul
     restart: unless-stopped
       
 # it has dependency on consul container.
