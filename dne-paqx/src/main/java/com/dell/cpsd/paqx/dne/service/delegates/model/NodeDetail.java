@@ -36,6 +36,15 @@ public class NodeDetail implements Serializable
     private String vMotionManagementSubnetMask;
     private String protectionDomain;
 
+    public NodeDetail()
+    {
+    }
+
+    public NodeDetail(final String id)
+    {
+        this.id = id;
+    }
+
     public String getId()
     {
         return id;

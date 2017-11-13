@@ -238,8 +238,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Value("${rackhd.boot.proto.value}")
     private String bootProtoValue;
 
-    private static final long timeout            = 1800000L;
-    private static final long installEsxiTimeout = 2700000L;
+    private static final long timeout            = 240000L;
 
     /**
      * AmqpNodeService constructor.

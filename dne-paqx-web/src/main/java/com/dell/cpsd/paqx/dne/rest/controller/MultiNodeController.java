@@ -14,6 +14,7 @@ import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Job;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Status;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @EnableAsync
 @RestController
@@ -68,12 +71,15 @@ public class MultiNodeController
     @CrossOrigin
     @RequestMapping(path = "/preprocess", method = RequestMethod.POST, consumes = "application/json",
                     produces = "application/json")
-    public Job startPreProcessWorkflow(@RequestBody List<NodeDetail> nodeList) throws InterruptedException, ExecutionException
+    public Job startPreProcessWorkflow(@RequestBody List<String> nodeIdsList) throws InterruptedException, ExecutionException
     {
         Job responseJob = null;
 
         Map<String, Object> inputVariables = new HashMap<>();
-        inputVariables.put(DelegateConstants.NODE_DETAILS, nodeList);
+        if (CollectionUtils.isNotEmpty(nodeIdsList)) {
+            List<NodeDetail> nodeDetailsList = nodeIdsList.stream().map(id -> new NodeDetail(id)).collect(Collectors.toList());
+            inputVariables.put(DelegateConstants.NODE_DETAILS, nodeDetailsList);
+        }
 
         String jobId = camundaWorkflowService.startWorkflow("preProcess", inputVariables);
         if (jobId != null)
