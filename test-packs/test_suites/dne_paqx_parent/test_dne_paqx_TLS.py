@@ -40,6 +40,7 @@ def load_test_data():
 
 ##############################################################################################
 
+@pytest.mark.skip(reason='Unable to test using RMQ API due to TLS')
 @pytest.mark.dne_paqx_parent_mvp
 @pytest.mark.dne_paqx_parent_mvp_extended
 def test_dnePAQX_container_using_AMQP_over_TLS():
