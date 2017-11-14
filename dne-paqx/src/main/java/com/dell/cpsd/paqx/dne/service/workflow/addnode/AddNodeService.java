@@ -260,7 +260,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     @Bean("notifyNodeDiscoveryToUpdateStatusTask")
     private WorkflowTask notifyNodeDiscoveryToUpdateStatusTask()
     {
-        return createTask("Notify node discovery to update status", new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService));
+        return createTask("Notify node discovery to update status", new NotifyNodeDiscoveryToUpdateStatusTaskHandler(this.nodeService,"Completed"));
     }
 
     @Bean("datastoreRenameTask")

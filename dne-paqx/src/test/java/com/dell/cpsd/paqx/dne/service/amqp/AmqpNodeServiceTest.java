@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
+import com.dell.cpsd.*;
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
@@ -12,8 +13,6 @@ import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.NodeAllocationInfo;
 import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
-import com.dell.cpsd.NodeInventoryResponseMessage;
-import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
@@ -465,7 +464,7 @@ public class AmqpNodeServiceTest
     }
 
     /**
-     * Test that the notifyNodeAllocationComplete method executes successfully.
+     * Test that the notifyNodeAllocationStatus method executes successfully.
      *
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
@@ -495,14 +494,75 @@ public class AmqpNodeServiceTest
             }
         };
 
-        Boolean responseInfo = nodeService.notifyNodeAllocationComplete("elementIdentifier");
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","Completed");
 
         Assert.assertEquals(true, responseInfo);
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
     }
 
+    @Test
+    public void testNotifyNodeAllocationStartedSuccess() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
+                messageProperties.setCorrelationId(UUID.randomUUID().toString());
+
+                NodeAllocationInfo nodeAllocationInfo = new NodeAllocationInfo("elementIdentifier", "nodeIdentifier",
+                        AllocationStatus.PROVISIONING_IN_PROGRESS);
+
+                StartNodeAllocationResponseMessage responseMessage = new StartNodeAllocationResponseMessage(messageProperties,
+                        StartNodeAllocationResponseMessage.Status.SUCCESS, nodeAllocationInfo, Collections.emptyList());
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","Started");
+
+        Assert.assertEquals(true, responseInfo);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishStartedNodeAllocation(any());
+    }
+
+    @Test
+    public void testNotifyNodeAllocationStartedFailed() throws ServiceTimeoutException, ServiceExecutionException
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
+                messageProperties.setCorrelationId(UUID.randomUUID().toString());
+
+                NodeAllocationInfo nodeAllocationInfo = new NodeAllocationInfo("elementIdentifier", "nodeIdentifier",
+                        AllocationStatus.PROVISIONING_FAILED);
+
+                FailNodeAllocationResponseMessage responseMessage = new FailNodeAllocationResponseMessage(messageProperties,
+                        FailNodeAllocationResponseMessage.Status.SUCCESS, nodeAllocationInfo, Collections.emptyList());
+
+                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
+            }
+        };
+
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","failed");
+
+        Assert.assertEquals(true, responseInfo);
+        Mockito.verify(dneProducer, Mockito.times(1)).publishFailedNodeAllocation(any());
+    }
     /**
-     * Test that the notifyNodeAllocationComplete method can handle any errors.
+     * Test that the notifyNodeAllocationStatus method can handle any errors.
      *
      * @throws ServiceTimeoutException
      */
@@ -522,8 +582,48 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.notifyNodeAllocationComplete("elementIdentifier");
+        nodeService.notifyNodeAllocationStatus("elementIdentifier","Completed");
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
+    }
+
+    @Test(expected = ServiceExecutionException.class)
+    public void testNotifyNodeAllocationStartedError() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.notifyNodeAllocationStatus("elementIdentifier","Started");
+        Mockito.verify(dneProducer, Mockito.times(1)).publishStartedNodeAllocation(any());
+    }
+
+    @Test(expected = ServiceExecutionException.class)
+    public void testNotifyNodeAllocationFailedError() throws Exception
+    {
+        DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
+        DneProducer dneProducer = mock(DneProducer.class);
+
+        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
+        {
+            @Override
+            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
+                    throws ServiceTimeoutException
+            {
+                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
+            }
+        };
+
+        nodeService.notifyNodeAllocationStatus("elementIdentifier","failed");
+        Mockito.verify(dneProducer, Mockito.times(1)).publishFailedNodeAllocation(any());
     }
 
     @Test

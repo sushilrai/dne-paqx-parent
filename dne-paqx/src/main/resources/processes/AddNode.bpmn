@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.8.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.11.2">
   <bpmn:process id="addNode" name="Add Node" isExecutable="true" camunda:versionTag="1.0">
     <bpmn:startEvent id="StartEvent_1gjhh65">
       <bpmn:outgoing>SequenceFlow_1x7cq92</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="configureNodeIPAddress" name="Configure Node IP Address" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${configIdracIpAddress}">
-      <bpmn:incoming>SequenceFlow_0d7szj3</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1fv6rc6</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1l5qe62</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="configureObmSettiings" name="Configure Obm Settings" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${configureObmSettings}">
@@ -26,22 +26,22 @@
     </bpmn:serviceTask>
     <bpmn:serviceTask id="verifyNodeInformation" name="Verify Node Information" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:class="com.dell.cpsd.paqx.dne.service.delegates.VerifyNodeDetail">
       <bpmn:incoming>SequenceFlow_1x7cq92</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0d7szj3</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1vpucf9</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="BoundaryEvent_1dfpwcx" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureNodeIPAddress">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_036z2ua" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureObmSettiings">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_1h8umow" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureNodeCredentials">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_0nmfa4r" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="ServiceTask_1uadsre">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_1y3zgvb" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="ServiceTask_1pf3hp9">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_0p9azvj" name="Error" attachedToRef="verifyNodeInformation">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
@@ -55,7 +55,7 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1r03k38" sourceRef="ServiceTask_1pf3hp9" targetRef="datastoreRename" />
     <bpmn:boundaryEvent id="renameDatastoreError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="datastoreRename">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="exitHostMaintenanceMode" name="Exit Maintenenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
       <bpmn:incoming>SequenceFlow_1jatz0h</bpmn:incoming>
@@ -63,56 +63,56 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1jatz0h" sourceRef="datastoreRename" targetRef="exitHostMaintenanceMode" />
     <bpmn:boundaryEvent id="exitMaintenanceModeError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="exitHostMaintenanceMode">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="enablePCIPassThrough" name="Enable PCI Pass Through On Node" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${enablePCIPassThrough}">
       <bpmn:incoming>SequenceFlow_1roraqw</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0f3y24o</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="enablePCIPassThroughError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="enablePCIPassThrough">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="enterHostMaintenanceMode" name="Enter Maintenance Mode" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${enterHostMaintenanceMode}">
       <bpmn:incoming>SequenceFlow_0f3y24o</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0mx3f7b</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="enterHostMaintenanceModeError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="enterHostMaintenanceMode">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="erroCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="erroCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="rebootHost" name="Reboot Host" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${rebootHost}">
       <bpmn:incoming>SequenceFlow_0mx3f7b</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_10o8grp</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="rebootHostError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="rebootHost">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="exitHostMaintenanceMode2" name="Exit Maintenenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
       <bpmn:incoming>SequenceFlow_10o8grp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1c6utyo</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="enterMaintenanceModeError2" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="exitHostMaintenanceMode2">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="configureScaleIOVIB" name="Configure ScaleIO VIB" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${configureScaleIOVIB}">
       <bpmn:incoming>SequenceFlow_1c6utyo</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_06re85c</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="configureScaleIOVIBError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureScaleIOVIB">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="updateSDCPerformanceProfile" name="Update SDC Performance Profile" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${updateSDCPerformanceProfile}">
       <bpmn:incoming>SequenceFlow_06re85c</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0hbkdjp</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="updateSdcPerformanceProfileError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="updateSDCPerformanceProfile">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="addHostToDvSwitch" name="Add Host To Distributed Switch" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${addHostToDvSwitch}">
       <bpmn:incoming>SequenceFlow_0hbkdjp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1uijh8k</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="addHostToDvSwitchError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="addHostToDvSwitch">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1roraqw" sourceRef="exitHostMaintenanceMode" targetRef="enablePCIPassThrough" />
     <bpmn:sequenceFlow id="SequenceFlow_0f3y24o" sourceRef="enablePCIPassThrough" targetRef="enterHostMaintenanceMode" />
@@ -123,90 +123,98 @@
     <bpmn:sequenceFlow id="SequenceFlow_0hbkdjp" sourceRef="updateSDCPerformanceProfile" targetRef="addHostToDvSwitch" />
     <bpmn:subProcess id="handleErrorSubProcess" name="Handle Error" triggeredByEvent="true">
       <bpmn:startEvent id="StartEvent_12ft740">
-        <bpmn:outgoing>SequenceFlow_08bzz4x</bpmn:outgoing>
-        <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+        <bpmn:outgoing>SequenceFlow_1g1bvj6</bpmn:outgoing>
+        <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
       </bpmn:startEvent>
       <bpmn:endEvent id="EndEvent_0ac6425">
-        <bpmn:incoming>SequenceFlow_08bzz4x</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0h9l6ew</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_08bzz4x" sourceRef="StartEvent_12ft740" targetRef="EndEvent_0ac6425" />
+      <bpmn:serviceTask id="notifyNodeDiscoveryToUpdateStatusFailed" name="Fail Node Provisioning" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${notifyNodeDiscoveryToUpdateStatusFailed}">
+        <bpmn:incoming>SequenceFlow_1g1bvj6</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0h9l6ew</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent_0lobdnb" name="Error" attachedToRef="notifyNodeDiscoveryToUpdateStatusFailed">
+        <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      </bpmn:boundaryEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1g1bvj6" sourceRef="StartEvent_12ft740" targetRef="notifyNodeDiscoveryToUpdateStatusFailed" />
+      <bpmn:sequenceFlow id="SequenceFlow_0h9l6ew" sourceRef="notifyNodeDiscoveryToUpdateStatusFailed" targetRef="EndEvent_0ac6425" />
     </bpmn:subProcess>
     <bpmn:serviceTask id="deployScaleIOVm" name="Deploy ScaleIO VM" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${deployScaleIOVm}">
       <bpmn:incoming>SequenceFlow_1uijh8k</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0akyyai</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="deployScaleIOVmError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="deployScaleIOVm">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="updatePCIPassThrough" name="Update PCI Pass Through" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${updatePCIPassThrough}">
       <bpmn:incoming>SequenceFlow_0akyyai</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0oao200</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="updatePCIPassThroughError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="updatePCIPassThrough">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="configureVMNetworkSettings" name="Configure VM Network Settings" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${configureVMNetworkSettings}">
       <bpmn:incoming>SequenceFlow_0oao200</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_048vvc6</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="configureVMNetworkSettingsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureVMNetworkSettings">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="powerOnScaleIOVM" name="Power On ScaleIO VM" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${powerOnScaleIOVM}">
       <bpmn:incoming>SequenceFlow_048vvc6</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ltw6vg</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="powerOnScaleIOVMError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="powerOnScaleIOVM">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="changeScaleIOVMCredentials" name="Change ScaleIO VM Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${changeScaleIOVMCredentials}">
       <bpmn:incoming>SequenceFlow_1ltw6vg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_03yf2wm</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="changeScaleIOVMCredentialsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="changeScaleIOVMCredentials">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="installScaleIOVMPackages" name="Install ScaleIO VM Packages" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${installScaleIOVMPackages}">
       <bpmn:incoming>SequenceFlow_03yf2wm</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_14drqzf</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="installScaleIOVMPackagesError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="installScaleIOVMPackages">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="performanceTuneScaleIOVM" name="Performance Tune ScaleIO VM" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${performanceTuneScaleIOVM}">
       <bpmn:incoming>SequenceFlow_14drqzf</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0gjmj9x</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="performanceTuneScaleIOVMError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="performanceTuneScaleIOVM">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="addVCenterHostToProtectionDomain" name="Add Host To Protection Domain" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${addVCenterHostToProtectionDomain}">
       <bpmn:incoming>SequenceFlow_0gjmj9x</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_19unhuj</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="addVCenterHostToProtectionDomainError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="addVCenterHostToProtectionDomain">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="disablePXEBoot" name="Disable PXE Boot" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${disablePXEBoot}">
       <bpmn:incoming>SequenceFlow_19unhuj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1s9tre1</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="disablePXEBootError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="disablePXEBoot">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="addNodeToSystemDefinition" name="Add Node To System Defintion" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${addNodeToSystemDefinition}">
       <bpmn:incoming>SequenceFlow_1s9tre1</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_192loht</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="addNodeToSystemDefinitionError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="addNodeToSystemDefinition">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:serviceTask id="notifyNodeDiscoveryToUpdateStatus" name="Update Node Status" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${notifyNodeDiscoveryToUpdateStatus}">
+    <bpmn:serviceTask id="notifyNodeDiscoveryToUpdateStatusCompleted" name="Complete Node Provisioning" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${notifyNodeDiscoveryToUpdateStatusCompleted}">
       <bpmn:incoming>SequenceFlow_192loht</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wnen9i</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:boundaryEvent id="notifyNodeDiscoveryToUpdateStatusError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="notifyNodeDiscoveryToUpdateStatus">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    <bpmn:boundaryEvent id="notifyNodeDiscoveryToUpdateStatusError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="notifyNodeDiscoveryToUpdateStatusCompleted">
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:endEvent id="EndEvent_1ymjmsr" camunda:asyncBefore="true">
       <bpmn:incoming>SequenceFlow_1wnen9i</bpmn:incoming>
@@ -221,8 +229,8 @@
     <bpmn:sequenceFlow id="SequenceFlow_0gjmj9x" sourceRef="performanceTuneScaleIOVM" targetRef="addVCenterHostToProtectionDomain" />
     <bpmn:sequenceFlow id="SequenceFlow_19unhuj" sourceRef="addVCenterHostToProtectionDomain" targetRef="disablePXEBoot" />
     <bpmn:sequenceFlow id="SequenceFlow_1s9tre1" sourceRef="disablePXEBoot" targetRef="addNodeToSystemDefinition" />
-    <bpmn:sequenceFlow id="SequenceFlow_192loht" sourceRef="addNodeToSystemDefinition" targetRef="notifyNodeDiscoveryToUpdateStatus" />
-    <bpmn:sequenceFlow id="SequenceFlow_1wnen9i" sourceRef="notifyNodeDiscoveryToUpdateStatus" targetRef="EndEvent_1ymjmsr" />
+    <bpmn:sequenceFlow id="SequenceFlow_192loht" sourceRef="addNodeToSystemDefinition" targetRef="notifyNodeDiscoveryToUpdateStatusCompleted" />
+    <bpmn:sequenceFlow id="SequenceFlow_1wnen9i" sourceRef="notifyNodeDiscoveryToUpdateStatusCompleted" targetRef="EndEvent_1ymjmsr" />
     <bpmn:subProcess id="configureBootDeviceMessage" name="Configure Boot Device" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:incoming>SequenceFlow_0q15rtt</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0l370br</bpmn:outgoing>
@@ -274,9 +282,8 @@
     </bpmn:subProcess>
     <bpmn:sequenceFlow id="SequenceFlow_0q15rtt" sourceRef="configureNodeCredentials" targetRef="configureBootDeviceMessage" />
     <bpmn:boundaryEvent id="messageConfigureBootDeviceError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureBootDeviceMessage">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0d7szj3" sourceRef="verifyNodeInformation" targetRef="configureNodeIPAddress" />
     <bpmn:sequenceFlow id="SequenceFlow_1x7cq92" sourceRef="StartEvent_1gjhh65" targetRef="verifyNodeInformation" />
     <bpmn:subProcess id="installEsxiMessage" name="Install Esxi" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:incoming>SequenceFlow_0l370br</bpmn:incoming>
@@ -328,21 +335,31 @@
       <bpmn:sequenceFlow id="SequenceFlow_0j2kax4" sourceRef="BoundaryEvent_1mtn03v" targetRef="EndEvent_0c78qpa" />
     </bpmn:subProcess>
     <bpmn:boundaryEvent id="messageInstallEsxiError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="installEsxiMessage">
-      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0l370br" sourceRef="configureBootDeviceMessage" targetRef="installEsxiMessage" />
     <bpmn:sequenceFlow id="SequenceFlow_0wkkx99" sourceRef="installEsxiMessage" targetRef="ServiceTask_1uadsre" />
+    <bpmn:serviceTask id="notifyNodeDiscoveryToUpdateStatusStarted" name="Start Node Provisioning" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${notifyNodeDiscoveryToUpdateStatusStarted}">
+      <bpmn:incoming>SequenceFlow_1vpucf9</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1fv6rc6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0o7y8pb" name="Error" attachedToRef="notifyNodeDiscoveryToUpdateStatusStarted">
+      <bpmn:errorEventDefinition errorRef="Error_0gd5he3" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1vpucf9" sourceRef="verifyNodeInformation" targetRef="notifyNodeDiscoveryToUpdateStatusStarted" />
+    <bpmn:sequenceFlow id="SequenceFlow_1fv6rc6" sourceRef="notifyNodeDiscoveryToUpdateStatusStarted" targetRef="configureNodeIPAddress" />
   </bpmn:process>
   <bpmn:message id="Message_0llvgib" name="configureBootDeviceResponseReceived" />
   <bpmn:error id="Error_1v9tnoq" name="Configure Boot Device Error" errorCode="Configure-Boot-Device-Failed" />
   <bpmn:message id="Message_0b6kkin" name="installEsxiResponseReceived" />
   <bpmn:error id="Error_18fw8dx" name="Install Esxi Error" errorCode="Install-Esxi-Failed" />
+  <bpmn:error id="Error_0gd5he3" name="Error in Node Provisioning" errorCode="1" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="addNode">
       <bpmndi:BPMNShape id="StartEvent_1gjhh65_di" bpmnElement="StartEvent_1gjhh65">
-        <dc:Bounds x="-576" y="114" width="36" height="36" />
+        <dc:Bounds x="-576" y="-11" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-648" y="154" width="90" height="12" />
+          <dc:Bounds x="-648" y="29" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0atfv08_di" bpmnElement="configureNodeIPAddress">
@@ -364,7 +381,7 @@
         <dc:Bounds x="-608" y="1339" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1v5fmfh_di" bpmnElement="verifyNodeInformation">
-        <dc:Bounds x="-608" y="179" width="100" height="80" />
+        <dc:Bounds x="-608" y="58" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_1dfpwcx_di" bpmnElement="BoundaryEvent_1dfpwcx">
         <dc:Bounds x="-526" y="376" width="36" height="36" />
@@ -403,9 +420,9 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_0p9azvj_di" bpmnElement="BoundaryEvent_0p9azvj">
-        <dc:Bounds x="-526" y="241" width="36" height="36" />
+        <dc:Bounds x="-526" y="120" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-521" y="281" width="25" height="12" />
+          <dc:Bounds x="-521" y="160" width="26" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1l5qe62_di" bpmnElement="SequenceFlow_1l5qe62">
@@ -574,27 +591,20 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="SubProcess_0htbsqx_di" bpmnElement="handleErrorSubProcess" isExpanded="true">
-        <dc:Bounds x="-408" y="426" width="141" height="120" />
+        <dc:Bounds x="-408" y="426" width="442" height="167" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_0e95fdg_di" bpmnElement="StartEvent_12ft740">
-        <dc:Bounds x="-388" y="456" width="36" height="36" />
+        <dc:Bounds x="-389" y="493" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-416" y="496" width="90" height="12" />
+          <dc:Bounds x="-417" y="533" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0ac6425_di" bpmnElement="EndEvent_0ac6425">
-        <dc:Bounds x="-323" y="456" width="36" height="36" />
+        <dc:Bounds x="-49" y="493" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-350" y="496" width="90" height="12" />
+          <dc:Bounds x="-76" y="533" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_08bzz4x_di" bpmnElement="SequenceFlow_08bzz4x">
-        <di:waypoint xsi:type="dc:Point" x="-352" y="474" />
-        <di:waypoint xsi:type="dc:Point" x="-323" y="474" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="-382" y="453" width="90" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1s8gtc2_di" bpmnElement="deployScaleIOVm">
         <dc:Bounds x="-608" y="2648" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -685,7 +695,7 @@
           <dc:Bounds x="-521" y="3869" width="25" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1tjtm8s_di" bpmnElement="notifyNodeDiscoveryToUpdateStatus">
+      <bpmndi:BPMNShape id="ServiceTask_1tjtm8s_di" bpmnElement="notifyNodeDiscoveryToUpdateStatusCompleted">
         <dc:Bounds x="-608" y="3891" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_0tooyky_di" bpmnElement="notifyNodeDiscoveryToUpdateStatusError">
@@ -861,18 +871,11 @@
           <dc:Bounds x="-680" y="852" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0d7szj3_di" bpmnElement="SequenceFlow_0d7szj3">
-        <di:waypoint xsi:type="dc:Point" x="-558" y="259" />
-        <di:waypoint xsi:type="dc:Point" x="-558" y="314" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="-588" y="281" width="90" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1x7cq92_di" bpmnElement="SequenceFlow_1x7cq92">
-        <di:waypoint xsi:type="dc:Point" x="-558" y="150" />
-        <di:waypoint xsi:type="dc:Point" x="-558" y="179" />
+        <di:waypoint xsi:type="dc:Point" x="-558" y="25" />
+        <di:waypoint xsi:type="dc:Point" x="-558" y="58" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="-588" y="159" width="90" height="12" />
+          <dc:Bounds x="-588" y="35.5" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="SubProcess_1pz4ane_di" bpmnElement="installEsxiMessage" isExpanded="true">
@@ -1024,6 +1027,52 @@
         <di:waypoint xsi:type="dc:Point" x="-558" y="1207" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="-543" y="1183" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1qxjkbd_di" bpmnElement="notifyNodeDiscoveryToUpdateStatusStarted">
+        <dc:Bounds x="-608" y="189" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0o7y8pb_di" bpmnElement="BoundaryEvent_0o7y8pb">
+        <dc:Bounds x="-526" y="251" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-521" y="291" width="26" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vpucf9_di" bpmnElement="SequenceFlow_1vpucf9">
+        <di:waypoint xsi:type="dc:Point" x="-558" y="138" />
+        <di:waypoint xsi:type="dc:Point" x="-558" y="189" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-543" y="157.5" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fv6rc6_di" bpmnElement="SequenceFlow_1fv6rc6">
+        <di:waypoint xsi:type="dc:Point" x="-558" y="269" />
+        <di:waypoint xsi:type="dc:Point" x="-558" y="314" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-543" y="285.5" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1qy9rnc_di" bpmnElement="notifyNodeDiscoveryToUpdateStatusFailed">
+        <dc:Bounds x="-247" y="471" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0lobdnb_di" bpmnElement="BoundaryEvent_0lobdnb">
+        <dc:Bounds x="-165" y="533" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-160" y="573" width="26" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1g1bvj6_di" bpmnElement="SequenceFlow_1g1bvj6">
+        <di:waypoint xsi:type="dc:Point" x="-353" y="511" />
+        <di:waypoint xsi:type="dc:Point" x="-247" y="511" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-300" y="490" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0h9l6ew_di" bpmnElement="SequenceFlow_0h9l6ew">
+        <di:waypoint xsi:type="dc:Point" x="-147" y="511" />
+        <di:waypoint xsi:type="dc:Point" x="-49" y="511" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-98" y="490" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>

@@ -204,5 +204,4 @@ public class AddNodeServiceImplTest
     {
         assertEquals("Notify node discovery to update status", workFlowTasks.get("notifyNodeDiscoveryToUpdateStatus").getTaskName());
     }
-
 }

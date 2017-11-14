@@ -155,7 +155,7 @@ public interface NodeService
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    boolean notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException;
+    boolean notifyNodeAllocationStatus(String elementIdentifier,String action) throws ServiceTimeoutException, ServiceExecutionException;
 
     /**
      * Configure the iDRAC network settings.

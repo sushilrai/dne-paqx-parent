@@ -20,6 +20,10 @@ import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.PxeBootConfig;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.SetObmSettingsResponseMessage;
+import com.dell.cpsd.StartNodeAllocationResponseMessage;
+import com.dell.cpsd.StartNodeAllocationRequestMessage;
+import com.dell.cpsd.FailNodeAllocationResponseMessage;
+import com.dell.cpsd.FailNodeAllocationRequestMessage;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
@@ -71,6 +75,8 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapte
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateProtectionDomainResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.StartNodeAllocationResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.FailNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -278,6 +284,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new NodesListedResponseAdapter(this));
         this.consumer.addAdapter(new ClustersListedResponseAdapter(this));
         this.consumer.addAdapter(new CompleteNodeAllocationResponseAdapter(this));
+        this.consumer.addAdapter(new StartNodeAllocationResponseAdapter(this));
+        this.consumer.addAdapter(new FailNodeAllocationResponseAdapter(this));
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
         this.consumer.addAdapter(new ConfigurePxeBootResponseAdapter(this));
@@ -653,16 +661,60 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return processResponse(response, ValidateVcenterClusterResponseMessage.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException
+    public boolean notifyNodeAllocationStatus(String elementIdentifier,String action) throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
         messageProperties.setReplyTo(replyTo);
+
+        if("Completed".equalsIgnoreCase(action))
+        {
+            return notifyNodeAllocationComplete(elementIdentifier,messageProperties);
+        } else if ("Started".equalsIgnoreCase(action))
+        {
+            return notifyNodeAllocationStarted(elementIdentifier,messageProperties);
+        } else if ("failed".equalsIgnoreCase(action))
+        {
+            return notifyNodeAllocationFailed(elementIdentifier,messageProperties);
+        }
+
+        return false;
+    }
+
+    private boolean notifyNodeAllocationStarted(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    {
+
+        StartNodeAllocationRequestMessage request = new StartNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                producer.publishStartedNodeAllocation(request);
+            }
+        });
+
+        StartNodeAllocationResponseMessage responseInfo = processResponse(response, StartNodeAllocationResponseMessage.class);
+
+        if ( responseInfo != null && StartNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        {
+            LOGGER.error("Error response from notify node allocation started: " + responseInfo.getNodeAllocationErrors());
+        }
+
+        return responseInfo!=null && StartNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+    }
+
+    private boolean notifyNodeAllocationComplete(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    {
 
         CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
 
@@ -689,6 +741,37 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return responseInfo!=null && CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+    }
+
+
+    private boolean notifyNodeAllocationFailed(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    {
+
+        FailNodeAllocationRequestMessage request = new FailNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
+
+        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        {
+            @Override
+            public String getRequestId()
+            {
+                return messageProperties.getCorrelationId();
+            }
+
+            @Override
+            public void executeRequest(String requestId) throws Exception
+            {
+                producer.publishFailedNodeAllocation(request);
+            }
+        });
+
+        FailNodeAllocationResponseMessage responseInfo = processResponse(response, FailNodeAllocationResponseMessage.class);
+
+        if ( responseInfo != null && FailNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        {
+            LOGGER.error("Error response from notify node allocation failed: " + responseInfo.getNodeAllocationErrors());
+        }
+
+        return responseInfo!=null && FailNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
     /**
