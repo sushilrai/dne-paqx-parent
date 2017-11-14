@@ -98,18 +98,20 @@ public class ConfigureScaleIOVIB extends BaseWorkflowDelegate
             if (scaleIOMdmCluster != null)
             {
                 // Scan the master element info the ips
-                scaleIOMdmCluster.getMasterElementInfo().stream().filter(Objects::nonNull).forEach(
-                        scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
-                            if (!scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker"))
+                scaleIOMdmCluster.getMasterElementInfo().stream().filter(Objects::nonNull)
+                        .forEach(scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
+                            if (!scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker") && "master"
+                                    .equalsIgnoreCase(scaleIOIP.getType()))
                             {
                                 mdmIpList.add(scaleIOIP.getIp());
                             }
                         }));
 
                 // Scan the slave element info for ips
-                scaleIOMdmCluster.getSlaveElementInfo().stream().filter(Objects::nonNull).forEach(
-                        scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
-                            if (!scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker"))
+                scaleIOMdmCluster.getSlaveElementInfo().stream().filter(Objects::nonNull)
+                        .forEach(scaleIOSDSElementInfo -> scaleIOSDSElementInfo.getIps().forEach(scaleIOIP -> {
+                            if (!scaleIOIP.getSdsElementInfo().getRole().equalsIgnoreCase("TieBreaker") && "slave"
+                                    .equalsIgnoreCase(scaleIOIP.getType()))
                             {
                                 mdmIpList.add(scaleIOIP.getIp());
                             }
