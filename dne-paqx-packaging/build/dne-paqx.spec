@@ -10,7 +10,7 @@ License: Commercial
 Vendor: Dell Inc.
 Group: System Environment/Dell Inc. Applications
 URL: http://www.dell.com
-Requires: dell-cpsd-core-services dell-cpsd-core-adapters cpsd-node-discovery-service
+Requires: dell-cpsd-core-services dell-cpsd-core-adapters dell-cpsd-node-discovery-paqx
 
 %define _use_internal_dependency_generator 0
 %define __find_requires %{nil}
