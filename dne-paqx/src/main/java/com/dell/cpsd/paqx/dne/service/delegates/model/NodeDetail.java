@@ -22,11 +22,13 @@ public class NodeDetail implements Serializable
     private String esxiManagementHostname;
 
     private String scaleIoData1SvmIpAddress;
-    private String scaleIoData1KernelIpAddress;
-    private String scaleIoSvmData1SubnetMask;
+    private String scaleIoData1SvmSubnetMask;
     private String scaleIoData2SvmIpAddress;
-    private String scaleIoData2KernelIpAddress;
-    private String scaleIoSvmData2SubnetMask;
+    private String scaleIoData2SvmSubnetMask;
+    private String scaleIoData1EsxIpAddress;
+    private String scaleIoData1EsxSubnetMask;
+    private String scaleIoData2EsxIpAddress;
+    private String scaleIoData2EsxSubnetMask;
     private String scaleIoSvmManagementIpAddress;
     private String scaleIoSvmManagementGatewayAddress;
     private String scaleIoSvmManagementSubnetMask;
@@ -145,24 +147,14 @@ public class NodeDetail implements Serializable
         this.scaleIoData1SvmIpAddress = scaleIoData1SvmIpAddress;
     }
 
-    public String getScaleIoData1KernelIpAddress()
+    public String getScaleIoData1SvmSubnetMask()
     {
-        return scaleIoData1KernelIpAddress;
+        return scaleIoData1SvmSubnetMask;
     }
 
-    public void setScaleIoData1KernelIpAddress(final String scaleIoData1KernelIpAddress)
+    public void setScaleIoData1SvmSubnetMask(final String scaleIoData1SvmSubnetMask)
     {
-        this.scaleIoData1KernelIpAddress = scaleIoData1KernelIpAddress;
-    }
-
-    public String getScaleIoSvmData1SubnetMask()
-    {
-        return scaleIoSvmData1SubnetMask;
-    }
-
-    public void setScaleIoSvmData1SubnetMask(final String scaleIoSvmData1SubnetMask)
-    {
-        this.scaleIoSvmData1SubnetMask = scaleIoSvmData1SubnetMask;
+        this.scaleIoData1SvmSubnetMask = scaleIoData1SvmSubnetMask;
     }
 
     public String getScaleIoData2SvmIpAddress()
@@ -175,24 +167,54 @@ public class NodeDetail implements Serializable
         this.scaleIoData2SvmIpAddress = scaleIoData2SvmIpAddress;
     }
 
-    public String getScaleIoData2KernelIpAddress()
+    public String getScaleIoData2SvmSubnetMask()
     {
-        return scaleIoData2KernelIpAddress;
+        return scaleIoData2SvmSubnetMask;
     }
 
-    public void setScaleIoData2KernelIpAddress(final String scaleIoData2KernelIpAddress)
+    public void setScaleIoData2SvmSubnetMask(final String scaleIoData2SvmSubnetMask)
     {
-        this.scaleIoData2KernelIpAddress = scaleIoData2KernelIpAddress;
+        this.scaleIoData2SvmSubnetMask = scaleIoData2SvmSubnetMask;
     }
 
-    public String getScaleIoSvmData2SubnetMask()
+    public String getScaleIoData1EsxIpAddress()
     {
-        return scaleIoSvmData2SubnetMask;
+        return scaleIoData1EsxIpAddress;
     }
 
-    public void setScaleIoSvmData2SubnetMask(final String scaleIoSvmData2SubnetMask)
+    public void setScaleIoData1EsxIpAddress(final String scaleIoData1EsxIpAddress)
     {
-        this.scaleIoSvmData2SubnetMask = scaleIoSvmData2SubnetMask;
+        this.scaleIoData1EsxIpAddress = scaleIoData1EsxIpAddress;
+    }
+
+    public String getScaleIoData1EsxSubnetMask()
+    {
+        return scaleIoData1EsxSubnetMask;
+    }
+
+    public void setScaleIoData1EsxSubnetMask(final String scaleIoData1EsxSubnetMask)
+    {
+        this.scaleIoData1EsxSubnetMask = scaleIoData1EsxSubnetMask;
+    }
+
+    public String getScaleIoData2EsxIpAddress()
+    {
+        return scaleIoData2EsxIpAddress;
+    }
+
+    public void setScaleIoData2EsxIpAddress(final String scaleIoData2EsxIpAddress)
+    {
+        this.scaleIoData2EsxIpAddress = scaleIoData2EsxIpAddress;
+    }
+
+    public String getScaleIoData2EsxSubnetMask()
+    {
+        return scaleIoData2EsxSubnetMask;
+    }
+
+    public void setScaleIoData2EsxSubnetMask(final String scaleIoData2EsxSubnetMask)
+    {
+        this.scaleIoData2EsxSubnetMask = scaleIoData2EsxSubnetMask;
     }
 
     public String getScaleIoSvmManagementIpAddress()

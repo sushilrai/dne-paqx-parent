@@ -48,9 +48,9 @@ public class VerfiyNodeDetailTest {
         nodeDetail.setEsxiManagementSubnetMask("abc");
         nodeDetail.setEsxiManagementHostname("abc");
         nodeDetail.setScaleIoData1SvmIpAddress("abc");
-        nodeDetail.setScaleIoData1KernelIpAddress("abc");
+        nodeDetail.setScaleIoData1SvmSubnetMask("abc");
         nodeDetail.setScaleIoData2SvmIpAddress("abc");
-        nodeDetail.setScaleIoData2KernelIpAddress("abc");
+        nodeDetail.setScaleIoData2SvmSubnetMask("abc");
         nodeDetail.setScaleIoSvmManagementIpAddress("abc");
         nodeDetail.setScaleIoSvmManagementGatewayAddress("abc");
         nodeDetail.setScaleIoSvmManagementSubnetMask("abc");

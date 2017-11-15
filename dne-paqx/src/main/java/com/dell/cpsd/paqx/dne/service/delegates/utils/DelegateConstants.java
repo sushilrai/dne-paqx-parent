@@ -21,6 +21,7 @@ public class DelegateConstants
     public static final String DATASTORE_NAME = "DatastoreName";
     public static final String HOST_PCI_DEVICE_ID = "HostPCIDeviceId";
     public static final String IOCTL_INI_GUI_STR = "IoctlIniGuidStr";
+    public static final String VIRTUAL_MACHINE_NAME = "VirtualMachineName";
 
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
