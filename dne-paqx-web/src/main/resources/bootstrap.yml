@@ -9,14 +9,14 @@ spring:
               hostname: symphony-dne-paqx.cpsd.dell
               scheme: https
               enabled: true
-              port: 9050
+              port: 8071
               register-health-check: true
               register: true
               fail-fast: false
               health-check-path: ${server.context-path}/health
             config:
               enabled: true
-server.port: 9050
+server.port: 8071
 endpoints:
   actuator:
     enabled: true
