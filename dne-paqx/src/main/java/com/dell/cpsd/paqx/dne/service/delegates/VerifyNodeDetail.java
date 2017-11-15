@@ -71,6 +71,7 @@ public class VerifyNodeDetail extends BaseWorkflowDelegate
         if (StringUtils.isBlank(nodeDetail.getScaleIoData1SvmIpAddress())) {
             missingFields.add("scaleIoData1SvmIpAddress");
         }
+
         if (StringUtils.isBlank(nodeDetail.getScaleIoData1SvmSubnetMask())) {
             missingFields.add("scaleIoData1SvmSubnetMask");
         }
@@ -92,6 +93,7 @@ public class VerifyNodeDetail extends BaseWorkflowDelegate
         if (StringUtils.isBlank(nodeDetail.getScaleIoData2EsxSubnetMask())) {
             missingFields.add("scaleIoData2EsxSubnetMask");
         }
+
         if (StringUtils.isBlank(nodeDetail.getScaleIoSvmManagementIpAddress())) {
             missingFields.add("scaleIoSvmManagementIpAddress");
         }

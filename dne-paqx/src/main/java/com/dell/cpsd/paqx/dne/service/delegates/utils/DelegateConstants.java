@@ -5,6 +5,15 @@
  */
 package com.dell.cpsd.paqx.dne.service.delegates.utils;
 
+/**
+ * Constants used by the asynchronous code.
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class DelegateConstants
 {
 
@@ -26,8 +35,6 @@ public class DelegateConstants
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
     public static final String INSTALL_ESXI_MESSAGE_ID = "installEsxiResponseReceived";
-
-
 
     public static final String VCENTER_INFORMATION_NOT_FOUND = "VCenter-Information-Missing";
     public static final String INVENTORY_VCENTER_FAILED = "Inventory-VCenter-Failed";
@@ -55,10 +62,19 @@ public class DelegateConstants
     public static final String VERIFY_NODE_DETAIL_FAILED = "Verify-Node-Detail-Failed";
     public static final String VERIFY_NODES_SELECTED_FAILED = "Verify-Nodes-Selected-Failed";
     public static final String SEND_CONFIGURE_BOOT_DEVICE_FAILED = "Send-Configure-Boot-Device-Failed";
+    public static final String CONFIGURE_VM_NETWORK_SETTINGS = "Configure-VM-Network-Settings";
+    public static final String CHANGE_SCALEIO_VM_CREDENTIALS = "Change-ScaleIo-VM-Credentials";
+    public static final String INSTALL_SCALEIO_VM_PACKAGES = "Install-Scaleio-Vm-Packages";
+    public static final String PERFORMANCE_TUNE_SCALEIO_VM = "Performance-Tune-Scaleio-Vm";
+    public static final String ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN = "Add-vCenter-Host-To-Protection-Domain";
+    public static final String DEPLOY_SCALEIO_VM_FAILED = "Deploy-ScaleIo-Vm-Failed";
+    public static final String DEPLOY_SCALEIO_NEW_VM_NAME = "Deploy-ScaleIo-New-VM-Name";
+    public static final String UPDATE_PCI_PASSTHROUGH = "Update-Pci-Passthrough";
     public static final String SEND_INSTALL_ESXI_FAILED = "Send-Install-Esxi-Failed";
     public static final String NOTIFY_NODE_STATUS_STARTED_FAILED = "Notify-Node-Status-Started-Failed";
     public static final String NOTIFY_NODE_STATUS_COMPLETED_FAILED = "Notify-Node-Status-Completed-Failed";
     public static final String NOTIFY_NODE_STATUS_UPDATE_FAILED = "Notify-node-status-update-failed";
+    public static final String UPDATE_SDC_PERFORMANCE_PROFILE_FAILED = "Update-Sdc-Performance-Profile-Failed";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED = "Failed";
