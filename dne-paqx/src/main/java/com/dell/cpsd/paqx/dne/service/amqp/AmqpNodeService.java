@@ -427,11 +427,14 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         });
 
         NodesListed nodes = processResponse(response, NodesListed.class);
+
         if (nodes != null)
         {
             if (nodes.getDiscoveredNodes() != null)
             {
-                return nodes.getDiscoveredNodes().stream().filter(d->d.getAllocationStatus() == com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED).map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus()))
+                return nodes.getDiscoveredNodes().stream()
+                        .filter(d -> d.getAllocationStatus() == com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED)
+                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus(), d.getSerial(), d.getProduct(), d.getVendor()))
                         .collect(Collectors.toList());
             }
         }
@@ -441,28 +444,31 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     @Override
     @Transactional
-    public List<DiscoveredNodeInfo> listDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+    public List<DiscoveredNodeInfo> listDiscoveredNodeInfo()
+            throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException
+    {
         List<DiscoveredNode> discoveredNodes = listDiscoveredNodes();
         List<DiscoveredNodeInfo> retList = new ArrayList<>();
 
-        for (DiscoveredNode node : discoveredNodes) {
-            Object nodeInventoryResponse = listNodeInventory(node.getConvergedUuid());
-
-            if (nodeInventoryResponse != null) {
-                NodeInventory nodeInventory = new NodeInventory(node.getConvergedUuid(), nodeInventoryResponse);
-                boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
-                DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.getDiscoveredNodeInfo(nodeInventoryResponse, node.getConvergedUuid());
-                if ( isNodeInventorySaved && discoveredNodeInfo != null) {
-                    discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
-                    repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
-                    retList.add(discoveredNodeInfo);
-                }
-            } else {
-                LOGGER.info("There is no node inventory for UUID " + node.getConvergedUuid());
+        if (discoveredNodes != null && !discoveredNodes.isEmpty())
+        {
+            for (DiscoveredNode node : discoveredNodes)
+            {
+                DiscoveredNodeInfo discoveredNodeInfo = new DiscoveredNodeInfo(node.getProduct(), null, node.getProduct(), null,
+                        node.getSerial(), node.getConvergedUuid());
+                discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
+                discoveredNodeInfo.setVendor(node.getVendor());
+                retList.add(discoveredNodeInfo);
             }
+
+            LOGGER.info("Listing DiscoveredNodeInfo data ...");
+        }
+        else
+        {
+            LOGGER.info("There are no Discovered Nodes");
         }
 
-        LOGGER.info("Listing DiscoveredNodeInfo data ...");
+
         return retList;
     }
 

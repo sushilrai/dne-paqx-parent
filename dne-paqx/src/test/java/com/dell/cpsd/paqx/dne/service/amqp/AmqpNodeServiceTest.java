@@ -198,10 +198,16 @@ public class AmqpNodeServiceTest
         com.dell.cpsd.DiscoveredNode discoveredNode = new com.dell.cpsd.DiscoveredNode();
         discoveredNode.setConvergedUuid(uuid);
         discoveredNode.setAllocationStatus(com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED);
+        discoveredNode.setSerial("testserial");
+        discoveredNode.setProduct("testproduct");
+        discoveredNode.setVendor("test_Dell Inc");
 
         com.dell.cpsd.DiscoveredNode addedNode = new com.dell.cpsd.DiscoveredNode();
         addedNode.setConvergedUuid(UUID.randomUUID().toString());
         addedNode.setAllocationStatus(com.dell.cpsd.DiscoveredNode.AllocationStatus.ADDED);
+        addedNode.setSerial("testserial");
+        addedNode.setProduct("testproduct");
+        addedNode.setVendor("test_Dell Inc");
 
         List<com.dell.cpsd.DiscoveredNode> nodeList = new ArrayList<>();
         nodeList.add(discoveredNode);
@@ -251,63 +257,31 @@ public class AmqpNodeServiceTest
 
         NodesListed listed = new NodesListed(messageProperties, buildNodeList(convergedUuid1));
 
-        NodeInventoryResponseMessage nodeInventoryResponseMessage = new NodeInventoryResponseMessage(messageProperties,
-                buildNodeInventory());
         AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
         {
             @Override
             protected ServiceResponse<?> processRequest(long timeout, ServiceRequestCallback serviceRequestCallback)
             {
                 StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+
                 if (stackTraceElements[2].getMethodName().equalsIgnoreCase("listDiscoveredNodes"))
                 {
-                    return new ServiceResponse<>(serviceRequestCallback.getRequestId(), listed, "test");
+                    ServiceResponse response = new  ServiceResponse<>(serviceRequestCallback.getRequestId(), listed, "test");
+
+                    return  response;
                 }
-                if (stackTraceElements[2].getMethodName().equalsIgnoreCase("listNodeInventory"))
-                {
-                    return new ServiceResponse<>(serviceRequestCallback.getRequestId(), nodeInventoryResponseMessage, "test");
-                }
+
                 return null;
-
             }
-
-            ;
         };
 
-        when(repository.saveNodeInventory(any())).thenReturn(true);
-        when(repository.saveDiscoveredNodeInfo(any())).thenReturn(true);
-
         assertEquals(1, nodeService.listDiscoveredNodeInfo().size());
-        assertEquals("ABCDEFG", nodeService.listDiscoveredNodeInfo().get(0).getSerialNumber());
-        assertEquals("DellNode730", nodeService.listDiscoveredNodeInfo().get(0).getProduct());
-
+        assertEquals("testserial", nodeService.listDiscoveredNodeInfo().get(0).getSerialNumber());
+        assertEquals("testproduct", nodeService.listDiscoveredNodeInfo().get(0).getProduct());
     }
 
-    private Object buildNodeInventory()
-    {
-        String DMI_FIELD = "dmi";
-        String SOURCE_FIELD = "source";
-        String DATA_FIELD = "data";
-        String SYSTEM_INFO_FIELD = "System Information";
-        String SERIAL_NUM_FIELD = "Serial Number";
-        String PRODUCT_FIELD = "Product Name";
-        String FAMILY_FIELD = "Family";
 
-        Map<String, String> sysInfoData = new HashMap<>();
-        sysInfoData.put(SERIAL_NUM_FIELD, "ABCDEFG");
-        sysInfoData.put(PRODUCT_FIELD, "DellNode730");
-        sysInfoData.put(FAMILY_FIELD, "family");
-        Map<String, Map<String, String>> sysInfo = new HashMap<>();
-        sysInfo.put(SYSTEM_INFO_FIELD, sysInfoData);
-
-        Map<String, Object> source = new HashMap<>();
-        source.put(DATA_FIELD, sysInfo);
-        source.put(SOURCE_FIELD, DMI_FIELD);
-        List<Object> retList = new ArrayList<>();
-        retList.add(source);
-        return retList;
-    }
-
+    /**
     /**
      * Test that the the listClusters method can handle a timeout.
      *
