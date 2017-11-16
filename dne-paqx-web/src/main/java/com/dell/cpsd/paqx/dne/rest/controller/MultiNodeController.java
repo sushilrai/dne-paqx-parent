@@ -8,6 +8,7 @@ package com.dell.cpsd.paqx.dne.rest.controller;
 
 import com.dell.cpsd.paqx.dne.rest.exception.WorkflowNotFoundException;
 import com.dell.cpsd.paqx.dne.rest.model.AboutInfo;
+import com.dell.cpsd.paqx.dne.rest.model.Node;
 import com.dell.cpsd.paqx.dne.service.ICamundaWorkflowService;
 import com.dell.cpsd.paqx.dne.service.delegates.exception.JobNotFoundException;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -71,13 +72,13 @@ public class MultiNodeController
     @CrossOrigin
     @RequestMapping(path = "/preprocess", method = RequestMethod.POST, consumes = "application/json",
                     produces = "application/json")
-    public Job startPreProcessWorkflow(@RequestBody List<String> nodeIdsList) throws InterruptedException, ExecutionException
+    public Job startPreProcessWorkflow(@RequestBody List<Node> nodesList) throws InterruptedException, ExecutionException
     {
         Job responseJob = null;
 
         Map<String, Object> inputVariables = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(nodeIdsList)) {
-            List<NodeDetail> nodeDetailsList = nodeIdsList.stream().map(id -> new NodeDetail(id)).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(nodesList)) {
+            List<NodeDetail> nodeDetailsList = nodesList.stream().map(node -> new NodeDetail(node.getId(), node.getServiceTag() )).collect(Collectors.toList());
             inputVariables.put(DelegateConstants.NODE_DETAILS, nodeDetailsList);
         }
 

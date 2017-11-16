@@ -45,9 +45,10 @@ public class NodeDetail implements Serializable
     {
     }
 
-    public NodeDetail(final String id)
+    public NodeDetail(final String id, final String serviceTag)
     {
         this.id = id;
+        this.serviceTag = serviceTag;
     }
 
     private Map<String, DeviceAssignment> deviceToDeviceStoragePool;

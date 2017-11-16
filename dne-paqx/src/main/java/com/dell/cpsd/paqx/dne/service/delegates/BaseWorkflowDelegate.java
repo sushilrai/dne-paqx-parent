@@ -77,5 +77,4 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
     public void updateDelegateStatus(String statusString) {
         delegateStatus.add(statusString);
     }
-
 }
