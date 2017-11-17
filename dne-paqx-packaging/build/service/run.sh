@@ -3,6 +3,7 @@
 # Copyright (c) 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
 # Dell EMC Confidential/Proprietary Information
 #
+set -x
 
 CONTAINERID=$(basename "$(cat /proc/1/cpuset)" | cut -c 1-12)
 LOCAL_DOMAIN="cpsd.dell"
@@ -27,6 +28,8 @@ PAM_STATUS_URL="${PAM_URL}/pam-service/health"
 PAM_AMQP_USERS_URL="${PAM_URL}/pam-service/v1/amqp/users"
  
 MAX_SLEEP=300
+
+#set +x
 
 touch -t 00:00:00 /tmp/_dt
 FILE_COUNT=$(find $BASE_CERTS_DIR/ -type f -newer /tmp/_dt | grep $LOCAL_DOMAIN | wc -l)
@@ -129,4 +132,10 @@ EOJ
          -XPUT ${PAM_AMQP_USERS_URL}
 fi
 JKS_PASSPHRASE=$(cat ${BASE_CERTS_DIR}/${FQDN}.pwd)
-java  -Xms64m -Xmx192m -Djavax.net.ssl.trustStore=${JKS_FILE} -Djavax.net.ssl.trustStorePassword=${JKS_PASSPHRASE} -Dspring.profiles.active=production -Dcontainer.id=$CONTAINERID -Dlog4j.configuration=file:/opt/dell/cpsd/dne-paqx/conf/dne-paqx-log4j.xml -jar /opt/dell/cpsd/dne-paqx/lib/dne-paqx-web.jar
+java -Xms64m -Xmx192m \
+    -cp /opt/dell/cpsd/dne/node-expansion-service/lib/*:/opt/dell/cpsd/dne/node-expansion-service/conf/* \
+    -Dcontainer.id=$CONTAINERID \
+    -Djavax.net.ssl.trustStore=${JKS_FILE} \
+    -Djavax.net.ssl.trustStorePassword=${JKS_PASSPHRASE} \
+    -Dlog4j.configuration=file:/opt/dell/cpsd/dne/node-expansion-service/conf/dne-paqx-log4j.xml \
+    -Dspring.profiles.active=production com.dell.cpsd.paqx.dne.rest.NodeExpansionWebApplication
