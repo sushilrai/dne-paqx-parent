@@ -64,7 +64,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
     private static final int PING_IDRAC_TIMEOUT = 120000; // 120 seconds
 
-    @Bean("cleanInMemoryDatabase")
+    @Bean("cleanInMemoryDatabaseTask")
     private WorkflowTask cleanInMemoryDatabase()
     {
         return createTask("Clean in memory database", new CleanInMemoryDatabaseTaskHandler(this.nodeService, this.repository));

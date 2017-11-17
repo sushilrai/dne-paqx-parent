@@ -21,10 +21,10 @@
     <bpmn:boundaryEvent id="inventoryVCenterError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="inventoryVCenter">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1xg9b7l" sourceRef="StartEvent_1" targetRef="retrieveScaleIOComponents" />
+    <bpmn:sequenceFlow id="SequenceFlow_1xg9b7l" sourceRef="StartEvent_1" targetRef="cleanInMemoryDatabase" />
     <bpmn:sequenceFlow id="SequenceFlow_1t43ys6" sourceRef="retrieveVCenterComponents" targetRef="inventoryScaleIO" />
     <bpmn:serviceTask id="retrieveScaleIOComponents" name="Retrieve Scale IO Components" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveScaleIoComponents}">
-      <bpmn:incoming>SequenceFlow_1xg9b7l</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_03inz3b</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1n23832</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1n23832" sourceRef="retrieveScaleIOComponents" targetRef="retrieveVCenterComponents" />
@@ -105,14 +105,22 @@
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1i3dscx" sourceRef="inventoryVCenter" targetRef="SubProcess_1w5k0ub" />
     <bpmn:sequenceFlow id="SequenceFlow_16g64dr" sourceRef="SubProcess_1w5k0ub" targetRef="selectVCenterClusters" />
+    <bpmn:serviceTask id="cleanInMemoryDatabase" name="Clean In Memory Database" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${cleanInMemoryDatabase}">
+      <bpmn:incoming>SequenceFlow_1xg9b7l</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_03inz3b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="cleanInMemoryDatabaseError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="cleanInMemoryDatabase">
+      <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_03inz3b" sourceRef="cleanInMemoryDatabase" targetRef="retrieveScaleIOComponents" />
   </bpmn:process>
   <bpmn:error id="Error_0hu4d3v" name="Error_0k4c71h" errorCode="Inventory-Node-Failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="preProcess">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="964" y="-25" width="36" height="36" />
+        <dc:Bounds x="964" y="-148" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="937" y="11" width="90" height="20" />
+          <dc:Bounds x="937" y="-112" width="90" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1q9omni_di" bpmnElement="retrieveVCenterComponents">
@@ -140,10 +148,10 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1xg9b7l_di" bpmnElement="SequenceFlow_1xg9b7l">
-        <di:waypoint xsi:type="dc:Point" x="982" y="11" />
-        <di:waypoint xsi:type="dc:Point" x="982" y="48" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="-112" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="-76" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="952" y="24" width="90" height="12" />
+          <dc:Bounds x="952" y="-100" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1t43ys6_di" bpmnElement="SequenceFlow_1t43ys6">
@@ -326,6 +334,22 @@
         <di:waypoint xsi:type="dc:Point" x="982" y="759" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="997" y="731" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0e2z0r5_di" bpmnElement="cleanInMemoryDatabase">
+        <dc:Bounds x="932" y="-76" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0eiiq17_di" bpmnElement="cleanInMemoryDatabaseError">
+        <dc:Bounds x="1014" y="-14" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1018" y="26" width="27" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_03inz3b_di" bpmnElement="SequenceFlow_03inz3b">
+        <di:waypoint xsi:type="dc:Point" x="982" y="4" />
+        <di:waypoint xsi:type="dc:Point" x="982" y="48" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="20" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>

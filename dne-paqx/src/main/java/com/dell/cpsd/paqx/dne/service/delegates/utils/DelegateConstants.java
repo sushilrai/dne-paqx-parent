@@ -76,6 +76,7 @@ public class DelegateConstants
     public static final String NOTIFY_NODE_STATUS_COMPLETED_FAILED = "Notify-Node-Status-Completed-Failed";
     public static final String NOTIFY_NODE_STATUS_UPDATE_FAILED = "Notify-node-status-update-failed";
     public static final String UPDATE_SDC_PERFORMANCE_PROFILE_FAILED = "Update-Sdc-Performance-Profile-Failed";
+    public static final String CLEAN_IN_MEMORY_DATABASE_ERROR = "Clean-In-Memory-Database-Error";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED = "Failed";

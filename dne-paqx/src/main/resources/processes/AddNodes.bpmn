@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.8.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.11.2">
   <bpmn:process id="addNodes" name="Add Nodes" isExecutable="true" camunda:versionTag="1.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_00j2ul6</bpmn:outgoing>
@@ -35,14 +35,14 @@
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_1a5q3fm" sourceRef="StartEvent_10yzwdk" targetRef="EndEvent_0cxndfn" />
     </bpmn:subProcess>
-    <bpmn:serviceTask id="ServiceTask_19kcz2k" name="Retrieve Default VCenter Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveDefaultESXiCredentials}">
+    <bpmn:serviceTask id="retrieveDefaultESXiCredentials" name="Default ESXi credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveDefaultESXiCredentials}">
       <bpmn:incoming>SequenceFlow_0tql36z</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0r5oufv</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:boundaryEvent id="BoundaryEvent_1nrhwse" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="ServiceTask_19kcz2k">
+    <bpmn:boundaryEvent id="BoundaryEvent_1nrhwse" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="retrieveDefaultESXiCredentials">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0tql36z" sourceRef="verifySelectedNodes" targetRef="ServiceTask_19kcz2k" />
+    <bpmn:sequenceFlow id="SequenceFlow_0tql36z" sourceRef="verifySelectedNodes" targetRef="retrieveDefaultESXiCredentials" />
     <bpmn:serviceTask id="configureStoragePools" name="Configure Storage Pools" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${configureStoragePools}">
       <bpmn:incoming>SequenceFlow_0atfvkl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1l49wyb</bpmn:outgoing>
@@ -64,7 +64,7 @@
     <bpmn:boundaryEvent id="configureProtectionDomainsError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="configureProtectionDomains">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0r5oufv" sourceRef="ServiceTask_19kcz2k" targetRef="configureVCenterClusters" />
+    <bpmn:sequenceFlow id="SequenceFlow_0r5oufv" sourceRef="retrieveDefaultESXiCredentials" targetRef="configureVCenterClusters" />
     <bpmn:sequenceFlow id="SequenceFlow_0vt5bmr" sourceRef="configureVCenterClusters" targetRef="configureProtectionDomains" />
     <bpmn:sequenceFlow id="SequenceFlow_0atfvkl" sourceRef="configureProtectionDomains" targetRef="configureStoragePools" />
     <bpmn:sequenceFlow id="SequenceFlow_1l49wyb" sourceRef="configureStoragePools" targetRef="addNode" />
@@ -131,7 +131,7 @@
           <dc:Bounds x="1099" y="152" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_19kcz2k_di" bpmnElement="ServiceTask_19kcz2k">
+      <bpmndi:BPMNShape id="ServiceTask_19kcz2k_di" bpmnElement="retrieveDefaultESXiCredentials">
         <dc:Bounds x="932" y="275" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BoundaryEvent_1nrhwse_di" bpmnElement="BoundaryEvent_1nrhwse">
