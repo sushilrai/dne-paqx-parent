@@ -77,8 +77,14 @@ public class VerifyNodesSelected extends BaseWorkflowDelegate
                     {
                         final List<Host> vCenterHosts = repository.getVCenterHosts();
                         final Optional<Host> foundHost = vCenterHosts.stream().filter(Objects::nonNull)
-                                .filter(host -> host.getName().contains(nodeDetail.getEsxiManagementHostname()) || host.getName()
-                                        .contains(nodeDetail.getEsxiManagementIpAddress())).findFirst();
+                                .filter(host -> {
+                                    if (host.getName() != null)
+                                    {
+                                        return host.getName().contains(nodeDetail.getEsxiManagementHostname()) ||
+                                                host.getName().contains(nodeDetail.getEsxiManagementIpAddress());
+                                    }
+                                    return false;
+                                }).findFirst();
 
                         if (foundHost.isPresent())
                         {
@@ -88,8 +94,14 @@ public class VerifyNodesSelected extends BaseWorkflowDelegate
                         else
                         {
                             final Optional<ScaleIOSDC> foundSdc = repository.getScaleIoData().getSdcList().stream().filter(Objects::nonNull)
-                                    .filter(sdc -> sdc.getName().contains(nodeDetail.getEsxiManagementHostname()) ||
-                                           sdc.getName().contains(nodeDetail.getEsxiManagementIpAddress())).findFirst();
+                                    .filter(sdc -> {
+                                        if(sdc.getName() != null)
+                                        {
+                                            return sdc.getName().contains(nodeDetail.getEsxiManagementHostname()) ||
+                                                    sdc.getName().contains(nodeDetail.getEsxiManagementIpAddress());
+                                        }
+                                        return false;
+                                    }).findFirst();
 
                             if (foundSdc.isPresent())
                             {
@@ -100,8 +112,14 @@ public class VerifyNodesSelected extends BaseWorkflowDelegate
                             {
                                 final Optional<ScaleIOSDS> foundSds = repository.getScaleIoData().getSdsList().stream()
                                         .filter(Objects::nonNull)
-                                        .filter(sds -> sds.getName().contains(nodeDetail.getEsxiManagementHostname())
-                                                || sds.getName().contains(nodeDetail.getEsxiManagementIpAddress()))
+                                        .filter(sds -> {
+                                            if(sds.getName() != null)
+                                            {
+                                                return sds.getName().contains(nodeDetail.getEsxiManagementHostname()) ||
+                                                        sds.getName().contains(nodeDetail.getEsxiManagementIpAddress());
+                                            }
+                                            return false;
+                                        })
                                         .findFirst();
 
                                 if (foundSds.isPresent())
