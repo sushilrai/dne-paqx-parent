@@ -73,6 +73,8 @@ public interface DataServiceRepository
 
     List<Host> getVCenterHosts();
 
+    List<String> getDnsServers();
+
     Host getExistingVCenterHost();
 
     List<PortGroup> getPortGroups();

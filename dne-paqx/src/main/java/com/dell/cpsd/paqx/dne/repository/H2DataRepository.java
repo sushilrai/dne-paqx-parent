@@ -33,11 +33,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * H2-InMemory Data Repository
@@ -502,6 +505,24 @@ public class H2DataRepository implements DataServiceRepository
     {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
         return query.getResultList();
+    }
+
+    @Override
+    public List<String> getDnsServers()
+    {
+        final Set<String> dnsServers = new HashSet<>();
+
+        final List<Host> vCenterHosts = getVCenterHosts();
+
+        List<String> returnVal = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(vCenterHosts))
+        {
+            vCenterHosts.stream().filter(Objects::nonNull)
+                .forEach(hs -> hs.getHostDnsConfig().getDnsConfigIPs().stream().filter(Objects::nonNull).forEach(dnsServers::add));
+            returnVal.addAll(dnsServers);
+        }
+
+        return returnVal;
     }
 
     @Override
