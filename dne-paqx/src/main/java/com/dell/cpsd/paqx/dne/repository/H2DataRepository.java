@@ -490,7 +490,7 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public Host getVCenterHost(final String hostName) throws NoResultException
+    public Host getVCenterHost(final String hostName)
     {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h where h.name=:hostName", Host.class);
         query.setParameter("hostName", hostName);
@@ -498,7 +498,7 @@ public class H2DataRepository implements DataServiceRepository
     }
 
     @Override
-    public List<Host> getVCenterHosts() throws NoResultException
+    public List<Host> getVCenterHosts()
     {
         final TypedQuery<Host> query = entityManager.createQuery("SELECT h FROM Host as h", Host.class);
         return query.getResultList();
