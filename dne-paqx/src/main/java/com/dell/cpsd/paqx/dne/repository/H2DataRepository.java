@@ -451,6 +451,7 @@ public class H2DataRepository implements DataServiceRepository
                 if (dneJob == null)
                 {
                     dneJob = new DneJob(jobId, scaleIOData, null);
+                    scaleIOData.setJob(dneJob);
                     entityManager.persist(dneJob);
                 }
                 else

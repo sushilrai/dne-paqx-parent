@@ -6,7 +6,6 @@
 package com.dell.cpsd.paqx.dne.amqp.config;
 
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
-import org.eclipse.jetty.server.ConnectionFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -15,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.MessageConverter;
 
 import static org.junit.Assert.assertNotNull;

@@ -41,9 +41,9 @@
 
     <properties>
         <!-- Internal libraries -->
-        <common-rabbitmq-version>1.4-SNAPSHOT</common-rabbitmq-version>
+        <common-rabbitmq-version>2.1.0</common-rabbitmq-version>
         <!-- Common libraries -->
-        <spring-boot.version>1.4.2.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.1.RELEASE</spring-boot.version>
         <!-- Common test libraries -->
         <!-- Maven plugins -->
         <plugin-maven-dependency-version>2.10</plugin-maven-dependency-version>
@@ -85,6 +85,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dell.cpsd</groupId>
+                <artifactId>common-dependencies</artifactId>
+                <version>1.2.0</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
 
             <dependency>
