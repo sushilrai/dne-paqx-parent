@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.APPLY_ESXI_LICENSE_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
@@ -66,7 +68,7 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
 
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        /*final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
+        final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
                 "VCENTER-CUSTOMER");
         if (componentEndpointIds == null)
         {
@@ -85,7 +87,7 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
             updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
             throw new BpmnError(APPLY_ESXI_LICENSE_FAILED,
                                 taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-        }*/
+        }
         LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
 

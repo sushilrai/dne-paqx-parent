@@ -10,9 +10,11 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
@@ -86,7 +89,7 @@ public class EnablePCIPassThrough extends BaseWorkflowDelegate
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
 
-  /*      ComponentEndpointIds componentEndpointIds = null;
+        ComponentEndpointIds componentEndpointIds = null;
         try
         {
             componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
@@ -148,10 +151,10 @@ public class EnablePCIPassThrough extends BaseWorkflowDelegate
         {
             LOGGER.error("Enable PCI Pass Through on Node " + nodeDetail.getServiceTag() + " failed!");
             updateDelegateStatus("Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!");
-            throw new BpmnError(INSTALL_ESXI_FAILED, "Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!");
+            throw new BpmnError(ENABLE_PCI_PASSTHROUGH_FAILED, "Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!");
         }
         delegateExecution.setVariable(DelegateConstants.HOST_PCI_DEVICE_ID, hostPciDeviceId);
-        */
+
         LOGGER.info("Request PCI Pass Through on Node " + nodeDetail.getServiceTag() + " was successful.");
         updateDelegateStatus("Request PCI Pass Through on Node " + nodeDetail.getServiceTag() + " was successful.");
 

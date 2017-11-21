@@ -8,10 +8,12 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.MaintenanceModeRequest;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +69,9 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute {}", this.taskName);
 
-       /* final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
+       final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
                 "VCENTER-CUSTOMER");
-        final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final String hostname = (String) delegateExecution.getVariable(DelegateConstants.HOSTNAME);
 
         final boolean maintenanceModeEnable = this.getMaintenanceModeEnable();
         final HostMaintenanceModeRequestMessage requestMessage = getHostMaintenanceModeRequestMessage(
@@ -79,9 +81,9 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
         {
             LOGGER.error(taskName + " failed!");
             updateDelegateStatus(taskName + " failed!");
-            throw new BpmnError(INSTALL_ESXI_FAILED, taskName + " failed!");
+            throw new BpmnError(DelegateConstants.ESXI_HOST_MAINTENANCE_MODE, taskName + " failed!");
         }
-*/
+
         LOGGER.info(taskName + " was successful.");
         updateDelegateStatus(taskName + " was successful.");
     }

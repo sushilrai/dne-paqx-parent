@@ -13,6 +13,7 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.PowerOperationRequest;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.REBOOT_HOST_FAILED;
 
 @Component
 @Scope("prototype")
@@ -37,7 +39,7 @@ public class RebootHost extends BaseWorkflowDelegate
     /**
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
+    private final NodeService           nodeService;
     private final DataServiceRepository repository;
 
     @Autowired
@@ -47,8 +49,8 @@ public class RebootHost extends BaseWorkflowDelegate
         this.repository = repository;
     }
 
-    private HostPowerOperationRequestMessage getHostPowerOperationRequestMessage(
-            final ComponentEndpointIds componentEndpointIds, final String hostname)
+    private HostPowerOperationRequestMessage getHostPowerOperationRequestMessage(final ComponentEndpointIds componentEndpointIds,
+            final String hostname)
     {
         final HostPowerOperationRequestMessage requestMessage = new HostPowerOperationRequestMessage();
         final PowerOperationRequest powerOperationRequest = new PowerOperationRequest();
@@ -56,9 +58,9 @@ public class RebootHost extends BaseWorkflowDelegate
         powerOperationRequest.setHostName(hostname);
         requestMessage.setPowerOperationRequest(powerOperationRequest);
         requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
-                componentEndpointIds.getComponentUuid(), componentEndpointIds.getEndpointUuid(),
-                componentEndpointIds.getCredentialUuid()));
+        requestMessage.setComponentEndpointIds(
+                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
+                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
         return requestMessage;
     }
 
@@ -71,7 +73,7 @@ public class RebootHost extends BaseWorkflowDelegate
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
 
-        /*ComponentEndpointIds componentEndpointIds = null;
+        ComponentEndpointIds componentEndpointIds = null;
         try
         {
             componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
@@ -80,15 +82,12 @@ public class RebootHost extends BaseWorkflowDelegate
         {
             LOGGER.error("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.", e);
             updateDelegateStatus(
-                    "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.  Reason: " +
-                    e.getMessage());
+                    "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.  Reason: " + e.getMessage());
             throw new BpmnError(REBOOT_HOST_FAILED,
-                                "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.  Reason: " +
-                                e.getMessage());
+                    "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.  Reason: " + e.getMessage());
         }
 
-        final HostPowerOperationRequestMessage requestMessage = getHostPowerOperationRequestMessage(
-                componentEndpointIds, hostname);
+        final HostPowerOperationRequestMessage requestMessage = getHostPowerOperationRequestMessage(componentEndpointIds, hostname);
 
         boolean succeeded = false;
 
@@ -98,21 +97,17 @@ public class RebootHost extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred attempting to Install ScaleIO Vib.", e);
-            updateDelegateStatus(
-                    "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: " +
-                    e.getMessage());
+            LOGGER.error("An Unexpected Exception occurred attempting to request " + taskMessage, e);
+            updateDelegateStatus("An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: " + e.getMessage());
             throw new BpmnError(REBOOT_HOST_FAILED,
-                                "An Unexpected Exception occurred attempting to request " + taskMessage +
-                                ".  Reason: " + e.getMessage());
+                    "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: " + e.getMessage());
         }
         if (!succeeded)
         {
             LOGGER.error(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
             updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            throw new BpmnError(REBOOT_HOST_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-        }*/
+            throw new BpmnError(REBOOT_HOST_FAILED, taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
+        }
 
         LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");

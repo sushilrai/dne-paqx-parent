@@ -8,6 +8,12 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
+import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.virtualization.capabilities.api.Credentials;
+import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
+import org.apache.commons.lang3.StringUtils;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +78,7 @@ public class DatastoreRename extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute datastore rename");
 
-       /* final String esxiManagementHostname = (String) delegateExecution.getVariable(HOSTNAME);
+       final String esxiManagementHostname = (String) delegateExecution.getVariable(DelegateConstants.HOSTNAME);
 
         final ComponentEndpointIds vCenterComponentEndpointIdsByEndpointType = dataServiceRepository
                 .getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
@@ -88,27 +94,27 @@ public class DatastoreRename extends BaseWorkflowDelegate
                 vCenterComponentEndpointIdsByEndpointType.getEndpointUuid(),
                 vCenterComponentEndpointIdsByEndpointType.getCredentialUuid()));
 
-        boolean succeeded;
+        final String assignedDatastoreName;
         try
         {
-            succeeded = this.nodeService.requestDatastoreRename(requestMessage);
+            assignedDatastoreName = this.nodeService.requestDatastoreRename(requestMessage);
         }
         catch (Exception ex)
         {
             LOGGER.error("An Unexpected Exception Occurred attempting to Rename the Datastore.", ex);
             updateDelegateStatus("An Unexpected Exception Occurred attempting to Rename the Datastore.");
-            throw new BpmnError(INSTALL_ESXI_FAILED,"An Unexpected Exception Occurred attempting to Rename the Datastore.  Reason: " + ex.getMessage());
+            throw new BpmnError(DelegateConstants.DATASTORE_FAILED,"An Unexpected Exception Occurred attempting to Rename the Datastore.  Reason: " + ex.getMessage());
         }
-        if (!succeeded)
+        if (StringUtils.isEmpty(assignedDatastoreName))
         {
             LOGGER.error("Datastore Rename failed!");
             updateDelegateStatus(
                     "Datastore Rename failed!");
-            throw new BpmnError(INSTALL_ESXI_FAILED,
+            throw new BpmnError(DelegateConstants.DATASTORE_FAILED,
                                 "Datastore Rename failed!");
         }
 
-        delegateExecution.setVariable(DATASTORE_NAME, newDatastoreName);*/
+        delegateExecution.setVariable(DelegateConstants.DATASTORE_NAME, assignedDatastoreName);
         LOGGER.info("Datastore Rename was successful.");
         updateDelegateStatus("Datastore Rename was successful.");
 
