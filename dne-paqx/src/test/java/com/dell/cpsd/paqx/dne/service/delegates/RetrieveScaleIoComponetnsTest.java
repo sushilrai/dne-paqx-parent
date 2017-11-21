@@ -42,7 +42,7 @@ public class RetrieveScaleIoComponetnsTest {
         discoveredNodesResponse = nodeService.listDiscoveredNodes();
     }
 
-    @Ignore @Test
+    @Test
     public void testFailed() throws Exception
     {
         try {
@@ -55,7 +55,7 @@ public class RetrieveScaleIoComponetnsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testException() throws Exception
     {
         try {
@@ -68,7 +68,7 @@ public class RetrieveScaleIoComponetnsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testSuccess() throws Exception
     {
         when(nodeService.requestScaleIoComponents()).thenReturn(true);

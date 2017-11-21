@@ -16,82 +16,108 @@ import com.dell.cpsd.paqx.dne.service.model.ObmSettingsResponse;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Properties;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ConfigureObmSettingsTest {
 
     private ConfigureObmSettings configureObmSettings;
-    private NodeService nodeService;
     private String[] obmServices = new String[2];
-    private DelegateExecution delegateExecution;
-    private List<DiscoveredNode> discoveredNodesResponse;
-    private DiscoveredNode discoveredNode;
     private NodeDetail nodeDetail;
-    private IdracNetworkSettingsRequest idracNetworkSettingsRequest;
     private ObmSettingsResponse obmSettingsResponse;
+
+    @Mock
+    private NodeService nodeService;
+
+    @Mock
+    private DelegateExecution delegateExecution;
+
+    @Mock
+    private IdracNetworkSettingsRequest idracNetworkSettingsRequest;
+
+
+    @BeforeClass
+    public static void configureSystemProperties() {
+        System.setProperty("obm.services", "dell-wsman-obm-service, ipmi-obm-service");
+    }
 
     @Before
     public void setUp() throws Exception
     {
-        nodeService = mock(NodeService.class);
         obmServices[0] = "abc";
         obmServices[1] = "xyz";
         configureObmSettings = new ConfigureObmSettings(nodeService);
-        delegateExecution = mock(DelegateExecution.class);
-        nodeDetail = new NodeDetail();
-        idracNetworkSettingsRequest = mock(IdracNetworkSettingsRequest.class);
+        ReflectionTestUtils.setField(configureObmSettings, "obmServices", obmServices);
+
         obmSettingsResponse = new ObmSettingsResponse();
+        obmSettingsResponse.setStatus("SUCCESS");
+
+        nodeDetail = new NodeDetail();
         nodeDetail.setId("1");
+        nodeDetail.setServiceTag("abc");
         nodeDetail.setIdracIpAddress("1");
         nodeDetail.setIdracGatewayIpAddress("1");
         nodeDetail.setIdracSubnetMask("1");
-        nodeDetail.setServiceTag("abc");
+
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
+        when(nodeService.obmSettingsResponse(any())).thenReturn(obmSettingsResponse);
     }
 
-    @Ignore @Test
-    public void testException() throws Exception {
+    @Test
+    public void testException() {
         try {
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            given(nodeService.obmSettingsResponse(any())).willThrow(new NullPointerException());
+            when(nodeService.obmSettingsResponse(any())).thenThrow(new NullPointerException());
             configureObmSettings.delegateExecute(delegateExecution);
+            fail("Should Not Get Here!");
         } catch (BpmnError error) {
             assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_OBM_SETTINGS_FAILED));
             assertTrue(error.getMessage().contains("An Unexpected Exception occurred while attempting to Configure the Obm Settings on Node abc"));
         }
     }
 
-    @Ignore @Test
-    public void testSuccess() throws Exception {
-        obmSettingsResponse.setStatus("SUCCESS");
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(nodeService.obmSettingsResponse(any())).thenReturn(obmSettingsResponse);
-        final ConfigureObmSettings c = spy(new ConfigureObmSettings(nodeService));
-        c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Obm Settings on Node abc were configured successfully.");
+    @Test
+    public void testSuccess() {
+        configureObmSettings.delegateExecute(delegateExecution);
     }
 
-    @Ignore @Test
-    public void testFailure() throws Exception {
+    @Test
+    public void testFailure() {
         try {
             obmSettingsResponse.setStatus("FAIL");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(nodeService.obmSettingsResponse(any())).thenReturn(obmSettingsResponse);
             configureObmSettings.delegateExecute(delegateExecution);
+            fail("Shoudl Not Get Here!");
         } catch (BpmnError error) {
             assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_OBM_SETTINGS_FAILED));
             assertTrue(error.getMessage().equalsIgnoreCase("Obm Settings on Node abc were not configured."));
         }
     }
+
 }

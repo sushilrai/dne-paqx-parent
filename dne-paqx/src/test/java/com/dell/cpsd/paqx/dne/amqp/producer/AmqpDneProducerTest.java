@@ -421,7 +421,6 @@ public class AmqpDneProducerTest
 
         doReturn(this.capabilityDataList).when(this.capabilityBinder).getCurrentCapabilities();
         doReturn(this.capability).when(this.capabilityData).getCapability();
-        doReturn(profile).when(this.capability).getProfile();
         doReturn(this.providerEndpoint).when(this.capability).getProviderEndpoint();
         doReturn(this.endpointProperties).when(this.providerEndpoint).getEndpointProperties();
 
@@ -443,7 +442,6 @@ public class AmqpDneProducerTest
 
         doReturn(this.capabilityDataList).when(this.capabilityBinder).getCurrentCapabilities();
         doReturn(this.capability).when(this.capabilityData).getCapability();
-        doReturn(profile).when(this.capability).getProfile();
         doReturn(this.providerEndpoint).when(this.capability).getProviderEndpoint();
         doReturn(this.endpointProperties).when(this.providerEndpoint).getEndpointProperties();
 
@@ -465,7 +463,6 @@ public class AmqpDneProducerTest
 
         doReturn(this.capabilityDataList).when(this.capabilityBinder).getCurrentCapabilities();
         doReturn(this.capability).when(this.capabilityData).getCapability();
-        doReturn(profile).when(this.capability).getProfile();
         doReturn(this.providerEndpoint).when(this.capability).getProviderEndpoint();
         doReturn(this.endpointProperties).when(this.providerEndpoint).getEndpointProperties();
 

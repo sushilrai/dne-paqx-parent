@@ -54,7 +54,7 @@ public class InventoryScaleIOTest {
 
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoInventoryFailed() throws Exception {
         try {
             inventoryScaleIO = new InventoryScaleIO(nodeService, null);
@@ -66,7 +66,7 @@ public class InventoryScaleIOTest {
     }
 
 
-    @Ignore @Test
+    @Test
     public void scaleIoInventoryNotSaved() throws Exception {
         try {
             when(repository.getComponentEndpointIds("SCALEIO-CLUSTER")).thenReturn(null);
@@ -77,7 +77,7 @@ public class InventoryScaleIOTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoveryException() throws Exception {
         try {
             when(repository.getComponentEndpointIds("SCALEIO-CLUSTER")).thenReturn(componentEndpointIds);
@@ -89,7 +89,7 @@ public class InventoryScaleIOTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoveryFailed() throws Exception {
         try {
             when(repository.getComponentEndpointIds("SCALEIO-CLUSTER")).thenReturn(componentEndpointIds);
@@ -102,7 +102,7 @@ public class InventoryScaleIOTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoverySuccess() throws Exception {
         when(repository.getComponentEndpointIds("SCALEIO-CLUSTER")).thenReturn(componentEndpointIds);
         when(delegateExecution.getProcessInstanceId()).thenReturn("1");

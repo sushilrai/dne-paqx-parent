@@ -44,7 +44,7 @@ public class RetrieveVCenterComponetnsTest {
         baseWorkflowDelegate = mock(BaseWorkflowDelegate.class);
     }
 
-    @Ignore @Test
+    @Test
     public void testException() throws Exception
     {
         try {
@@ -57,7 +57,7 @@ public class RetrieveVCenterComponetnsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testFailed() throws Exception
     {
         try {
@@ -70,7 +70,7 @@ public class RetrieveVCenterComponetnsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testSuccess() throws Exception
     {
         when(nodeService.requestVCenterComponents()).thenReturn(true);

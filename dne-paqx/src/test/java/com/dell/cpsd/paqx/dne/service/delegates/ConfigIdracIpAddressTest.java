@@ -59,7 +59,7 @@ public class ConfigIdracIpAddressTest {
         nodeDetail.setServiceTag("abc");
     }
 
-    @Ignore @Test
+    @Test
     public void testFailConfig() throws Exception {
         try {
             idracInfo.setMessage("FAIL");
@@ -72,7 +72,7 @@ public class ConfigIdracIpAddressTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testSuccess() throws Exception {
         idracInfo.setMessage("SUCCESS");
         when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
@@ -82,7 +82,7 @@ public class ConfigIdracIpAddressTest {
         verify(c).updateDelegateStatus("Configure IP Address on Node abc was successful.");
     }
 
-    @Ignore @Test
+    @Test
     public void testException() throws Exception {
         try {
             idracInfo.setMessage("FAIL");

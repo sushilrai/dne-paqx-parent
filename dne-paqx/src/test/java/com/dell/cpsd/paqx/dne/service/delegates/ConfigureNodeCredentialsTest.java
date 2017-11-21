@@ -45,7 +45,7 @@ public class ConfigureNodeCredentialsTest {
         responseMessage = new ChangeIdracCredentialsResponse();
     }
 
-    @Ignore @Test
+    @Test
     public void testExceptionThrown() throws Exception
     {
         try {
@@ -59,7 +59,7 @@ public class ConfigureNodeCredentialsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testFailed() throws Exception
     {
         try {
@@ -74,7 +74,7 @@ public class ConfigureNodeCredentialsTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testSuccess() throws Exception
     {
         when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);

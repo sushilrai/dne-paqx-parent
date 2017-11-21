@@ -8,6 +8,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.virtualization.capabilities.api.Cluster;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,7 +22,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CLUSTER_INFO_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.FIND_VCLUSTER_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
@@ -49,10 +52,14 @@ public class FindVCenterCluster extends BaseWorkflowDelegate
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         updateDelegateStatus("Selecting VCenter Cluster for Node " + nodeDetail.getServiceTag());
         ValidateVcenterClusterResponseMessage responseMsg = null;
+        List<ClusterInfo> clusterInfos = null;
         try
         {
-            List<ClusterInfo> clusterInfo = nodeService.listClusters();
-            responseMsg = nodeService.validateClusters(clusterInfo);
+            clusterInfos =  (List<ClusterInfo>) delegateExecution.getVariable(CLUSTER_INFO_DETAILS);
+            if (clusterInfos == null) {
+                clusterInfos = nodeService.listClusters();
+            }
+            responseMsg = nodeService.validateClusters(clusterInfos);
         }
         catch (Exception e)
         {
@@ -82,6 +89,14 @@ public class FindVCenterCluster extends BaseWorkflowDelegate
         }
         nodeDetail.setClusterName(clusterName);
         delegateExecution.setVariable(NODE_DETAIL, nodeDetail);
+        final String finalClusterName = clusterName;
+        Optional<ClusterInfo> updateCluster = clusterInfos.stream().filter(cluster -> finalClusterName
+                .equals(cluster.getName())).findFirst();
+        if (updateCluster.isPresent()) {
+            ClusterInfo cluster = updateCluster.get();
+            cluster.setNumberOfHosts(cluster.getNumberOfHosts()+ 1);
+            delegateExecution.setVariable(CLUSTER_INFO_DETAILS, clusterInfos);
+        }
         final String message = "VCenter Cluster " + clusterName + " was selected for Node " + nodeDetail.getServiceTag();
         updateDelegateStatus(message);
         LOGGER.info(message);

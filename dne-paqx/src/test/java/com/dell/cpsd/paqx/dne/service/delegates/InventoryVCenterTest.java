@@ -54,7 +54,7 @@ public class InventoryVCenterTest {
 
     }
 
-    @Ignore @Test
+    @Test
     public void vcInventoryFailed() throws Exception {
         try {
             inventoryVCenter = new InventoryVCenter(nodeService, null);
@@ -65,7 +65,7 @@ public class InventoryVCenterTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoInventoryNotSaved() throws Exception {
         try {
             when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(null);
@@ -76,7 +76,7 @@ public class InventoryVCenterTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoveryException() throws Exception {
         try {
             when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
@@ -88,7 +88,7 @@ public class InventoryVCenterTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoveryFailed() throws Exception {
         try {
             when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
@@ -101,7 +101,7 @@ public class InventoryVCenterTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void scaleIoDiscoverySuccess() throws Exception {
         when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
         when(delegateExecution.getProcessInstanceId()).thenReturn("1");

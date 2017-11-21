@@ -44,7 +44,7 @@ public class ApplyEsxiLicenseTest {
         componentEndpointIds = new ComponentEndpointIds("abc","abc","abc", "abc");
     }
 
-    @Ignore @Test
+    @Test
     public void testFailedException1() throws Exception
     {
         try {

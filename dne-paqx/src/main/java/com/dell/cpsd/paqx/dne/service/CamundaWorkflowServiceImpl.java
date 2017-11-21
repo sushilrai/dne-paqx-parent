@@ -7,7 +7,6 @@
 
 package com.dell.cpsd.paqx.dne.service;
 
-import com.dell.cpsd.paqx.dne.service.delegates.HandleError;
 import com.dell.cpsd.paqx.dne.service.delegates.exception.JobNotFoundException;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Activity;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Error;
@@ -290,7 +289,6 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
 
             if (parentId.equals(hai.getParentActivityInstanceId()))
             {
-
                 activityName = getActivityName(hai.getActivityId(), bpmnModelInstance);
 
                 Activity activity = new Activity();
@@ -299,11 +297,6 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
                 activity.setStartTime(hai.getStartTime());
                 activity.setEndTime(hai.getEndTime());
                 activity.setDurationInMillis(hai.getDurationInMillis());
-
-                if (!isErrorHandler(hai, bpmnModelInstance))
-                {
-                    ret.add(activity);
-                }
             }
         }
 
@@ -326,42 +319,6 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         }
         return result;
     }
-
-    /**
-     * Check if this task is error handler - we don't want those to show up in status.
-     * Assumes all error handlers extend HandleError,
-     *
-     * @param hai
-     * @return
-     */
-    private boolean isErrorHandler(HistoricActivityInstance hai, BpmnModelInstance bpmnModelInstance)
-    {
-
-        ModelElementInstance modelElementById = bpmnModelInstance.getModelElementById(hai.getActivityId());
-        if (modelElementById != null)
-        {
-            String className = modelElementById.getAttributeValueNs("http://camunda.org/schema/1.0/bpmn", "class");
-
-            if (className != null)
-            {
-                try
-                {
-                    Class claz = Class.forName(className);
-                    if (HandleError.class.isAssignableFrom(claz))
-                    {
-                        return true;
-                    }
-                }
-                catch (ClassNotFoundException e)
-                {
-                    LOGGER.warn("Activity ID= " + hai.getActivityId() + " has unknown Java class: " + className);
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
-
 
     private synchronized IdGenerator getIdGenerator()
     {

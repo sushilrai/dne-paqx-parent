@@ -22,6 +22,7 @@ public class DelegateConstants
 
     public static final String NODE_DETAILS = "NodeDetails";
     public static final String NODE_DETAIL = "NodeDetail";
+    public static final String CLUSTER_INFO_DETAILS = "ClusterInfoDetails";
     public static final String VCENTER_CLUSTER_ID = "VCenterClusterId";
     public static final String VCENTER_CLUSTER_NAME = "VCenterClusterName";
     public static final String STORAGE_POOL = "StoragePool";

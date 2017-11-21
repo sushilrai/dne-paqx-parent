@@ -16,6 +16,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Incubating;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -35,6 +36,7 @@ public class VerfiyNodeDetailTest {
         repository = mock(DataServiceRepository.class);
         verifyNodeDetail = new VerifyNodeDetail();
         delegateExecution = mock(DelegateExecution.class);
+
         nodeDetail = new NodeDetail();
         nodeDetail.setServiceTag("abc");
         nodeDetail.setvMotionManagementIpAddress("abc");
@@ -49,20 +51,23 @@ public class VerfiyNodeDetailTest {
         nodeDetail.setEsxiManagementHostname("abc");
         nodeDetail.setScaleIoData1SvmIpAddress("abc");
 
-//        nodeDetail.setScaleIoData1KernelIpAddress("abc");
         nodeDetail.setScaleIoData2SvmIpAddress("abc");
-//        nodeDetail.setScaleIoData2KernelIpAddress("abc");
-
-//        nodeDetail.setScaleIoSvmManagementIpAddress("abc");
-//        nodeDetail.setScaleIoSvmManagementGatewayAddress("abc");
-//        nodeDetail.setScaleIoSvmManagementSubnetMask("abc");
-//        nodeDetail.setHostname("abc");
         nodeDetail.setClusterName("abc");
         nodeDetail.setProtectionDomainId("abc");
         nodeDetail.setProtectionDomainName("pd-abc");
+
+        nodeDetail.setScaleIoData1SvmSubnetMask("abc");
+        nodeDetail.setScaleIoData2SvmSubnetMask("abc");
+        nodeDetail.setScaleIoData1EsxIpAddress("abc");
+        nodeDetail.setScaleIoData1EsxSubnetMask("abc");
+        nodeDetail.setScaleIoData2EsxIpAddress("abc");
+        nodeDetail.setScaleIoData2EsxSubnetMask("abc");
+        nodeDetail.setScaleIoSvmManagementIpAddress("abc");
+        nodeDetail.setScaleIoSvmManagementGatewayAddress("abc");
+        nodeDetail.setScaleIoSvmManagementSubnetMask("abc");
     }
 
-    @Ignore @Test
+    @Test
     public void testNodeDetailsNull() throws Exception
     {
         try {
@@ -75,11 +80,11 @@ public class VerfiyNodeDetailTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testNodeDetailsMissing() throws Exception
     {
         try {
-            nodeDetail.setClusterName("");
+            nodeDetail = new NodeDetail();
             when(delegateExecution.getVariable(DelegateConstants.NODE_DETAIL)).thenReturn(nodeDetail);
             verifyNodeDetail.delegateExecute(delegateExecution);
         } catch (BpmnError error)
@@ -89,7 +94,7 @@ public class VerfiyNodeDetailTest {
         }
     }
 
-    @Ignore @Test
+    @Test
     public void testVerifiedSuccess() throws Exception
     {
         when(delegateExecution.getVariable(DelegateConstants.NODE_DETAIL)).thenReturn(nodeDetail);
