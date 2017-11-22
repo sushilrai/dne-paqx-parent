@@ -13,10 +13,7 @@
     <packaging>jar</packaging>
     <artifactId>dne-paqx</artifactId>
 
-    <properties>
-        <spring.oxm.version>4.3.3.RELEASE</spring.oxm.version>
-        <dbh2.version>1.4.195</dbh2.version>
-    </properties>
+    <properties/>
 
     <licenses>
         <license>
@@ -274,18 +271,23 @@
             <version>${spring-boot.version}</version>
         </dependency>
 
-        <!--<dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate-core.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>5.0.11.Final</version>
-            <scope>test</scope>
+            <version>${hibernate-core.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-core</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>-->
+        </dependency>
 
         <dependency>
             <groupId>javax.validation</groupId>
