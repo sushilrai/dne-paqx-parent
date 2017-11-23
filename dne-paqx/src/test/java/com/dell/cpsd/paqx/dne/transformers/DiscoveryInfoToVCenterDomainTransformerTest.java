@@ -290,7 +290,8 @@ public class DiscoveryInfoToVCenterDomainTransformerTest
         final VCenter result = this.transformer.transform(discoveryResponseInfoMessage);
 
         assertNotNull(result);
-        assertThat(result.getDataCenterList().get(0).getClusterList().get(0).getHostList().get(0).getVirtualMachineList().get(0).getVmNetworkList(), is(empty()));
+        assertThat(result.getDataCenterList().get(0).getClusterList().get(0).getHostList().get(0).getVirtualMachineList().get(0)
+                .getVmNetworkList(), is(empty()));
     }
 
     @Test

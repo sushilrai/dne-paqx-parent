@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -34,23 +35,19 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SdcPerformanceProfileRequestTransformerTest
 {
-    @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
-
-    @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
-    private ComponentEndpointIds componentEndpointIds;
-
-    @Mock
-    private NodeDetail nodeDetail;
-
-    private SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer;
-
     private final String guidString              = "12234fjsd2323";
     private final String esxiManagementIpAddress = "1.1.1.1";
     private final String endpointUrl             = "hello.com";
+    private final String serviceTag              = "service-tag";
+    @Mock
+    private ComponentIdsTransformer componentIdsTransformer;
+    @Mock
+    private DelegateExecution delegateExecution;
+    @Mock
+    private ComponentEndpointIds componentEndpointIds;
+    @Mock
+    private NodeDetail nodeDetail;
+    private SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer;
 
     @Before
     public void setup() throws Exception
@@ -66,9 +63,12 @@ public class SdcPerformanceProfileRequestTransformerTest
         when(delegateExecution.getVariable(DelegateConstants.IOCTL_INI_GUI_STR)).thenReturn(guidString);
         when(nodeDetail.getEsxiManagementIpAddress()).thenReturn(esxiManagementIpAddress);
         when(componentEndpointIds.getEndpointUrl()).thenReturn(endpointUrl);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = sdcPerformanceProfileRequestTransformer
+        final DelegateRequestModel<SioSdcUpdatePerformanceProfileRequestMessage> requestModel = sdcPerformanceProfileRequestTransformer
                 .buildSdcPerformanceProfileRequest(delegateExecution);
+        assertNotNull(requestModel);
+        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
 
@@ -83,5 +83,6 @@ public class SdcPerformanceProfileRequestTransformerTest
         assertEquals(guidString, performanceProfileRequest.getSdcGuid());
         assertEquals(esxiManagementIpAddress, performanceProfileRequest.getSdcIp());
         assertEquals(PerformanceProfileRequest.PerfProfile.HIGH_PERFORMANCE, performanceProfileRequest.getPerfProfile());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

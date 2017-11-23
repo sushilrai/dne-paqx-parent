@@ -1,4 +1,3 @@
-
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -7,138 +6,124 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
-import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.PciPassThroughRequestTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class EnablePCIPassThroughTest {
-
-    private EnablePCIPassThrough enablePCIPassThrough;
+@RunWith(MockitoJUnitRunner.class)
+public class EnablePCIPassThroughTest
+{
+    @Mock
     private NodeService nodeService;
-    private DataServiceRepository repository;
+
+    @Mock
+    private PciPassThroughRequestTransformer requestTransformer;
+
+    @Mock
     private DelegateExecution delegateExecution;
-    private NodeDetail nodeDetail;
-    private ComponentEndpointIds componentEndpointIds;
-    List<PciDevice> pciDeviceList;
-    Host host = new Host("abc", "abc", "abc", "abc", "abc", true);
-    PciDevice pciDevice = new PciDevice("abc", "abc", "abc", "abc", "abc", "abc", host);
+
+    @Mock
+    private DelegateRequestModel<EnablePCIPassthroughRequestMessage> requestModel;
+
+    private EnablePCIPassThrough delegate;
+    private final String serviceTag      = "service-tag";
+    private final String hostPciDeviceId = "0000:02:00.0";
+    private final String taskMessage     = "Enable PCI pass through for ESXi host";
 
     @Before
-    public void setUp() throws Exception {
-        nodeService = mock(NodeService.class);
-        repository = mock(DataServiceRepository.class);
-        enablePCIPassThrough = new EnablePCIPassThrough(nodeService, repository);
-        delegateExecution = mock(DelegateExecution.class);
-        nodeDetail = new NodeDetail();
-        nodeDetail.setServiceTag("abc");
-        nodeDetail.setEsxiManagementIpAddress("abc");
-        componentEndpointIds = new ComponentEndpointIds("abc", "abc", "abc", "abc");
-        pciDeviceList = new ArrayList<>();
-        pciDeviceList.add(pciDevice);
-    }
-
-    @Ignore @Test
-    public void testExceptionThrown1() throws Exception {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            given(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).willThrow(new NullPointerException());
-            enablePCIPassThrough.delegateExecute(delegateExecution);
-        } catch (BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints."));
-        }
-    }
-
-    @Ignore @Test
-    public void testExceptionThrown2() throws Exception {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            given(repository.getPciDeviceList()).willThrow(new NullPointerException());
-            enablePCIPassThrough.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve PCI Device List."));
-        }
-    }
-
-    @Ignore @Test
-    public void testExceptionThrown3() throws Exception {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            pciDeviceList.clear();
-            when(repository.getPciDeviceList()).thenReturn(pciDeviceList);
-            enablePCIPassThrough.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to inventory VCenter."));
-        }
-    }
-
-    @Ignore @Test
-    public void testExceptionThrown4() throws Exception
+    public void setup() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(repository.getPciDeviceList()).thenReturn(pciDeviceList);
-            given(nodeService.requestEnablePciPassThrough(any())).willThrow(new NullPointerException());
-            enablePCIPassThrough.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to request Enable PCI Pass Through."));
-        }
+        delegate = new EnablePCIPassThrough(nodeService, requestTransformer);
     }
 
-    @Ignore @Test
-    public void testFailed() throws Exception
+    @Test
+    public void unknownExceptionThrownResultsInBpmnError() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(repository.getPciDeviceList()).thenReturn(pciDeviceList);
-            when(nodeService.requestEnablePciPassThrough(any())).thenReturn(false);
-            enablePCIPassThrough.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
-            assertTrue(error.getMessage().contains("Install Esxi on Node abc failed!"));
+        final String errorMessage = "Illegal state exception";
+        when(requestTransformer.buildEnablePciPassThroughRequest(delegateExecution)).thenThrow(new IllegalStateException(errorMessage));
+        final EnablePCIPassThrough spy = spy(delegate);
+
+        try
+        {
+            spy.delegateExecute(delegateExecution);
         }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
+            assertThat(error.getMessage(), containsString(errorMessage));
+            assertThat(error.getMessage(), containsString(taskMessage));
+            assertTrue(error.getErrorCode().equals(ENABLE_PCI_PASSTHROUGH_FAILED));
+        }
+
+        verify(spy).updateDelegateStatus(
+                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
     }
 
-    @Ignore @Test
-    public void testSuccess() throws Exception
+    @Test
+    public void taskResponseFailureExceptionThrownDueToServiceTimeoutOrExecution() throws Exception
     {
-        when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-        when(repository.getPciDeviceList()).thenReturn(pciDeviceList);
-        when(nodeService.requestEnablePciPassThrough(any())).thenReturn(true);
-        final EnablePCIPassThrough c = spy(new EnablePCIPassThrough(nodeService, repository));
-        c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Request PCI Pass Through on Node abc was successful.");
+        final EnablePCIPassthroughRequestMessage mockRequestMessage = mock(EnablePCIPassthroughRequestMessage.class);
+        final String errorMessage = "Service timeout";
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(requestTransformer.buildEnablePciPassThroughRequest(delegateExecution)).thenReturn(requestModel);
+        doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestEnablePciPassThrough(mockRequestMessage);
+
+        final EnablePCIPassThrough spy = spy(delegate);
+
+        try
+        {
+            spy.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertTrue(error.getErrorCode().equals(ENABLE_PCI_PASSTHROUGH_FAILED));
+        }
+
+        verify(spy).updateDelegateStatus(errorMessage);
+    }
+
+    @Test
+    public void enablePciPassThroughSuccessUpdatesTheDelegateStatus() throws Exception
+    {
+        final EnablePCIPassthroughRequestMessage mockRequestMessage = mock(EnablePCIPassthroughRequestMessage.class);
+
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(mockRequestMessage.getHostPciDeviceId()).thenReturn(hostPciDeviceId);
+        when(requestModel.getServiceTag()).thenReturn(serviceTag);
+        when(requestTransformer.buildEnablePciPassThroughRequest(delegateExecution)).thenReturn(requestModel);
+        doNothing().when(nodeService).requestEnablePciPassThrough(mockRequestMessage);
+
+        final EnablePCIPassThrough spy = spy(delegate);
+
+        spy.delegateExecute(delegateExecution);
+
+        verify(spy).updateDelegateStatus(taskMessage + " on Node " + serviceTag + " was successful.");
+        final ArgumentCaptor<String> setVariableCaptor = ArgumentCaptor.forClass(String.class);
+        verify(delegateExecution).setVariable(anyString(), setVariableCaptor.capture());
+        assertEquals(hostPciDeviceId, setVariableCaptor.getValue());
     }
 }

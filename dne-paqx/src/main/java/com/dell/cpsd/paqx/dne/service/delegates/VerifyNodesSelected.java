@@ -153,7 +153,8 @@ public class VerifyNodesSelected extends BaseWorkflowDelegate
             throw new BpmnError(VERIFY_NODES_SELECTED_FAILED, message);
         }
 
-        LOGGER.info("All selected Nodes are available.");
-        updateDelegateStatus("All selected Nodes are available.");
+        final String message = "All selected Nodes are available.";
+        LOGGER.info(message);
+        updateDelegateStatus(message);
     }
 }

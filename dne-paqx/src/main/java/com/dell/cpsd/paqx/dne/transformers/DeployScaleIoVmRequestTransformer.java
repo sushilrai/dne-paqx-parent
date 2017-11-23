@@ -6,6 +6,7 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.AutoStartDefaults;
@@ -66,7 +67,8 @@ public class DeployScaleIoVmRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public DeployVMFromTemplateRequestMessage buildDeployVmRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<DeployVMFromTemplateRequestMessage> buildDeployVmRequest(final DelegateExecution delegateExecution)
+            throws IllegalStateException
     {
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
@@ -87,8 +89,9 @@ public class DeployScaleIoVmRequestTransformer
 
         final VmAutoStartConfig vmAutoStartConfig = getVmAutoStartConfig();
 
-        return getDeployVmFromTemplateRequestMessage(componentEndpointIds, hostname, dataCenterName, newScaleIoVmName,
-                virtualMachineCloneSpec, vmAutoStartConfig);
+        final DeployVMFromTemplateRequestMessage requestMessage = getDeployVmFromTemplateRequestMessage(componentEndpointIds, hostname,
+                dataCenterName, newScaleIoVmName, virtualMachineCloneSpec, vmAutoStartConfig);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private DeployVMFromTemplateRequestMessage getDeployVmFromTemplateRequestMessage(final ComponentEndpointIds componentEndpointIds,

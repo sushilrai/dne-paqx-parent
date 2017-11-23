@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -15,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static org.junit.Assert.*;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -31,19 +35,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DatastoreRenameRequestTransformerTest
 {
+    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
+    private final        String hostname              = "hostname";
+    private final        String serviceTag            = "service-tag";
     @Mock
     private ComponentIdsTransformer componentIdsTransformer;
-
     @Mock
     private DelegateExecution delegateExecution;
-
     @Mock
     private ComponentEndpointIds componentEndpointIds;
-
+    @Mock
+    private NodeDetail nodeDetail;
     private DatastoreRenameRequestTransformer datastoreRenameRequestTransformer;
-    private static final String VCENTER_CUSTOMER_TYPE        = "VCENTER-CUSTOMER";
-    private final        String hostname                     = "hostname";
-
 
     @Before
     public void setup() throws Exception
@@ -56,13 +59,20 @@ public class DatastoreRenameRequestTransformerTest
     {
         when(delegateExecution.getVariable(HOSTNAME)).thenReturn(hostname);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE)).thenReturn(componentEndpointIds);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final DatastoreRenameRequestMessage requestMessage = datastoreRenameRequestTransformer
+        final DelegateRequestModel<DatastoreRenameRequestMessage> requestModel = datastoreRenameRequestTransformer
                 .buildDatastoreRenameRequest(delegateExecution);
+
+        assertNotNull(requestModel);
+
+        final DatastoreRenameRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
         assertEquals(hostname, requestMessage.getHostname());
         assertNotNull(requestMessage.getCredentials());
         assertNotNull(requestMessage.getComponentEndpointIds());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

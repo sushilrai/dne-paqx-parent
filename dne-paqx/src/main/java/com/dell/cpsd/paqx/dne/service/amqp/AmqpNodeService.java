@@ -12,6 +12,8 @@ import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
+import com.dell.cpsd.FailNodeAllocationRequestMessage;
+import com.dell.cpsd.FailNodeAllocationResponseMessage;
 import com.dell.cpsd.ListNodes;
 import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.NodeInventoryRequestMessage;
@@ -20,10 +22,8 @@ import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.PxeBootConfig;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.SetObmSettingsResponseMessage;
-import com.dell.cpsd.StartNodeAllocationResponseMessage;
 import com.dell.cpsd.StartNodeAllocationRequestMessage;
-import com.dell.cpsd.FailNodeAllocationResponseMessage;
-import com.dell.cpsd.FailNodeAllocationRequestMessage;
+import com.dell.cpsd.StartNodeAllocationResponseMessage;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
@@ -38,6 +38,7 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
@@ -58,6 +59,7 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.DeployScaleIoVmResponseAdapte
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverScaleIoResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.DiscoverVCenterResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.EnablePciPassthroughResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.FailNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.HostMaintenanceModeResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.IdracConfigResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListESXiCredentialDetailsResponseAdapter;
@@ -70,13 +72,12 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.RemoteCommandExecutionRespons
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SioSdcUpdatePerformanceProfileResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.StartNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.VCenterUpdateSoftwareAcceptanceResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateProtectionDomainResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.StartNodeAllocationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.FailNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -166,6 +167,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
@@ -178,6 +180,31 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_HOST_TO_DV_SWITCH;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_HOST_TO_VCENTER_CLUSTER;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_SDS_NODE_TO_PROTECTION_DOMAIN;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.APPLY_ESXI_HOST_LICENSE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_SDC_VIB;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_VM_NETWORK_SETTINGS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CREATE_PROTECTION_DOMAIN;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CREATE_STORAGE_POOL;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DATASTORE_RENAME;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DEPLOY_VM_FROM_TEMPLATE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DISCOVER_SCALEIO;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DISCOVER_VCENTER;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ENABLE_PCI_PASSTHROUGH;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.HOST_MAINTENANCE_MODE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL_SDC_VIB;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_ESXI_DEFAULT_CREDENTIALS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_SCALEIO_COMPONENTS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_VCENTER_COMPONENTS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REMOTE_COMMAND_EXECUTION;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.UPDATE_SDC_PERFORMANCE_PROFILE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.UPDATE_SOFTWARE_ACCEPTANCE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.VM_POWER_OPERATIONS;
 
 /**
  * <p>
@@ -243,7 +270,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Value("${rackhd.boot.proto.value}")
     private String bootProtoValue;
 
-    private static final long timeout            = 240000L;
+    private static final long timeout = 240000L;
 
     /**
      * AmqpNodeService constructor.
@@ -256,8 +283,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * @param scaleIORestToScaleIODomainTransformer   scaleIORestToScaleIODomainTransformer
      * @since 1.0
      */
-    public AmqpNodeService( DelegatingMessageConsumer consumer, DneProducer producer, String replyTo,
-            final DataServiceRepository repository, final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer,
+    public AmqpNodeService(DelegatingMessageConsumer consumer, DneProducer producer, String replyTo, final DataServiceRepository repository,
+            final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer,
             final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer,
             final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer)
     {
@@ -433,8 +460,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             {
                 return nodes.getDiscoveredNodes().stream()
                         .filter(d -> d.getAllocationStatus() == com.dell.cpsd.DiscoveredNode.AllocationStatus.DISCOVERED)
-                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus(), d.getSerial(), d.getProduct(), d.getVendor()))
-                        .collect(Collectors.toList());
+                        .map(d -> new DiscoveredNode(d.getConvergedUuid(), d.getAllocationStatus(), d.getSerial(), d.getProduct(),
+                                d.getVendor())).collect(Collectors.toList());
             }
         }
 
@@ -467,19 +494,22 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             LOGGER.info("There are no Discovered Nodes");
         }
 
-
         return retList;
     }
 
     @Override
-    public DiscoveredNodeInfo getFirstDiscoveredNodeInfo() throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException {
+    public DiscoveredNodeInfo getFirstDiscoveredNodeInfo()
+            throws ServiceTimeoutException, ServiceExecutionException, JsonProcessingException
+    {
         // since symphony doesn't have mechanism to auto delete obsolete node,
         // there will be dangling node in node discovery paqx and if it's the first one,
         // it will cause failure to get nodeInventory so just get all and return first one.
         List<DiscoveredNodeInfo> nodeList = this.listDiscoveredNodeInfo();
 
-        if ( nodeList.size() != 0)
+        if (nodeList.size() != 0)
+        {
             return nodeList.get(0);
+        }
         return null;
     }
 
@@ -523,7 +553,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         DiscoverClusterResponseInfoMessage responseInfo = processResponse(response, DiscoverClusterResponseInfoMessage.class);
 
-        if ( responseInfo!= null && responseInfo.getStatus() == DiscoverClusterResponseInfoMessage.Status.SUCCESS)
+        if (responseInfo != null && responseInfo.getStatus() == DiscoverClusterResponseInfoMessage.Status.SUCCESS)
         {
             DiscoverClusterResponseInfo clusterResponseInfo = responseInfo.getDiscoverClusterResponseInfo();
             return clusterResponseInfo != null ? clusterResponseInfo.getClusters() : Collections.emptyList();
@@ -597,7 +627,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * @throws ServiceExecutionException
      */
     @Override
-    public EssValidateProtectionDomainsResponseMessage validateProtectionDomains(EssValidateProtectionDomainsRequestMessage essValidateProtectionDomainsRequestMessage)
+    public EssValidateProtectionDomainsResponseMessage validateProtectionDomains(
+            EssValidateProtectionDomainsRequestMessage essValidateProtectionDomainsRequestMessage)
             throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.service.engineering.standards.MessageProperties messageProperties = new com.dell.cpsd.service.engineering.standards.MessageProperties();
@@ -624,7 +655,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         return processResponse(response, EssValidateProtectionDomainsResponseMessage.class);
     }
-
 
     @Override
     public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList)
@@ -667,28 +697,32 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean notifyNodeAllocationStatus(String elementIdentifier,String action) throws ServiceTimeoutException, ServiceExecutionException
+    public boolean notifyNodeAllocationStatus(String elementIdentifier, String action)
+            throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
         messageProperties.setReplyTo(replyTo);
 
-        if("Completed".equalsIgnoreCase(action))
+        if ("Completed".equalsIgnoreCase(action))
         {
-            return notifyNodeAllocationComplete(elementIdentifier,messageProperties);
-        } else if ("Started".equalsIgnoreCase(action))
+            return notifyNodeAllocationComplete(elementIdentifier, messageProperties);
+        }
+        else if ("Started".equalsIgnoreCase(action))
         {
-            return notifyNodeAllocationStarted(elementIdentifier,messageProperties);
-        } else if ("failed".equalsIgnoreCase(action))
+            return notifyNodeAllocationStarted(elementIdentifier, messageProperties);
+        }
+        else if ("failed".equalsIgnoreCase(action))
         {
-            return notifyNodeAllocationFailed(elementIdentifier,messageProperties);
+            return notifyNodeAllocationFailed(elementIdentifier, messageProperties);
         }
 
         return false;
     }
 
-    private boolean notifyNodeAllocationStarted(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    private boolean notifyNodeAllocationStarted(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties)
+            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         StartNodeAllocationRequestMessage request = new StartNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
@@ -710,15 +744,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         StartNodeAllocationResponseMessage responseInfo = processResponse(response, StartNodeAllocationResponseMessage.class);
 
-        if ( responseInfo != null && StartNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        if (responseInfo != null && StartNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
         {
             LOGGER.error("Error response from notify node allocation started: " + responseInfo.getNodeAllocationErrors());
         }
 
-        return responseInfo!=null && StartNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+        return responseInfo != null && StartNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
-    private boolean notifyNodeAllocationComplete(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    private boolean notifyNodeAllocationComplete(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties)
+            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
@@ -740,16 +775,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         CompleteNodeAllocationResponseMessage responseInfo = processResponse(response, CompleteNodeAllocationResponseMessage.class);
 
-        if ( responseInfo != null && CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        if (responseInfo != null && CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
         {
             LOGGER.error("Error response from notify node allocation complete: " + responseInfo.getNodeAllocationErrors());
         }
 
-        return responseInfo!=null && CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+        return responseInfo != null && CompleteNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
-
-    private boolean notifyNodeAllocationFailed(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties) throws ServiceTimeoutException, ServiceExecutionException
+    private boolean notifyNodeAllocationFailed(String elementIdentifier, com.dell.cpsd.MessageProperties messageProperties)
+            throws ServiceTimeoutException, ServiceExecutionException
     {
 
         FailNodeAllocationRequestMessage request = new FailNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
@@ -771,12 +806,12 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         FailNodeAllocationResponseMessage responseInfo = processResponse(response, FailNodeAllocationResponseMessage.class);
 
-        if ( responseInfo != null && FailNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
+        if (responseInfo != null && FailNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
         {
             LOGGER.error("Error response from notify node allocation failed: " + responseInfo.getNodeAllocationErrors());
         }
 
-        return responseInfo!=null && FailNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
+        return responseInfo != null && FailNodeAllocationResponseMessage.Status.SUCCESS.equals(responseInfo.getStatus());
     }
 
     /**
@@ -946,7 +981,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         return bootDeviceIdracStatus;
     }
 
-
     @Override
     public ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage)
     {
@@ -999,7 +1033,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestScaleIoComponents()
+    public void requestScaleIoComponents() throws TaskResponseFailureException
     {
         final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
@@ -1025,61 +1059,70 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            ListComponentResponseMessage responseMessage = processResponse(callbackResponse, ListComponentResponseMessage.class);
+            handleRetrieveScaleIoComponentsResponse(componentEndpointDetailsListResponse, callbackResponse);
+        }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(LIST_SCALEIO_COMPONENTS.getCode(), e.getMessage());
+        }
+    }
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
-            {
-                final List<ScaleIOComponentDetails> scaleIOComponentDetailsList = responseMessage.getComponents();
+    private void handleRetrieveScaleIoComponentsResponse(final List<ComponentDetails> componentEndpointDetailsListResponse,
+            final ServiceResponse<?> callbackResponse) throws TaskResponseFailureException
+    {
+        ListComponentResponseMessage responseMessage = processResponse(callbackResponse, ListComponentResponseMessage.class);
 
-                if (scaleIOComponentDetailsList != null)
+        if (responseMessage != null && responseMessage.getMessageProperties() != null && !CollectionUtils
+                .isEmpty(responseMessage.getComponents()))
+        {
+            final List<ScaleIOComponentDetails> scaleIOComponentDetailsList = responseMessage.getComponents();
+
+            scaleIOComponentDetailsList.stream().filter(Objects::nonNull).forEach(scaleIOComponentDetails -> {
+
+                final ComponentDetails componentDetails = new ComponentDetails();
+
+                componentDetails.setComponentUuid(scaleIOComponentDetails.getComponentUuid());
+                componentDetails.setElementType(scaleIOComponentDetails.getElementType());
+                componentDetails.setComponentType(scaleIOComponentDetails.getElementType());
+                componentDetails.setIdentifier(scaleIOComponentDetails.getIdentifier());
+
+                final List<ScaleIoEndpointDetails> endpointDetailsList = scaleIOComponentDetails.getEndpoints();
+
+                if (endpointDetailsList != null)
                 {
-                    scaleIOComponentDetailsList.stream().filter(Objects::nonNull).forEach(scaleIOComponentDetails -> {
-
-                        final ComponentDetails componentDetails = new ComponentDetails();
-
-                        componentDetails.setComponentUuid(scaleIOComponentDetails.getComponentUuid());
-                        componentDetails.setElementType(scaleIOComponentDetails.getElementType());
-                        componentDetails.setComponentType(scaleIOComponentDetails.getElementType());
-                        componentDetails.setIdentifier(scaleIOComponentDetails.getIdentifier());
-
-                        final List<ScaleIoEndpointDetails> endpointDetailsList = scaleIOComponentDetails.getEndpoints();
-
-                        if (endpointDetailsList != null)
-                        {
-                            endpointDetailsList.stream().filter(Objects::nonNull).forEach(scaleIoEndpointDetails -> {
-                                final EndpointDetails endpointDetails = new EndpointDetails();
-                                endpointDetails.setEndpointUrl(scaleIoEndpointDetails.getEndpointUrl());
-                                endpointDetails.setEndpointUuid(scaleIoEndpointDetails.getEndpointUuid());
-                                endpointDetails.setIdentifier(scaleIoEndpointDetails.getIdentifier());
-                                endpointDetails.setType(scaleIoEndpointDetails.getElementType());
-                                final List<CredentialNameId> credentialUuids = scaleIoEndpointDetails.getCredentialNameIds();
-                                credentialUuids.forEach(
-                                        credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
-                                                credential.getCredentialUuid()));
-                                endpointDetails.setComponentDetails(componentDetails);
-                                componentDetails.getEndpointDetails().add(endpointDetails);
-                            });
-                        }
-
-                        componentEndpointDetailsListResponse.add(componentDetails);
-
+                    endpointDetailsList.stream().filter(Objects::nonNull).forEach(scaleIoEndpointDetails -> {
+                        final EndpointDetails endpointDetails = new EndpointDetails();
+                        endpointDetails.setEndpointUrl(scaleIoEndpointDetails.getEndpointUrl());
+                        endpointDetails.setEndpointUuid(scaleIoEndpointDetails.getEndpointUuid());
+                        endpointDetails.setIdentifier(scaleIoEndpointDetails.getIdentifier());
+                        endpointDetails.setType(scaleIoEndpointDetails.getElementType());
+                        final List<CredentialNameId> credentialUuids = scaleIoEndpointDetails.getCredentialNameIds();
+                        credentialUuids.forEach(credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
+                                credential.getCredentialUuid()));
+                        endpointDetails.setComponentDetails(componentDetails);
+                        componentDetails.getEndpointDetails().add(endpointDetails);
                     });
-
-                    return repository.saveScaleIoComponentDetails(componentEndpointDetailsListResponse);
                 }
+                componentEndpointDetailsListResponse.add(componentDetails);
+            });
+
+            repository.saveScaleIoComponentDetails(componentEndpointDetailsListResponse);
+        }
+        else
+        {
+            if (responseMessage != null)
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(LIST_SCALEIO_COMPONENTS.getCode(), responseMessage.getDescription());
             }
             else
             {
-                LOGGER.error("Response was null");
+                final String errorDescription = "Response message is null";
+                LOGGER.error(errorDescription);
+                throw new TaskResponseFailureException(LIST_SCALEIO_COMPONENTS.getCode(), errorDescription);
             }
-
         }
-        catch (Exception e)
-        {
-            LOGGER.error("Exception occurred", e);
-        }
-
-        return false;
     }
 
     private void addCredentialsToEndpoint(final EndpointDetails endpointDetails, final String credentialName, final String credentialUuid)
@@ -1092,7 +1135,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestVCenterComponents()
+    public void requestVCenterComponents() throws TaskResponseFailureException
     {
         final List<ComponentDetails> componentEndpointDetailsListResponse = new ArrayList<>();
 
@@ -1118,65 +1161,78 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            ListComponentsResponseMessage responseMessage = processResponse(callbackResponse, ListComponentsResponseMessage.class);
+            handleRetrieveVCenterComponents(componentEndpointDetailsListResponse, callbackResponse);
+        }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(LIST_VCENTER_COMPONENTS.getCode(), e.getMessage());
+        }
+    }
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
-            {
-                final List<VCenterComponentDetails> vCenterComponentDetailsList = responseMessage.getVcenterComponentDetails();
+    private void handleRetrieveVCenterComponents(final List<ComponentDetails> componentEndpointDetailsListResponse,
+            final ServiceResponse<?> callbackResponse) throws TaskResponseFailureException
+    {
+        ListComponentsResponseMessage responseMessage = processResponse(callbackResponse, ListComponentsResponseMessage.class);
 
-                if (vCenterComponentDetailsList != null)
+        if (responseMessage != null && responseMessage.getMessageProperties() != null && !CollectionUtils
+                .isEmpty(responseMessage.getVcenterComponentDetails()))
+        {
+            final List<VCenterComponentDetails> vCenterComponentDetailsList = responseMessage.getVcenterComponentDetails();
+
+            vCenterComponentDetailsList.stream().filter(Objects::nonNull).forEach(vcenterComponentDetails -> {
+
+                final ComponentDetails componentDetails = new ComponentDetails();
+
+                componentDetails.setComponentUuid(vcenterComponentDetails.getComponentUuid());
+                componentDetails.setElementType(vcenterComponentDetails.getElementType());
+                componentDetails.setComponentType("VCENTER");
+                componentDetails.setIdentifier(vcenterComponentDetails.getIdentifier());
+
+                final List<VCenterEndpointDetails> endpointDetailsList = vcenterComponentDetails.getEndpoints();
+
+                if (endpointDetailsList != null)
                 {
-                    vCenterComponentDetailsList.stream().filter(Objects::nonNull).forEach(vcenterComponentDetails -> {
-
-                        final ComponentDetails componentDetails = new ComponentDetails();
-
-                        componentDetails.setComponentUuid(vcenterComponentDetails.getComponentUuid());
-                        componentDetails.setElementType(vcenterComponentDetails.getElementType());
-                        componentDetails.setComponentType("VCENTER");
-                        componentDetails.setIdentifier(vcenterComponentDetails.getIdentifier());
-
-                        final List<VCenterEndpointDetails> endpointDetailsList = vcenterComponentDetails.getEndpoints();
-
-                        if (endpointDetailsList != null)
-                        {
-                            endpointDetailsList.stream().filter(Objects::nonNull).forEach(vCenterEndpointDetails -> {
-                                final EndpointDetails endpointDetails = new EndpointDetails();
-                                endpointDetails.setEndpointUrl(vCenterEndpointDetails.getEndpointUrl());
-                                endpointDetails.setEndpointUuid(vCenterEndpointDetails.getEndpointUuid());
-                                endpointDetails.setIdentifier(vCenterEndpointDetails.getIdentifier());
-                                endpointDetails.setType(vCenterEndpointDetails.getType());
-                                final List<VCenterCredentialDetails> credentialDetailsList = vCenterEndpointDetails.getCredentialDetails();
-                                credentialDetailsList.stream().filter(Objects::nonNull).forEach(
-                                        credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
-                                                credential.getCredentialUuid()));
-                                endpointDetails.setComponentDetails(componentDetails);
-                                componentDetails.getEndpointDetails().add(endpointDetails);
-                            });
-                        }
-
-                        componentEndpointDetailsListResponse.add(componentDetails);
-
+                    endpointDetailsList.stream().filter(Objects::nonNull).forEach(vCenterEndpointDetails -> {
+                        final EndpointDetails endpointDetails = new EndpointDetails();
+                        endpointDetails.setEndpointUrl(vCenterEndpointDetails.getEndpointUrl());
+                        endpointDetails.setEndpointUuid(vCenterEndpointDetails.getEndpointUuid());
+                        endpointDetails.setIdentifier(vCenterEndpointDetails.getIdentifier());
+                        endpointDetails.setType(vCenterEndpointDetails.getType());
+                        final List<VCenterCredentialDetails> credentialDetailsList = vCenterEndpointDetails.getCredentialDetails();
+                        credentialDetailsList.stream().filter(Objects::nonNull).forEach(
+                                credential -> addCredentialsToEndpoint(endpointDetails, credential.getCredentialName(),
+                                        credential.getCredentialUuid()));
+                        endpointDetails.setComponentDetails(componentDetails);
+                        componentDetails.getEndpointDetails().add(endpointDetails);
                     });
-
-                    return repository.saveVCenterComponentDetails(componentEndpointDetailsListResponse);
                 }
+
+                componentEndpointDetailsListResponse.add(componentDetails);
+
+            });
+
+            repository.saveVCenterComponentDetails(componentEndpointDetailsListResponse);
+        }
+        else
+        {
+            if (responseMessage != null)
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(LIST_VCENTER_COMPONENTS.getCode(), responseMessage.getDescription());
             }
             else
             {
-                LOGGER.error("Response was null");
+                final String errorDescription = "Response message is null";
+                LOGGER.error(errorDescription);
+                throw new TaskResponseFailureException(LIST_VCENTER_COMPONENTS.getCode(), errorDescription);
             }
-
         }
-        catch (Exception e)
-        {
-            LOGGER.error("Exception occurred", e);
-        }
-
-        return false;
     }
 
     @Override
-    public boolean requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds, final String jobId)
+    public void requestDiscoverScaleIo(final ComponentEndpointIds componentEndpointIds, final String jobId)
+            throws TaskResponseFailureException
     {
         try
         {
@@ -1208,26 +1264,42 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
+                final String errorDescription = responseMessage.getDescription();
+                if (!StringUtils.isEmpty(errorDescription))
+                {
+                    LOGGER.error(errorDescription);
+                    throw new TaskResponseFailureException(DISCOVER_SCALEIO.getCode(), errorDescription);
+                }
+
                 final ScaleIOData scaleIOData = scaleIORestToScaleIODomainTransformer
                         .transform(responseMessage.getScaleIOSystemDataRestRep());
 
-                return scaleIOData != null && repository.saveScaleIoData(jobId, scaleIOData);
+                if (scaleIOData == null)
+                {
+                    final String error = "Unable to transform the ScaleIO data";
+                    LOGGER.error(error);
+                    throw new TaskResponseFailureException(DISCOVER_SCALEIO.getCode(), error);
+                }
+
+                repository.saveScaleIoData(jobId, scaleIOData);
             }
             else
             {
-                LOGGER.error("Message is null");
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(DISCOVER_SCALEIO.getCode(), error);
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(DISCOVER_SCALEIO.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public boolean requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
+    public void requestDiscoverVCenter(final ComponentEndpointIds componentEndpointIds, final String jobId)
+            throws TaskResponseFailureException
     {
         try
         {
@@ -1259,25 +1331,39 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
-                final VCenter vCenterData = discoveryInfoToVCenterDomainTransformer.transform(responseMessage);
+                final String errorDescription = responseMessage.getDescription();
+                if (!StringUtils.isEmpty(errorDescription))
+                {
+                    LOGGER.error(errorDescription);
+                    throw new TaskResponseFailureException(DISCOVER_VCENTER.getCode(), errorDescription);
+                }
 
-                return vCenterData != null && repository.saveVCenterData(jobId, vCenterData);
+                final VCenter vCenterData = discoveryInfoToVCenterDomainTransformer.transform(responseMessage);
+                if (vCenterData == null)
+                {
+                    final String error = "Unable to transform the VCenter data";
+                    LOGGER.error(error);
+                    throw new TaskResponseFailureException(DISCOVER_VCENTER.getCode(), error);
+                }
+
+                repository.saveVCenterData(jobId, vCenterData);
             }
             else
             {
-                LOGGER.error("Message is null");
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(DISCOVER_VCENTER.getCode(), error);
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(DISCOVER_VCENTER.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public boolean requestAddHostToVCenter(final ClusterOperationRequestMessage requestMessage)
+    public void requestAddHostToVCenter(final ClusterOperationRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1302,24 +1388,29 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             ClusterOperationResponseMessage responseMessage = processResponse(callbackResponse, ClusterOperationResponseMessage.class);
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(ClusterOperationResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(ADD_HOST_TO_VCENTER_CLUSTER.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(ClusterOperationResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(ADD_HOST_TO_VCENTER_CLUSTER.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(ADD_HOST_TO_VCENTER_CLUSTER.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestAddHostToProtectionDomain(final AddHostToProtectionDomainRequestMessage requestMessage)
+    public void requestAddHostToProtectionDomain(final AddHostToProtectionDomainRequestMessage requestMessage)
+            throws TaskResponseFailureException
     {
         try
         {
@@ -1345,26 +1436,31 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            AddHostToProtectionDomainResponseMessage responseMessage = processResponse(callbackResponse, AddHostToProtectionDomainResponseMessage.class);
+            AddHostToProtectionDomainResponseMessage responseMessage = processResponse(callbackResponse,
+                    AddHostToProtectionDomainResponseMessage.class);
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(AddHostToProtectionDomainResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(ADD_SDS_NODE_TO_PROTECTION_DOMAIN.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(AddHostToProtectionDomainResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(ADD_SDS_NODE_TO_PROTECTION_DOMAIN.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(ADD_SDS_NODE_TO_PROTECTION_DOMAIN.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestInstallSoftwareVib(final SoftwareVIBRequestMessage requestMessage)
+    public void requestInstallSoftwareVib(final SoftwareVIBRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1389,24 +1485,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse, SoftwareVIBResponseMessage.class);
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(SoftwareVIBResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(INSTALL_SDC_VIB.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(SoftwareVIBResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(INSTALL_SDC_VIB.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(INSTALL_SDC_VIB.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage requestMessage)
+    public void requestConfigureScaleIoVib(final SoftwareVIBConfigureRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1432,25 +1532,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             });
 
             SoftwareVIBResponseMessage responseMessage = processResponse(callbackResponse, SoftwareVIBResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(SoftwareVIBResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CONFIGURE_SDC_VIB.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(SoftwareVIBResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(CONFIGURE_SDC_VIB.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CONFIGURE_SDC_VIB.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage requestMessage)
+    public void requestAddHostToDvSwitch(final AddHostToDvSwitchRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1474,25 +1577,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             });
 
             AddHostToDvSwitchResponseMessage responseMessage = processResponse(callbackResponse, AddHostToDvSwitchResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(AddHostToDvSwitchResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(ADD_HOST_TO_DV_SWITCH.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(AddHostToDvSwitchResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(ADD_HOST_TO_DV_SWITCH.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(ADD_HOST_TO_DV_SWITCH.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestDeployScaleIoVm(final DeployVMFromTemplateRequestMessage requestMessage)
+    public void requestDeployScaleIoVm(final DeployVMFromTemplateRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1517,25 +1623,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             DeployVMFromTemplateResponseMessage responseMessage = processResponse(callbackResponse,
                     DeployVMFromTemplateResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(DeployVMFromTemplateResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(DEPLOY_VM_FROM_TEMPLATE.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(DeployVMFromTemplateResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(DEPLOY_VM_FROM_TEMPLATE.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(DEPLOY_VM_FROM_TEMPLATE.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestEnablePciPassThrough(final EnablePCIPassthroughRequestMessage requestMessage)
+    public void requestEnablePciPassThrough(final EnablePCIPassthroughRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1560,25 +1669,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             EnablePCIPassthroughResponseMessage responseMessage = processResponse(callbackResponse,
                     EnablePCIPassthroughResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(EnablePCIPassthroughResponseMessage.Status.SUCCESS_REBOOT_REQUIRED);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(ENABLE_PCI_PASSTHROUGH.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(EnablePCIPassthroughResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(ENABLE_PCI_PASSTHROUGH.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(ENABLE_PCI_PASSTHROUGH.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestHostReboot(final HostPowerOperationRequestMessage requestMessage)
+    public void requestHostReboot(final HostPowerOperationRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1602,25 +1714,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             });
 
             HostPowerOperationResponseMessage responseMessage = processResponse(callbackResponse, HostPowerOperationResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(HostPowerOperationResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(REBOOT_HOST.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(HostPowerOperationResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(REBOOT_HOST.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(REBOOT_HOST.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestSetPciPassThrough(final UpdatePCIPassthruSVMRequestMessage requestMessage)
+    public void requestSetPciPassThrough(final UpdatePCIPassthruSVMRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1645,25 +1760,28 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             UpdatePCIPassthruSVMResponseMessage responseMessage = processResponse(callbackResponse,
                     UpdatePCIPassthruSVMResponseMessage.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(UpdatePCIPassthruSVMResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(UpdatePCIPassthruSVMResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean requestInstallEsxiLicense(final AddEsxiHostVSphereLicenseRequest requestMessage)
+    public void requestInstallEsxiLicense(final AddEsxiHostVSphereLicenseRequest requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1687,27 +1805,31 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             });
 
             AddEsxiHostVSphereLicenseResponse responseMessage = processResponse(callbackResponse, AddEsxiHostVSphereLicenseResponse.class);
-
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(AddEsxiHostVSphereLicenseResponse.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(APPLY_ESXI_HOST_LICENSE.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(AddEsxiHostVSphereLicenseResponse.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(APPLY_ESXI_HOST_LICENSE.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(APPLY_ESXI_HOST_LICENSE.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
     public ComponentEndpointIds listDefaultCredentials(final ListEsxiCredentialDetailsRequestMessage requestMessage)
+            throws TaskResponseFailureException
     {
-        ComponentEndpointIds returnData = null;
+        ComponentEndpointIds returnData;
         try
         {
             final String correlationId = UUID.randomUUID().toString();
@@ -1732,31 +1854,41 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse,
                     ListEsxiCredentialDetailsResponseMessage.class);
 
-            boolean validResponse = responseMessage != null;
-            validResponse = validResponse && responseMessage.getMessageProperties() != null;
+            if (responseMessage == null)
+            {
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(LIST_ESXI_DEFAULT_CREDENTIALS.getCode(), error);
+            }
+
+            boolean validResponse = responseMessage.getMessageProperties() != null;
             validResponse = validResponse && responseMessage.getComponentUuid() != null;
             validResponse = validResponse && responseMessage.getEndpointUuid() != null;
             validResponse = validResponse && responseMessage.getCredentialUuid() != null;
 
             if (validResponse)
             {
+                LOGGER.info("Received ESXo host default credential ids");
                 returnData = new ComponentEndpointIds(responseMessage.getComponentUuid(), responseMessage.getEndpointUuid(), null,
                         responseMessage.getCredentialUuid());
             }
             else
             {
-                LOGGER.error("Response message is null");
+                final String description = responseMessage.getDescription();
+                LOGGER.error(description);
+                throw new TaskResponseFailureException(LIST_ESXI_DEFAULT_CREDENTIALS.getCode(), description);
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(LIST_ESXI_DEFAULT_CREDENTIALS.getCode(), e.getMessage());
         }
         return returnData;
     }
 
     @Override
-    public boolean requestHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage)
+    public void requestHostMaintenanceMode(final HostMaintenanceModeRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -1782,20 +1914,24 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             HostMaintenanceModeResponseMessage responseMessage = processResponse(callbackResponse,
                     HostMaintenanceModeResponseMessage.class);
 
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            if (responseMessage == null)
             {
-                return responseMessage.getStatus().equals(HostMaintenanceModeResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(HOST_MAINTENANCE_MODE.getCode(), error);
             }
-            else
+
+            if (responseMessage.getStatus().equals(HostMaintenanceModeResponseMessage.Status.FAILED))
             {
-                LOGGER.error("Response message is null");
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(HOST_MAINTENANCE_MODE.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception e)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
             LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(HOST_MAINTENANCE_MODE.getCode(), e.getMessage());
         }
-        return false;
     }
 
     @Override
@@ -1835,12 +1971,11 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public String requestDatastoreRename(final DatastoreRenameRequestMessage requestMessage)
+    public String requestDatastoreRename(final DatastoreRenameRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
-            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
-                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
             messageProperties.setReplyTo(replyTo);
@@ -1862,28 +1997,38 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            DatastoreRenameResponseMessage datastoreRenameResponseMessage = processResponse(response, DatastoreRenameResponseMessage.class);
+            DatastoreRenameResponseMessage responseMessage = processResponse(response, DatastoreRenameResponseMessage.class);
 
-            if (datastoreRenameResponseMessage != null)
+            if (responseMessage == null)
             {
-                return datastoreRenameResponseMessage.getDatastoreName();
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(DATASTORE_RENAME.getCode(), error);
             }
-        }
-        catch (Exception ex)
-        {
-            LOGGER.error("Exception occurred", ex);
-        }
 
-        return null;
+            if (responseMessage.getStatus().equals(DatastoreRenameResponseMessage.Status.FAILED) || StringUtils
+                    .isEmpty(responseMessage.getDatastoreName()))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(DATASTORE_RENAME.getCode(), responseMessage.getDescription());
+            }
+
+            return responseMessage.getDatastoreName();
+        }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(DATASTORE_RENAME.getCode(), e.getMessage());
+        }
     }
 
     @Override
-    public boolean requestUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage)
+    public void requestUpdateSoftwareAcceptance(final VCenterUpdateSoftwareAcceptanceRequestMessage requestMessage)
+            throws TaskResponseFailureException
     {
         try
         {
-            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
-                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
             messageProperties.setReplyTo(replyTo);
@@ -1905,29 +2050,35 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            VCenterUpdateSoftwareAcceptanceResponseMessage vCenterUpdateSoftwareAcceptanceResponseMessage =
-                    processResponse(response, VCenterUpdateSoftwareAcceptanceResponseMessage.class);
+            VCenterUpdateSoftwareAcceptanceResponseMessage responseMessage = processResponse(response,
+                    VCenterUpdateSoftwareAcceptanceResponseMessage.class);
 
-            if (vCenterUpdateSoftwareAcceptanceResponseMessage != null)
+            if (responseMessage == null)
             {
-                return vCenterUpdateSoftwareAcceptanceResponseMessage.getStatus().equals(VCenterUpdateSoftwareAcceptanceResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(UPDATE_SOFTWARE_ACCEPTANCE.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(VCenterUpdateSoftwareAcceptanceResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(UPDATE_SOFTWARE_ACCEPTANCE.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception ex)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", ex);
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(UPDATE_SOFTWARE_ACCEPTANCE.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public boolean requestVmPowerOperation(final VmPowerOperationsRequestMessage requestMessage)
+    public void requestVmPowerOperation(final VmPowerOperationsRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
-            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
-                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
             messageProperties.setReplyTo(replyTo);
@@ -1949,30 +2100,35 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            VmPowerOperationsResponseMessage vmPowerOperationsResponseMessage = processResponse(response,
-                    VmPowerOperationsResponseMessage.class);
+            VmPowerOperationsResponseMessage responseMessage = processResponse(response, VmPowerOperationsResponseMessage.class);
 
-            if (vmPowerOperationsResponseMessage != null)
+            if (responseMessage == null)
             {
-                return vmPowerOperationsResponseMessage.getStatus()
-                        .equals(VmPowerOperationsResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(VM_POWER_OPERATIONS.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(VmPowerOperationsResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(VM_POWER_OPERATIONS.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception ex)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", ex);
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(VM_POWER_OPERATIONS.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public boolean requestConfigureVmNetworkSettings(final ConfigureVmNetworkSettingsRequestMessage requestMessage)
+    public void requestConfigureVmNetworkSettings(final ConfigureVmNetworkSettingsRequestMessage requestMessage)
+            throws TaskResponseFailureException
     {
         try
         {
-            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties =
-                    new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+            com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
             messageProperties.setCorrelationId(UUID.randomUUID().toString());
             messageProperties.setTimestamp(Calendar.getInstance().getTime());
             messageProperties.setReplyTo(replyTo);
@@ -1994,25 +2150,31 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            ConfigureVmNetworkSettingsResponseMessage configureVmNetworkSettingsResponseMessage = processResponse(response,
+            ConfigureVmNetworkSettingsResponseMessage responseMessage = processResponse(response,
                     ConfigureVmNetworkSettingsResponseMessage.class);
 
-            if (configureVmNetworkSettingsResponseMessage != null)
+            if (responseMessage == null)
             {
-                return configureVmNetworkSettingsResponseMessage.getStatus()
-                        .equals(ConfigureVmNetworkSettingsResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CONFIGURE_VM_NETWORK_SETTINGS.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(ConfigureVmNetworkSettingsResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(CONFIGURE_VM_NETWORK_SETTINGS.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception ex)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", ex);
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CONFIGURE_VM_NETWORK_SETTINGS.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public boolean requestRemoteCommandExecution(final RemoteCommandExecutionRequestMessage requestMessage)
+    public void requestRemoteCommandExecution(final RemoteCommandExecutionRequestMessage requestMessage) throws TaskResponseFailureException
     {
         try
         {
@@ -2038,30 +2200,38 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            RemoteCommandExecutionResponseMessage remoteCommandExecutionResponseMessage = processResponse(response,
-                    RemoteCommandExecutionResponseMessage.class);
+            RemoteCommandExecutionResponseMessage responseMessage = processResponse(response, RemoteCommandExecutionResponseMessage.class);
 
-            if (remoteCommandExecutionResponseMessage != null)
+            if (responseMessage == null)
             {
-                return remoteCommandExecutionResponseMessage.getStatus().equals(RemoteCommandExecutionResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(REMOTE_COMMAND_EXECUTION.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(RemoteCommandExecutionResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(REMOTE_COMMAND_EXECUTION.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception ex)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", ex);
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(REMOTE_COMMAND_EXECUTION.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     /**
      * get node inventory json string from Node_info table
+     *
      * @param job
      * @return
      */
-    public String getNodeInventoryData(Job job) {
+    public String getNodeInventoryData(Job job)
+    {
         String symphonyUUID = job.getInputParams().getSymphonyUuid();
-        LOGGER.info("Node Inventory UUID="+symphonyUUID);
+        LOGGER.info("Node Inventory UUID=" + symphonyUUID);
         NodeInventory nodeInventory = repository.getNodeInventory(symphonyUUID);
 
         return nodeInventory == null ? null : nodeInventory.getNodeInventory();
@@ -2092,7 +2262,8 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public boolean requestUpdateSdcPerformanceProfile(final SioSdcUpdatePerformanceProfileRequestMessage requestMessage)
+    public void requestUpdateSdcPerformanceProfile(final SioSdcUpdatePerformanceProfileRequestMessage requestMessage)
+            throws TaskResponseFailureException
     {
         try
         {
@@ -2118,50 +2289,79 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 }
             });
 
-            SioSdcUpdatePerformanceProfileResponseMessage sioSdcUpdatePerformanceProfileResponseMessage = processResponse(response,
+            SioSdcUpdatePerformanceProfileResponseMessage responseMessage = processResponse(response,
                     SioSdcUpdatePerformanceProfileResponseMessage.class);
 
-            if (sioSdcUpdatePerformanceProfileResponseMessage != null)
+            if (responseMessage == null)
             {
-                return sioSdcUpdatePerformanceProfileResponseMessage.getStatus().equals(SioSdcUpdatePerformanceProfileResponseMessage.Status.SUCCESS);
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(UPDATE_SDC_PERFORMANCE_PROFILE.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(SioSdcUpdatePerformanceProfileResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(UPDATE_SDC_PERFORMANCE_PROFILE.getCode(), responseMessage.getDescription());
             }
         }
-        catch (Exception ex)
+        catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", ex);
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(UPDATE_SDC_PERFORMANCE_PROFILE.getCode(), e.getMessage());
         }
-
-        return false;
     }
 
     @Override
-    public CreateStoragePoolResponseMessage createStoragePool(CreateStoragePoolRequestMessage requestMessage)
-            throws ServiceTimeoutException, ServiceExecutionException
+    public String createStoragePool(CreateStoragePoolRequestMessage requestMessage) throws TaskResponseFailureException
     {
-        com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
-        messageProperties.setCorrelationId(UUID.randomUUID().toString());
-        messageProperties.setTimestamp(Calendar.getInstance().getTime());
-        messageProperties.setReplyTo(replyTo);
-
-        requestMessage.setMessageProperties(messageProperties);
-
-        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        try
         {
-            @Override
-            public String getRequestId()
+            com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
-                return messageProperties.getCorrelationId();
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    LOGGER.info("publish create storage pool message.");
+                    producer.publishCreateStoragePool(requestMessage);
+                }
+            });
+
+            final CreateStoragePoolResponseMessage responseMessage = processResponse(response, CreateStoragePoolResponseMessage.class);
+
+            if (responseMessage == null)
+            {
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), error);
             }
 
-            @Override
-            public void executeRequest(String requestId) throws Exception
+            if (responseMessage.getStatus().equals(CreateStoragePoolResponseMessage.Status.FAILED))
             {
-                LOGGER.info("publish create storage pool message.");
-                producer.publishCreateStoragePool(requestMessage);
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), responseMessage.getDescription());
             }
-        });
 
-        return processResponse(response, CreateStoragePoolResponseMessage.class);
+            return responseMessage.getStoragePoolId();
+        }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), e.getMessage());
+        }
     }
 
     @Override
@@ -2171,42 +2371,56 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public String createProtectionDomain(final CreateProtectionDomainRequestMessage requestMessage)
-            throws ServiceTimeoutException, ServiceExecutionException
+    public String createProtectionDomain(final CreateProtectionDomainRequestMessage requestMessage) throws TaskResponseFailureException
     {
-        com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
-        messageProperties.setCorrelationId(UUID.randomUUID().toString());
-        messageProperties.setTimestamp(Calendar.getInstance().getTime());
-        messageProperties.setReplyTo(replyTo);
-
-        requestMessage.setMessageProperties(messageProperties);
-
-        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+        try
         {
-            @Override
-            public String getRequestId()
+            com.dell.cpsd.storage.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.storage.capabilities.api.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            requestMessage.setMessageProperties(messageProperties);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
             {
-                return messageProperties.getCorrelationId();
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishCreateProtectionDomain(requestMessage);
+                }
+            });
+
+            final CreateProtectionDomainResponseMessage responseMessage = processResponse(response,
+                    CreateProtectionDomainResponseMessage.class);
+
+            if (responseMessage == null)
+            {
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CREATE_PROTECTION_DOMAIN.getCode(), error);
             }
 
-            @Override
-            public void executeRequest(String requestId) throws Exception
+            if (responseMessage.getStatus().equals(CreateProtectionDomainResponseMessage.Status.FAILED))
             {
-                producer.publishCreateProtectionDomain(requestMessage);
+                LOGGER.error(responseMessage.getDescription());
+                throw new TaskResponseFailureException(CREATE_PROTECTION_DOMAIN.getCode(), responseMessage.getDescription());
             }
-        });
 
-        final CreateProtectionDomainResponseMessage createProtectionDomainResponseMessage = processResponse(response,
-                CreateProtectionDomainResponseMessage.class);
-
-        if (createProtectionDomainResponseMessage == null)
-        {
-            LOGGER.error("Create Protection Domain Response Message is null");
-            return null;
+            return responseMessage.getProtectionDomainId();
         }
-
-        return createProtectionDomainResponseMessage.getProtectionDomainId();
-     }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CREATE_PROTECTION_DOMAIN.getCode(), e.getMessage());
+        }
+    }
 
     /*
      * {@inheritDoc}

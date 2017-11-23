@@ -5,18 +5,21 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
-import com.dell.cpsd.*;
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
+import com.dell.cpsd.FailNodeAllocationResponseMessage;
 import com.dell.cpsd.NodeAllocationInfo;
 import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
+import com.dell.cpsd.NodesListed;
+import com.dell.cpsd.StartNodeAllocationResponseMessage;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
@@ -104,14 +107,33 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_HOST_TO_DV_SWITCH;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_HOST_TO_VCENTER_CLUSTER;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ADD_SDS_NODE_TO_PROTECTION_DOMAIN;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.APPLY_ESXI_HOST_LICENSE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_SDC_VIB;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_VM_NETWORK_SETTINGS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DATASTORE_RENAME;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DEPLOY_VM_FROM_TEMPLATE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DISCOVER_SCALEIO;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.DISCOVER_VCENTER;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.ENABLE_PCI_PASSTHROUGH;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.HOST_MAINTENANCE_MODE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL_SDC_VIB;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_ESXI_DEFAULT_CREDENTIALS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_SCALEIO_COMPONENTS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_VCENTER_COMPONENTS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REMOTE_COMMAND_EXECUTION;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.UPDATE_SDC_PERFORMANCE_PROFILE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.UPDATE_SOFTWARE_ACCEPTANCE;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.VM_POWER_OPERATIONS;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -266,9 +288,9 @@ public class AmqpNodeServiceTest
 
                 if (stackTraceElements[2].getMethodName().equalsIgnoreCase("listDiscoveredNodes"))
                 {
-                    ServiceResponse response = new  ServiceResponse<>(serviceRequestCallback.getRequestId(), listed, "test");
+                    ServiceResponse response = new ServiceResponse<>(serviceRequestCallback.getRequestId(), listed, "test");
 
-                    return  response;
+                    return response;
                 }
 
                 return null;
@@ -280,9 +302,8 @@ public class AmqpNodeServiceTest
         assertEquals("testproduct", nodeService.listDiscoveredNodeInfo().get(0).getProduct());
     }
 
-
     /**
-    /**
+     * /**
      * Test that the the listClusters method can handle a timeout.
      *
      * @throws Exception
@@ -471,7 +492,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","Completed");
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier", "Completed");
 
         Assert.assertEquals(true, responseInfo);
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
@@ -502,7 +523,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","Started");
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier", "Started");
 
         Assert.assertEquals(true, responseInfo);
         Mockito.verify(dneProducer, Mockito.times(1)).publishStartedNodeAllocation(any());
@@ -533,11 +554,12 @@ public class AmqpNodeServiceTest
             }
         };
 
-        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier","failed");
+        Boolean responseInfo = nodeService.notifyNodeAllocationStatus("elementIdentifier", "failed");
 
         Assert.assertEquals(true, responseInfo);
         Mockito.verify(dneProducer, Mockito.times(1)).publishFailedNodeAllocation(any());
     }
+
     /**
      * Test that the notifyNodeAllocationStatus method can handle any errors.
      *
@@ -559,7 +581,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.notifyNodeAllocationStatus("elementIdentifier","Completed");
+        nodeService.notifyNodeAllocationStatus("elementIdentifier", "Completed");
         Mockito.verify(dneProducer, Mockito.times(1)).publishCompleteNodeAllocation(any());
     }
 
@@ -579,7 +601,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.notifyNodeAllocationStatus("elementIdentifier","Started");
+        nodeService.notifyNodeAllocationStatus("elementIdentifier", "Started");
         Mockito.verify(dneProducer, Mockito.times(1)).publishStartedNodeAllocation(any());
     }
 
@@ -599,7 +621,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.notifyNodeAllocationStatus("elementIdentifier","failed");
+        nodeService.notifyNodeAllocationStatus("elementIdentifier", "failed");
         Mockito.verify(dneProducer, Mockito.times(1)).publishFailedNodeAllocation(any());
     }
 
@@ -792,7 +814,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestScaleIoComponents();
+        try
+        {
+            nodeService.requestScaleIoComponents();
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == LIST_SCALEIO_COMPONENTS.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishListScaleIoComponents(any());
     }
 
@@ -827,9 +856,7 @@ public class AmqpNodeServiceTest
 
         when(repository.saveScaleIoComponentDetails(anyList())).thenReturn(true);
 
-        final boolean success = nodeService.requestScaleIoComponents();
-
-        assertTrue(success);
+        nodeService.requestScaleIoComponents();
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishListScaleIoComponents(any());
     }
@@ -851,7 +878,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestVCenterComponents();
+        try
+        {
+            nodeService.requestVCenterComponents();
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == LIST_VCENTER_COMPONENTS.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishListVCenterComponents(any());
     }
 
@@ -885,9 +919,7 @@ public class AmqpNodeServiceTest
 
         when(repository.saveVCenterComponentDetails(anyList())).thenReturn(true);
 
-        final boolean success = nodeService.requestVCenterComponents();
-
-        assertTrue(success);
+        nodeService.requestVCenterComponents();
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishListVCenterComponents(any());
     }
@@ -912,7 +944,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
+        try
+        {
+            nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == DISCOVER_VCENTER.getCode());
+        }
+
         Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverVcenter(any());
     }
 
@@ -944,9 +984,7 @@ public class AmqpNodeServiceTest
         when(transformer.transform(any())).thenReturn(new VCenter());
         when(repository.saveVCenterData(anyString(), any())).thenReturn(true);
 
-        final boolean success = nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
-
-        assertTrue(success);
+        nodeService.requestDiscoverVCenter(componentEndpointIds, "job-id");
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverVcenter(any());
     }
@@ -971,7 +1009,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
+        try
+        {
+            nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == DISCOVER_SCALEIO.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverScaleIo(any());
     }
 
@@ -1004,9 +1049,7 @@ public class AmqpNodeServiceTest
         when(transformer.transform(any())).thenReturn(new ScaleIOData());
         when(repository.saveScaleIoData(anyString(), any())).thenReturn(true);
 
-        final boolean success = nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
-
-        assertTrue(success);
+        nodeService.requestDiscoverScaleIo(componentEndpointIds, "job-id");
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishDiscoverScaleIo(any());
     }
@@ -1029,7 +1072,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestInstallEsxiLicense(request);
+        try
+        {
+            nodeService.requestInstallEsxiLicense(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == APPLY_ESXI_HOST_LICENSE.getCode());
+        }
+
         Mockito.verify(dneProducer, Mockito.times(1)).publishApplyEsxiLicense(request);
     }
 
@@ -1056,9 +1107,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestInstallEsxiLicense(request);
-
-        assertTrue(success);
+        nodeService.requestInstallEsxiLicense(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishApplyEsxiLicense(request);
     }
@@ -1081,7 +1130,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestHostMaintenanceMode(request);
+        try
+        {
+            nodeService.requestHostMaintenanceMode(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == HOST_MAINTENANCE_MODE.getCode());
+        }
+
         Mockito.verify(dneProducer, Mockito.times(1)).publishHostMaintenanceMode(request);
     }
 
@@ -1108,9 +1165,8 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestHostMaintenanceMode(request);
+        nodeService.requestHostMaintenanceMode(request);
 
-        assertTrue(success);
         Mockito.verify(dneProducer, Mockito.times(1)).publishHostMaintenanceMode(request);
     }
 
@@ -1132,7 +1188,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestAddHostToVCenter(request);
+        try
+        {
+            nodeService.requestAddHostToVCenter(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ADD_HOST_TO_VCENTER_CLUSTER.getCode());
+        }
+
         Mockito.verify(dneProducer, Mockito.times(1)).publishAddHostToVCenter(request);
     }
 
@@ -1159,9 +1223,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestAddHostToVCenter(request);
-
-        assertTrue(success);
+        nodeService.requestAddHostToVCenter(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishAddHostToVCenter(request);
     }
@@ -1184,7 +1246,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestAddHostToDvSwitch(request);
+        try
+        {
+            nodeService.requestAddHostToDvSwitch(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ADD_HOST_TO_DV_SWITCH.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishAddHostToDvSwitch(request);
     }
 
@@ -1211,9 +1280,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestAddHostToDvSwitch(request);
-
-        assertTrue(success);
+        try
+        {
+            nodeService.requestAddHostToDvSwitch(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ADD_HOST_TO_DV_SWITCH.getCode());
+        }
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishAddHostToDvSwitch(request);
     }
@@ -1236,7 +1310,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestDeployScaleIoVm(request);
+        try
+        {
+            nodeService.requestDeployScaleIoVm(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == DEPLOY_VM_FROM_TEMPLATE.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishDeployVmFromTemplate(request);
     }
 
@@ -1263,9 +1344,7 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final boolean success = nodeService.requestDeployScaleIoVm(request);
-
-        assertTrue(success);
+        nodeService.requestDeployScaleIoVm(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishDeployVmFromTemplate(request);
     }
@@ -1288,7 +1367,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestEnablePciPassThrough(request);
+        try
+        {
+            nodeService.requestEnablePciPassThrough(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ENABLE_PCI_PASSTHROUGH.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishEnablePciPassthrough(request);
     }
 
@@ -1316,9 +1402,7 @@ public class AmqpNodeServiceTest
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getStatus()).thenReturn(EnablePCIPassthroughResponseMessage.Status.SUCCESS_REBOOT_REQUIRED);
 
-        final boolean success = nodeService.requestEnablePciPassThrough(request);
-
-        assertTrue(success);
+        nodeService.requestEnablePciPassThrough(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishEnablePciPassthrough(request);
     }
@@ -1341,7 +1425,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestHostReboot(request);
+        try
+        {
+            nodeService.requestHostReboot(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == REBOOT_HOST.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishRebootHost(request);
     }
 
@@ -1369,9 +1460,7 @@ public class AmqpNodeServiceTest
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getStatus()).thenReturn(HostPowerOperationResponseMessage.Status.SUCCESS);
 
-        final boolean success = nodeService.requestHostReboot(request);
-
-        assertTrue(success);
+        nodeService.requestHostReboot(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishRebootHost(request);
     }
@@ -1394,7 +1483,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestSetPciPassThrough(request);
+        try
+        {
+            nodeService.requestSetPciPassThrough(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishSetPciPassthrough(request);
     }
 
@@ -1422,9 +1518,14 @@ public class AmqpNodeServiceTest
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getStatus()).thenReturn(UpdatePCIPassthruSVMResponseMessage.Status.SUCCESS);
 
-        final boolean success = nodeService.requestSetPciPassThrough(request);
-
-        assertTrue(success);
+        try
+        {
+            nodeService.requestSetPciPassThrough(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == CONFIGURE_PCI_PASSTHROUGH_SCALEIO_VM.getCode());
+        }
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishSetPciPassthrough(request);
     }
@@ -1447,7 +1548,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestConfigureScaleIoVib(request);
+        try
+        {
+            nodeService.requestConfigureScaleIoVib(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == CONFIGURE_SDC_VIB.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureScaleIoVib(request);
     }
 
@@ -1475,9 +1583,7 @@ public class AmqpNodeServiceTest
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getStatus()).thenReturn(SoftwareVIBResponseMessage.Status.SUCCESS);
 
-        final boolean success = nodeService.requestConfigureScaleIoVib(request);
-
-        assertTrue(success);
+        nodeService.requestConfigureScaleIoVib(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishConfigureScaleIoVib(request);
     }
@@ -1500,7 +1606,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.requestInstallSoftwareVib(request);
+        try
+        {
+            nodeService.requestInstallSoftwareVib(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == INSTALL_SDC_VIB.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishInstallScaleIoVib(request);
     }
 
@@ -1528,9 +1641,7 @@ public class AmqpNodeServiceTest
         when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
         when(responseMessage.getStatus()).thenReturn(SoftwareVIBResponseMessage.Status.SUCCESS);
 
-        final boolean success = nodeService.requestInstallSoftwareVib(request);
-
-        assertTrue(success);
+        nodeService.requestInstallSoftwareVib(request);
 
         Mockito.verify(dneProducer, Mockito.times(1)).publishInstallScaleIoVib(request);
     }
@@ -1553,7 +1664,14 @@ public class AmqpNodeServiceTest
             }
         };
 
-        nodeService.listDefaultCredentials(request);
+        try
+        {
+            nodeService.listDefaultCredentials(request);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == LIST_ESXI_DEFAULT_CREDENTIALS.getCode());
+        }
         Mockito.verify(dneProducer, Mockito.times(1)).publishListExsiCredentialDetails(request);
     }
 
@@ -1662,9 +1780,16 @@ public class AmqpNodeServiceTest
             }
         };
 
-        final String datastoreName = nodeService.requestDatastoreRename(requestMessage);
+        try
+        {
+            nodeService.requestDatastoreRename(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == DATASTORE_RENAME.getCode());
+            assertEquals("TIMEOUT_TEST", ex.getMessage());
+        }
 
-        assertNull(datastoreName);
         Mockito.verify(dneProducer).publishDatastoreRename(any(DatastoreRenameRequestMessage.class));
     }
 
@@ -1690,9 +1815,8 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestUpdateSoftwareAcceptance(requestMessage);
+        nodeService.requestUpdateSoftwareAcceptance(requestMessage);
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
     }
 
@@ -1713,9 +1837,16 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestUpdateSoftwareAcceptance(requestMessage);
+        try
+        {
+            nodeService.requestUpdateSoftwareAcceptance(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == UPDATE_SOFTWARE_ACCEPTANCE.getCode());
+            assertEquals("TIMEOUT_TEST", ex.getMessage());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishUpdateSoftwareAcceptance(any(VCenterUpdateSoftwareAcceptanceRequestMessage.class));
     }
 
@@ -1741,9 +1872,8 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestVmPowerOperation(requestMessage);
+        nodeService.requestVmPowerOperation(requestMessage);
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishVmPowerOperation(any(VmPowerOperationsRequestMessage.class));
     }
 
@@ -1753,6 +1883,7 @@ public class AmqpNodeServiceTest
         final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
         final DneProducer dneProducer = mock(DneProducer.class);
         final VmPowerOperationsRequestMessage requestMessage = mock(VmPowerOperationsRequestMessage.class);
+        final String errorMessage = "TIMEOUT_TEST";
 
         AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", null, null, null, null)
         {
@@ -1760,13 +1891,20 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
                     throws ServiceTimeoutException
             {
-                throw new ServiceTimeoutException("TIMEOUT_TEST");
+                throw new ServiceTimeoutException(errorMessage);
             }
         };
 
-        boolean result = nodeService.requestVmPowerOperation(requestMessage);
+        try
+        {
+            nodeService.requestVmPowerOperation(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == VM_POWER_OPERATIONS.getCode());
+            assertEquals(errorMessage, ex.getMessage());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishVmPowerOperation(any(VmPowerOperationsRequestMessage.class));
     }
 
@@ -1854,9 +1992,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestConfigureVmNetworkSettings(requestMessage);
+        try
+        {
+            nodeService.requestConfigureVmNetworkSettings(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == CONFIGURE_VM_NETWORK_SETTINGS.getCode());
+        }
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishConfigureVmNetworkSettings(any(ConfigureVmNetworkSettingsRequestMessage.class));
     }
 
@@ -1877,9 +2021,16 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestConfigureVmNetworkSettings(requestMessage);
+        try
+        {
+            nodeService.requestConfigureVmNetworkSettings(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == CONFIGURE_VM_NETWORK_SETTINGS.getCode());
+            assertEquals("TIMEOUT_TEST", ex.getMessage());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishConfigureVmNetworkSettings(any(ConfigureVmNetworkSettingsRequestMessage.class));
     }
 
@@ -1905,9 +2056,8 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestRemoteCommandExecution(requestMessage);
+        nodeService.requestRemoteCommandExecution(requestMessage);
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishRemoteCommandExecution(any(RemoteCommandExecutionRequestMessage.class));
     }
 
@@ -1928,9 +2078,16 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestRemoteCommandExecution(requestMessage);
+        try
+        {
+            nodeService.requestRemoteCommandExecution(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == REMOTE_COMMAND_EXECUTION.getCode());
+            assertEquals("TIMEOUT_TEST", ex.getMessage());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishRemoteCommandExecution(any(RemoteCommandExecutionRequestMessage.class));
     }
 
@@ -2027,9 +2184,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestAddHostToProtectionDomain(requestMessage);
+        try
+        {
+            nodeService.requestAddHostToProtectionDomain(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ADD_SDS_NODE_TO_PROTECTION_DOMAIN.getCode());
+        }
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishAddHostToProtectionDomain(any(AddHostToProtectionDomainRequestMessage.class));
     }
 
@@ -2051,9 +2214,15 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestAddHostToProtectionDomain(requestMessage);
+        try
+        {
+            nodeService.requestAddHostToProtectionDomain(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == ADD_SDS_NODE_TO_PROTECTION_DOMAIN.getCode());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishAddHostToProtectionDomain(any(AddHostToProtectionDomainRequestMessage.class));
     }
 
@@ -2080,9 +2249,8 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
+        nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
 
-        assertTrue(result);
         Mockito.verify(dneProducer).publishUpdateSdcPerformanceProfile(any(SioSdcUpdatePerformanceProfileRequestMessage.class));
     }
 
@@ -2103,9 +2271,16 @@ public class AmqpNodeServiceTest
             }
         };
 
-        boolean result = nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
+        try
+        {
+            nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            assertTrue(ex.getCode() == UPDATE_SDC_PERFORMANCE_PROFILE.getCode());
+            assertEquals("TIMEOUT_TEST", ex.getMessage());
+        }
 
-        assertFalse(result);
         Mockito.verify(dneProducer).publishUpdateSdcPerformanceProfile(any(SioSdcUpdatePerformanceProfileRequestMessage.class));
     }
 }

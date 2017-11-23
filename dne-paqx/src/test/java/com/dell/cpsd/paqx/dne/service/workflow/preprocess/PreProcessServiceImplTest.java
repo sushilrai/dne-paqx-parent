@@ -12,8 +12,6 @@ import com.dell.cpsd.paqx.dne.domain.WorkflowTask;
 import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.Step;
-
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,10 +23,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class PreProcessServiceImplTest {
+public class PreProcessServiceImplTest
+{
 
-    private PreProcessService   preProcessServiceUnderTest;
+    private PreProcessService         preProcessServiceUnderTest;
     private Map<String, WorkflowTask> workFlowTasks;
+
     @Before
     public void setUp() throws Exception
     {
@@ -51,8 +51,7 @@ public class PreProcessServiceImplTest {
     public void testCreateWorkflow()
     {
 
-        Job initialJob = preProcessServiceUnderTest.createWorkflow(
-                "PreProcess", "startPreProcessWorkflow", "status1");
+        Job initialJob = preProcessServiceUnderTest.createWorkflow("PreProcess", "startPreProcessWorkflow", "status1");
 
         assertNotNull(initialJob);
         assertNotNull(initialJob.getId());
@@ -61,8 +60,7 @@ public class PreProcessServiceImplTest {
     @Test
     public void testFindJob()
     {
-        Job initialJob = preProcessServiceUnderTest.createWorkflow(
-                "PreProcess", "startPreProcessWorkflow", "status1");
+        Job initialJob = preProcessServiceUnderTest.createWorkflow("PreProcess", "startPreProcessWorkflow", "status1");
 
         Job foundJob = preProcessServiceUnderTest.findJob(initialJob.getId());
         assertNotNull(initialJob);
@@ -84,30 +82,6 @@ public class PreProcessServiceImplTest {
     }
 
     @Test
-    public void testTaskName_listScaleIoComponents()
-    {
-        assertEquals("List ScaleIO components", workFlowTasks.get("listScaleIoComponents").getTaskName());
-    }
-
-    @Test
-    public void testTaskName_listVCenterComponentsTask()
-    {
-        assertEquals("List vCenter components", workFlowTasks.get("listVCenterComponents").getTaskName());
-    }
-
-    @Test
-    public void testTaskName_discoverScaleIo()
-    {
-        assertEquals("Discover ScaleIO", workFlowTasks.get("discoverScaleIo").getTaskName());
-    }
-
-    @Test
-    public void testTaskName_discoverVCenter()
-    {
-        assertEquals("Discover vCenter", workFlowTasks.get("discoverVCenter").getTaskName());
-    }
-
-    @Test
     public void testTaskName_configureObmSettings()
     {
         assertEquals("Configure out of band management settings", workFlowTasks.get("configureObmSettings").getTaskName());
@@ -120,22 +94,26 @@ public class PreProcessServiceImplTest {
     }
 
     @Test
-    public void testTaskName_findVCluster() {
+    public void testTaskName_findVCluster()
+    {
         assertEquals("Find vCenter cluster", workFlowTasks.get("findVCluster").getTaskName());
     }
 
     @Test
-    public void testTaskName_findScaleIO() {
+    public void testTaskName_findScaleIO()
+    {
         assertEquals("Find or create valid storage pool", workFlowTasks.get("findOrCreateValidStoragePool").getTaskName());
     }
 
     @Test
-    public void testTaskName_findProtectionDomain() {
+    public void testTaskName_findProtectionDomain()
+    {
         assertEquals("Find or create protection domain", workFlowTasks.get("findProtectionDomain").getTaskName());
     }
 
     @Test
-    public void testTaskName_changeIdracCredentials() {
+    public void testTaskName_changeIdracCredentials()
+    {
         assertEquals("Change out of band management credentials", workFlowTasks.get("changeIdracCredentials").getTaskName());
     }
 }

@@ -9,16 +9,15 @@ package com.dell.cpsd.paqx.dne.transformers;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIODevice;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOSDS;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
+import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.service.engineering.standards.StoragePool;
 import org.junit.Before;
 import org.junit.Test;
-import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
-import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +25,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for storage transformer.
@@ -173,7 +175,8 @@ public class StoragePoolEssRequestTransformerTest
         Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
         ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 12);
 
-        EssValidateStoragePoolRequestMessage request = transformer.transform(Collections.singletonList(scaleIOStoragePool), hostToStorageDeviceMap);
+        EssValidateStoragePoolRequestMessage request = transformer
+                .transform(Collections.singletonList(scaleIOStoragePool), hostToStorageDeviceMap);
         assertNotNull(request.getStoragePools());
         assertEquals(1, request.getStoragePools().size());
         assertNotNull(request.getStoragePools().get(0).getDevices());

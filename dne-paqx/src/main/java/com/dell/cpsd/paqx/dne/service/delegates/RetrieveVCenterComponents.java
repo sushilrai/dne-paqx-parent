@@ -3,8 +3,10 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -42,28 +44,26 @@ public class RetrieveVCenterComponents extends BaseWorkflowDelegate
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute List VCenter Components");
-        boolean succeeded;
+
         try
         {
-            succeeded = this.nodeService.requestVCenterComponents();
+            this.nodeService.requestVCenterComponents();
+
+            final String message = "VCenter Components were retrieved successfully.";
+            LOGGER.info(message);
+            updateDelegateStatus(message);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred while retrieving VCenter Components", e);
-            updateDelegateStatus(
-                    "An Unexpected Exception occurred while retrieving VCenter Components.  Reason: " + e.getMessage());
-            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED,
-                                "An Unexpected Exception occurred while retrieving VCenter Components.  Reason: " +
-                                e.getMessage());
+            final String message = "An Unexpected Exception occurred while retrieving VCenter Components.";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message + " Reason: " + e.getMessage());
+            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, message + " Reason: " + e.getMessage());
         }
-        if (!succeeded)
-        {
-            LOGGER.error("VCenter Components were not retrieved.");
-            updateDelegateStatus("VCenter Components were not retrieved.");
-            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, "VCenter Components were not retrieved.");
-        }
-        LOGGER.info("VCenter Components were retrieved successfully.");
-        updateDelegateStatus("VCenter Components were retrieved successfully.");
-
     }
 }

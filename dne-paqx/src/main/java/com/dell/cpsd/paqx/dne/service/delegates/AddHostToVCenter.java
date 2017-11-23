@@ -6,14 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequest;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.AddHostToVCenterClusterRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -24,11 +21,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_HOST_TO_CLUSTER_FAILED;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_ID;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 
 @Component
 @Scope("prototype")
@@ -43,66 +35,43 @@ public class AddHostToVCenter extends BaseWorkflowDelegate
     /**
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
-    private final DataServiceRepository repository;
+    private final NodeService                               nodeService;
+    private final AddHostToVCenterClusterRequestTransformer requestTransformer;
 
     @Autowired
-    public AddHostToVCenter(final NodeService nodeService, final DataServiceRepository repository)
+    public AddHostToVCenter(final NodeService nodeService, final AddHostToVCenterClusterRequestTransformer requestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
-    }
-
-    private ClusterOperationRequestMessage getClusterOperationRequestMessage(
-            final ComponentEndpointIds componentEndpointIds, final String hostname, final String clusterId,
-            final ESXiCredentialDetails esxiCredentialDetails)
-    {
-        final ClusterOperationRequestMessage requestMessage = new ClusterOperationRequestMessage();
-
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
-                componentEndpointIds.getComponentUuid(), componentEndpointIds.getEndpointUuid(),
-                componentEndpointIds.getCredentialUuid()));
-        final ClusterOperationRequest clusterOperationRequest = new ClusterOperationRequest();
-        clusterOperationRequest.setHostName(hostname);
-        clusterOperationRequest.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
-                        esxiCredentialDetails.getComponentUuid(), esxiCredentialDetails.getEndpointUuid(),
-                        esxiCredentialDetails.getCredentialUuid()));
-        clusterOperationRequest.setClusterOperation(ClusterOperationRequest.ClusterOperation.ADD_HOST);
-        clusterOperationRequest.setClusterID(clusterId);
-        requestMessage.setClusterOperationRequest(clusterOperationRequest);
-        return requestMessage;
+        this.requestTransformer = requestTransformer;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute Add Host to VCenter");
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String clusterName = (String) delegateExecution.getVariable(VCENTER_CLUSTER_NAME);
-        final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
-                "VCENTER-CUSTOMER");
-        final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
-        final ESXiCredentialDetails esxiCredentialDetails = (ESXiCredentialDetails) delegateExecution.getVariable(
-                ESXI_CREDENTIAL_DETAILS);
-        final String clusterId = repository.getClusterId(clusterName);
+        final String taskMessage = "Add ESXi host to vcenter cluster";
 
-        final ClusterOperationRequestMessage requestMessage = getClusterOperationRequestMessage(componentEndpointIds,
-                                                                                                hostname, clusterId,
-                                                                                                esxiCredentialDetails);
-        final boolean success = this.nodeService.requestAddHostToVCenter(requestMessage);
-        if (!success)
+        try
         {
-            LOGGER.error("Add Host to VCenter on Node " + nodeDetail.getServiceTag() + " failed!");
-            updateDelegateStatus("Add Host to VCenter on Node " + nodeDetail.getServiceTag() + " failed!");
-            throw new BpmnError(ADD_HOST_TO_CLUSTER_FAILED,
-                                "Add Host to VCenter on Node " + nodeDetail.getServiceTag() + " failed!");
+            final DelegateRequestModel<ClusterOperationRequestMessage> delegateRequestModel = requestTransformer
+                    .buildAddHostToVCenterRequest(delegateExecution);
+            this.nodeService.requestAddHostToVCenter(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
         }
-        delegateExecution.setVariable(VCENTER_CLUSTER_ID, clusterId);
-        LOGGER.info("Add Host to VCenter on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus("Add Host to VCenter on Node " + nodeDetail.getServiceTag() + " was successful.");
-
-
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(ADD_HOST_TO_CLUSTER_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+        }
+        catch (Exception ex)
+        {
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
+            LOGGER.error(errorMessage, ex);
+            updateDelegateStatus(errorMessage + ex.getMessage());
+            throw new BpmnError(ADD_HOST_TO_CLUSTER_FAILED, errorMessage + ex.getMessage());
+        }
     }
 }

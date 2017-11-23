@@ -6,6 +6,7 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
@@ -115,8 +116,10 @@ public class ConfigureDvSwitchesTransformerTest
         when(this.dataServiceRepository.getDvSwitchNames()).thenReturn(this.dvSwitchNames);
         when(this.dataServiceRepository.getDvPortGroupNames(this.dvSwitchNames)).thenReturn(this.dvPortGroupNames);
 
-        final AddHostToDvSwitchRequestMessage addHostToDvSwitchRequestMessage = this.transformer
+        final DelegateRequestModel<AddHostToDvSwitchRequestMessage> requestModel = this.transformer
                 .buildAddHostToDvSwitchRequest(this.delegateExecution);
+
+        final AddHostToDvSwitchRequestMessage addHostToDvSwitchRequestMessage = requestModel.getRequestMessage();
 
         assertNotNull(addHostToDvSwitchRequestMessage);
         assertNotNull(addHostToDvSwitchRequestMessage.getComponentEndpointIds());
@@ -126,6 +129,7 @@ public class ConfigureDvSwitchesTransformerTest
         assertNotNull(addHostToDvSwitchRequestMessage.getDvSwitchConfigList());
         assertNotNull(addHostToDvSwitchRequestMessage.getPNicNames());
         assertEquals(this.hostName, addHostToDvSwitchRequestMessage.getHostname());
+        assertEquals("servicetag-1", requestModel.getServiceTag());
     }
 
     @Test

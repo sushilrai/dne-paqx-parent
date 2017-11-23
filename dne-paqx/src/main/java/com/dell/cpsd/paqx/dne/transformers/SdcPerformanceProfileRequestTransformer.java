@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.storage.capabilities.api.PerformanceProfileRequest;
@@ -40,14 +41,16 @@ public class SdcPerformanceProfileRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public SioSdcUpdatePerformanceProfileRequestMessage buildSdcPerformanceProfileRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<SioSdcUpdatePerformanceProfileRequestMessage> buildSdcPerformanceProfileRequest(
+            final DelegateExecution delegateExecution)
     {
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer.getComponentEndpointIdsByComponentType(COMPONENT_TYPE);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final String sdcGUID = (String) delegateExecution.getVariable(IOCTL_INI_GUI_STR);
         final String scaleIoSdcIpAddress = nodeDetail.getEsxiManagementIpAddress();
-
-        return getRequestMessage(componentEndpointIds, sdcGUID, scaleIoSdcIpAddress);
+        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = getRequestMessage(componentEndpointIds, sdcGUID,
+                scaleIoSdcIpAddress);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private SioSdcUpdatePerformanceProfileRequestMessage getRequestMessage(final ComponentEndpointIds componentEndpointIds,

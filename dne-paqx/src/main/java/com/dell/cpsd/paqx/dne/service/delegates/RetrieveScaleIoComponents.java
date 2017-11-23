@@ -3,8 +3,10 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -43,28 +45,26 @@ public class RetrieveScaleIoComponents extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute Retrieve ScaleIO Components");
 
-        boolean succeeded;
         try
         {
-            succeeded = this.nodeService.requestScaleIoComponents();
+            this.nodeService.requestScaleIoComponents();
+
+            final String message = "Scale IO Components were retrieved successfully.";
+            LOGGER.info(message);
+            updateDelegateStatus(message);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred while retrieving Scale IO Components", e);
-            updateDelegateStatus(
-                    "An Unexpected Exception occurred while retrieving Scale IO Components.  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred while retrieving Scale IO Components.";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message + " Reason: " + e.getMessage());
             throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED,
-                                "An Unexpected Exception occurred while retrieving Scale IO Components.  Reason: " +
-                                e.getMessage());
+                    message + " Reason: " + e.getMessage());
         }
-        if (!succeeded)
-        {
-            LOGGER.error("Scale IO Components were not retrieved.");
-            updateDelegateStatus("Scale IO Components were not retrieved.");
-            throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED, "Scale IO Components were not retrieved.");
-        }
-        LOGGER.info("Scale IO Components were retrieved successfully.");
-        updateDelegateStatus("Scale IO Components were retrieved successfully.");
-
     }
 }

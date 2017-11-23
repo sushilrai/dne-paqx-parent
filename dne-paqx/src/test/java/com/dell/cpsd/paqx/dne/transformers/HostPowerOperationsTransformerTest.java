@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.PowerOperationRequest;
@@ -16,7 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static org.junit.Assert.*;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -30,8 +34,10 @@ import static org.mockito.Mockito.when;
  * @since 1.0
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RebootHostRequestTransformerTest
+public class HostPowerOperationsTransformerTest
 {
+    private final String hostname = "hostname";
+
     @Mock
     private ComponentIdsTransformer componentIdsTransformer;
 
@@ -41,14 +47,16 @@ public class RebootHostRequestTransformerTest
     @Mock
     private ComponentEndpointIds componentEndpointIds;
 
-    private RebootHostRequestTransformer rebootHostRequestTransformer;
+    @Mock
+    private NodeDetail nodeDetail;
 
-    private final String hostname = "hostname";
+    private HostPowerOperationsTransformer hostPowerOperationsTransformer;
+    private final String serviceTag = "service-tag";
 
     @Before
     public void setup() throws Exception
     {
-        rebootHostRequestTransformer = new RebootHostRequestTransformer(componentIdsTransformer);
+        hostPowerOperationsTransformer = new HostPowerOperationsTransformer(componentIdsTransformer);
     }
 
     @Test
@@ -56,9 +64,14 @@ public class RebootHostRequestTransformerTest
     {
         when(delegateExecution.getVariable(HOSTNAME)).thenReturn(hostname);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final HostPowerOperationRequestMessage requestMessage = rebootHostRequestTransformer
+        final DelegateRequestModel<HostPowerOperationRequestMessage> requestModel = hostPowerOperationsTransformer
                 .buildHostPowerOperationsRequestMessage(delegateExecution, PowerOperationRequest.PowerOperation.REBOOT);
+        assertNotNull(requestModel);
+
+        final HostPowerOperationRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
 
@@ -68,5 +81,6 @@ public class RebootHostRequestTransformerTest
         assertNotNull(requestMessage.getComponentEndpointIds());
         assertEquals(hostname, powerOperationRequest.getHostName());
         assertEquals(PowerOperationRequest.PowerOperation.REBOOT, powerOperationRequest.getPowerOperation());
+        assertEquals(serviceTag, nodeDetail.getServiceTag());
     }
 }

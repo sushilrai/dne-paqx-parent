@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -34,25 +35,20 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteCommandExecutionRequestTransformerTest
 {
-    @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
-
-    @Mock
-    private NodeDetail nodeDetail;
-
-    @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
-    private ComponentEndpointIds componentEndpointIds;
-
-    @Mock
-    private ComponentEndpointIds factoryComponentEndpointIds;
-
-    private RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
-
     private static final String VCENTER_CUSTOMER_TYPE        = "VCENTER-CUSTOMER";
     private final        String scaleIoVmManagementIpAddress = "1.1.1.1";
+    private final        String serviceTag                   = "service-tag";
+    @Mock
+    private ComponentIdsTransformer componentIdsTransformer;
+    @Mock
+    private NodeDetail nodeDetail;
+    @Mock
+    private DelegateExecution delegateExecution;
+    @Mock
+    private ComponentEndpointIds componentEndpointIds;
+    @Mock
+    private ComponentEndpointIds factoryComponentEndpointIds;
+    private RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     @Before
     public void setup() throws Exception
@@ -67,10 +63,15 @@ public class RemoteCommandExecutionRequestTransformerTest
         when(componentIdsTransformer.getComponentEndpointIdsByCredentialType("COMMON-SERVER", "COMMON-SVM", "SVM-COMMON"))
                 .thenReturn(componentEndpointIds);
         when(nodeDetail.getScaleIoSvmManagementIpAddress()).thenReturn(scaleIoVmManagementIpAddress);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final RemoteCommandExecutionRequestMessage requestMessage = remoteCommandExecutionRequestTransformer
+        final DelegateRequestModel<RemoteCommandExecutionRequestMessage> requestModel = remoteCommandExecutionRequestTransformer
                 .buildRemoteCodeExecutionRequest(delegateExecution,
                         RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
+
+        assertNotNull(requestModel);
+
+        final RemoteCommandExecutionRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
         assertNotNull(requestMessage.getComponentEndpointIds());
@@ -78,6 +79,7 @@ public class RemoteCommandExecutionRequestTransformerTest
         assertEquals(RemoteCommandExecutionRequestMessage.OsType.LINUX, requestMessage.getOsType());
         assertEquals(scaleIoVmManagementIpAddress, requestMessage.getRemoteHost());
         assertEquals(RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA, requestMessage.getRemoteCommand());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 
     @Test
@@ -89,9 +91,14 @@ public class RemoteCommandExecutionRequestTransformerTest
         when(nodeDetail.getScaleIoSvmManagementIpAddress()).thenReturn(scaleIoVmManagementIpAddress);
         when(componentIdsTransformer.getComponentEndpointIdsByCredentialType("COMMON-SERVER", "COMMON-SVM", "SVM-FACTORY"))
                 .thenReturn(factoryComponentEndpointIds);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final RemoteCommandExecutionRequestMessage requestMessage = remoteCommandExecutionRequestTransformer
+        final DelegateRequestModel<RemoteCommandExecutionRequestMessage> requestModel = remoteCommandExecutionRequestTransformer
                 .buildRemoteCodeExecutionRequest(delegateExecution, RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD);
+
+        assertNotNull(requestModel);
+
+        final RemoteCommandExecutionRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
         assertNotNull(requestMessage.getComponentEndpointIds());
@@ -105,5 +112,6 @@ public class RemoteCommandExecutionRequestTransformerTest
         assertNotNull(vmPasswordUpdateRequest);
         assertNotNull(vmPasswordUpdateRequest.getComponentEndpointIds());
         assertEquals(VmPasswordUpdateRequest.CredentialName.SVM_FACTORY, vmPasswordUpdateRequest.getCredentialName());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

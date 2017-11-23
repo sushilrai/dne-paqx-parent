@@ -6,8 +6,8 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
+import com.dell.cpsd.paqx.dne.transformers.HostMaintenanceRequestTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 public class EnterHostMaintenanceMode extends AbstractHostMaintenanceMode
 {
     @Autowired
-    public EnterHostMaintenanceMode(final NodeService nodeService, final DataServiceRepository repository)
+    public EnterHostMaintenanceMode(final NodeService nodeService, final HostMaintenanceRequestTransformer requestTransformer)
     {
-        super(nodeService, repository, "Enter Host Maintenance Mode");
+        super(nodeService, requestTransformer, "Enter Host Maintenance Mode");
     }
 
     @Override

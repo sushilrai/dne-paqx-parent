@@ -3,8 +3,10 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -47,42 +49,46 @@ public class RetrieveDefaultESXiCredentials extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute Retrieve ESXi Credential Details");
 
-        ComponentEndpointIds returnData = null;
         try
         {
             final ListEsxiCredentialDetailsRequestMessage requestMessage = getListDefaultCredentialsRequestMessage();
-            returnData = this.nodeService.listDefaultCredentials(requestMessage);
+            final ComponentEndpointIds returnData = this.nodeService.listDefaultCredentials(requestMessage);
+
+            final ESXiCredentialDetails esXiCredentialDetails = new ESXiCredentialDetails();
+            esXiCredentialDetails.setComponentUuid(returnData.getComponentUuid());
+            esXiCredentialDetails.setCredentialUuid(returnData.getCredentialUuid());
+            esXiCredentialDetails.setEndpointUuid(returnData.getEndpointUuid());
+
+            delegateExecution.setVariable(ESXI_CREDENTIAL_DETAILS, esXiCredentialDetails);
+
+            final String message = "Default ESXi host default credential ids retrieved successfully";
+            LOGGER.info(message);
+            updateDelegateStatus(message);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception Occurred attempting to retrieve the ESXi Default Credentials.", e);
+            final String message = "An Unexpected Exception Occurred attempting to retrieve the ESXi Default Credentials.";
+            LOGGER.error(message, e);
             updateDelegateStatus(
-                    "An Unexpected Exception Occurred attempting to retrieve the ESXi Default Credentials.  Reason: " + e.getMessage());
-            throw new BpmnError(RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED, "An Unexpected Exception Occurred attempting to retrieve the ESXi Default Credentials.  Reason: " + e.getMessage());
+                    message + " Reason: " + e.getMessage());
+            throw new BpmnError(RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED,
+                    message + " Reason: " + e.getMessage());
         }
-        if (returnData == null)
-        {
-            throw new IllegalStateException("List default credentials failed");
-        }
-
-        ESXiCredentialDetails esXiCredentialDetails = new ESXiCredentialDetails();
-        esXiCredentialDetails.setComponentUuid(returnData.getComponentUuid());
-        esXiCredentialDetails.setCredentialUuid(returnData.getCredentialUuid());
-        esXiCredentialDetails.setEndpointUuid(returnData.getEndpointUuid());
-
-        delegateExecution.setVariable(ESXI_CREDENTIAL_DETAILS, esXiCredentialDetails);
     }
 
     private ListEsxiCredentialDetailsRequestMessage getListDefaultCredentialsRequestMessage()
     {
         final ListEsxiCredentialDetailsRequestMessage requestMessage = new ListEsxiCredentialDetailsRequestMessage();
-        requestMessage.setComponentElementType(
-                ListEsxiCredentialDetailsRequestMessage.ComponentElementType.COMMON_SERVER);
-        requestMessage.setEndpointElementType(
-                ListEsxiCredentialDetailsRequestMessage.EndpointElementType.COMMON_DELL_POWEREDGE_ESXI_HOST_EP);
+        requestMessage.setComponentElementType(ListEsxiCredentialDetailsRequestMessage.ComponentElementType.COMMON_SERVER);
+        requestMessage
+                .setEndpointElementType(ListEsxiCredentialDetailsRequestMessage.EndpointElementType.COMMON_DELL_POWEREDGE_ESXI_HOST_EP);
         requestMessage.setCredentialName(ListEsxiCredentialDetailsRequestMessage.CredentialName.ESXI_HOST_DEFAULT);
 
         return requestMessage;
     }
-
 }

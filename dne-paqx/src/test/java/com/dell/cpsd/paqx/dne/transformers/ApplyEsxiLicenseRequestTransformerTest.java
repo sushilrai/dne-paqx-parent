@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -15,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -32,17 +35,17 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ApplyEsxiLicenseRequestTransformerTest
 {
+    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
+    private final        String serviceTag            = "service-tag";
     @Mock
     ComponentIdsTransformer componentIdsTransformer;
-
     @Mock
     private DelegateExecution delegateExecution;
-
     @Mock
     private ComponentEndpointIds componentEndpointIds;
-
+    @Mock
+    private NodeDetail nodeDetail;
     private ApplyEsxiLicenseRequestTransformer transformer;
-    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private              String hostName              = "hostname-1";
 
     @Before
@@ -55,15 +58,22 @@ public class ApplyEsxiLicenseRequestTransformerTest
     public void testBuildApplyEsxiLicenseRequestIsValid() throws Exception
     {
         when(this.delegateExecution.getVariable(HOSTNAME)).thenReturn(this.hostName);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE))
                 .thenReturn(this.componentEndpointIds);
 
-        final AddEsxiHostVSphereLicenseRequest addEsxiHostVSphereLicenseRequest = this.transformer
+        final DelegateRequestModel<AddEsxiHostVSphereLicenseRequest> requestModel = this.transformer
                 .buildApplyEsxiLicenseRequest(this.delegateExecution);
+
+        assertNotNull(requestModel);
+
+        final AddEsxiHostVSphereLicenseRequest addEsxiHostVSphereLicenseRequest = requestModel.getRequestMessage();
 
         assertNotNull(addEsxiHostVSphereLicenseRequest);
         assertNotNull(addEsxiHostVSphereLicenseRequest.getComponentEndpointIds());
         assertNotNull(addEsxiHostVSphereLicenseRequest.getCredentials());
         assertEquals(this.hostName, addEsxiHostVSphereLicenseRequest.getHostname());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

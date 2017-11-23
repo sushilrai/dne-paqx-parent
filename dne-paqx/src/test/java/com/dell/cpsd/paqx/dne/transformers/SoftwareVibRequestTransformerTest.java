@@ -10,7 +10,9 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOIP;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOMdmCluster;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOSDSElementInfo;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequest;
@@ -25,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,46 +47,37 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SoftwareVibRequestTransformerTest
 {
-    @Mock
-    private DataServiceRepository dataServiceRepository;
-
-    @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
-
-    @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
-    private ComponentEndpointIds componentEndpointIds;
-
-    @Mock
-    private ScaleIOData scaleIOData;
-
-    @Mock
-    private ESXiCredentialDetails esXiCredentialDetails;
-
-    @Mock
-    private ScaleIOMdmCluster scaleIOMdmCluster;
-
-    @Mock
-    private ScaleIOSDSElementInfo masterElementInfo;
-
-    @Mock
-    private ScaleIOSDSElementInfo slaveElementInfo;
-
-    @Mock
-    private ScaleIOIP masterIp;
-
-    @Mock
-    private ScaleIOIP slaveIp;
-
-    private SoftwareVibRequestTransformer softwareVibRequestTransformer;
-
+    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private final        String remoteVibUrl          = "https://remote.vib.url";
     private final        String hostname              = "host.name";
-    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private final        String masterIpAddress       = "2.2.2.2";
     private final        String slaveIpAddress        = "3.3.3.3";
+    private final        String serviceTag            = "serviceTag";
+    @Mock
+    private DataServiceRepository dataServiceRepository;
+    @Mock
+    private ComponentIdsTransformer componentIdsTransformer;
+    @Mock
+    private DelegateExecution delegateExecution;
+    @Mock
+    private ComponentEndpointIds componentEndpointIds;
+    @Mock
+    private ScaleIOData scaleIOData;
+    @Mock
+    private ESXiCredentialDetails esXiCredentialDetails;
+    @Mock
+    private ScaleIOMdmCluster scaleIOMdmCluster;
+    @Mock
+    private ScaleIOSDSElementInfo masterElementInfo;
+    @Mock
+    private ScaleIOSDSElementInfo slaveElementInfo;
+    @Mock
+    private ScaleIOIP masterIp;
+    @Mock
+    private ScaleIOIP slaveIp;
+    @Mock
+    private NodeDetail nodeDetail;
+    private SoftwareVibRequestTransformer softwareVibRequestTransformer;
 
     @Before
     public void setup() throws Exception
@@ -96,9 +90,15 @@ public class SoftwareVibRequestTransformerTest
     {
         when(delegateExecution.getVariable(HOSTNAME)).thenReturn(hostname);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE)).thenReturn(componentEndpointIds);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final SoftwareVIBRequestMessage softwareVIBRequestMessage = softwareVibRequestTransformer
+        final DelegateRequestModel<SoftwareVIBRequestMessage> requestModel = softwareVibRequestTransformer
                 .buildInstallSoftwareVibRequest(delegateExecution);
+
+        assertNotNull(requestModel);
+
+        final SoftwareVIBRequestMessage softwareVIBRequestMessage = requestModel.getRequestMessage();
 
         assertNotNull(softwareVIBRequestMessage);
 
@@ -112,6 +112,7 @@ public class SoftwareVibRequestTransformerTest
         assertEquals(hostname, softwareVibInstallRequest.getHostName());
         assertEquals(SoftwareVIBRequest.VibOperation.INSTALL, softwareVibInstallRequest.getVibOperation());
         assertEquals(singletonList(remoteVibUrl), softwareVibInstallRequest.getVibUrls());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -149,9 +150,14 @@ public class SoftwareVibRequestTransformerTest
         when(slaveIp.getIp()).thenReturn(slaveIpAddress);
         when(slaveIp.getSdsElementInfo()).thenReturn(slaveElementInfo);
 
-        final SoftwareVIBConfigureRequestMessage requestMessage = softwareVibRequestTransformer
-                .buildConfigureSoftwareVibRequest(delegateExecution);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
+        final DelegateRequestModel<SoftwareVIBConfigureRequestMessage> requestModel = softwareVibRequestTransformer
+                .buildConfigureSoftwareVibRequest(delegateExecution);
+        assertNotNull(requestModel);
+
+        final SoftwareVIBConfigureRequestMessage requestMessage = requestModel.getRequestMessage();
         assertNotNull(requestMessage);
 
         final SoftwareVIBConfigureRequest softwareVIBConfigureRequest = requestMessage.getSoftwareVIBConfigureRequest();
@@ -162,6 +168,7 @@ public class SoftwareVibRequestTransformerTest
         assertNotNull(softwareVIBConfigureRequest.getModuleOptions());
         assertTrue(softwareVIBConfigureRequest.getModuleOptions().contains(masterIpAddress));
         assertTrue(softwareVIBConfigureRequest.getModuleOptions().contains(slaveIpAddress));
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 
 }

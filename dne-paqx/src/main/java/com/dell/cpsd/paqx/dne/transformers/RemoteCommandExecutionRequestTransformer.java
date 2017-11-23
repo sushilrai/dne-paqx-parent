@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
@@ -41,8 +42,8 @@ public class RemoteCommandExecutionRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public RemoteCommandExecutionRequestMessage buildRemoteCodeExecutionRequest(final DelegateExecution delegateExecution,
-            final RemoteCommandExecutionRequestMessage.RemoteCommand remoteCommand)
+    public DelegateRequestModel<RemoteCommandExecutionRequestMessage> buildRemoteCodeExecutionRequest(
+            final DelegateExecution delegateExecution, final RemoteCommandExecutionRequestMessage.RemoteCommand remoteCommand)
     {
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getComponentEndpointIdsByCredentialType(COMPONENT_TYPE, ENDPOINT_TYPE, COMMON_CREDENTIALS);
@@ -62,7 +63,7 @@ public class RemoteCommandExecutionRequestTransformer
             setChangePasswordRequest(requestMessage);
         }
 
-        return requestMessage;
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private void setChangePasswordRequest(final RemoteCommandExecutionRequestMessage requestMessage)

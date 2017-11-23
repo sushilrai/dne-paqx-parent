@@ -8,7 +8,6 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import org.apache.commons.lang.StringUtils;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -18,10 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NOTIFY_NODE_STATUS_STARTED_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.STARTED;
 
 @Component
 @Scope("prototype")
@@ -31,21 +29,17 @@ public class NotifyNodeDiscoveryToUpdateStatusStarted extends BaseWorkflowDelega
     /*
      * The logger instance
      */
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(NotifyNodeDiscoveryToUpdateStatusStarted.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotifyNodeDiscoveryToUpdateStatusStarted.class);
 
     /*
      * The <code>NodeService</code> instance
      */
     private final NodeService nodeService;
 
-
     /**
      * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
      *
-     * @param nodeService
-     *            - The <code>NodeService</code> instance.
-     *
+     * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0
      */
     @Autowired
@@ -58,24 +52,33 @@ public class NotifyNodeDiscoveryToUpdateStatusStarted extends BaseWorkflowDelega
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute NotifyNodeDiscoveryToUpdateStatusStarted task");
-        final String taskMessage = "Update Node Status";
+        final String taskMessage = "Update Node Status to Started";
         final NodeDetail nd = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
 
         try
         {
-            boolean succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), "Started");
+            final boolean succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), STARTED);
 
-            if(!succeeded)
+            if (!succeeded)
             {
-                LOGGER.error("Node Status was not updated to provisioning in-progress.");
-                updateDelegateStatus("Node Status was not updated to provisioning in-progress.");
-                throw new BpmnError(NOTIFY_NODE_STATUS_STARTED_FAILED, "Node Status was not updated to provisioning in-progress.");
+                final String message = "Node Status was not updated to started for Node " + nd.getServiceTag();
+                LOGGER.error(message);
+                updateDelegateStatus(message);
+                throw new BpmnError(NOTIFY_NODE_STATUS_STARTED_FAILED, message);
             }
-            LOGGER.info(taskMessage + " on Node " + nd.getServiceTag() + " was successful.");
-            updateDelegateStatus(taskMessage + " on Node " + nd.getServiceTag() + " was successful.");
-        } catch (Exception e)
+
+            final String message = taskMessage + " on Node " + nd.getServiceTag() + " was successful.";
+            LOGGER.info(message);
+            updateDelegateStatus(message);
+        }
+        catch (Exception e)
         {
-            throw new BpmnError(NOTIFY_NODE_STATUS_STARTED_FAILED, "Node Status was not updated to provisioning inprogress.");
+            final String message =
+                    "An unexpected exception occurred attempting to update the node status to started for Node " + nd.getServiceTag()
+                            + ". Reason: ";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message + e.getMessage());
+            throw new BpmnError(NOTIFY_NODE_STATUS_STARTED_FAILED, message + e.getMessage());
         }
     }
 }

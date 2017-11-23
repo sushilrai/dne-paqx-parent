@@ -17,8 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NOTIFY_NODE_STATUS_UPDATE_FAILED;
 
@@ -30,21 +29,17 @@ public class NotifyNodeDiscoveryToUpdateStatusFailed extends BaseWorkflowDelegat
     /*
      * The logger instance
      */
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(NotifyNodeDiscoveryToUpdateStatusFailed.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotifyNodeDiscoveryToUpdateStatusFailed.class);
 
     /*
      * The <code>NodeService</code> instance
      */
     private final NodeService nodeService;
 
-
     /**
      * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
      *
-     * @param nodeService
-     *            - The <code>NodeService</code> instance.
-     *
+     * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0
      */
     @Autowired
@@ -57,24 +52,33 @@ public class NotifyNodeDiscoveryToUpdateStatusFailed extends BaseWorkflowDelegat
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute NotifyNodeDiscoveryToUpdateStatusFailed task");
-        final String taskMessage = "Update Node Status";
+        final String taskMessage = "Update Node Status to Failed";
         final NodeDetail nd = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
 
         try
         {
-            boolean succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), "Failed");
+            final boolean succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), FAILED);
 
-            if(!succeeded)
+            if (!succeeded)
             {
-                LOGGER.error("Node Status was not updated to provisioning failed.");
-                updateDelegateStatus("Node Status was not updated to provisioning failed.");
-            } else {
-                LOGGER.info(taskMessage + " on Node " + nd.getServiceTag() + " was successful.");
-                updateDelegateStatus(taskMessage + " on Node " + nd.getServiceTag() + " was successful.");
+                final String message = "Node Status was not updated to provisioning failed for Node " + nd.getServiceTag();
+                LOGGER.error(message);
+                updateDelegateStatus(message);
+                throw new BpmnError(NOTIFY_NODE_STATUS_UPDATE_FAILED, message);
             }
-        } catch (Exception e)
+
+            final String message = taskMessage + " on Node " + nd.getServiceTag() + " was successful.";
+            LOGGER.info(message);
+            updateDelegateStatus(message);
+        }
+        catch (Exception e)
         {
-            LOGGER.error("Node Status was not updated to provisioning failed.");
+            final String message =
+                    "An unexpected exception occurred attempting to update the node status to failed for Node " + nd.getServiceTag()
+                            + ". Reason: ";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message + e.getMessage());
+            throw new BpmnError(NOTIFY_NODE_STATUS_UPDATE_FAILED, message + e.getMessage());
         }
     }
 }

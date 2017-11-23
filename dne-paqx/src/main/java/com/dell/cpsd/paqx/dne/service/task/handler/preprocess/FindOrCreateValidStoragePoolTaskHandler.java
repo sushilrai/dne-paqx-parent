@@ -249,7 +249,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         storagePoolSpec.setZeroPaddingEnabled(true);
         requestMessage.setStoragePoolSpec(storagePoolSpec);
 
-        CreateStoragePoolResponseMessage responseMessage = nodeService.createStoragePool(requestMessage);
+        /*CreateStoragePoolResponseMessage responseMessage = nodeService.createStoragePool(requestMessage);
 
         if (responseMessage.getStatus().equals(CreateStoragePoolResponseMessage.Status.FAILED))
         {
@@ -259,7 +259,7 @@ public class FindOrCreateValidStoragePoolTaskHandler extends BaseTaskHandler imp
         // Sync up the same storage pool into H2 db
         ScaleIOStoragePool newlyCreatedStoragePool = nodeService
                 .createStoragePool(DEFAULT_STORAGE_POOL_NAME, responseMessage.getStoragePoolId(), scaleIOProtectionDomain.getId());
-        scaleIOProtectionDomain.addStoragePool(newlyCreatedStoragePool);
+        scaleIOProtectionDomain.addStoragePool(newlyCreatedStoragePool);*/
 
     }
 

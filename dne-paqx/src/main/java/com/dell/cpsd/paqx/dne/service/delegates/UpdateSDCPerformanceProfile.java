@@ -6,11 +6,10 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.storage.capabilities.api.PerformanceProfileRequest;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.SdcPerformanceProfileRequestTransformer;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -21,8 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.IOCTL_INI_GUI_STR;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.UPDATE_SDC_PERFORMANCE_PROFILE_FAILED;
 
 /**
@@ -47,24 +44,21 @@ public class UpdateSDCPerformanceProfile extends BaseWorkflowDelegate
     /*
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
-
-    /*
-     * The <code>DataServiceRepository</code> instance
-     */
-    private final DataServiceRepository repository;
+    private final NodeService                             nodeService;
+    private final SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer;
 
     /**
      * UpdateSdcPerformanceProfileTaskHandler constructor
      *
-     * @param nodeService - The <code>NodeService</code> instance
-     * @param repository  - The <code>DataServiceRepository</code> instance
+     * @param nodeService                             - The <code>NodeService</code> instance
+     * @param sdcPerformanceProfileRequestTransformer The request building transformer
      */
     @Autowired
-    public UpdateSDCPerformanceProfile(final NodeService nodeService, final DataServiceRepository repository)
+    public UpdateSDCPerformanceProfile(final NodeService nodeService,
+            final SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
+        this.sdcPerformanceProfileRequestTransformer = sdcPerformanceProfileRequestTransformer;
     }
 
     @Override
@@ -73,59 +67,27 @@ public class UpdateSDCPerformanceProfile extends BaseWorkflowDelegate
         LOGGER.info("Execute UpdateSDCPerformanceProfile");
         final String taskMessage = "Update ScaleIO SDC Performance Profile";
 
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String sdcGUID = (String) delegateExecution.getVariable(IOCTL_INI_GUI_STR);
-        final String scaleIoSdcIpAddress = nodeDetail.getEsxiManagementIpAddress();
-
-        ComponentEndpointIds componentEndpointIds;
         try
         {
-            componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
+            final DelegateRequestModel<SioSdcUpdatePerformanceProfileRequestMessage> delegateRequestModel = sdcPerformanceProfileRequestTransformer
+                    .buildSdcPerformanceProfileRequest(delegateExecution);
+            this.nodeService.requestUpdateSdcPerformanceProfile(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
         }
-        catch (Exception e)
+        catch (TaskResponseFailureException ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.  Reason: ";
-            LOGGER.error(errorMessage, e);
-            updateDelegateStatus(errorMessage + e.getMessage());
-            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, errorMessage + e.getMessage());
-        }
-
-        final PerformanceProfileRequest performanceProfileRequest = new PerformanceProfileRequest();
-        performanceProfileRequest.setSdcIp(scaleIoSdcIpAddress);
-        performanceProfileRequest.setSdcGuid(sdcGUID);
-        performanceProfileRequest.setPerfProfile(PerformanceProfileRequest.PerfProfile.HIGH_PERFORMANCE);
-
-        final SioSdcUpdatePerformanceProfileRequestMessage requestMessage = new SioSdcUpdatePerformanceProfileRequestMessage();
-        requestMessage.setPerformanceProfileRequest(performanceProfileRequest);
-        requestMessage.setEndpointUrl("https://" + componentEndpointIds.getEndpointUrl());
-        requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.storage.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-
-        boolean succeeded;
-        try
-        {
-            succeeded = this.nodeService.requestUpdateSdcPerformanceProfile(requestMessage);
-
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: ";
+            final String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
             LOGGER.error(errorMessage, ex);
             updateDelegateStatus(errorMessage + ex.getMessage());
-            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED,
-                    errorMessage + ex.getMessage());
+            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, errorMessage + ex.getMessage());
         }
-        if (!succeeded)
-        {
-            String errorMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!";
-            LOGGER.error(errorMessage);
-            updateDelegateStatus(errorMessage);
-            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, errorMessage);
-        }
-
-        String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
     }
 }

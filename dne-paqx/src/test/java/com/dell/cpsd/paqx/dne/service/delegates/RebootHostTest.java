@@ -1,4 +1,3 @@
-
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -7,98 +6,106 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.transformers.HostPowerOperationsTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.when;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
-public class RebootHostTest {
+@RunWith(MockitoJUnitRunner.class)
+public class RebootHostTest
+{
+    @Mock
+    private HostPowerOperationsTransformer hostPowerOperationsRequestTransformer;
+
+    @Mock
+    private DelegateExecution delegateExecution;
+
+    @Mock
+    private NodeService nodeService;
+
+    @Mock
+    private DelegateRequestModel<HostPowerOperationRequestMessage> requestModel;
 
     private RebootHost rebootHost;
-    private NodeService nodeService;
-    private DataServiceRepository repository;
-    private DelegateExecution delegateExecution;
-    private NodeDetail nodeDetail;
-    private ComponentEndpointIds componentEndpointIds;
 
     @Before
     public void setUp() throws Exception
     {
-        nodeService = mock(NodeService.class);
-        repository = mock(DataServiceRepository.class);
-        rebootHost = new RebootHost(nodeService, repository);
-        delegateExecution = mock(DelegateExecution.class);
-        nodeDetail = new NodeDetail();
-        nodeDetail.setServiceTag("abc");
-        nodeDetail.setEsxiManagementIpAddress("abc");
-        componentEndpointIds = new ComponentEndpointIds("abc","abc","abc", "abc");
+        rebootHost = new RebootHost(nodeService, hostPowerOperationsRequestTransformer);
     }
 
-    @Ignore @Test
-    public void testExceptionThrown1() throws Exception
+    @Test
+    public void testTaskResponseFailureException() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            given(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).willThrow(new NullPointerException());
+        final String exceptionMsg = "request failed";
+
+        try
+        {
+            when(hostPowerOperationsRequestTransformer.buildHostPowerOperationsRequestMessage(any(), any())).thenReturn(requestModel);
+            willThrow(new TaskResponseFailureException(1, exceptionMsg)).given(nodeService).requestHostReboot(any());
+
             rebootHost.delegateExecute(delegateExecution);
-        } catch (BpmnError error)
+
+            fail("Expected exception to be thrown but was not");
+        }
+        catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.REBOOT_HOST_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints."));
+            assertThat(error.getMessage(), containsString(exceptionMsg));
+
         }
     }
 
-    @Ignore @Test
-    public void testExceptionThrown2() throws Exception
+    @Test
+    public void testGeneralException() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            given(nodeService.requestHostReboot(any())).willThrow(new NullPointerException());
+        try
+        {
+            when(hostPowerOperationsRequestTransformer.buildHostPowerOperationsRequestMessage(any(), any()))
+                    .thenThrow(new NullPointerException());
+
             rebootHost.delegateExecute(delegateExecution);
-        } catch (BpmnError error)
+
+            fail("Expected exception to be thrown but was not");
+        }
+        catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.REBOOT_HOST_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to request Reboot Host"));
+            assertThat(error.getMessage(), containsString("An Unexpected Exception occurred attempting to request Reboot Host"));
         }
     }
 
-    //commenting out this test for now because succeeded flag is not assigned properly in the class
-    /*@Ignore @Test
-    public void testFailed() throws Exception
-    {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(nodeService.requestHostReboot(any())).thenReturn(false);
-            final RebootHost c = spy(new RebootHost(nodeService, repository));
-            c.delegateExecute(delegateExecution);
-            verify(c).updateDelegateStatus("Reboot Host on Node abc failed!");
-    }
-
-    @Ignore @Test
+    @Test
     public void testSuccess() throws Exception
     {
-        when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-        when(nodeService.requestHostReboot(any())).thenReturn(true);
-        final RebootHost c = spy(new RebootHost(nodeService, repository));
-        c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Reboot Host on Node abc was successful.");
-    }*/
+        when(hostPowerOperationsRequestTransformer.buildHostPowerOperationsRequestMessage(any(), any())).thenReturn(requestModel);
+        final RebootHost rebootHostSpy = spy(new RebootHost(nodeService, hostPowerOperationsRequestTransformer));
+
+        rebootHostSpy.delegateExecute(delegateExecution);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(rebootHostSpy).updateDelegateStatus(captor.capture());
+        assertThat(captor.getValue(), CoreMatchers.containsString("was successful"));
+    }
 }

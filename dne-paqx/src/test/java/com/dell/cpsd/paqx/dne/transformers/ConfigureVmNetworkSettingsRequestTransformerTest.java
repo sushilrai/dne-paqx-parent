@@ -6,6 +6,8 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsRequestMessage;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -37,26 +40,24 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigureVmNetworkSettingsRequestTransformerTest
 {
-    @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
-
-    @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
-    private ComponentEndpointIds componentEndpointIds;
-
-    @Mock
-    private DataServiceRepository repository;
-
-    private ConfigureVmNetworkSettingsRequestTransformer configureVmNetworkSettingsRequestTransformer;
-
     private static final String              VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private final        String              hostname              = "hostname";
     private final        Map<String, String> dvSwitchNamesMap      = new HashMap<>();
     private final        Map<String, String> networkNamesMap       = new HashMap<>();
     private final        String              virtualMachineName    = "vm-name";
     private final        String              endpointUrl           = "https://fake";
+    private final        String              serviceTag            = "service-tag";
+    @Mock
+    private ComponentIdsTransformer componentIdsTransformer;
+    @Mock
+    private DelegateExecution delegateExecution;
+    @Mock
+    private ComponentEndpointIds componentEndpointIds;
+    @Mock
+    private DataServiceRepository repository;
+    @Mock
+    private NodeDetail nodeDetail;
+    private ConfigureVmNetworkSettingsRequestTransformer configureVmNetworkSettingsRequestTransformer;
 
     @Before
     public void setup() throws Exception
@@ -98,14 +99,20 @@ public class ConfigureVmNetworkSettingsRequestTransformerTest
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE)).thenReturn(componentEndpointIds);
         when(delegateExecution.getVariable(DelegateConstants.VIRTUAL_MACHINE_NAME)).thenReturn(virtualMachineName);
         when(componentEndpointIds.getEndpointUrl()).thenReturn(endpointUrl);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
         dvSwitchNamesMap.put("test", "test");
         when(repository.getDvSwitchNames()).thenReturn(dvSwitchNamesMap);
         networkNamesMap.put("test", "test");
         when(repository.getScaleIoNetworkNames(dvSwitchNamesMap)).thenReturn(networkNamesMap);
 
-        final ConfigureVmNetworkSettingsRequestMessage requestMessage = configureVmNetworkSettingsRequestTransformer
+        final DelegateRequestModel<ConfigureVmNetworkSettingsRequestMessage> requestModel = configureVmNetworkSettingsRequestTransformer
                 .buildConfigureVmNetworkSettingsRequest(delegateExecution);
+
+        assertNotNull(requestModel);
+
+        final ConfigureVmNetworkSettingsRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
 
@@ -114,5 +121,6 @@ public class ConfigureVmNetworkSettingsRequestTransformerTest
         assertEquals(virtualMachineName, requestMessage.getVmName());
         assertEquals(endpointUrl, requestMessage.getEndpointUrl());
         assertNotNull(requestMessage.getNetworkSettingsMap());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

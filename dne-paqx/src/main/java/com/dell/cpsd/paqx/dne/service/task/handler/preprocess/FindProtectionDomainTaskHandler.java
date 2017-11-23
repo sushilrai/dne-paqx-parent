@@ -13,6 +13,7 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOSDS;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -158,7 +159,9 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         return false;
     }
 
-    private void createProtectionDomain(Job job, FindProtectionDomainTaskResponse response, ScaleIOData scaleIo) throws ServiceTimeoutException, ServiceExecutionException {
+    private void createProtectionDomain(Job job, FindProtectionDomainTaskResponse response, ScaleIOData scaleIo)
+            throws ServiceTimeoutException, ServiceExecutionException, TaskResponseFailureException
+    {
         //Create a New Protection Domain
         final ComponentEndpointIds componentEndpointIds = repository.getComponentEndpointIds(COMPONENT_TYPE);
 
@@ -180,10 +183,11 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         }
 
         //save the protection domain in H2 database so that it is available in the next task in the workflow
-        ScaleIOProtectionDomain newScaleIOProtectionDomain = repository.createProtectionDomain(job.getId().toString(),protectionDomainId, protectionDomainName);
+        ScaleIOProtectionDomain newScaleIOProtectionDomain = repository
+                .createProtectionDomain(job.getId().toString(), protectionDomainId, protectionDomainName);
         scaleIo.addProtectionDomain(newScaleIOProtectionDomain);
 
-        response.setResults(buildResponseResult(protectionDomainId,protectionDomainName));
+        response.setResults(buildResponseResult(protectionDomainId, protectionDomainName));
         response.setProtectionDomainName(protectionDomainName);
         response.setProtectionDomainId(protectionDomainId);
     }
@@ -249,7 +253,8 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
         validateProtectionDomainResponse
                 .setProtectionDomainName(protectionDomainNameList.size() == 1 ? protectionDomainList.get(0).getName() : protectionDomainId);
         validateProtectionDomainResponse.setProtectionDomainId(protectionDomainId);
-        response.setResults(buildResponseResult(validateProtectionDomainResponse.getProtectionDomainId(), validateProtectionDomainResponse.getProtectionDomainName()));
+        response.setResults(buildResponseResult(validateProtectionDomainResponse.getProtectionDomainId(),
+                validateProtectionDomainResponse.getProtectionDomainName()));
         response.setProtectionDomainId(validateProtectionDomainResponse.getProtectionDomainId());
         response.setProtectionDomainName(validateProtectionDomainResponse.getProtectionDomainName());
     }
@@ -308,7 +313,7 @@ public class FindProtectionDomainTaskHandler extends BaseTaskHandler implements 
 
         String scaleIoName = scaleIOSDS.getName();
 
-        String scaleIONameSuffix="-ESX";
+        String scaleIONameSuffix = "-ESX";
         if (scaleIoName.endsWith(scaleIONameSuffix))
         {
             scaleIoName = scaleIoName.substring(0, scaleIoName.length() - scaleIONameSuffix.length());

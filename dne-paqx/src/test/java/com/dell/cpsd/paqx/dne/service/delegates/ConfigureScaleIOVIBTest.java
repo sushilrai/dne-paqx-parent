@@ -1,4 +1,3 @@
-
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -7,111 +6,114 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.SoftwareVibRequestTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_SCALEIO_VIB_FAILED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class ConfigureScaleIOVIBTest {
-
-    private ConfigureScaleIOVIB configureScaleIOVIB;
+@RunWith(MockitoJUnitRunner.class)
+public class ConfigureScaleIOVIBTest
+{
+    @Mock
     private NodeService nodeService;
-    private DataServiceRepository repository;
+
+    @Mock
+    private SoftwareVibRequestTransformer requestTransformer;
+
+    @Mock
     private DelegateExecution delegateExecution;
-    private NodeDetail nodeDetail;
-    private ComponentEndpointIds componentEndpointIds;
-    private ESXiCredentialDetails esxiCredentialDetails;
-    private ScaleIOData scaleIOData;
+
+    @Mock
+    private DelegateRequestModel<SoftwareVIBConfigureRequestMessage> requestModel;
+
+    private ConfigureScaleIOVIB delegate;
+    private final String serviceTag  = "service-tag";
+    private final String taskMessage = "Configure ScaleIO Vib";
 
     @Before
-    public void setUp() throws Exception {
-        nodeService = mock(NodeService.class);
-        repository = mock(DataServiceRepository.class);
-        configureScaleIOVIB = new ConfigureScaleIOVIB(nodeService, repository);
-        delegateExecution = mock(DelegateExecution.class);
-        nodeDetail = new NodeDetail();
-        nodeDetail.setServiceTag("abc");
-        nodeDetail.setEsxiManagementIpAddress("abc");
-        componentEndpointIds = new ComponentEndpointIds("abc", "abc", "abc", "abc");
-        esxiCredentialDetails = new ESXiCredentialDetails();
-        esxiCredentialDetails.setComponentUuid("abc");
-        esxiCredentialDetails.setCredentialUuid("abc");
-        esxiCredentialDetails.setEndpointUuid("abc");
-        scaleIOData = new ScaleIOData("abc", "abc", "abc", "abc", "abc", "abc", "abc");
-    }
-
-    @Test
-    public void testExceptionThrown1() throws Exception {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS)).thenReturn(esxiCredentialDetails);
-            given(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).willThrow(new NullPointerException());
-            configureScaleIOVIB.delegateExecute(delegateExecution);
-        } catch (BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_SCALEIO_VIB_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints."));
-        }
-    }
-
-    @Test
-    public void testExceptionThrown2() throws Exception {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            given(nodeService.requestConfigureScaleIoVib(any())).willThrow(new NullPointerException());
-            when(repository.getScaleIoData()).thenReturn(scaleIOData);
-            configureScaleIOVIB.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_SCALEIO_VIB_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to request Configure ScaleIO Vib"));
-        }
-    }
-
-    @Test
-    public void testFailed() throws Exception
+    public void setup() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(nodeService.requestConfigureScaleIoVib(any())).thenReturn(false);
-            when(delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS)).thenReturn(esxiCredentialDetails);
-            when(repository.getScaleIoData()).thenReturn(scaleIOData);
-            configureScaleIOVIB.delegateExecute(delegateExecution);
-        } catch(BpmnError error) {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_SCALEIO_VIB_FAILED));
-            assertTrue(error.getMessage().contains("Configure ScaleIO Vib on Node abc failed!"));
-        }
+        delegate = new ConfigureScaleIOVIB(nodeService, requestTransformer);
     }
 
     @Test
-    public void testSuccess() throws Exception
+    public void unknownExceptionThrownResultsInBpmnError() throws Exception
     {
-        when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-        when(nodeService.requestConfigureScaleIoVib(any())).thenReturn(true);
-        when(delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS)).thenReturn(esxiCredentialDetails);
-        when(repository.getScaleIoData()).thenReturn(scaleIOData);
-        final ConfigureScaleIOVIB c = spy(new ConfigureScaleIOVIB(nodeService, repository));
-        c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Configure ScaleIO Vib on Node abc was successful.");
+        final String errorMessage = "Illegal state exception";
+        when(requestTransformer.buildConfigureSoftwareVibRequest(delegateExecution)).thenThrow(new IllegalStateException(errorMessage));
+
+        final ConfigureScaleIOVIB spy = spy(delegate);
+        try
+        {
+            spy.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
+            assertThat(error.getMessage(), containsString(errorMessage));
+            assertThat(error.getMessage(), containsString(taskMessage));
+            assertTrue(error.getErrorCode().equals(CONFIGURE_SCALEIO_VIB_FAILED));
+        }
+
+        verify(spy).updateDelegateStatus(
+                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
+    }
+
+    @Test
+    public void taskResponseFailureExceptionThrownDueToServiceTimeoutOrExecution() throws Exception
+    {
+        final SoftwareVIBConfigureRequestMessage mockRequestMessage = mock(SoftwareVIBConfigureRequestMessage.class);
+        final String errorMessage = "Service timeout";
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(requestTransformer.buildConfigureSoftwareVibRequest(delegateExecution)).thenReturn(requestModel);
+        doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestConfigureScaleIoVib(mockRequestMessage);
+
+        final ConfigureScaleIOVIB spy = spy(delegate);
+        try
+        {
+            spy.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertTrue(error.getErrorCode().equals(CONFIGURE_SCALEIO_VIB_FAILED));
+        }
+
+        verify(spy).updateDelegateStatus(errorMessage);
+    }
+
+    @Test
+    public void configureScaleIoVibSuccessUpdatesTheDelegateStatus() throws Exception
+    {
+        final SoftwareVIBConfigureRequestMessage mockRequestMessage = mock(SoftwareVIBConfigureRequestMessage.class);
+
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(requestModel.getServiceTag()).thenReturn(serviceTag);
+        when(requestTransformer.buildConfigureSoftwareVibRequest(delegateExecution)).thenReturn(requestModel);
+        doNothing().when(nodeService).requestConfigureScaleIoVib(mockRequestMessage);
+
+        final ConfigureScaleIOVIB spy = spy(delegate);
+        spy.delegateExecute(delegateExecution);
+
+        verify(spy).updateDelegateStatus(taskMessage + " on Node " + serviceTag + " was successful.");
     }
 }

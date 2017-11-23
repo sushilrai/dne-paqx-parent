@@ -50,8 +50,7 @@ public class VcenterDiscoveryTransformationTest
         final RabbitConfig config = new RabbitConfig();
         final MessageConverter converter = config.dneMessageConverter();
 
-        final Message message = TestUtil.jsonMessage("com.dell.cpsd.vcenter.discover.response",
-                "vcenterResponseDiscoveryPayload.json");
+        final Message message = TestUtil.jsonMessage("com.dell.cpsd.vcenter.discover.response", "vcenterResponseDiscoveryPayload.json");
         entity = (DiscoveryResponseInfoMessage) converter.fromMessage(message);
     }
 

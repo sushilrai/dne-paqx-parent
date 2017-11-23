@@ -6,11 +6,10 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.virtualization.capabilities.api.Credentials;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.PciPassThroughRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -21,10 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_NEW_VM_NAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOST_PCI_DEVICE_ID;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.UPDATE_PCI_PASSTHROUGH;
 
 /**
@@ -49,80 +44,43 @@ public class UpdatePCIPassThrough extends BaseWorkflowDelegate
     /**
      * The <code>NodeService</code> instance
      */
-    private final NodeService           nodeService;
-    private final DataServiceRepository repository;
+    private final NodeService                      nodeService;
+    private final PciPassThroughRequestTransformer pciPassThroughRequestTransformer;
 
     @Autowired
-    public UpdatePCIPassThrough(final NodeService nodeService, final DataServiceRepository repository)
+    public UpdatePCIPassThrough(final NodeService nodeService, final PciPassThroughRequestTransformer pciPassThroughRequestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
-    }
-
-    private UpdatePCIPassthruSVMRequestMessage getUpdatePCIPassthruSVMRequestMessage(final String hostname, final String hostPciDeviceId,
-            final String newVMName, final ComponentEndpointIds componentEndpointIds)
-    {
-        final UpdatePCIPassthruSVMRequestMessage requestMessage = new UpdatePCIPassthruSVMRequestMessage();
-        requestMessage.setHostname(hostname);
-        requestMessage.setHostPciDeviceId(hostPciDeviceId);
-        requestMessage.setVmName(newVMName);
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-        return requestMessage;
+        this.pciPassThroughRequestTransformer = pciPassThroughRequestTransformer;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Update/Set PCI pass through task");
-        final String taskMessage = "Set PCI Pass Through";
+        LOGGER.info("Execute Update PCI pass through task");
+        final String taskMessage = "Update PCI pass through for ScaleIO VM";
 
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String hostname =(String) delegateExecution.getVariable(HOSTNAME);
-        final String hostPciDeviceId = (String) delegateExecution.getVariable(HOST_PCI_DEVICE_ID);
-        final String newVMName = (String) delegateExecution.getVariable(DEPLOY_SCALEIO_NEW_VM_NAME);
-
-        ComponentEndpointIds componentEndpointIds;
         try
         {
-            componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER");
-        }
-        catch (Exception e)
-        {
-            String errorMessage = "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: ";
-            LOGGER.error(errorMessage, e);
-            updateDelegateStatus(errorMessage + e.getMessage());
-            throw new BpmnError(UPDATE_PCI_PASSTHROUGH, errorMessage + e.getMessage());
-        }
+            final DelegateRequestModel<UpdatePCIPassthruSVMRequestMessage> delegateRequestModel = pciPassThroughRequestTransformer
+                    .buildUpdatePciPassThroughRequest(delegateExecution);
+            this.nodeService.requestSetPciPassThrough(delegateRequestModel.getRequestMessage());
 
-        final UpdatePCIPassthruSVMRequestMessage requestMessage = getUpdatePCIPassthruSVMRequestMessage(hostname, hostPciDeviceId,
-                newVMName, componentEndpointIds);
-
-        boolean success;
-        try
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
+        }
+        catch (TaskResponseFailureException ex)
         {
-           success = this.nodeService.requestSetPciPassThrough(requestMessage);
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(UPDATE_PCI_PASSTHROUGH, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: ";
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
             LOGGER.error(errorMessage, ex);
             updateDelegateStatus(errorMessage + ex.getMessage());
             throw new BpmnError(UPDATE_PCI_PASSTHROUGH, errorMessage + ex.getMessage());
         }
-
-        if (!success)
-        {
-            String errorMessage = "Configure PCI PassThrough Failed!";
-            LOGGER.error(errorMessage);
-            updateDelegateStatus(errorMessage);
-            throw new BpmnError(UPDATE_PCI_PASSTHROUGH, errorMessage);
-        }
-
-        String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
     }
 }

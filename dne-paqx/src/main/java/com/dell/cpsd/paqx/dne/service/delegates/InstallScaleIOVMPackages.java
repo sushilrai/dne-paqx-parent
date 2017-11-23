@@ -6,10 +6,10 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.RemoteCommandExecutionRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -21,7 +21,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_SCALEIO_VM_PACKAGES;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Install ScaleIo VM packages.
@@ -45,28 +44,21 @@ public class InstallScaleIOVMPackages extends BaseWorkflowDelegate
     /*
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
-
-    /*
-     * The <code>DataServiceRepository</code> instance
-     */
-    private final DataServiceRepository repository;
-
-    private static final String COMPONENT_TYPE     = "COMMON-SERVER";
-    private static final String ENDPOINT_TYPE      = "COMMON-SVM";
-    private static final String COMMON_CREDENTIALS = "SVM-COMMON";
+    private final NodeService                              nodeService;
+    private final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     /**
      * InstallSvmPackagesTaskHandler constructor.
      *
-     * @param nodeService - The <code>NodeService</code> instance
-     * @param repository  - The <code>DataServiceRepository</code> instance
+     * @param nodeService                              - The <code>NodeService</code> instance
+     * @param remoteCommandExecutionRequestTransformer
      */
     @Autowired
-    public InstallScaleIOVMPackages(final NodeService nodeService, final DataServiceRepository repository)
+    public InstallScaleIOVMPackages(final NodeService nodeService,
+            final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
+        this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
 
     @Override
@@ -74,53 +66,29 @@ public class InstallScaleIOVMPackages extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute InstallSvmPackagesTaskHandler task");
         final String taskMessage = "Install Scale IO VM Packages";
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String scaleIoSvmManagementIpAddress = nodeDetail.getScaleIoSvmManagementIpAddress();
 
-        ComponentEndpointIds componentEndpointIds;
-        try {
-            componentEndpointIds = repository
-                    .getComponentEndpointIds(COMPONENT_TYPE, ENDPOINT_TYPE, COMMON_CREDENTIALS);
-        }
-        catch (Exception e)
-        {
-            String errorMessage = "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: ";
-            LOGGER.error(errorMessage, e);
-            updateDelegateStatus(errorMessage + e.getMessage());
-            throw new BpmnError(INSTALL_SCALEIO_VM_PACKAGES, errorMessage + e.getMessage());
-        }
-
-        RemoteCommandExecutionRequestMessage requestMessage = new RemoteCommandExecutionRequestMessage();
-        requestMessage.setRemoteHost(scaleIoSvmManagementIpAddress);
-        requestMessage.setRemoteCommand(RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
-        requestMessage.setOsType(RemoteCommandExecutionRequestMessage.OsType.LINUX);
-        requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-
-        boolean succeeded;
         try
         {
-            succeeded = this.nodeService.requestRemoteCommandExecution(requestMessage);
+            final DelegateRequestModel<RemoteCommandExecutionRequestMessage> delegateRequestModel = remoteCommandExecutionRequestTransformer
+                    .buildRemoteCodeExecutionRequest(delegateExecution,
+                            RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
+            this.nodeService.requestRemoteCommandExecution(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(INSTALL_SCALEIO_VM_PACKAGES, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: ";
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
             LOGGER.error(errorMessage, ex);
             updateDelegateStatus(errorMessage + ex.getMessage());
             throw new BpmnError(INSTALL_SCALEIO_VM_PACKAGES, errorMessage + ex.getMessage());
         }
-
-        if (!succeeded)
-        {
-            String errorMessage = taskMessage + ": install ScaleIO packages request failed";
-            LOGGER.error(errorMessage);
-            updateDelegateStatus(errorMessage);
-            throw new BpmnError(INSTALL_SCALEIO_VM_PACKAGES, errorMessage);
-        }
-
-        String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
     }
 }

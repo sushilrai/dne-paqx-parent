@@ -119,14 +119,17 @@ public class VerifyNodeDetail extends BaseWorkflowDelegate
         //    missingFields.add("protectionDomain");
         //}
         if (CollectionUtils.isNotEmpty(missingFields)) {
-            final String message = "Node details are incomplete!  Please update Node details with the following information and try again.  Missing values for " + StringUtils.join(missingFields, ", ") + ".";
+            final String message =
+                    "Node details are incomplete!  Please update Node details with the following information and try again.  Missing values for "
+                            + StringUtils.join(missingFields, ", ") + ".";
             LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(VERIFY_NODE_DETAIL_FAILED,
                                 message);
         }
 
-        LOGGER.info("Verification of Details on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus("Verification of Details on Node " + nodeDetail.getServiceTag() + " was successful.");
+        final String message = "Verification of Details on Node " + nodeDetail.getServiceTag() + " was successful.";
+        LOGGER.info(message);
+        updateDelegateStatus(message);
     }
 }

@@ -165,7 +165,7 @@ public class FindOrCreateValidStoragePoolTaskHandlerTest
 
     @Test
     @Ignore("temporarily ignoring this test until we get the task handler working")
-    public void testExecuteTask_new_pool() throws ServiceTimeoutException, ServiceExecutionException
+    public void testExecuteTask_new_pool() throws Exception
     {
         FindOrCreateValidStoragePoolTaskHandler handler = new FindOrCreateValidStoragePoolTaskHandler(this.nodeService);
         NodeInventory nodeInventory = new NodeInventory();
@@ -189,7 +189,7 @@ public class FindOrCreateValidStoragePoolTaskHandlerTest
         when(this.nodeService.getNodeInventoryData(job)).thenReturn(NODE_INVENTORY_JSON);
         when(this.nodeService.listScaleIOData()).thenReturn(Arrays.asList(scaleIOData));
         when(this.nodeService.validateStoragePools(anyList(), anyList(), anyMap())).thenReturn(storageResponseMessage);
-        when(this.nodeService.createStoragePool(this.createStoragePoolRequestMessage)).thenReturn(createStoragePoolResponseMessage);
+        when(this.nodeService.createStoragePool(this.createStoragePoolRequestMessage)).thenReturn("1-2-3-4");
 
         boolean expectedResult = false;
         boolean actualResult = handler.executeTask(job);

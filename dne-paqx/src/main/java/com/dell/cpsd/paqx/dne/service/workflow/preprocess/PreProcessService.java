@@ -18,13 +18,9 @@ import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ChangeIdracCredent
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.CleanInMemoryDatabaseTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigIdracTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigureObmSettingsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.DiscoverScaleIoTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.DiscoverVCenterTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindOrCreateValidStoragePoolTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindProtectionDomainTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindVClusterTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ListScaleIoComponentsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ListVCenterComponentsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +34,7 @@ import java.util.UUID;
 
 /**
  * Preprocess service.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
@@ -77,7 +73,8 @@ public class PreProcessService extends BaseService implements IPreProcessService
     }
 
     @Bean("configureObmSettingsTask")
-    private WorkflowTask configureObmSettingsTask(){
+    private WorkflowTask configureObmSettingsTask()
+    {
         return createTask("Configure out of band management settings", new ConfigureObmSettingsTaskHandler(nodeService, obmServices));
     }
 
@@ -111,30 +108,6 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Find or create protection domain", new FindProtectionDomainTaskHandler(nodeService, repository));
     }
 
-    @Bean("listScaleIoComponentsTask")
-    private WorkflowTask listScaleIoComponentsTask()
-    {
-        return createTask("List ScaleIO components", new ListScaleIoComponentsTaskHandler(this.nodeService));
-    }
-
-    @Bean("listVCenterComponentsTask")
-    private WorkflowTask listVCenterComponentsTask()
-    {
-        return createTask("List vCenter components", new ListVCenterComponentsTaskHandler(this.nodeService));
-    }
-
-    @Bean("discoverScaleIoTask")
-    private WorkflowTask discoverScaleIoTask()
-    {
-        return createTask("Discover ScaleIO", new DiscoverScaleIoTaskHandler(this.nodeService, repository));
-    }
-
-    @Bean("discoverVCenterTask")
-    private WorkflowTask discoverVCenterTask()
-    {
-        return createTask("Discover vCenter", new DiscoverVCenterTaskHandler(this.nodeService, repository));
-    }
-
     @Bean("preProcessWorkflowTasks")
     public Map<String, WorkflowTask> preProcessWorkflowTasks()
     {
@@ -142,10 +115,10 @@ public class PreProcessService extends BaseService implements IPreProcessService
 
         workflowTasks.put("cleanInMemoryDatabase", cleanInMemoryDatabase());
         workflowTasks.put("changeIdracCredentials", changeIdracCredentialsTask());
-        workflowTasks.put("listScaleIoComponents", listScaleIoComponentsTask());
+        /*workflowTasks.put("listScaleIoComponents", listScaleIoComponentsTask());
         workflowTasks.put("listVCenterComponents", listVCenterComponentsTask());
         workflowTasks.put("discoverScaleIo", discoverScaleIoTask());
-        workflowTasks.put("discoverVCenter", discoverVCenterTask());
+        workflowTasks.put("discoverVCenter", discoverVCenterTask());*/
         workflowTasks.put("configureObmSettings", configureObmSettingsTask());
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());

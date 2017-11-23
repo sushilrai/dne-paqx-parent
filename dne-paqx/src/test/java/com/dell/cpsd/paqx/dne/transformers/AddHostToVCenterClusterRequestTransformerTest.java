@@ -6,7 +6,9 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -18,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,23 +40,21 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class AddHostToVCenterClusterRequestTransformerTest
 {
+    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
+    private final        String serviceTag            = "service-tag";
     @Mock
     private DataServiceRepository dataServiceRepository;
-
     @Mock
     private ComponentIdsTransformer componentIdsTransformer;
-
     @Mock
     private DelegateExecution delegateExecution;
-
     @Mock
     private ComponentEndpointIds componentEndpointIds;
-
     @Mock
     private ESXiCredentialDetails esxiCredentialDetails;
-
+    @Mock
+    private NodeDetail nodeDetail;
     private AddHostToVCenterClusterRequestTransformer transformer;
-    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private              String clusterName           = "clustername-1";
     private              String clusterId             = "clustername-1d-1";
     private              String hostName              = "hostname-1";
@@ -73,9 +74,14 @@ public class AddHostToVCenterClusterRequestTransformerTest
                 .thenReturn(this.componentEndpointIds);
         when(this.delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS)).thenReturn(this.esxiCredentialDetails);
         when(this.dataServiceRepository.getClusterId(anyString())).thenReturn(this.clusterId);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final ClusterOperationRequestMessage clusterOperationRequestMessage = this.transformer
+        final DelegateRequestModel<ClusterOperationRequestMessage> requestModel = this.transformer
                 .buildAddHostToVCenterRequest(this.delegateExecution);
+
+        assertNotNull(requestModel);
+        final ClusterOperationRequestMessage clusterOperationRequestMessage = requestModel.getRequestMessage();
 
         assertNotNull(clusterOperationRequestMessage);
         assertNotNull(clusterOperationRequestMessage.getClusterOperationRequest());

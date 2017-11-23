@@ -61,6 +61,7 @@ public class AddNodeTaskConfig
             workflowSteps.put(currentStep, new Step(step));
             currentStep=step;
         }
+        
         workflowSteps.put(currentStep, new Step("completed", true));
         workflowSteps.put("completed", null);
     }

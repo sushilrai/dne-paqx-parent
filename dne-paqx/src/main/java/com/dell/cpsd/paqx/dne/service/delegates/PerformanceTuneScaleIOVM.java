@@ -6,10 +6,10 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.RemoteCommandExecutionRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.PERFORMANCE_TUNE_SCALEIO_VM;
 
 /**
@@ -45,28 +44,21 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     /*
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
-
-    /*
-     * The <code>DataServiceRepository</code> instance
-     */
-    private final DataServiceRepository repository;
-
-    private static final String COMPONENT_TYPE     = "COMMON-SERVER";
-    private static final String ENDPOINT_TYPE      = "COMMON-SVM";
-    private static final String COMMON_CREDENTIALS = "SVM-COMMON";
+    private final NodeService                              nodeService;
+    private final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     /**
      * PerformanceTuneSvmTaskHandler constructor.
      *
-     * @param nodeService - The <code>NodeService</code> instance
-     * @param repository  - The <code>DataServiceRepository</code> instance
+     * @param nodeService                              - The <code>NodeService</code> instance
+     * @param remoteCommandExecutionRequestTransformer
      */
     @Autowired
-    public PerformanceTuneScaleIOVM(final NodeService nodeService, final DataServiceRepository repository)
+    public PerformanceTuneScaleIOVM(final NodeService nodeService,
+            final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
+        this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
 
     @Override
@@ -74,54 +66,29 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     {
         LOGGER.info("Execute PerformanceTuneSvmTaskHandler task");
         final String taskMessage = "Performance Tune Scale IO VM";
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
 
-        ComponentEndpointIds componentEndpointIds;
         try
         {
-            componentEndpointIds = repository.getComponentEndpointIds(COMPONENT_TYPE, ENDPOINT_TYPE, COMMON_CREDENTIALS);
+            final DelegateRequestModel<RemoteCommandExecutionRequestMessage> delegateRequestModel = remoteCommandExecutionRequestTransformer
+                    .buildRemoteCodeExecutionRequest(delegateExecution,
+                            RemoteCommandExecutionRequestMessage.RemoteCommand.PERFORMANCE_TUNING_SVM);
+            this.nodeService.requestRemoteCommandExecution(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
         }
-        catch (Exception e)
+        catch (TaskResponseFailureException ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to retrieve Common Credentials Component Endpoints. Reason: ";
-            LOGGER.error(errorMessage, e);
-            updateDelegateStatus(errorMessage + e.getMessage());
-            throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, errorMessage + e.getMessage());
-        }
-
-        final String scaleIoSvmManagementIpAddress = nodeDetail.getScaleIoSvmManagementIpAddress();
-
-        RemoteCommandExecutionRequestMessage requestMessage = new RemoteCommandExecutionRequestMessage();
-        requestMessage.setRemoteCommand(RemoteCommandExecutionRequestMessage.RemoteCommand.PERFORMANCE_TUNING_SVM);
-        requestMessage.setRemoteHost(scaleIoSvmManagementIpAddress);
-        requestMessage.setOsType(RemoteCommandExecutionRequestMessage.OsType.LINUX);
-        requestMessage.setComponentEndpointIds(
-                new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(componentEndpointIds.getComponentUuid(),
-                        componentEndpointIds.getEndpointUuid(), componentEndpointIds.getCredentialUuid()));
-
-        boolean succeeded;
-        try
-        {
-            succeeded = this.nodeService.requestRemoteCommandExecution(requestMessage);
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: ";
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
             LOGGER.error(errorMessage, ex);
             updateDelegateStatus(errorMessage + ex.getMessage());
             throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, errorMessage + ex.getMessage());
         }
-
-        if (!succeeded)
-        {
-            String errorMessage = taskMessage + ": performance tune ScaleIO vm request failed";
-            LOGGER.error(errorMessage);
-            updateDelegateStatus(errorMessage);
-            throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, errorMessage);
-        }
-
-        String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
     }
 }

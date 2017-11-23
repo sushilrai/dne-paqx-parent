@@ -6,6 +6,7 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
@@ -49,7 +50,7 @@ public class ConfigureDvSwitchesTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public AddHostToDvSwitchRequestMessage buildAddHostToDvSwitchRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<AddHostToDvSwitchRequestMessage> buildAddHostToDvSwitchRequest(final DelegateExecution delegateExecution)
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
@@ -89,7 +90,7 @@ public class ConfigureDvSwitchesTransformer
 
         requestMessage.setDvSwitchConfigList(dvSwitchConfigList);
 
-        return requestMessage;
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private void getDvSwitchScaleIoDataConfig(final String scaleIoData1EsxIpAddress, final String scaleIoData1EsxSubnetMask,

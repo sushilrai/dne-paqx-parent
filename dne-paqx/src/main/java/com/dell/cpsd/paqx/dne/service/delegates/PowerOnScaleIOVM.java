@@ -9,7 +9,6 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.task.handler.addnode.RebootHostTaskHandler;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +22,13 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 @Component
 @Scope("prototype")
 @Qualifier("powerOnScaleIOVM")
+//TODO: Currently not used in the workflow can be deleted if required
 public class PowerOnScaleIOVM extends BaseWorkflowDelegate
 {
     /*
      * The logger instance
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(RebootHostTaskHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PowerOnScaleIOVM.class);
 
     /*
      * The <code>NodeService</code> instance

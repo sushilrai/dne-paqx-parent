@@ -6,12 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.ApplyEsxiLicenseRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
-import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -22,8 +21,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.APPLY_ESXI_LICENSE_FAILED;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
 @Scope("prototype")
@@ -38,26 +35,14 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
     /**
      * The <code>NodeService</code> instance
      */
-    private final NodeService nodeService;
-    private final DataServiceRepository repository;
+    private final NodeService                        nodeService;
+    private final ApplyEsxiLicenseRequestTransformer requestTransformer;
 
     @Autowired
-    public ApplyEsxiLicense(final NodeService nodeService, final DataServiceRepository repository)
+    public ApplyEsxiLicense(final NodeService nodeService, final ApplyEsxiLicenseRequestTransformer requestTransformer)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
-    }
-
-    private AddEsxiHostVSphereLicenseRequest getLicenseRequest(final ComponentEndpointIds componentEndpointIds,
-                                                               final String hostname)
-    {
-        final AddEsxiHostVSphereLicenseRequest requestMessage = new AddEsxiHostVSphereLicenseRequest();
-        requestMessage.setHostname(hostname);
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
-                componentEndpointIds.getComponentUuid(), componentEndpointIds.getEndpointUuid(),
-                componentEndpointIds.getCredentialUuid()));
-        return requestMessage;
+        this.requestTransformer = requestTransformer;
     }
 
     @Override
@@ -66,30 +51,27 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
         LOGGER.info("Execute Apply Esxi License");
         final String taskMessage = "Apply Esxi License";
 
-        final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
-        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
-                "VCENTER-CUSTOMER");
-        if (componentEndpointIds == null)
+        try
         {
-            LOGGER.error(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            throw new BpmnError(APPLY_ESXI_LICENSE_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
+            final DelegateRequestModel<AddEsxiHostVSphereLicenseRequest> delegateRequestModel = requestTransformer
+                    .buildApplyEsxiLicenseRequest(delegateExecution);
+            this.nodeService.requestInstallEsxiLicense(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
         }
-
-        final AddEsxiHostVSphereLicenseRequest requestMessage = getLicenseRequest(componentEndpointIds, hostname);
-
-        final boolean success = this.nodeService.requestInstallEsxiLicense(requestMessage);
-        if (!success)
+        catch (TaskResponseFailureException ex)
         {
-            LOGGER.error(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            throw new BpmnError(APPLY_ESXI_LICENSE_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(APPLY_ESXI_LICENSE_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
-        LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-
+        catch (Exception ex)
+        {
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
+            LOGGER.error(errorMessage, ex);
+            updateDelegateStatus(errorMessage + ex.getMessage());
+            throw new BpmnError(APPLY_ESXI_LICENSE_FAILED, errorMessage + ex.getMessage());
+        }
     }
 }

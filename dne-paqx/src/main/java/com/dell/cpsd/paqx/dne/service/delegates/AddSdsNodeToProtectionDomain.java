@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -45,6 +46,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 @Component
 @Scope("prototype")
 @Qualifier("addVCenterHostToProtectionDomain")
+//TODO: Change camunda delete expression and move logic to transformer
 public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
 {
     /**
@@ -235,10 +237,18 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
         requestMessage.setComponentEndpointIds(componentEndpoints);
         requestMessage.setEndpointUrl(endpointUrl);
 
-        boolean success;
         try
         {
-            success = this.nodeService.requestAddHostToProtectionDomain(requestMessage);
+            this.nodeService.requestAddHostToProtectionDomain(requestMessage);
+
+            final String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
@@ -247,17 +257,5 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
             updateDelegateStatus(errorMessage + e.getMessage());
             throw new BpmnError(ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN, errorMessage + e.getMessage());
         }
-
-        if (!success)
-        {
-            String errorMessage = taskMessage + ": request add host to protection domain failed";
-            LOGGER.error(errorMessage);
-            updateDelegateStatus(errorMessage);
-            throw new BpmnError(ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN, errorMessage);
-        }
-
-        String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
     }
 }

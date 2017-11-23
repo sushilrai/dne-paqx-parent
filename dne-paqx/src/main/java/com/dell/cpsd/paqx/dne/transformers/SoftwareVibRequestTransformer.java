@@ -8,7 +8,9 @@ package com.dell.cpsd.paqx.dne.transformers;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOMdmCluster;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequest;
@@ -24,10 +26,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.IOCTL_INI_GUI_STR;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static java.util.Collections.singletonList;
 
 /**
@@ -71,36 +74,43 @@ public class SoftwareVibRequestTransformer
     }
 
     /**
-     * This method builds the Install Software SDC VIB request message.
+     * This method returns the delegate request model containing the
+     * service tag and software vib install request message.
      *
      * @param delegateExecution delegateExecution
-     * @return SoftwareVIBRequestMessage
+     * @return DelegateRequestModel
      */
-    public SoftwareVIBRequestMessage buildInstallSoftwareVibRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<SoftwareVIBRequestMessage> buildInstallSoftwareVibRequest(final DelegateExecution delegateExecution)
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
 
-        return getInstallSdcSoftwareVibRequestMessage(hostname, componentEndpointIds);
+        final SoftwareVIBRequestMessage requestMessage = getInstallSdcSoftwareVibRequestMessage(hostname, componentEndpointIds);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     /**
-     * This method builds the configure ScaleIO VIB request message.
+     * This method returns the delegate request model containing the
+     * service tag and software vib configure request message.
      *
      * @param delegateExecution delegateExecution
-     * @return SoftwareVIBConfigureRequestMessage
-     * @throws Exception Exception
+     * @return DelegateRequestModel
      */
-    public SoftwareVIBConfigureRequestMessage buildConfigureSoftwareVibRequest(final DelegateExecution delegateExecution) throws Exception
+    public DelegateRequestModel<SoftwareVIBConfigureRequestMessage> buildConfigureSoftwareVibRequest(
+            final DelegateExecution delegateExecution) throws Exception
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
         final ESXiCredentialDetails esxiCredentialDetails = (ESXiCredentialDetails) delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS);
-        final String ioctlIniGuidStr = UUID.randomUUID().toString();
+        final String ioctlIniGuidStr = (String) delegateExecution.getVariable(IOCTL_INI_GUI_STR);
 
-        return getConfigureSoftwareVibRequestMessage(hostname, componentEndpointIds, esxiCredentialDetails, ioctlIniGuidStr);
+        final SoftwareVIBConfigureRequestMessage requestMessage = getConfigureSoftwareVibRequestMessage(hostname, componentEndpointIds,
+                esxiCredentialDetails, ioctlIniGuidStr);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private SoftwareVIBRequestMessage getInstallSdcSoftwareVibRequestMessage(final String hostname,

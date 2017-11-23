@@ -9,61 +9,72 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
-import com.dell.cpsd.paqx.dne.transformers.RemoteCommandExecutionRequestTransformer;
-import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.paqx.dne.transformers.DatastoreRenameRequestTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CHANGE_SCALEIO_VM_CREDENTIALS_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DATASTORE_RENAME_FAILED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Datastore rename delegate test class
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 @RunWith(MockitoJUnitRunner.class)
-public class ChangeScaleIOVMCredentialsTest
+public class DatastoreRenameTest
 {
     @Mock
     private NodeService nodeService;
 
     @Mock
-    private RemoteCommandExecutionRequestTransformer requestTransformer;
+    private DatastoreRenameRequestTransformer requestTransformer;
 
     @Mock
     private DelegateExecution delegateExecution;
 
     @Mock
-    private DelegateRequestModel<RemoteCommandExecutionRequestMessage> requestModel;
+    private DelegateRequestModel<DatastoreRenameRequestMessage> requestModel;
 
-    private ChangeScaleIOVMCredentials delegate;
-    private final String serviceTag  = "service-tag";
-    private final String taskMessage = "Change ScaleIO VM factory credentials";
+    private DatastoreRename delegate;
+    private final String serviceTag    = "service-tag";
+    private final String datastoreName = "DASXX";
+    private final String taskMessage   = "Rename datastore for ESXi host";
 
     @Before
     public void setup() throws Exception
     {
-        delegate = new ChangeScaleIOVMCredentials(nodeService, requestTransformer);
+        delegate = new DatastoreRename(nodeService, requestTransformer);
     }
 
     @Test
     public void unknownExceptionThrownResultsInBpmnError() throws Exception
     {
         final String errorMessage = "Illegal state exception";
-        when(requestTransformer
-                .buildRemoteCodeExecutionRequest(delegateExecution, RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD))
-                .thenThrow(new IllegalStateException(errorMessage));
+        when(requestTransformer.buildDatastoreRenameRequest(delegateExecution)).thenThrow(new IllegalStateException(errorMessage));
+        final DatastoreRename spy = spy(delegate);
 
-        final ChangeScaleIOVMCredentials spy = spy(delegate);
         try
         {
             spy.delegateExecute(delegateExecution);
@@ -73,7 +84,7 @@ public class ChangeScaleIOVMCredentialsTest
             assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
             assertThat(error.getMessage(), containsString(errorMessage));
             assertThat(error.getMessage(), containsString(taskMessage));
-            assertTrue(error.getErrorCode().equals(CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
+            assertTrue(error.getErrorCode().equals(DATASTORE_RENAME_FAILED));
         }
 
         verify(spy).updateDelegateStatus(
@@ -83,15 +94,13 @@ public class ChangeScaleIOVMCredentialsTest
     @Test
     public void taskResponseFailureExceptionThrownDueToServiceTimeoutOrExecution() throws Exception
     {
-        final RemoteCommandExecutionRequestMessage mockRequestMessage = mock(RemoteCommandExecutionRequestMessage.class);
+        final DatastoreRenameRequestMessage mockRequestMessage = mock(DatastoreRenameRequestMessage.class);
         final String errorMessage = "Service timeout";
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestTransformer
-                .buildRemoteCodeExecutionRequest(delegateExecution, RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD))
-                .thenReturn(requestModel);
-        doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestRemoteCommandExecution(mockRequestMessage);
+        when(requestTransformer.buildDatastoreRenameRequest(delegateExecution)).thenReturn(requestModel);
+        doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestDatastoreRename(mockRequestMessage);
+        final DatastoreRename spy = spy(delegate);
 
-        final ChangeScaleIOVMCredentials spy = spy(delegate);
         try
         {
             spy.delegateExecute(delegateExecution);
@@ -99,27 +108,28 @@ public class ChangeScaleIOVMCredentialsTest
         catch (BpmnError error)
         {
             assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
-            assertTrue(error.getErrorCode().equals(CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
+            assertTrue(error.getErrorCode().equals(DATASTORE_RENAME_FAILED));
         }
 
         verify(spy).updateDelegateStatus(errorMessage);
     }
 
     @Test
-    public void changeSvmCredentialsSuccessUpdatesTheDelegateStatus() throws Exception
+    public void datastoreRenameSuccessUpdatesTheDelegateStatus() throws Exception
     {
-        final RemoteCommandExecutionRequestMessage mockRequestMessage = mock(RemoteCommandExecutionRequestMessage.class);
+        final DatastoreRenameRequestMessage mockRequestMessage = mock(DatastoreRenameRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
         when(requestModel.getServiceTag()).thenReturn(serviceTag);
-        when(requestTransformer
-                .buildRemoteCodeExecutionRequest(delegateExecution, RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD))
-                .thenReturn(requestModel);
-        doNothing().when(nodeService).requestRemoteCommandExecution(mockRequestMessage);
+        when(requestTransformer.buildDatastoreRenameRequest(delegateExecution)).thenReturn(requestModel);
+        when(nodeService.requestDatastoreRename(mockRequestMessage)).thenReturn(datastoreName);
+        final DatastoreRename spy = spy(delegate);
 
-        final ChangeScaleIOVMCredentials spy = spy(delegate);
         spy.delegateExecute(delegateExecution);
 
         verify(spy).updateDelegateStatus(taskMessage + " on Node " + serviceTag + " was successful.");
+        final ArgumentCaptor<String> setVariableCaptor = ArgumentCaptor.forClass(String.class);
+        verify(delegateExecution).setVariable(anyString(), setVariableCaptor.capture());
+        assertEquals(datastoreName, setVariableCaptor.getValue());
     }
 }

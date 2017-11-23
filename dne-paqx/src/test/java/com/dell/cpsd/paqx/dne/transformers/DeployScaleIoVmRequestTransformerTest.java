@@ -6,6 +6,7 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -46,29 +47,24 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DeployScaleIoVmRequestTransformerTest
 {
-    @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
-
-    @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
-    private ComponentEndpointIds componentEndpointIds;
-
-    @Mock
-    private DataServiceRepository repository;
-
-    @Mock
-    private NodeDetail nodeDetail;
-
-    private DeployScaleIoVmRequestTransformer deployScaleIoVmRequestTransformer;
-
     private static final String VCENTER_CUSTOMER_TYPE        = "VCENTER-CUSTOMER";
     private final        String hostname                     = "hostname";
     private final        String clusterName                  = "cluster-name";
     private final        String scaleIoVmManagementIpAddress = "1.1.1.1";
     private final        String datacenterName               = "datacenter-name";
     private final        String domainName                   = "domain-name";
+    private final        String serviceTag                   = "service-tag";
+    @Mock
+    private ComponentIdsTransformer componentIdsTransformer;
+    @Mock
+    private DelegateExecution delegateExecution;
+    @Mock
+    private ComponentEndpointIds componentEndpointIds;
+    @Mock
+    private DataServiceRepository repository;
+    @Mock
+    private NodeDetail nodeDetail;
+    private DeployScaleIoVmRequestTransformer deployScaleIoVmRequestTransformer;
 
     @Before
     public void setup() throws Exception
@@ -114,11 +110,16 @@ public class DeployScaleIoVmRequestTransformerTest
         when(nodeDetail.getClusterName()).thenReturn(clusterName);
         when(nodeDetail.getScaleIoSvmManagementIpAddress()).thenReturn(scaleIoVmManagementIpAddress);
 
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
+
         when(repository.getDataCenterName(clusterName)).thenReturn(datacenterName);
         when(repository.getDomainName()).thenReturn(domainName);
         when(repository.getDnsServers()).thenReturn(new ArrayList<>());
 
-        final DeployVMFromTemplateRequestMessage requestMessage = deployScaleIoVmRequestTransformer.buildDeployVmRequest(delegateExecution);
+        final DelegateRequestModel<DeployVMFromTemplateRequestMessage> requestModel = deployScaleIoVmRequestTransformer
+                .buildDeployVmRequest(delegateExecution);
+        assertNotNull(requestModel);
+        final DeployVMFromTemplateRequestMessage requestMessage = requestModel.getRequestMessage();
         assertNotNull(requestMessage);
 
         final VirtualMachineCloneSpec virtualMachineCloneSpec = requestMessage.getVirtualMachineCloneSpec();
@@ -169,5 +170,6 @@ public class DeployScaleIoVmRequestTransformerTest
 
         assertNotNull(nicSettings);
         assertEquals(3, nicSettings.size());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

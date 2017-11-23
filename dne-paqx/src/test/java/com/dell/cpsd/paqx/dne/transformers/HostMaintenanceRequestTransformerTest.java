@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.MaintenanceModeRequest;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -33,19 +36,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class HostMaintenanceRequestTransformerTest
 {
+    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
+    private final        String hostname              = "hostname";
+    private final        String serviceTag            = "service-tag";
     @Mock
     private ComponentIdsTransformer componentIdsTransformer;
-
     @Mock
     private DelegateExecution delegateExecution;
-
     @Mock
     private ComponentEndpointIds componentEndpointIds;
-
+    @Mock
+    private NodeDetail nodeDetail;
     private HostMaintenanceRequestTransformer hostMaintenanceRequestTransformer;
-
-    private final        String hostname              = "hostname";
-    private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
 
     @Before
     public void setup() throws Exception
@@ -58,9 +60,13 @@ public class HostMaintenanceRequestTransformerTest
     {
         when(delegateExecution.getVariable(HOSTNAME)).thenReturn(hostname);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE)).thenReturn(componentEndpointIds);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final HostMaintenanceModeRequestMessage requestMessage = hostMaintenanceRequestTransformer
+        final DelegateRequestModel<HostMaintenanceModeRequestMessage> requestModel = hostMaintenanceRequestTransformer
                 .buildHostMaintenanceRequest(delegateExecution, true);
+        assertNotNull(requestModel);
+        final HostMaintenanceModeRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
         assertNotNull(requestMessage.getComponentEndpointIds());
@@ -71,6 +77,7 @@ public class HostMaintenanceRequestTransformerTest
 
         assertEquals(true, maintenanceModeRequest.getMaintenanceModeEnable());
         assertEquals(hostname, maintenanceModeRequest.getHostName());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 
     @Test
@@ -78,9 +85,13 @@ public class HostMaintenanceRequestTransformerTest
     {
         when(delegateExecution.getVariable(HOSTNAME)).thenReturn(hostname);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE)).thenReturn(componentEndpointIds);
+        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeDetail.getServiceTag()).thenReturn(serviceTag);
 
-        final HostMaintenanceModeRequestMessage requestMessage = hostMaintenanceRequestTransformer
+        final DelegateRequestModel<HostMaintenanceModeRequestMessage> requestModel = hostMaintenanceRequestTransformer
                 .buildHostMaintenanceRequest(delegateExecution, false);
+        assertNotNull(requestModel);
+        final HostMaintenanceModeRequestMessage requestMessage = requestModel.getRequestMessage();
 
         assertNotNull(requestMessage);
         assertNotNull(requestMessage.getComponentEndpointIds());
@@ -91,5 +102,6 @@ public class HostMaintenanceRequestTransformerTest
 
         assertEquals(false, maintenanceModeRequest.getMaintenanceModeEnable());
         assertEquals(hostname, maintenanceModeRequest.getHostName());
+        assertEquals(serviceTag, requestModel.getServiceTag());
     }
 }

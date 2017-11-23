@@ -6,17 +6,17 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
-import com.dell.cpsd.virtualization.capabilities.api.Credentials;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.HostMaintenanceRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
-import com.dell.cpsd.virtualization.capabilities.api.MaintenanceModeRequest;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_HOST_MAINTENANCE_MODE_FAILED;
 
 public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
 {
@@ -30,10 +30,7 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
      */
     private final NodeService nodeService;
 
-    /*
-     * The <code>DataServiceRepository</code> instance
-     */
-    private final DataServiceRepository repository;
+    private final HostMaintenanceRequestTransformer requestTransformer;
 
     /*
     * The task name
@@ -43,16 +40,15 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     /**
      * AbstractHostMaintenanceModeTaskHandler constructor
      *
-     * @param nodeService - The <code>NodeService</code> instance
-     * @param repository  - The <code>DataServiceRepository</code> instance
-     * @param taskName    - The task name
-     * @since 1.0
+     * @param nodeService        - The <code>NodeService</code> instance
+     * @param requestTransformer
+     * @param taskName           - The task name  @since 1.0
      */
-    public AbstractHostMaintenanceMode(final NodeService nodeService, final DataServiceRepository repository,
-                                       final String taskName)
+    public AbstractHostMaintenanceMode(final NodeService nodeService, final HostMaintenanceRequestTransformer requestTransformer,
+            final String taskName)
     {
         this.nodeService = nodeService;
-        this.repository = repository;
+        this.requestTransformer = requestTransformer;
         this.taskName = taskName;
     }
 
@@ -68,38 +64,29 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute {}", this.taskName);
-
-       final ComponentEndpointIds componentEndpointIds = repository.getVCenterComponentEndpointIdsByEndpointType(
-                "VCENTER-CUSTOMER");
-        final String hostname = (String) delegateExecution.getVariable(DelegateConstants.HOSTNAME);
-
         final boolean maintenanceModeEnable = this.getMaintenanceModeEnable();
-        final HostMaintenanceModeRequestMessage requestMessage = getHostMaintenanceModeRequestMessage(
-                componentEndpointIds, hostname, maintenanceModeEnable);
-        final boolean success = this.nodeService.requestHostMaintenanceMode(requestMessage);
-        if (!success)
+
+        try
         {
-            LOGGER.error(taskName + " failed!");
-            updateDelegateStatus(taskName + " failed!");
-            throw new BpmnError(DelegateConstants.ESXI_HOST_MAINTENANCE_MODE, taskName + " failed!");
+            final DelegateRequestModel<HostMaintenanceModeRequestMessage> delegateRequestModel = requestTransformer
+                    .buildHostMaintenanceRequest(delegateExecution, maintenanceModeEnable);
+            this.nodeService.requestHostMaintenanceMode(delegateRequestModel.getRequestMessage());
+
+            final String returnMessage = taskName + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            LOGGER.info(returnMessage);
+            updateDelegateStatus(returnMessage);
         }
-
-        LOGGER.info(taskName + " was successful.");
-        updateDelegateStatus(taskName + " was successful.");
-    }
-
-    protected HostMaintenanceModeRequestMessage getHostMaintenanceModeRequestMessage(
-            final ComponentEndpointIds componentEndpointIds, final String hostname, final boolean maintenanceModeEnable)
-    {
-        final HostMaintenanceModeRequestMessage requestMessage = new HostMaintenanceModeRequestMessage();
-        final MaintenanceModeRequest maintenanceModeRequest = new MaintenanceModeRequest();
-        maintenanceModeRequest.setMaintenanceModeEnable(maintenanceModeEnable);
-        maintenanceModeRequest.setHostName(hostname);
-        requestMessage.setMaintenanceModeRequest(maintenanceModeRequest);
-        requestMessage.setCredentials(new Credentials(componentEndpointIds.getEndpointUrl(), null, null));
-        requestMessage.setComponentEndpointIds(new com.dell.cpsd.virtualization.capabilities.api.ComponentEndpointIds(
-                componentEndpointIds.getComponentUuid(), componentEndpointIds.getEndpointUuid(),
-                componentEndpointIds.getCredentialUuid()));
-        return requestMessage;
+        catch (TaskResponseFailureException ex)
+        {
+            updateDelegateStatus(ex.getMessage());
+            throw new BpmnError(ESXI_HOST_MAINTENANCE_MODE_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+        }
+        catch (Exception ex)
+        {
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + ". Reason: ";
+            LOGGER.error(errorMessage, ex);
+            updateDelegateStatus(errorMessage + ex.getMessage());
+            throw new BpmnError(ESXI_HOST_MAINTENANCE_MODE_FAILED, errorMessage + ex.getMessage());
+        }
     }
 }

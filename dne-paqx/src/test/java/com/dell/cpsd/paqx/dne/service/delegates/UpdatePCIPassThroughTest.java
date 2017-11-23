@@ -6,26 +6,27 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.transformers.PciPassThroughRequestTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_NEW_VM_NAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOST_PCI_DEVICE_ID;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,77 +34,75 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class UpdatePCIPassThroughTest
 {
-    private UpdatePCIPassThrough  updatePCIPassThrough;
-    private NodeService           nodeService;
-    private DelegateExecution     delegateExecution;
-    private DataServiceRepository repository;
-    private ComponentEndpointIds  componentEndpointIds;
-    private NodeDetail            nodeDetail;
+    @Mock
+    private NodeService nodeService;
+
+    @Mock
+    private PciPassThroughRequestTransformer pciPassThroughRequestTransformer;
+
+    @Mock
+    private DelegateExecution delegateExecution;
+
+    @Mock
+    private DelegateRequestModel<UpdatePCIPassthruSVMRequestMessage> requestModel;
+
+    private UpdatePCIPassThrough updatePCIPassThrough;
 
     @Before
     public void setUp() throws Exception
     {
-        nodeService = mock(NodeService.class);
-        repository = mock(DataServiceRepository.class);
-        updatePCIPassThrough = new UpdatePCIPassThrough(nodeService, repository);
-        delegateExecution = mock(DelegateExecution.class);
-        componentEndpointIds = new ComponentEndpointIds("abc", "abc", "abc", "abc");
-        nodeDetail = new NodeDetail();
-        nodeDetail.setServiceTag("abc");
-        nodeDetail.setEsxiManagementIpAddress("abc");
+        updatePCIPassThrough = new UpdatePCIPassThrough(nodeService, pciPassThroughRequestTransformer);
     }
 
     @Test
-    public void testExceptionThrown1() throws Exception
+    public void testTaskResponseFailureException() throws Exception
     {
+        final String exceptionMsg = "request failed";
+
         try
         {
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(delegateExecution.getVariable(HOST_PCI_DEVICE_ID)).thenReturn("pci-id");
-            when(delegateExecution.getVariable(DEPLOY_SCALEIO_NEW_VM_NAME)).thenReturn("new-vm-name");
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("hostabc");
-            given(nodeService.requestSetPciPassThrough(any())).willThrow(new NullPointerException());
+            when(pciPassThroughRequestTransformer.buildUpdatePciPassThroughRequest(any())).thenReturn(requestModel);
+            willThrow(new TaskResponseFailureException(1, exceptionMsg)).given(nodeService).requestSetPciPassThrough(any());
+
             updatePCIPassThrough.delegateExecute(delegateExecution);
+
+            fail("Expected exception to be thrown but was not");
         }
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.UPDATE_PCI_PASSTHROUGH));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to request"));
+            assertThat(error.getMessage(), containsString(exceptionMsg));
         }
     }
 
     @Test
-    public void testExecutionFailed()
+    public void testGeneralException() throws Exception
     {
         try
         {
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(delegateExecution.getVariable(HOST_PCI_DEVICE_ID)).thenReturn("pci-id");
-            when(delegateExecution.getVariable(DEPLOY_SCALEIO_NEW_VM_NAME)).thenReturn("new-vm-name");
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("hostabc");
-            when(nodeService.requestSetPciPassThrough(any())).thenReturn(false);
+            when(pciPassThroughRequestTransformer.buildUpdatePciPassThroughRequest(any())).thenThrow(new NullPointerException());
+
             updatePCIPassThrough.delegateExecute(delegateExecution);
+
+            fail("Expected exception to be thrown but was not");
         }
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.UPDATE_PCI_PASSTHROUGH));
-            assertTrue(error.getMessage().contains("Configure PCI PassThrough Failed!"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request"));
         }
     }
 
     @Test
-    public void testSuccess()
+    public void testSuccess() throws Exception
     {
-        when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(delegateExecution.getVariable(HOST_PCI_DEVICE_ID)).thenReturn("pci-id");
-        when(delegateExecution.getVariable(DEPLOY_SCALEIO_NEW_VM_NAME)).thenReturn("new-vm-name");
-        when(delegateExecution.getVariable(HOSTNAME)).thenReturn("hostabc");
-        when(nodeService.requestSetPciPassThrough(any())).thenReturn(true);
+        when(pciPassThroughRequestTransformer.buildUpdatePciPassThroughRequest(any())).thenReturn(requestModel);
         final UpdatePCIPassThrough updatePCIPassThroughSpy = spy(updatePCIPassThrough);
+
         updatePCIPassThroughSpy.delegateExecute(delegateExecution);
-        verify(updatePCIPassThroughSpy).updateDelegateStatus("Set PCI Pass Through on Node abc was successful.");
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(updatePCIPassThroughSpy).updateDelegateStatus(captor.capture());
+        assertThat(captor.getValue(), containsString("was successful"));
     }
 }

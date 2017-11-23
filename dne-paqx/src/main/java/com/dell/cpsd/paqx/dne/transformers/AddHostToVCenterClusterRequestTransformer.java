@@ -6,7 +6,9 @@
 package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequest;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 
 /**
@@ -43,16 +46,19 @@ public class AddHostToVCenterClusterRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public ClusterOperationRequestMessage buildAddHostToVCenterRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<ClusterOperationRequestMessage> buildAddHostToVCenterRequest(final DelegateExecution delegateExecution)
     {
         final String clusterName = (String) delegateExecution.getVariable(VCENTER_CLUSTER_NAME);
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
         final ESXiCredentialDetails esxiCredentialDetails = (ESXiCredentialDetails) delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS);
         final String clusterId = repository.getClusterId(clusterName);
 
-        return getClusterOperationRequestMessage(componentEndpointIds, hostname, clusterId, esxiCredentialDetails);
+        final ClusterOperationRequestMessage requestMessage = getClusterOperationRequestMessage(componentEndpointIds, hostname, clusterId,
+                esxiCredentialDetails);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private ClusterOperationRequestMessage getClusterOperationRequestMessage(final ComponentEndpointIds componentEndpointIds,

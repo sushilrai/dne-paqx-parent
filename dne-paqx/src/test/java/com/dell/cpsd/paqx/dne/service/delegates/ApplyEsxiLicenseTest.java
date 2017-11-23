@@ -1,4 +1,3 @@
-
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
@@ -7,82 +6,113 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.transformers.ApplyEsxiLicenseRequestTransformer;
+import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.APPLY_ESXI_LICENSE_FAILED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class ApplyEsxiLicenseTest {
-
-    private ApplyEsxiLicense applyEsxiLicense;
+@RunWith(MockitoJUnitRunner.class)
+public class ApplyEsxiLicenseTest
+{
+    @Mock
     private NodeService nodeService;
-    private DataServiceRepository repository;
+
+    @Mock
+    private ApplyEsxiLicenseRequestTransformer requestTransformer;
+
+    @Mock
     private DelegateExecution delegateExecution;
-    private NodeDetail nodeDetail;
-    private ComponentEndpointIds componentEndpointIds;
+
+    @Mock
+    private DelegateRequestModel<AddEsxiHostVSphereLicenseRequest> requestModel;
+
+    private ApplyEsxiLicense delegate;
+    private final String serviceTag = "service-tag";
 
     @Before
-    public void setUp() throws Exception
+    public void setup() throws Exception
     {
-        nodeService = mock(NodeService.class);
-        repository = mock(DataServiceRepository.class);
-        applyEsxiLicense = new ApplyEsxiLicense(nodeService, repository);
-        delegateExecution = mock(DelegateExecution.class);
-        nodeDetail = new NodeDetail();
-        nodeDetail.setServiceTag("abc");
-        componentEndpointIds = new ComponentEndpointIds("abc","abc","abc", "abc");
+        delegate = new ApplyEsxiLicense(nodeService, requestTransformer);
     }
 
     @Test
-    public void testFailedException1() throws Exception
+    public void unknownExceptionThrownResultsInBpmnError() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(null);
-            applyEsxiLicense.delegateExecute(delegateExecution);
-        } catch (BpmnError error)
+        final String errorMessage = "Illegal state exception";
+        when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenThrow(new IllegalStateException(errorMessage));
+
+        final ApplyEsxiLicense spy = spy(delegate);
+        try
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.APPLY_ESXI_LICENSE_FAILED));
-            assertTrue(error.getMessage().equalsIgnoreCase("Apply Esxi License on Node abc failed!"));
+            spy.delegateExecute(delegateExecution);
         }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
+            assertThat(error.getMessage(), containsString(errorMessage));
+            assertThat(error.getMessage(), containsString("Apply Esxi License"));
+            assertTrue(error.getErrorCode().equals(APPLY_ESXI_LICENSE_FAILED));
+        }
+
+        verify(spy)
+                .updateDelegateStatus("An unexpected exception occurred attempting to request Apply Esxi License. Reason: " + errorMessage);
     }
 
-    @Ignore @Test
-    public void testFailedException2() throws Exception
+    @Test
+    public void taskResponseFailureExceptionThrownDueToServiceTimeoutOrExecution() throws Exception
     {
-        try {
-            when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-            when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-            applyEsxiLicense.delegateExecute(delegateExecution);
-        } catch (BpmnError error)
+        final AddEsxiHostVSphereLicenseRequest mockRequestMessage = mock(AddEsxiHostVSphereLicenseRequest.class);
+        final String errorMessage = "Service timeout";
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenReturn(requestModel);
+        doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestInstallEsxiLicense(mockRequestMessage);
+
+        final ApplyEsxiLicense spy = spy(delegate);
+        try
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.APPLY_ESXI_LICENSE_FAILED));
-            assertTrue(error.getMessage().equalsIgnoreCase("Apply Esxi License on Node abc failed!"));
+            spy.delegateExecute(delegateExecution);
         }
+        catch (BpmnError error)
+        {
+            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertTrue(error.getErrorCode().equals(APPLY_ESXI_LICENSE_FAILED));
+        }
+
+        verify(spy).updateDelegateStatus(errorMessage);
     }
 
-    @Ignore @Test
-    public void testSuccess() throws Exception
+    @Test
+    public void applyEsxiHostLicenseSuccessUpdatesTheDelegateStatus() throws Exception
     {
-        when(delegateExecution.getVariable(HOSTNAME)).thenReturn("abc");
-        when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-        when(repository.getVCenterComponentEndpointIdsByEndpointType("VCENTER-CUSTOMER")).thenReturn(componentEndpointIds);
-        when(nodeService.requestInstallEsxiLicense(any())).thenReturn(true);
-        final ApplyEsxiLicense c = spy(new ApplyEsxiLicense(nodeService, repository));
-        c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Apply Esxi License on Node abc was successful.");
+        final AddEsxiHostVSphereLicenseRequest mockRequestMessage = mock(AddEsxiHostVSphereLicenseRequest.class);
+
+        when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
+        when(requestModel.getServiceTag()).thenReturn(serviceTag);
+        when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenReturn(requestModel);
+        doNothing().when(nodeService).requestInstallEsxiLicense(mockRequestMessage);
+
+        final ApplyEsxiLicense spy = spy(delegate);
+        spy.delegateExecute(delegateExecution);
+
+        verify(spy).updateDelegateStatus("Apply Esxi License on Node " + serviceTag + " was successful.");
     }
 }

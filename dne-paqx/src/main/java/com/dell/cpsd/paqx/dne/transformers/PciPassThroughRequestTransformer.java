@@ -7,6 +7,8 @@ package com.dell.cpsd.paqx.dne.transformers;
 
 import com.dell.cpsd.paqx.dne.domain.vcenter.PciDevice;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
@@ -20,6 +22,7 @@ import java.util.Objects;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOST_PCI_DEVICE_ID;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VIRTUAL_MACHINE_NAME;
 
 /**
@@ -50,26 +53,34 @@ public class PciPassThroughRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public EnablePCIPassthroughRequestMessage buildEnablePciPassThroughRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<EnablePCIPassthroughRequestMessage> buildEnablePciPassThroughRequest(
+            final DelegateExecution delegateExecution)
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
         final List<PciDevice> pciDeviceList = getPciDeviceList();
         final String hostPciDeviceId = filterDellPercPciDeviceId(pciDeviceList);
 
-        return getEnablePCIPassthroughRequestMessage(componentEndpointIds, hostname, hostPciDeviceId);
+        final EnablePCIPassthroughRequestMessage requestMessage = getEnablePCIPassthroughRequestMessage(componentEndpointIds, hostname,
+                hostPciDeviceId);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
-    public UpdatePCIPassthruSVMRequestMessage buildUpdatePciPassThroughRequest(final DelegateExecution delegateExecution)
+    public DelegateRequestModel<UpdatePCIPassthruSVMRequestMessage> buildUpdatePciPassThroughRequest(
+            final DelegateExecution delegateExecution)
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
         final String hostPciDeviceId = (String) delegateExecution.getVariable(HOST_PCI_DEVICE_ID);
         final String virtualMachineName = (String) delegateExecution.getVariable(VIRTUAL_MACHINE_NAME);
 
-        return getUpdatePciPassThroughRequestMessage(hostname, componentEndpointIds, hostPciDeviceId, virtualMachineName);
+        final UpdatePCIPassthruSVMRequestMessage requestMessage = getUpdatePciPassThroughRequestMessage(hostname, componentEndpointIds,
+                hostPciDeviceId, virtualMachineName);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private UpdatePCIPassthruSVMRequestMessage getUpdatePciPassThroughRequestMessage(final String hostname,

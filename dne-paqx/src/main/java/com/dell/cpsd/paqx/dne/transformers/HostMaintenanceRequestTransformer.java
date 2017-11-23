@@ -5,6 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
+import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.virtualization.capabilities.api.Credentials;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
@@ -13,6 +15,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Host Maintenance request transformer.
@@ -36,14 +39,17 @@ public class HostMaintenanceRequestTransformer
         this.componentIdsTransformer = componentIdsTransformer;
     }
 
-    public HostMaintenanceModeRequestMessage buildHostMaintenanceRequest(final DelegateExecution delegateExecution,
+    public DelegateRequestModel<HostMaintenanceModeRequestMessage> buildHostMaintenanceRequest(final DelegateExecution delegateExecution,
             final boolean isMaintenanceModeEnable)
     {
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
 
-        return getHostMaintenanceModeRequestMessage(isMaintenanceModeEnable, hostname, componentEndpointIds);
+        final HostMaintenanceModeRequestMessage requestMessage = getHostMaintenanceModeRequestMessage(isMaintenanceModeEnable, hostname,
+                componentEndpointIds);
+        return new DelegateRequestModel<>(requestMessage, nodeDetail.getServiceTag());
     }
 
     private HostMaintenanceModeRequestMessage getHostMaintenanceModeRequestMessage(final boolean isMaintenanceModeEnable,

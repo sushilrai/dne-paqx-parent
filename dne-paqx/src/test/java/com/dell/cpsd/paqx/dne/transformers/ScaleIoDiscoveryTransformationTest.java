@@ -5,7 +5,6 @@
 
 package com.dell.cpsd.paqx.dne.transformers;
 
-
 import com.dell.cpsd.paqx.dne.TestUtil;
 import com.dell.cpsd.paqx.dne.amqp.config.RabbitConfig;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
@@ -48,10 +47,10 @@ public class ScaleIoDiscoveryTransformationTest
         final MessageConverter converter = config.dneMessageConverter();
         transformer = new ScaleIORestToScaleIODomainTransformer();
 
-        final Message message = TestUtil.jsonMessage("com.dell.cpsd.list.storage.response",
-                "scaleIODiscoveryResponsePayload.json");
+        final Message message = TestUtil.jsonMessage("com.dell.cpsd.list.storage.response", "scaleIODiscoveryResponsePayload.json");
         entity = (ListStorageResponseMessage) converter.fromMessage(message);
     }
+
     @Test
     public void testNullCase() throws Exception
     {

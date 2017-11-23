@@ -114,11 +114,11 @@ public class AddHostToProtectionDomainTaskHandler extends BaseTaskHandler implem
             /**
              * Creating the response message
              */
-            final boolean success = this.nodeService.requestAddHostToProtectionDomain(requestMessage);
+            /*final boolean success = this.nodeService.requestAddHostToProtectionDomain(requestMessage);
             if (!success)
             {
                 throw new IllegalStateException("Request add host to protection domain failed");
-            }
+            }*/
             response.setWorkFlowTaskStatus(Status.SUCCEEDED);
             response.setProtectionDomainId(protectionDomainId);
             response.setProtectionDomainName(inputParams.getProtectionDomainName());

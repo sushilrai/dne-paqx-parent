@@ -3,18 +3,24 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.PING_IP_ADDRESS_FAILED;
 
 @Component
 @Scope("prototype")
@@ -29,59 +35,80 @@ public class PingIdrac extends BaseWorkflowDelegate
     /**
      * Ping response wait time
      */
-    private final int pingTimeoutInMilliSeconds;
+    private final int pingIdracWaitTime;
 
-    @Autowired
-    public PingIdrac(int pingTimeoutInMilliSeconds)
+    /**
+     * Default constructor
+     */
+    public PingIdrac()
     {
-        this.pingTimeoutInMilliSeconds = pingTimeoutInMilliSeconds;
+        this(120000);// 120 seconds
+    }
+
+    /**
+     * @param pingIdracWaitTime
+     */
+    public PingIdrac(int pingIdracWaitTime)
+    {
+        this.pingIdracWaitTime = pingIdracWaitTime;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute Ping iDrac");
+        updateDelegateStatus("Attempting to Ping iDrac");
 
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        String idracIpAddress = nodeDetail.getIdracIpAddress();
+        boolean isReachableResult = false;
 
-        /*if (nodeDetail != null && StringUtils.isNotEmpty(nodeDetail.getIdracIpAddress()))
+        try
         {
-            InetAddress idracIP = null;
-            try
-            {
-                String idracIpAddress = nodeDetail.getIdracIpAddress();
+            isReachableResult = isIdracReachable(idracIpAddress);
+        }
+        catch (UnknownHostException e)
+        {
+            final String message = "Unable to determine iDRAC IP Address for Node " + nodeDetail.getServiceTag() + ".";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message);
+            throw new BpmnError(PING_IP_ADDRESS_FAILED, message + " Reason: " + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            final String message = "Unable to reach iDRAC IP Address for Node " + nodeDetail.getServiceTag() + ".";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message);
+            throw new BpmnError(PING_IP_ADDRESS_FAILED, message + " Reason: " + e.getMessage());
+        }
+        catch (Exception e)
+        {
+            final String message =
+                    "An unexpected exception occurred attempting to ping iDRAC IP Address for Node " + nodeDetail.getServiceTag();
+            LOGGER.error(message, e);
+            updateDelegateStatus(message);
+            throw new BpmnError(PING_IP_ADDRESS_FAILED, message);
+        }
 
-                idracIP = InetAddress.getByName(idracIpAddress);
-            }
-            catch (Exception e)
-            {
-                LOGGER.error("An Unexpected Exception occurred while attempting to ping Node " + nodeDetail.getServiceTag(), e);
-                updateDelegateStatus("An Unexpected Exception occurred while attempting to ping Node " + nodeDetail.getServiceTag());
-                throw new BpmnError(PING_IP_ADDRESS_FAILED,
-                                    "An Unexpected Exception occurred while attempting to ping Node " +
-                                    nodeDetail.getServiceTag() + ".  Reason: " + e.getMessage());
-            }
-            boolean ping = false;
-            if (idracIP != null)
-            {
-                try
-                {
-                    ping = idracIP.isReachable(this.pingTimeoutInMilliSeconds);
-                }
-                catch (Exception e)
-                {
-                    LOGGER.error("Error trying to reach ip address!", e);
-                }
-            }
-            if (idracIP == null || !ping)
-            {
-                LOGGER.error("Node " + nodeDetail.getServiceTag() + " IP Address was not able to be contacted.");
-                updateDelegateStatus("Node " + nodeDetail.getServiceTag() + " IP Address was not able to be contacted.");
-                throw new BpmnError(PING_IP_ADDRESS_FAILED,
-                                    "Node " + nodeDetail.getServiceTag() + " IP Address was not able to be contacted.");
-            }}*/
-        LOGGER.info("Ping iDrac on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus("Ping iDrac on Node " + nodeDetail.getServiceTag() + " was successful.");
+        if (!isReachableResult)
+        {
+            final String message = "Unable to contact iDRAC IP Address for Node " + nodeDetail.getServiceTag() + ".";
+            LOGGER.error(message);
+            updateDelegateStatus(message);
+            throw new BpmnError(PING_IP_ADDRESS_FAILED, message);
+        }
 
+        final String message = "Ping iDRAC IP Address for Node " + nodeDetail.getServiceTag() + " was successful.";
+        LOGGER.info(message);
+        updateDelegateStatus(message);
+    }
+
+    /**
+     * @param idracIpAddress
+     * @return
+     */
+    protected boolean isIdracReachable(String idracIpAddress) throws IOException
+    {
+        return InetAddress.getByName(idracIpAddress).isReachable(pingIdracWaitTime);
     }
 }
