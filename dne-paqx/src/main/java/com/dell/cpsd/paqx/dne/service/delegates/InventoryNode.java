@@ -88,7 +88,7 @@ public class InventoryNode extends BaseWorkflowDelegate
         {
             try
             {
-                nodeInventory = new NodeInventory(nodeDetail.getId(), nodeInventoryResponse.toString());
+                nodeInventory = new NodeInventory(nodeDetail.getId(), nodeInventoryResponse);
             }
             catch (JsonProcessingException jpe) {
                 final String message = "Update Node Inventory failed due to unrecognized response for Node " + (nodeDetail==null?null:nodeDetail.getServiceTag());
