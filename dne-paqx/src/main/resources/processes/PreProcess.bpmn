@@ -52,15 +52,17 @@
     <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${findVCenterCluster}">
       <bpmn:incoming>SequenceFlow_16g64dr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0qxxk7u</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:serviceTask id="selectStoragePools" name="Select Storage Pools" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectStoragePools}">
       <bpmn:incoming>SequenceFlow_08ayndm</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_116yf5e</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
       <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="selectVCenterClustersError" name="Error" camunda:asyncAfter="true" camunda:exclusive="false" attachedToRef="selectVCenterClusters">
       <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
