@@ -7,8 +7,11 @@ package com.dell.cpsd.paqx.dne.rest;
 
 import com.dell.cpsd.hdp.capability.registry.client.lookup.config.CapabilityRegistryLookupManagerConfig;
 import com.dell.cpsd.paqx.dne.amqp.config.AsynchronousNodeServiceConfig;
+import com.dell.cpsd.paqx.dne.amqp.config.ProductionConfig;
 import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import org.h2.tools.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -23,7 +26,10 @@ import java.sql.SQLException;
 @Import({ServiceConfig.class , AsynchronousNodeServiceConfig.class, CapabilityRegistryLookupManagerConfig.class })
 public class NodeExpansionWebApplication {
 
-    public static void main(String[] args) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NodeExpansionWebApplication.class);
+
+    public static void main(String[] args)
+    {
 
         SpringApplication.run(NodeExpansionWebApplication.class, args);
 
@@ -34,9 +40,7 @@ public class NodeExpansionWebApplication {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            LOGGER.error("Exception starting NodeExpansionWebApplication", e);
         }
-
-
     }
 }
