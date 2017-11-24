@@ -13,6 +13,7 @@ import com.dell.cpsd.paqx.dne.repository.InMemoryJobRepository;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
 import com.dell.cpsd.paqx.dne.service.model.Step;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -74,6 +75,7 @@ public class AddNodeServiceImplTest
     }
 
     @Test
+    @Ignore
     public void testTaskName_addHostToProtectionDomain()
     {
         assertEquals("Add host to protection domain", workFlowTasks.get("addHostToProtectionDomain").getTaskName());

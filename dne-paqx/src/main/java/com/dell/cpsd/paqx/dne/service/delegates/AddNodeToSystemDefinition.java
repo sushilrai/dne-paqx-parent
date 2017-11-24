@@ -60,28 +60,28 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
         this.repository = repository;
     }
 
-    /*
-     * Given a list of group names map each one to its corresponding UUID.
-     */
-    private List<String> mapGroupNamesToUUIDs(List<String> groupNames, List<Group> groups)
-    {
-        List<String> groupUuids = new ArrayList<>();
-        groups.forEach(group -> {
-            if (groupNames.contains(group.getName()))
-            {
-                groupUuids.add(group.getUuid());
-            }
-        });
-        return groupUuids;
-    }
+//    /*
+//     * Given a list of group names map each one to its corresponding UUID.
+//     */
+//    private List<String> mapGroupNamesToUUIDs(List<String> groupNames, List<Group> groups)
+//    {
+//        List<String> groupUuids = new ArrayList<>();
+//        groups.forEach(group -> {
+//            if (groupNames.contains(group.getName()))
+//            {
+//                groupUuids.add(group.getUuid());
+//            }
+//        });
+//        return groupUuids;
+//    }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute AddNodeToSystemDefinitionTaskHandler task");
+        /*LOGGER.info("Execute AddNodeToSystemDefinitionTaskHandler task");
         final String taskMessage = "Add Node To System Definition";
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-       /* try
+        try
         {
             final NodeExpansionRequest inputParams = job.getInputParams();
 
@@ -163,10 +163,10 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
         }
 
         response.setWorkFlowTaskStatus(Status.FAILED);
-        return false;*/
+        return false;
         LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-
+*/
     }
 
 }

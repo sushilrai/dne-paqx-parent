@@ -96,11 +96,11 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Find vCenter cluster", new FindVClusterTaskHandler(nodeService));
     }
 
-    @Bean("findOrCreateValidStoragePoolTask")
-    public WorkflowTask findOrCreateValidStoragePoolTask()
-    {
-        return createTask("Find or create valid storage pool", new FindOrCreateValidStoragePoolTaskHandler(nodeService));
-    }
+//    @Bean("findOrCreateValidStoragePoolTask")
+//    public WorkflowTask findOrCreateValidStoragePoolTask()
+//    {
+//        return createTask("Find or create valid storage pool", new FindOrCreateValidStoragePoolTaskHandler(nodeService));
+//    }
 
     @Bean("findProtectionDomainTask")
     public WorkflowTask findProtectionDomainTask()
@@ -122,7 +122,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configureObmSettings", configureObmSettingsTask());
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());
-        workflowTasks.put("findOrCreateValidStoragePool", findOrCreateValidStoragePoolTask());
+//        workflowTasks.put("findOrCreateValidStoragePool", findOrCreateValidStoragePoolTask());
         workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         return workflowTasks;

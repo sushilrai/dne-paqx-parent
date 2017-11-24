@@ -104,8 +104,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
         workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
         workflowTasks.put("installSvmPackages", installSvmPackagesTask());
-        workflowTasks.put("performanceTuneSvm", performanceTuneSvmTask());*/
-        workflowTasks.put("addHostToProtectionDomain", addHostToProtectionDomainTask());
+        workflowTasks.put("performanceTuneSvm", performanceTuneSvmTask());
+        workflowTasks.put("addHostToProtectionDomain", addHostToProtectionDomainTask());*/
         //workflowTasks.put("updateSdcPerformanceProfile", updateSdcPerformanceProfileTask());
         workflowTasks.put("configurePxeBoot", configurePxeBootTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
@@ -114,11 +114,11 @@ public class AddNodeService extends BaseService implements IAddNodeService
         return workflowTasks;
     }
 
-    @Bean("addHostToProtectionDomain")
-    private WorkflowTask addHostToProtectionDomainTask()
-    {
-        return createTask("Add host to protection domain", new AddHostToProtectionDomainTaskHandler(nodeService, repository));
-    }
+//    @Bean("addHostToProtectionDomain")
+//    private WorkflowTask addHostToProtectionDomainTask()
+//    {
+//        return createTask("Add host to protection domain", new AddHostToProtectionDomainTaskHandler(nodeService, repository));
+//    }
 
     @Bean("updateSystemDefinitionTask")
     private WorkflowTask updateSystemDefinitionTask()
