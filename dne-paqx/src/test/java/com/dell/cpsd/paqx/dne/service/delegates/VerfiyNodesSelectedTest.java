@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -219,6 +220,16 @@ public class VerfiyNodesSelectedTest
         assertThat(updateDelegateStatusParams, hasSize(2));
         assertTrue(updateDelegateStatusParams.get(0).contains("Attempting to verify selected Nodes are still available"));
         assertTrue(updateDelegateStatusParams.get(1).contains("All selected Nodes are available"));
+    }
+
+    @Test
+    public void testItemContainsString() throws Exception
+    {
+        assertFalse(verifyNodesSelected.itemContainsString("1.2.3.44-ABC", "1.2.3.4"));
+        assertFalse(verifyNodesSelected.itemContainsString("ABC-1.2.3.44", "1.2.3.4"));
+        assertFalse(verifyNodesSelected.itemContainsString("abc-d122.example.com", "abc-d12"));
+        assertTrue(verifyNodesSelected.itemContainsString("ABC-1.2.3.4", "1.2.3.4"));
+        assertTrue(verifyNodesSelected.itemContainsString("abc-d12.example.com", "abc-d12"));
     }
 
     private void verifyNodeAlreadyProvisioned() throws Exception
