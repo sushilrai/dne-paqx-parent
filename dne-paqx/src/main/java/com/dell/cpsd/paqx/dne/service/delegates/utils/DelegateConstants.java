@@ -82,6 +82,7 @@ public class DelegateConstants
     public static final String DATASTORE_RENAME_FAILED                  = "Datastore-rename-failed";
     public static final String ESXI_HOST_MAINTENANCE_MODE_FAILED        = "Esxi-Host-Maintenance-Mode-Failed";
     public static final String SELECT_PROTECTION_DOMAINS_FAILED         = "Select-Protection-Domains-Failed";
+    public static final String SELECT_STORAGE_POOLS_FAILED              = "Select-Storage-Pools-Failed";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED                   = "Failed";

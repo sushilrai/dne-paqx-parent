@@ -1,3 +1,8 @@
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
@@ -26,10 +31,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
 public class SelectProtectionDomainsTest
 {
-    private SelectProtectionDomains          findVCenterCluster;
-    private NodeDetail                       nodeDetail;
+    private SelectProtectionDomains                     selectedProtectionDomains;
+    private NodeDetail                                  nodeDetail;
     private EssValidateProtectionDomainsResponseMessage responseMessage;
 
     @Mock
@@ -47,13 +57,13 @@ public class SelectProtectionDomainsTest
     @Before
     public void setUp() throws Exception
     {
-        findVCenterCluster = new SelectProtectionDomains(nodeService, repository);
+        selectedProtectionDomains = new SelectProtectionDomains(nodeService, repository);
 
         nodeDetail = new NodeDetail("1", "abc");
         doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
 
-        List<ScaleIOData> clusterInfos = new ArrayList<>();
-        ScaleIOData clusterInfo = new ScaleIOData("sio1", "name1", "installId", "mdmMode", "systemVersion", "clusterState", "version");
+        List<ScaleIOData> scaleIODataList = new ArrayList<>();
+        ScaleIOData scaleIOData = new ScaleIOData("sio1", "name1", "installId", "mdmMode", "systemVersion", "clusterState", "version");
 
         ScaleIOProtectionDomain protectionDomain1 = new ScaleIOProtectionDomain("pdId1", "pdName1", "ACTIVE");
 
@@ -61,10 +71,10 @@ public class SelectProtectionDomainsTest
         ScaleIOSDS sds = new ScaleIOSDS("sds1", "sdsName-ESX", "RUNNING", 1234);
         sds.setProtectionDomain(protectionDomain1);
         protectionDomain1.addSDS(sds);
-        clusterInfo.addProtectionDomain(protectionDomain1);
-        protectionDomain1.setScaleIOData(clusterInfo);
-        clusterInfos.add(clusterInfo);
-        doReturn(clusterInfos).when(nodeService).listScaleIOData();
+        scaleIOData.addProtectionDomain(protectionDomain1);
+        protectionDomain1.setScaleIOData(scaleIOData);
+        scaleIODataList.add(scaleIOData);
+        doReturn(scaleIODataList).when(nodeService).listScaleIOData();
 
         responseMessage = new EssValidateProtectionDomainsResponseMessage();
         ValidProtectionDomain vpd1 = new ValidProtectionDomain("pdId1", null,null);
@@ -75,7 +85,7 @@ public class SelectProtectionDomainsTest
     @Test
     public void testSuccessful()
     {
-        findVCenterCluster.delegateExecute(delegateExecution);
+        selectedProtectionDomains.delegateExecute(delegateExecution);
         assertEquals(nodeDetail.getProtectionDomainId(), "pdId1");
         assertEquals(nodeDetail.getProtectionDomainName(), "pdName1");
     }

@@ -43,6 +43,11 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 @Component
 @Scope("prototype")
 @Qualifier("selectProtectionDomains")
+/**
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ */
 public class SelectProtectionDomains extends BaseWorkflowDelegate
 {
 

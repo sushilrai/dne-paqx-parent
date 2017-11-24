@@ -396,6 +396,14 @@ public interface NodeService
     String getNodeInventoryData(Job job);
 
     /**
+     * Method to retrive the node inventory data
+     *
+     * @param symphonyUUID
+     * @return
+     */
+    String getNodeInventoryData(String symphonyUUID);
+
+    /**
      * Retrieves vCenter hosts from H2 database
      *
      * @return List of <code>Host</code>

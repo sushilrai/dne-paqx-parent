@@ -2228,9 +2228,15 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      * @param job
      * @return
      */
+    @Override
     public String getNodeInventoryData(Job job)
     {
-        String symphonyUUID = job.getInputParams().getSymphonyUuid();
+        return getNodeInventoryData(job.getInputParams().getSymphonyUuid());
+    }
+
+    @Override
+    public String getNodeInventoryData(String symphonyUUID)
+    {
         LOGGER.info("Node Inventory UUID=" + symphonyUUID);
         NodeInventory nodeInventory = repository.getNodeInventory(symphonyUUID);
 
@@ -2240,6 +2246,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     /*
      * {@inheritDoc}
      */
+    @Override
     public List<Host> findVcenterHosts() throws NoResultException
     {
         List<Host> vCenterHosts;
