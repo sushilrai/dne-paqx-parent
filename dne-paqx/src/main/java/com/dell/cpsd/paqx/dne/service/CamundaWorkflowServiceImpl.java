@@ -277,7 +277,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         final String parentId = historicProcessInstance.getId();
         Set<Activity> ret = new LinkedHashSet<>();
 
-        String activityName = null;
+        String activityName;
         for (HistoricActivityInstance hai : historicActivityInstances)
         {
             // skip some processes
@@ -297,6 +297,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
                 activity.setStartTime(hai.getStartTime());
                 activity.setEndTime(hai.getEndTime());
                 activity.setDurationInMillis(hai.getDurationInMillis());
+                ret.add(activity);
             }
         }
 
