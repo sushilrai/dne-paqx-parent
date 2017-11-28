@@ -9,7 +9,6 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
-import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.dell.cpsd.virtualization.capabilities.api.MessageProperties;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterResponseMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,10 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.FIND_VCLUSTER_FAILED;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,10 +37,9 @@ public class FindVCenterClusterTest
 {
 
     private FindVCenterCluster findVCenterCluster;
-    private NodeDetail nodeDetail;
+    private List<NodeDetail> nodeDetail;
     private ValidateVcenterClusterResponseMessage responseMessage;
-    private List<String> clusterList;
-
+    private Map<String, String> clusterMap;
     @Mock
     private NodeService nodeService;
 
@@ -52,25 +52,23 @@ public class FindVCenterClusterTest
     @Before
     public void setUp() throws Exception {
         findVCenterCluster = new FindVCenterCluster(nodeService);
+        ValidateVcenterClusterResponseMessage responseMsg = new ValidateVcenterClusterResponseMessage();
 
-        nodeDetail = new NodeDetail("1", "abc");
-        doReturn(nodeDetail). when(delegateExecution).getVariable(NODE_DETAIL);
+        nodeDetail = new ArrayList<>();
+        nodeDetail.add(new NodeDetail("1", "abc"));
 
-        List<ClusterInfo> clusterInfos = new ArrayList<>();
-        ClusterInfo clusterInfo = new ClusterInfo("TestCluster", 1);
-        clusterInfos.add(clusterInfo);
-        doReturn(clusterInfos).when(nodeService).listClusters();
-
-        clusterList = new ArrayList<>();
-        clusterList.add("TestCluster");
-        responseMessage = new ValidateVcenterClusterResponseMessage(messageProperties, clusterList, null, "Description" );
-        doReturn(responseMessage).when(nodeService).validateClusters(any());
+        doReturn(nodeDetail). when(delegateExecution).getVariable(NODE_DETAILS);
+        clusterMap = new HashMap<>();
+        clusterMap.put("abc", "TestCluster");
+        responseMsg.setClusters(clusterMap);
+        responseMessage = new ValidateVcenterClusterResponseMessage(messageProperties, clusterMap, null, "Description" );
+        doReturn(responseMessage).when(nodeService).validateClusters(any(), any());
     }
 
     @Test
     public void testSuccessful() {
         findVCenterCluster.delegateExecute(delegateExecution);
-        assertEquals(nodeDetail.getClusterName(), "TestCluster");
+        assertEquals(nodeDetail.get(0).getClusterName(), "TestCluster");
     }
 
     @Test
@@ -83,20 +81,6 @@ public class FindVCenterClusterTest
         } catch( BpmnError bpmnError) {
             assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
             assertEquals(bpmnError.getMessage(), "An unexpected Exception occurred while retrieving the list of Clusters for selection.  Reason: Timeout");
-        }
-    }
-
-    @Test
-    public void testClusterFailedException() throws Exception {
-        responseMessage = new ValidateVcenterClusterResponseMessage(messageProperties, null, clusterList, "Description" );
-        doReturn(responseMessage).when(nodeService).validateClusters(any());
-        try
-        {
-            findVCenterCluster.delegateExecute(delegateExecution);
-            fail("Should not get here!");
-        } catch( BpmnError bpmnError) {
-            assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
-            assertEquals(bpmnError.getMessage(), "Selecting VCenter Cluster Failed for Node abc. Reason: TestCluster ");
         }
     }
 }

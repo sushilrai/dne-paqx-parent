@@ -656,7 +656,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     }
 
     @Override
-    public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList)
+    public ValidateVcenterClusterResponseMessage validateClusters(List<ClusterInfo> clusterInfoList, List<String> nodeIds)
             throws ServiceTimeoutException, ServiceExecutionException
     {
         com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
@@ -675,7 +675,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         request.setMessageProperties(messageProperties);
-        request.setDiscoverClusterResponseInfo(new DiscoverClusterResponseInfo(clusterInfoList));
+        request.setDiscoverClusterResponseInfo(new DiscoverClusterResponseInfo(clusterInfoList, nodeIds));
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override

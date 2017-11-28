@@ -20,7 +20,6 @@ import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigIdracTaskHan
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigureObmSettingsTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindOrCreateValidStoragePoolTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindProtectionDomainTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindVClusterTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -90,11 +89,11 @@ public class PreProcessService extends BaseService implements IPreProcessService
         return createTask("Ping server out of band IP address", new PingIdracTaskHandler(PING_IDRAC_TIMEOUT));
     }
 
-    @Bean("findVClusterTask")
-    public WorkflowTask createVClusterTask()
-    {
-        return createTask("Find vCenter cluster", new FindVClusterTaskHandler(nodeService));
-    }
+//    @Bean("findVClusterTask")
+//    public WorkflowTask createVClusterTask()
+//    {
+//        return createTask("Find vCenter cluster", new FindVClusterTaskHandler(nodeService));
+//    }
 
 //    @Bean("findOrCreateValidStoragePoolTask")
 //    public WorkflowTask findOrCreateValidStoragePoolTask()
@@ -123,7 +122,7 @@ public class PreProcessService extends BaseService implements IPreProcessService
         workflowTasks.put("configIdrac", configIdracTask());
         workflowTasks.put("pingIdrac", pingIdracTask());
 //        workflowTasks.put("findOrCreateValidStoragePool", findOrCreateValidStoragePoolTask());
-        workflowTasks.put("findVCluster", createVClusterTask());
+//        workflowTasks.put("findVCluster", createVClusterTask());
         workflowTasks.put("findProtectionDomain", findProtectionDomainTask());
         return workflowTasks;
     }

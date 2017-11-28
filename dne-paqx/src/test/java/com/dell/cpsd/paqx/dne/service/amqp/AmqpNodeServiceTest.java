@@ -349,8 +349,9 @@ public class AmqpNodeServiceTest
             protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
                     throws ServiceTimeoutException
             {
+                List<String> nodeIds = new ArrayList<>();
                 DiscoverClusterResponseInfo responseInfo = new DiscoverClusterResponseInfo(
-                        Collections.singletonList(new ClusterInfo(clusterName, numberOfHosts)));
+                        Collections.singletonList(new ClusterInfo(clusterName, numberOfHosts)), nodeIds);
 
                 MessageProperties messageProperties = new MessageProperties(Calendar.getInstance().getTime(), UUID.randomUUID().toString(),
                         "replyToMe");

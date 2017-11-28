@@ -52,7 +52,6 @@
     <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${findVCenterCluster}">
       <bpmn:incoming>SequenceFlow_16g64dr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0qxxk7u</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:serviceTask id="selectStoragePools" name="Select Storage Pools" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectStoragePools}">
       <bpmn:incoming>SequenceFlow_08ayndm</bpmn:incoming>

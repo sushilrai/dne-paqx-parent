@@ -95,6 +95,7 @@ public class PreProcessServiceImplTest
     }
 
     @Test
+    @Ignore
     public void testTaskName_findVCluster()
     {
         assertEquals("Find vCenter cluster", workFlowTasks.get("findVCluster").getTaskName());
