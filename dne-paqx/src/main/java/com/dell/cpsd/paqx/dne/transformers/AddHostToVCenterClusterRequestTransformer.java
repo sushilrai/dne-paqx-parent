@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 
 /**
  * Add Host To VCenter Cluster request message transformer
@@ -48,9 +47,9 @@ public class AddHostToVCenterClusterRequestTransformer
 
     public DelegateRequestModel<ClusterOperationRequestMessage> buildAddHostToVCenterRequest(final DelegateExecution delegateExecution)
     {
-        final String clusterName = (String) delegateExecution.getVariable(VCENTER_CLUSTER_NAME);
         final String hostname = (String) delegateExecution.getVariable(HOSTNAME);
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        final String clusterName = nodeDetail.getClusterName();
         final ComponentEndpointIds componentEndpointIds = componentIdsTransformer
                 .getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE);
         final ESXiCredentialDetails esxiCredentialDetails = (ESXiCredentialDetails) delegateExecution.getVariable(ESXI_CREDENTIAL_DETAILS);

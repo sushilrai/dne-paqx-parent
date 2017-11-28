@@ -27,7 +27,6 @@ import java.util.Optional;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CLUSTER_INFO_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.FIND_VCLUSTER_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 
 @Component
 @Scope("prototype")
@@ -55,8 +54,9 @@ public class FindVCenterCluster extends BaseWorkflowDelegate
         List<ClusterInfo> clusterInfos = null;
         try
         {
-            clusterInfos =  (List<ClusterInfo>) delegateExecution.getVariable(CLUSTER_INFO_DETAILS);
-            if (clusterInfos == null) {
+            clusterInfos = (List<ClusterInfo>) delegateExecution.getVariable(CLUSTER_INFO_DETAILS);
+            if (clusterInfos == null)
+            {
                 clusterInfos = nodeService.listClusters();
             }
             responseMsg = nodeService.validateClusters(clusterInfos);
@@ -90,11 +90,12 @@ public class FindVCenterCluster extends BaseWorkflowDelegate
         nodeDetail.setClusterName(clusterName);
         delegateExecution.setVariable(NODE_DETAIL, nodeDetail);
         final String finalClusterName = clusterName;
-        Optional<ClusterInfo> updateCluster = clusterInfos.stream().filter(cluster -> finalClusterName
-                .equals(cluster.getName())).findFirst();
-        if (updateCluster.isPresent()) {
+        Optional<ClusterInfo> updateCluster = clusterInfos.stream().filter(cluster -> finalClusterName.equals(cluster.getName()))
+                .findFirst();
+        if (updateCluster.isPresent())
+        {
             ClusterInfo cluster = updateCluster.get();
-            cluster.setNumberOfHosts(cluster.getNumberOfHosts()+ 1);
+            cluster.setNumberOfHosts(cluster.getNumberOfHosts() + 1);
             delegateExecution.setVariable(CLUSTER_INFO_DETAILS, clusterInfos);
         }
         final String message = "VCenter Cluster " + clusterName + " was selected for Node " + nodeDetail.getServiceTag();

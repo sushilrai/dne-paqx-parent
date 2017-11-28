@@ -20,8 +20,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_NEW_VM_NAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_VM_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VIRTUAL_MACHINE_NAME;
 
 /**
  * Deploy ScaleIo virtual machine.
@@ -73,15 +73,17 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
                     .buildDeployVmRequest(delegateExecution);
             this.nodeService.requestDeployScaleIoVm(delegateRequestModel.getRequestMessage());
 
-            delegateExecution.setVariable(DEPLOY_SCALEIO_NEW_VM_NAME, delegateRequestModel.getRequestMessage().getNewVMName());
+            delegateExecution.setVariable(VIRTUAL_MACHINE_NAME, delegateRequestModel.getRequestMessage().getNewVMName());
             final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
             LOGGER.info(returnMessage);
             updateDelegateStatus(returnMessage);
         }
         catch (TaskResponseFailureException ex)
         {
+            String errorMsg = "Exception Code: ";
+            LOGGER.error(errorMsg, ex);
             updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(DEPLOY_SCALEIO_VM_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            throw new BpmnError(DEPLOY_SCALEIO_VM_FAILED,  errorMsg + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {

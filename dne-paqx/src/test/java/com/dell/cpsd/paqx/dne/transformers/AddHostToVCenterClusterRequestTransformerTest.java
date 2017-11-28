@@ -21,7 +21,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_CREDENTIAL_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,21 +42,21 @@ public class AddHostToVCenterClusterRequestTransformerTest
     private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private final        String serviceTag            = "service-tag";
     @Mock
-    private DataServiceRepository dataServiceRepository;
+    private DataServiceRepository                     dataServiceRepository;
     @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
+    private ComponentIdsTransformer                   componentIdsTransformer;
     @Mock
-    private DelegateExecution delegateExecution;
+    private DelegateExecution                         delegateExecution;
     @Mock
-    private ComponentEndpointIds componentEndpointIds;
+    private ComponentEndpointIds                      componentEndpointIds;
     @Mock
-    private ESXiCredentialDetails esxiCredentialDetails;
+    private ESXiCredentialDetails                     esxiCredentialDetails;
     @Mock
-    private NodeDetail nodeDetail;
+    private NodeDetail                                nodeDetail;
     private AddHostToVCenterClusterRequestTransformer transformer;
-    private              String clusterName           = "clustername-1";
-    private              String clusterId             = "clustername-1d-1";
-    private              String hostName              = "hostname-1";
+    private String clusterName = "clustername-1";
+    private String clusterId   = "clustername-1d-1";
+    private String hostName    = "hostname-1";
 
     @Before
     public void setUp() throws Exception
@@ -68,7 +67,7 @@ public class AddHostToVCenterClusterRequestTransformerTest
     @Test
     public void testBuildAddHostToVCenterRequestIsValid() throws Exception
     {
-        when(this.delegateExecution.getVariable(VCENTER_CLUSTER_NAME)).thenReturn(this.clusterName);
+        when(nodeDetail.getClusterName()).thenReturn(this.clusterName);
         when(this.delegateExecution.getVariable(HOSTNAME)).thenReturn(this.hostName);
         when(componentIdsTransformer.getVCenterComponentEndpointIdsByEndpointType(VCENTER_CUSTOMER_TYPE))
                 .thenReturn(this.componentEndpointIds);

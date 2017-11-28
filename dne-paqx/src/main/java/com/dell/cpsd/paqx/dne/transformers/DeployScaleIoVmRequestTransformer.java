@@ -190,7 +190,10 @@ public class DeployScaleIoVmRequestTransformer
     {
         final NicSetting nicSettingScaleIoMgmt = new NicSetting();
         nicSettingScaleIoMgmt.setIpAddress(scaleIoSvmManagementIpAddress);
-        nicSettingScaleIoMgmt.setGateway(singletonList(scaleIoSvmManagementGatewayAddress));
+        if(!StringUtils.isEmpty(scaleIoSvmManagementGatewayAddress))
+        {
+            nicSettingScaleIoMgmt.setGateway(singletonList(scaleIoSvmManagementGatewayAddress));
+        }
         nicSettingScaleIoMgmt.setSubnetMask(scaleIoSvmManagementSubnetMask);
         return nicSettingScaleIoMgmt;
     }

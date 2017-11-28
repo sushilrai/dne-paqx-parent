@@ -25,7 +25,6 @@ public class DelegateConstants
     public static final String NODE_DETAIL             = "NodeDetail";
     public static final String CLUSTER_INFO_DETAILS    = "ClusterInfoDetails";
     public static final String VCENTER_CLUSTER_ID      = "VCenterClusterId";
-    public static final String VCENTER_CLUSTER_NAME    = "VCenterClusterName";
     public static final String STORAGE_POOL            = "StoragePool";
     public static final String ESXI_CREDENTIAL_DETAILS = "ESXiCredentialDetails";
     public static final String HOSTNAME                = "Hostname";
@@ -72,7 +71,6 @@ public class DelegateConstants
     public static final String PERFORMANCE_TUNE_SCALEIO_VM              = "Performance-Tune-Scaleio-Vm";
     public static final String ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN    = "Add-vCenter-Host-To-Protection-Domain";
     public static final String DEPLOY_SCALEIO_VM_FAILED                 = "Deploy-ScaleIo-Vm-Failed";
-    public static final String DEPLOY_SCALEIO_NEW_VM_NAME               = "Deploy-ScaleIo-New-VM-Name";
     public static final String UPDATE_PCI_PASSTHROUGH                   = "Update-Pci-Passthrough";
     public static final String SEND_INSTALL_ESXI_FAILED                 = "Send-Install-Esxi-Failed";
     public static final String NOTIFY_NODE_STATUS_STARTED_FAILED        = "Notify-Node-Status-Started-Failed";

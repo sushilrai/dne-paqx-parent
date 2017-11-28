@@ -32,7 +32,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.I
  */
 @Component
 @Scope("prototype")
-@Qualifier("installScaleIOVib")
+@Qualifier("installScaleIoVib")
 public class InstallScaleIoVib extends BaseWorkflowDelegate
 {
     /*
