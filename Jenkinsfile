@@ -52,6 +52,11 @@ pipeline {
                 }
             }
         }
+        stage('Fortify Scan') { 
+           steps { 
+                runFortifyScan() 
+             } 
+        }
         stage('Record Test Results') {
             steps {
                 junit '**/target/*-reports/*.xml'
