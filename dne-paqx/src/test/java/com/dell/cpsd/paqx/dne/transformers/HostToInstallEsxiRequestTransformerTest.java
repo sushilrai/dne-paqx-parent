@@ -108,7 +108,6 @@ public class HostToInstallEsxiRequestTransformerTest
         assertSame(result.getDomain(), this.searchDomains.get(0));
         assertSame(result.getHostname(), this.esxiManagementHostName);
         assertSame(result.getNtpServers(), this.ntpServers);
-        // TODO verify logical build guide specific configuration...
         assertThat(result.getKargs(), containsString("vmnic0"));
         assertSame(result.getNetworkDevices().get(0).getDevice(), "vmnic1");
         assertSame(result.getNetworkDevices().get(0).getEsxSwitchName(), "vSwitch0");

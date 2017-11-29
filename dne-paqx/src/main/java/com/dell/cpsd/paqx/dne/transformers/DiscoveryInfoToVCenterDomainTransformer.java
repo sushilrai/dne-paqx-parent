@@ -38,7 +38,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
         }
 
         // Create the VCenter object
-        // TODO: Add vcenter properties
         final VCenter returnVal = new VCenter("change-me", "change-me");
 
         // Transform and link datacenters
@@ -112,11 +111,6 @@ public class DiscoveryInfoToVCenterDomainTransformer
                 returnVal.setNetworkList(networks);
             }
         });
-
-        // TODO: Link Host Pnics to Dvswitches
-        // TODO: Link Datastores to Hosts
-        // TODO: Link Virtual Nics to DVPortgroups
-        // TODO: Link VMGuestNetworks to DVPortgroups
 
         // FK link
         returnVal.setvCenter(vCenter);

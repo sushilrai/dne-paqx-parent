@@ -7,9 +7,6 @@ package com.dell.cpsd.paqx.dne.service.amqp;
 
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
-import com.dell.cpsd.ConfigurePxeBootError;
-import com.dell.cpsd.ConfigurePxeBootRequestMessage;
-import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.FailNodeAllocationResponseMessage;
 import com.dell.cpsd.NodeAllocationInfo;
 import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
@@ -22,7 +19,6 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.H2DataRepository;
-import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
@@ -100,10 +96,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -624,115 +618,6 @@ public class AmqpNodeServiceTest
 
         nodeService.notifyNodeAllocationStatus("elementIdentifier", "failed");
         Mockito.verify(dneProducer, Mockito.times(1)).publishFailedNodeAllocation(any());
-    }
-
-    @Test
-    public void testConfigurePxeBootSuccess() throws Exception
-    {
-        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        final DneProducer dneProducer = mock(DneProducer.class);
-        final DataServiceRepository repository = mock(DataServiceRepository.class);
-        final com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(new Date(),
-                UUID.randomUUID().toString(), "test");
-        final ConfigurePxeBootResponseMessage responseMessage = mock(ConfigurePxeBootResponseMessage.class);
-        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn(ConfigurePxeBootResponseMessage.Status.SUCCESS);
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
-            }
-        };
-
-        ReflectionTestUtils.setField(nodeService, "shareName", "share-name-1");
-        ReflectionTestUtils.setField(nodeService, "shareType", 10);
-        ReflectionTestUtils.setField(nodeService, "fqdds", new String[] {"fqdds-1", "fqdds-2"});
-        ReflectionTestUtils.setField(nodeService, "bootProtoName", "boot-proto-name-1");
-        ReflectionTestUtils.setField(nodeService, "bootProtoValue", "boot-proto-value-1");
-
-        final BootDeviceIdracStatus result = nodeService.configurePxeBoot("uuid-1", "1.2.3.4");
-
-        assertNotNull(result);
-        assertEquals(ConfigurePxeBootResponseMessage.Status.SUCCESS.toString(), result.getStatus());
-        assertNull(result.getErrors());
-        Mockito.verify(dneProducer).publishConfigurePxeBoot(any(ConfigurePxeBootRequestMessage.class));
-    }
-
-    @Test
-    public void testConfigurePxeBootException() throws Exception
-    {
-        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        final DneProducer dneProducer = mock(DneProducer.class);
-        final DataServiceRepository repository = mock(DataServiceRepository.class);
-        final com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(new Date(),
-                UUID.randomUUID().toString(), "test");
-        final ConfigurePxeBootResponseMessage responseMessage = mock(ConfigurePxeBootResponseMessage.class);
-        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn(ConfigurePxeBootResponseMessage.Status.SUCCESS);
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceError(new ServiceError(requestId, "network", "network"));
-            }
-        };
-
-        ReflectionTestUtils.setField(nodeService, "shareName", "share-name-1");
-        ReflectionTestUtils.setField(nodeService, "shareType", 10);
-        ReflectionTestUtils.setField(nodeService, "fqdds", new String[] {"fqdds-1", "fqdds-2"});
-        ReflectionTestUtils.setField(nodeService, "bootProtoName", "boot-proto-name-1");
-        ReflectionTestUtils.setField(nodeService, "bootProtoValue", "boot-proto-value-1");
-
-        final BootDeviceIdracStatus result = nodeService.configurePxeBoot("uuid-1", "1.2.3.4");
-
-        assertNotNull(result);
-        assertEquals(ConfigurePxeBootResponseMessage.Status.FAILED.toString(), result.getStatus());
-        assertThat(result.getErrors(), hasSize(1));
-        Mockito.verify(dneProducer).publishConfigurePxeBoot(any(ConfigurePxeBootRequestMessage.class));
-    }
-
-    @Test
-    public void testConfigurePxeBootError() throws Exception
-    {
-        final DelegatingMessageConsumer consumer = new DefaultMessageConsumer();
-        final DneProducer dneProducer = mock(DneProducer.class);
-        final DataServiceRepository repository = mock(DataServiceRepository.class);
-        final com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties(new Date(),
-                UUID.randomUUID().toString(), "test");
-        final ConfigurePxeBootResponseMessage responseMessage = mock(ConfigurePxeBootResponseMessage.class);
-        when(responseMessage.getMessageProperties()).thenReturn(messageProperties);
-        when(responseMessage.getStatus()).thenReturn(ConfigurePxeBootResponseMessage.Status.FAILED);
-        when(responseMessage.getConfigurePxeBootErrors()).thenReturn(Arrays.asList(new ConfigurePxeBootError("0001", "some-error")));
-
-        AmqpNodeService nodeService = new AmqpNodeService(consumer, dneProducer, "replyToMe", repository, null, null, null)
-        {
-            @Override
-            protected void waitForServiceCallback(ServiceCallback serviceCallback, String requestId, long timeout)
-                    throws ServiceTimeoutException
-            {
-                serviceCallback.handleServiceResponse(new ServiceResponse<>(requestId, responseMessage, null));
-            }
-        };
-
-        ReflectionTestUtils.setField(nodeService, "shareName", "share-name-1");
-        ReflectionTestUtils.setField(nodeService, "shareType", 10);
-        ReflectionTestUtils.setField(nodeService, "fqdds", new String[] {"fqdds-1", "fqdds-2"});
-        ReflectionTestUtils.setField(nodeService, "bootProtoName", "boot-proto-name-1");
-        ReflectionTestUtils.setField(nodeService, "bootProtoValue", "boot-proto-value-1");
-
-        final BootDeviceIdracStatus result = nodeService.configurePxeBoot("uuid-1", "1.2.3.4");
-
-        assertNotNull(result);
-        assertEquals(ConfigurePxeBootResponseMessage.Status.FAILED.toString(), result.getStatus());
-        assertThat(result.getErrors(), hasSize(1));
-        Mockito.verify(dneProducer).publishConfigurePxeBoot(any(ConfigurePxeBootRequestMessage.class));
     }
 
     /**

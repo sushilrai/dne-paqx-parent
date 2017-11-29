@@ -19,7 +19,6 @@ import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.NodeInventoryRequestMessage;
 import com.dell.cpsd.NodeInventoryResponseMessage;
 import com.dell.cpsd.NodesListed;
-import com.dell.cpsd.PxeBootConfig;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.SetObmSettingsResponseMessage;
 import com.dell.cpsd.StartNodeAllocationRequestMessage;
@@ -50,7 +49,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsRespons
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureObmSettingsResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureVmNetworkSettingsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateProtectionDomainResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateStoragePoolAdapter;
@@ -67,7 +65,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListScaleIoComponentsResponse
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListVCenterComponentsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodeInventoryResponseMessageAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.RemoteCommandExecutionResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SioSdcUpdatePerformanceProfileResponseAdapter;
@@ -164,14 +161,12 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -255,21 +250,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
      */
     private final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer;
 
-    @Value("${rackhd.boot.proto.share.name}")
-    private String shareName;
-
-    @Value("${rackhd.boot.proto.share.type}")
-    private Integer shareType;
-
-    @Value("${rackhd.boot.proto.fqdds}")
-    private String[] fqdds;
-
-    @Value("${rackhd.boot.proto.name}")
-    private String bootProtoName;
-
-    @Value("${rackhd.boot.proto.value}")
-    private String bootProtoValue;
-
     private static final long timeout = 240000L;
 
     /**
@@ -314,7 +294,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new FailNodeAllocationResponseAdapter(this));
         this.consumer.addAdapter(new IdracConfigResponseAdapter(this));
         this.consumer.addAdapter(new ChangeIdracCredentialsResponseAdapter(this));
-        this.consumer.addAdapter(new ConfigurePxeBootResponseAdapter(this));
         this.consumer.addAdapter(new ConfigureObmSettingsResponseAdapter(this));
         this.consumer.addAdapter(new ValidateClusterResponseAdapter(this));
         this.consumer.addAdapter(new ValidateStoragePoolResponseAdapter(this));
@@ -905,79 +884,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
 
         return responseMessage;
-    }
-
-    @Override
-    public BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress)
-    {
-        BootDeviceIdracStatus bootDeviceIdracStatus = new BootDeviceIdracStatus();
-
-        try
-        {
-            ConfigurePxeBootRequestMessage configurePxeBootRequestMessage = new ConfigurePxeBootRequestMessage();
-
-            com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
-            messageProperties.setCorrelationId(UUID.randomUUID().toString());
-            messageProperties.setTimestamp(Calendar.getInstance().getTime());
-            messageProperties.setReplyTo(replyTo);
-            configurePxeBootRequestMessage.setMessageProperties(messageProperties);
-
-            configurePxeBootRequestMessage.setUuid(uuid);
-            configurePxeBootRequestMessage.setIpAddress(ipAddress);
-
-            PxeBootConfig pxeBootConfig = new PxeBootConfig();
-            pxeBootConfig.setProtoValue(bootProtoValue);
-            pxeBootConfig.setShareType(shareType);
-            pxeBootConfig.setShareName(shareName);
-            pxeBootConfig.setProtoName(bootProtoName);
-            pxeBootConfig.setNicFqdds(Arrays.asList(fqdds));
-
-            configurePxeBootRequestMessage.setPxeBootConfig(pxeBootConfig);
-
-            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
-            {
-                @Override
-                public String getRequestId()
-                {
-                    return messageProperties.getCorrelationId();
-                }
-
-                @Override
-                public void executeRequest(String requestId) throws Exception
-                {
-                    producer.publishConfigurePxeBoot(configurePxeBootRequestMessage);
-                }
-            });
-
-            ConfigurePxeBootResponseMessage resp = processResponse(response, ConfigurePxeBootResponseMessage.class);
-            if (resp != null)
-            {
-                if (resp.getMessageProperties() != null)
-                {
-                    if (resp.getStatus() != null)
-                    {
-                        LOGGER.info("Response message is: " + resp.getStatus().toString());
-
-                        bootDeviceIdracStatus.setStatus(resp.getStatus().toString());
-                        List<ConfigurePxeBootError> errors = resp.getConfigurePxeBootErrors();
-                        if (!CollectionUtils.isEmpty(errors))
-                        {
-                            List<String> errorMsgs = errors.stream().map(ConfigurePxeBootError::getMessage).collect(Collectors.toList());
-                            bootDeviceIdracStatus.setErrors(errorMsgs);
-                        }
-                    }
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            LOGGER.error("Exception in boot order sequence: ", ex);
-            bootDeviceIdracStatus.setStatus(ConfigurePxeBootResponseMessage.Status.FAILED.toString());
-            bootDeviceIdracStatus.setErrors(Arrays.asList(ex.getMessage()));
-        }
-
-        return bootDeviceIdracStatus;
     }
 
     @Override

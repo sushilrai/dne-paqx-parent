@@ -45,8 +45,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
  */
 @Component
 @Scope("prototype")
-@Qualifier("addVCenterHostToProtectionDomain")
-//TODO: Change camunda delete expression and move logic to transformer
+@Qualifier("addSdsNodeToProtectionDomain")
 public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
 {
     /**

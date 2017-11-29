@@ -2,6 +2,7 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
+
 package com.dell.cpsd.paqx.dne.domain.node;
 
 import com.dell.cpsd.paqx.dne.service.model.NodeStatus;
@@ -25,8 +26,9 @@ import javax.persistence.Table;
 // we save this in h2 database for now. Later RackHD node discovered event should have these value
 // we'll update the db in node discovery paqx to store them and use by findAvailable nodes and
 // updateSystemDefinition
-@Table(name="DISCOVERED_NODE_INFO")
-public class DiscoveredNodeInfo {
+@Table(name = "DISCOVERED_NODE_INFO")
+public class DiscoveredNodeInfo
+{
 
     @Id
     @Column(name = "SYMPHONY_UUID", unique = true, nullable = false)
@@ -35,7 +37,7 @@ public class DiscoveredNodeInfo {
     @Column(name = "NODE_STATUS")
     private NodeStatus nodeStatus;
 
-    @Column(name = "SERIAL_NUMBER",unique = true )
+    @Column(name = "SERIAL_NUMBER", unique = true)
     private String serialNumber;
 
     @Column(name = "MODEL")
@@ -53,11 +55,13 @@ public class DiscoveredNodeInfo {
     @Column(name = "VENDOR")
     private String vendor;
 
-    public DiscoveredNodeInfo() {
+    public DiscoveredNodeInfo()
+    {
     }
 
     public DiscoveredNodeInfo(String model, String modelFamily, String product, String productFamily, String serialNumber,
-            String symphonyUUID) {
+            String symphonyUUID)
+    {
         this.model = model;
         this.modelFamily = modelFamily;
         this.product = product;
@@ -66,35 +70,43 @@ public class DiscoveredNodeInfo {
         this.symphonyUuid = symphonyUUID;
     }
 
-    public void setNodeStatus(NodeStatus nodeStatus) {
+    public void setNodeStatus(NodeStatus nodeStatus)
+    {
         this.nodeStatus = nodeStatus;
     }
 
-    public String getModel() {
+    public String getModel()
+    {
         return model;
     }
 
-    public String getModelFamily() {
+    public String getModelFamily()
+    {
         return modelFamily;
     }
 
-    public NodeStatus getNodeStatus() {
+    public NodeStatus getNodeStatus()
+    {
         return nodeStatus;
     }
 
-    public String getProduct() {
+    public String getProduct()
+    {
         return product;
     }
 
-    public String getProductFamily() {
+    public String getProductFamily()
+    {
         return productFamily;
     }
 
-    public String getSerialNumber() {
+    public String getSerialNumber()
+    {
         return serialNumber;
     }
 
-    public String getSymphonyUuid() {
+    public String getSymphonyUuid()
+    {
         return symphonyUuid;
     }
 
@@ -109,7 +121,8 @@ public class DiscoveredNodeInfo {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -123,11 +136,11 @@ public class DiscoveredNodeInfo {
         if (product != null ? !product.equals(that.product) : that.product != null) return false;
         if (vendor != null ? !vendor.equals(that.vendor) : that.vendor != null) return false;
         return productFamily != null ? productFamily.equals(that.productFamily) : that.productFamily == null;
-
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int result = symphonyUuid.hashCode();
         result = 31 * result + (nodeStatus != null ? nodeStatus.hashCode() : 0);
         result = 31 * result + (serialNumber != null ? serialNumber.hashCode() : 0);
@@ -140,16 +153,10 @@ public class DiscoveredNodeInfo {
     }
 
     @Override
-    public String toString() {
-        return "DiscoveredNodeInfo{" +
-                "model='" + model + '\'' +
-                ", symphonyUuid='" + symphonyUuid + '\'' +
-                ", nodeStatus=" + nodeStatus +
-                ", serialNumber='" + serialNumber + '\'' +
-                ", modelFamily='" + modelFamily + '\'' +
-                ", product='" + product + '\'' +
-                ", productFamily='" + productFamily + '\'' +
-                ", vendor='" + vendor + '\'' +
-                '}';
+    public String toString()
+    {
+        return "DiscoveredNodeInfo{" + "model='" + model + '\'' + ", symphonyUuid='" + symphonyUuid + '\'' + ", nodeStatus=" + nodeStatus
+                + ", serialNumber='" + serialNumber + '\'' + ", modelFamily='" + modelFamily + '\'' + ", product='" + product + '\''
+                + ", productFamily='" + productFamily + '\'' + ", vendor='" + vendor + '\'' + '}';
     }
 }

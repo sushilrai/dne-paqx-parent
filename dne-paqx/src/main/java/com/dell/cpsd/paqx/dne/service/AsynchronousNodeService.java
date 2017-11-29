@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.service;
 
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
@@ -46,4 +47,8 @@ public interface AsynchronousNodeService
 
     void processRebootHostResponse(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
 
+    AsynchronousNodeServiceCallback<?> sendConfigurePxeBootRequest(String processId, String activityId, String messageId,
+            ConfigurePxeBootRequestMessage requestMessage);
+
+    void processConfigurePxeBootResponse(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
 }

@@ -18,7 +18,6 @@ import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ChangeIdracCredent
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.CleanInMemoryDatabaseTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigIdracTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.ConfigureObmSettingsTaskHandler;
-import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindOrCreateValidStoragePoolTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.FindProtectionDomainTaskHandler;
 import com.dell.cpsd.paqx.dne.service.task.handler.preprocess.PingIdracTaskHandler;
 import org.springframework.beans.factory.annotation.Autowired;

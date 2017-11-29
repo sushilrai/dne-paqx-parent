@@ -22,7 +22,6 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 @Component
 @Scope("prototype")
 @Qualifier("powerOnScaleIOVM")
-//TODO: Currently not used in the workflow can be deleted if required
 public class PowerOnScaleIOVM extends BaseWorkflowDelegate
 {
     /*

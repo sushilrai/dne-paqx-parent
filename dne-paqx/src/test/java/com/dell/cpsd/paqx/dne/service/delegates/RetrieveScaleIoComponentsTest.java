@@ -25,37 +25,23 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//TODO: <GORDON_FREEMAN>
-public class RetrieveVCenterComponetnsTest {
+//TODO: Complete this
+public class RetrieveScaleIoComponentsTest
+{
 
-    /*private RetrieveVCenterComponents retrieveVCenterComponents;
+    /*private RetrieveScaleIoComponents retrieveScaleIoComponents;
     private NodeService nodeService;
     private DelegateExecution delegateExecution;
     private List<DiscoveredNode> discoveredNodesResponse;
     private DiscoveredNode discoveredNode;
-    private BaseWorkflowDelegate baseWorkflowDelegate;
 
     @Before
     public void setUp() throws Exception
     {
         nodeService = mock(NodeService.class);
-        retrieveVCenterComponents = new RetrieveVCenterComponents(nodeService);
+        retrieveScaleIoComponents = new RetrieveScaleIoComponents(nodeService);
         delegateExecution = mock(DelegateExecution.class);
         discoveredNodesResponse = nodeService.listDiscoveredNodes();
-        baseWorkflowDelegate = mock(BaseWorkflowDelegate.class);
-    }
-
-    @Test
-    public void testException() throws Exception
-    {
-        try {
-            given(nodeService.requestVCenterComponents()).willThrow(new NullPointerException());
-            retrieveVCenterComponents.delegateExecute(delegateExecution);
-        } catch (BpmnError error)
-        {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_VCENTER_COMPONENTS_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving VCenter Components."));
-        }
     }
 
     @Test
@@ -63,20 +49,33 @@ public class RetrieveVCenterComponetnsTest {
     {
         try {
             nodeService = null;
-            retrieveVCenterComponents.delegateExecute(delegateExecution);
+            retrieveScaleIoComponents.delegateExecute(delegateExecution);
         } catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_VCENTER_COMPONENTS_FAILED));
-            assertTrue(error.getMessage().contains("VCenter Components were not retrieved."));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_SCALE_IO_COMPONENTS_FAILED));
+            assertTrue(error.getMessage().contains("Scale IO Components were not retrieved."));
+        }
+    }
+
+    @Test
+    public void testException() throws Exception
+    {
+        try {
+            given(nodeService.requestScaleIoComponents()).willThrow(new NullPointerException());
+            retrieveScaleIoComponents.delegateExecute(delegateExecution);
+        } catch (BpmnError error)
+        {
+            assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_SCALE_IO_COMPONENTS_FAILED));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving Scale IO Components."));
         }
     }
 
     @Test
     public void testSuccess() throws Exception
     {
-        when(nodeService.requestVCenterComponents()).thenReturn(true);
-        final RetrieveVCenterComponents c = spy(new RetrieveVCenterComponents(nodeService));
+        when(nodeService.requestScaleIoComponents()).thenReturn(true);
+        final RetrieveScaleIoComponents c = spy(new RetrieveScaleIoComponents(nodeService));
         c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("VCenter Components were retrieved successfully.");
+        verify(c).updateDelegateStatus("Scale IO Components were retrieved successfully.");
     }*/
 }

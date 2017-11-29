@@ -37,6 +37,7 @@ public class DelegateConstants
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
     public static final String INSTALL_ESXI_MESSAGE_ID          = "installEsxiResponseReceived";
     public static final String REBOOT_HOST_MESSAGE_ID           = "rebootHostResponseReceived";
+    public static final String CONFIGURE_PXE_BOOT_MESSAGE_ID    = "disablePxeResponseReceived";
 
     public static final String VCENTER_INFORMATION_NOT_FOUND            = "VCenter-Information-Missing";
     public static final String INVENTORY_VCENTER_FAILED                 = "Inventory-VCenter-Failed";
@@ -52,14 +53,14 @@ public class DelegateConstants
     public static final String CONFIGURE_OBM_SETTINGS_FAILED            = "Configure_Obm_Settings_Failed";
     public static final String CONFIGURE_BOOT_DEVICE_FAILED             = "Configure_Boot_Device_Failed";
     public static final String RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED = "Retrieve-Default-Esxi-Credentials";
-    public static final String INSTALL_ESXI_FAILED                      = "Installe-Esxi-Failed";
+    public static final String INSTALL_ESXI_FAILED                      = "Install-Esxi-Failed";
     public static final String ADD_HOST_TO_CLUSTER_FAILED               = "Add-Host-To-Cluster-Failed";
     public static final String FIND_VCLUSTER_FAILED                     = "Find-VCluster-Failed";
     public static final String APPLY_ESXI_LICENSE_FAILED                = "Apply-Esxi-License-Failed";
     public static final String FIND_SCALE_IO_FAILED                     = "Find-Scale-IO-Failed";
     public static final String ENABLE_PCI_PASSTHROUGH_FAILED            = "Enable-PCI-Pass-Through-Failed";
     public static final String INSTALL_SCALEIO_VIB_FAILED               = "Install-ScaleIO-Vib-Failed";
-    public static final String REBOOT_HOST_FAILED                       = "Reboot-Host-Failed";
+    public static final String REBOOT_HOST_FAILED                       = "Reboot-host-failed";
     public static final String CONFIGURE_SCALEIO_VIB_FAILED             = "Configure-ScaleIO-Vib-Failed";
     public static final String ADD_HOST_TO_DV_SWITCH_FAILED             = "Add-Host-To-DV-Switch-Failed";
     public static final String VERIFY_NODE_DETAIL_FAILED                = "Verify-Node-Detail-Failed";
@@ -82,6 +83,7 @@ public class DelegateConstants
     public static final String ESXI_HOST_MAINTENANCE_MODE_FAILED        = "Esxi-Host-Maintenance-Mode-Failed";
     public static final String SELECT_PROTECTION_DOMAINS_FAILED         = "Select-Protection-Domains-Failed";
     public static final String SELECT_STORAGE_POOLS_FAILED              = "Select-Storage-Pools-Failed";
+    public static final String CONFIGURE_PXE_FAILED                     = "Disable-Pxe-failed";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED                   = "Failed";

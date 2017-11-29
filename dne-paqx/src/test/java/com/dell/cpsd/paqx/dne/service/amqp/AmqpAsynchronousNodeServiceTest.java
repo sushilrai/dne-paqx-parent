@@ -5,6 +5,9 @@
 package com.dell.cpsd.paqx.dne.service.amqp;
 
 import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.cpsd.ConfigurePxeBootError;
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
+import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
@@ -24,6 +27,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -223,6 +227,90 @@ public class AmqpAsynchronousNodeServiceTest
         {
             assertTrue(e.getCode() == 1012);
             assertThat(e.getMessage(), containsString("VCenter validation failed"));
+        }
+    }
+
+    @Test
+    public void sendDisablePxeRequestExceptionThrownReturnsNullResponse() throws Exception
+    {
+        final ConfigurePxeBootRequestMessage request = new ConfigurePxeBootRequestMessage();
+
+        amqpAsynchronousNodeService.release();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .sendConfigurePxeBootRequest(processInstanceId, activityId, messageId, request);
+
+        assertNull(callback);
+        verify(dneProducer, times(0)).publishConfigurePxeBoot(any());
+    }
+
+    @Test
+    public void sendDisablePxeRequestSuccess() throws Exception
+    {
+        final ConfigurePxeBootRequestMessage request = new ConfigurePxeBootRequestMessage();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .sendConfigurePxeBootRequest(processInstanceId, activityId, messageId, request);
+        assertNotNull(callback);
+        assertEquals(callback.getProcessInstanceId(), processInstanceId);
+        assertEquals(callback.getActivityId(), activityId);
+        assertEquals(callback.getMessageId(), messageId);
+        verify(dneProducer, times(1)).publishConfigurePxeBoot(any());
+    }
+
+    @Test
+    public void processDisablePxeResponseCallbackIsNullExceptionThrown() throws Exception
+    {
+        try
+        {
+            amqpAsynchronousNodeService.processConfigurePxeBootResponse(null);
+        }
+        catch (TaskResponseFailureException e)
+        {
+            assertTrue(e.getCode() == 1025);
+            assertThat(e.getMessage(), containsString("Service callback is null"));
+        }
+    }
+
+    @Test
+    public void processDisablePxeResponseMessageIsNullExceptionThrown() throws Exception
+    {
+        final AsynchronousNodeServiceCallback<ServiceResponse<ConfigurePxeBootResponseMessage>> callback = mock(
+                AsynchronousNodeServiceCallback.class);
+        try
+        {
+            amqpAsynchronousNodeService.processConfigurePxeBootResponse(callback);
+        }
+        catch (TaskResponseFailureException e)
+        {
+            assertTrue(e.getCode() == 1025);
+            assertThat(e.getMessage(), containsString("Response message is null"));
+        }
+    }
+
+    @Test
+    public void processDisablePxeResponseFailedThrowsException() throws Exception
+    {
+        final AsynchronousNodeServiceCallback<ServiceResponse<ConfigurePxeBootResponseMessage>> callback = mock(
+                AsynchronousNodeServiceCallback.class);
+
+        final ConfigurePxeBootResponseMessage responseMessage = new ConfigurePxeBootResponseMessage();
+        final MessageProperties messageProperties = mock(MessageProperties.class);
+        responseMessage.setMessageProperties(messageProperties);
+        responseMessage.setConfigurePxeBootErrors(
+                singletonList(new ConfigurePxeBootError("1", "Rackhd failed yet again.... who told you to use that?")));
+        responseMessage.setStatus(ConfigurePxeBootResponseMessage.Status.FAILED);
+        ServiceResponse<ConfigurePxeBootResponseMessage> response = new ServiceResponse<>("UUID1", responseMessage, "Configure");
+        when(callback.getServiceResponse()).thenReturn(response);
+
+        try
+        {
+            amqpAsynchronousNodeService.processConfigurePxeBootResponse(callback);
+        }
+        catch (TaskResponseFailureException e)
+        {
+            assertTrue(e.getCode() == 1025);
+            assertThat(e.getMessage(), containsString("Rackhd failed yet again"));
         }
     }
 }

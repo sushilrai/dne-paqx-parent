@@ -13,7 +13,7 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 import com.dell.cpsd.storage.capabilities.api.ListStorageResponseMessage;
 
 /**
- * TODO: Document Usage
+ * Discover ScaleIO response adapter
  *
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information

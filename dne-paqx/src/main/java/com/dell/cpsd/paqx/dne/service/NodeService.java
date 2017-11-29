@@ -13,7 +13,6 @@ import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.Host;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
-import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
@@ -179,13 +178,6 @@ public interface NodeService
      * @return
      */
     ObmSettingsResponse obmSettingsResponse(SetObmSettingsRequestMessage setObmSettingsRequestMessage);
-
-    /**
-     * @param uuid      - The request message UUID
-     * @param ipAddress - The IP address of the iDRAC
-     * @return BootDeviceIdracStatus
-     */
-    BootDeviceIdracStatus configurePxeBoot(String uuid, String ipAddress);
 
     /**
      * Request a list of ScaleIO components.

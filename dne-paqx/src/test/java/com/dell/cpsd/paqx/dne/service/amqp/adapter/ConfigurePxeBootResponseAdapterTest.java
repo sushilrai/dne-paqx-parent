@@ -22,12 +22,12 @@ import static org.mockito.Mockito.spy;
  *
  * @since 1.0
  */
-public class ConfigurePxeBootResponseAdapterTest extends BaseResponseAdapterTest<ConfigurePxeBootResponseMessage>
+public class ConfigurePxeBootResponseAdapterTest extends BaseAsynchronousResponseAdapterTest<ConfigurePxeBootResponseMessage>
 {
     @Override
     protected ServiceCallbackAdapter<ConfigurePxeBootResponseMessage, ServiceResponse<ConfigurePxeBootResponseMessage>> createTestable()
     {
-        return new ConfigurePxeBootResponseAdapter(this.registry);
+        return new ConfigurePxeBootResponseAdapter(this.registry, runtimeService);
     }
 
     @Override

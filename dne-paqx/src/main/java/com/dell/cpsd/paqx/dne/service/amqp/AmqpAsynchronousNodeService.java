@@ -7,9 +7,13 @@ package com.dell.cpsd.paqx.dne.service.amqp;
 import com.dell.cpsd.ConfigureBootDeviceIdracError;
 import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
 import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
+import com.dell.cpsd.ConfigurePxeBootError;
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
+import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.InstallESXiRequestMessage;
 import com.dell.cpsd.InstallESXiResponseMessage;
+import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.amqp.config.AsynchronousNodeServiceConfig;
@@ -19,6 +23,7 @@ import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
@@ -39,12 +44,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PXE_BOOT;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
 
 public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager implements ServiceCallbackRegistry,
@@ -115,6 +123,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new InstallEsxiResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new RebootHostResponseAdapter(this, this.runtimeService));
+        this.consumer.addAdapter(new ConfigurePxeBootResponseAdapter(this, this.runtimeService));
     }
 
     /**
@@ -419,6 +428,78 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         {
             LOGGER.error("Exception occurred", e);
             throw new TaskResponseFailureException(REBOOT_HOST.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public AsynchronousNodeServiceCallback<?> sendConfigurePxeBootRequest(final String processId, final String activityId,
+            final String messageId, final ConfigurePxeBootRequestMessage requestMessage)
+    {
+        AsynchronousNodeServiceCallback<?> response = null;
+
+        try
+        {
+            final String correlationId = UUID.randomUUID().toString();
+            requestMessage.setMessageProperties(new MessageProperties(new Date(), correlationId, replyTo));
+            response = processRequest(processId, activityId, messageId, 0L, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return correlationId;
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishConfigurePxeBoot(requestMessage);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(" An unexpected exception occurred while requesting disable PXE boot", e);
+        }
+        return response;
+    }
+
+    @Override
+    public void processConfigurePxeBootResponse(final AsynchronousNodeServiceCallback<?> serviceCallback)
+            throws TaskResponseFailureException
+    {
+        try
+        {
+            if (serviceCallback == null)
+            {
+                final String error = "Service callback is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CONFIGURE_PXE_BOOT.getCode(), error);
+            }
+
+            final ConfigurePxeBootResponseMessage responseMessage = processResponse(serviceCallback, ConfigurePxeBootResponseMessage.class);
+            if (responseMessage == null)
+            {
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(CONFIGURE_PXE_BOOT.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(ConfigurePxeBootResponseMessage.Status.FAILED))
+            {
+                final List<ConfigurePxeBootError> errors = responseMessage.getConfigurePxeBootErrors();
+                final List<String> errorMsgs = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(errors))
+                {
+                    errors.stream().filter(Objects::nonNull).map(ConfigurePxeBootError::getMessage).forEach(errorMsgs::add);
+                    LOGGER.error(errorMsgs.toString());
+                }
+                throw new TaskResponseFailureException(CONFIGURE_PXE_BOOT.getCode(), errorMsgs.toString());
+            }
+        }
+        catch (ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(CONFIGURE_PXE_BOOT.getCode(), e.getMessage());
         }
     }
 }

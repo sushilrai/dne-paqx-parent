@@ -82,12 +82,6 @@ public class AddNodeServiceImplTest
     }
 
     @Test
-    public void testTaskName_findConfigurePxeBoot()
-    {
-        assertEquals("Configure PXE boot", workFlowTasks.get("configurePxeBoot").getTaskName());
-    }
-
-    @Test
     public void testTaskName_updateSystemDefinitionTask()
     {
         assertEquals("Update System Definition", workFlowTasks.get("updateSystemDefinition").getTaskName());

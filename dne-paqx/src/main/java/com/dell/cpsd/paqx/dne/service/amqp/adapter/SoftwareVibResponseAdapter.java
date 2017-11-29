@@ -11,7 +11,7 @@ import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBResponseMessage;
 
 /**
- * TODO: Document Usage
+ * Software VIB response adapter
  *
  * <p/>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information

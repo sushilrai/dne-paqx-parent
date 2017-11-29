@@ -10,8 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * TODO: Document Usage
- *
+ * Credential details entity
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information

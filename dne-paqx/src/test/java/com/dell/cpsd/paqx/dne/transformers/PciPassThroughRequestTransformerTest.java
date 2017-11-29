@@ -40,20 +40,20 @@ public class PciPassThroughRequestTransformerTest
 {
     private static final String VCENTER_CUSTOMER_TYPE = "VCENTER-CUSTOMER";
     private static final String PCI_BUS_DEVICE_ID     = "0000:02:00.0";
-    private final String hostname = "hostname";
+    private final        String hostname              = "hostname";
     private final        String serviceTag            = "serviceTag";
     @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
+    private ComponentIdsTransformer          componentIdsTransformer;
     @Mock
-    private DelegateExecution delegateExecution;
+    private DelegateExecution                delegateExecution;
     @Mock
-    private ComponentEndpointIds componentEndpointIds;
+    private ComponentEndpointIds             componentEndpointIds;
     @Mock
-    private DataServiceRepository repository;
+    private DataServiceRepository            repository;
     @Mock
-    private PciDevice pciDevice;
+    private PciDevice                        pciDevice;
     @Mock
-    private NodeDetail nodeDetail;
+    private NodeDetail                       nodeDetail;
     private PciPassThroughRequestTransformer pciPassThroughRequestTransformer;
 
     @Before

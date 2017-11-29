@@ -35,19 +35,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteCommandExecutionRequestTransformerTest
 {
-    private static final String VCENTER_CUSTOMER_TYPE        = "VCENTER-CUSTOMER";
     private final        String scaleIoVmManagementIpAddress = "1.1.1.1";
     private final        String serviceTag                   = "service-tag";
     @Mock
-    private ComponentIdsTransformer componentIdsTransformer;
+    private ComponentIdsTransformer                  componentIdsTransformer;
     @Mock
-    private NodeDetail nodeDetail;
+    private NodeDetail                               nodeDetail;
     @Mock
-    private DelegateExecution delegateExecution;
+    private DelegateExecution                        delegateExecution;
     @Mock
-    private ComponentEndpointIds componentEndpointIds;
+    private ComponentEndpointIds                     componentEndpointIds;
     @Mock
-    private ComponentEndpointIds factoryComponentEndpointIds;
+    private ComponentEndpointIds                     factoryComponentEndpointIds;
     private RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     @Before
