@@ -107,7 +107,9 @@ public class SelectProtectionDomains extends BaseWorkflowDelegate
             if (!org.springframework.util.CollectionUtils.isEmpty(protectionDomainResponse.getValidProtectionDomains()))
             {
                 setResultsInFindProtectionDomainTaskResponse(nodeDetail, protectionDomainList, protectionDomainResponse);
-                updateDelegateStatus("Selecting Protection Domain for Node " + nodeDetail.getServiceTag());
+                updateDelegateStatus(
+                        "Set protection domain to: " + nodeDetail.getProtectionDomainName() + "(" + nodeDetail.getProtectionDomainId()
+                                + ") for Node " + nodeDetail.getServiceTag());
             }
             else
             {
