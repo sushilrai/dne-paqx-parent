@@ -47,7 +47,7 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
      * AddNodeToSystemDefinition constructor.
      *
      * @param sdkAMQPClient - The <code>AMQPClient</code> instance.
-     * @param repository - The <code>DataServiceRepository</code> instance.
+     * @param repository    - The <code>DataServiceRepository</code> instance.
      * @since 1.0
      */
     @Autowired
@@ -120,21 +120,21 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
             newNode.setEndpoints(new ArrayList<>());
 
             LOGGER.info(taskMessage + " DID NOT CALL addComponent - need to convert task to a long running task...");
-//            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
-//
-//            // Need to make sure the node was really added.
-//            // The SDK has a habit of swallowing exceptions making it difficult to know
-//            // if there was an error...
-//            final List<ConvergedSystem> updateSystemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
-//            final ConvergedSystem systemThatWasUpdated = updateSystemDetails.get(0);
-//
-//            final Component newComponent = systemThatWasUpdated.getComponents().stream()
-//                    .filter(c -> c.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier())).findFirst().orElse(null);
-//
-//            if (newComponent == null)
-//            {
-//                throw new IllegalStateException("The discovered node was not added to the system definition.");
-//            }
+            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
+
+            // Need to make sure the node was really added.
+            // The SDK has a habit of swallowing exceptions making it difficult to know
+            // if there was an error...
+            final List<ConvergedSystem> updateSystemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
+            final ConvergedSystem systemThatWasUpdated = updateSystemDetails.get(0);
+
+            final Component newComponent = systemThatWasUpdated.getComponents().stream()
+                    .filter(c -> c.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier())).findFirst().orElse(null);
+
+            if (newComponent == null)
+            {
+                throw new IllegalStateException("The discovered node was not added to the system definition.");
+            }
         }
         catch (Exception ex)
         {

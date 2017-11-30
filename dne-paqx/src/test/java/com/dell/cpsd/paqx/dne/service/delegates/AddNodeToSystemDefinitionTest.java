@@ -18,7 +18,6 @@ import com.dell.cpsd.service.system.definition.api.Identity;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -139,7 +138,6 @@ public class AddNodeToSystemDefinitionTest
         }
     }
 
-    @Ignore
     @Test
     public void testNodeNotAddedToSystemDefinitionException() throws Exception
     {
@@ -189,12 +187,12 @@ public class AddNodeToSystemDefinitionTest
         when(repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
         AddNodeToSystemDefinition addNodeToSystemDefinitionSpy = spy(addNodeToSystemDefinition);
 
-//        doAnswer(invocation -> {
-//            final Component addedComponent = new Component();
-//            addedComponent.setIdentity(new Identity("elementType", discoveredNodeInfo.getSymphonyUuid(), "address", "serialNumber", null));
-//            convergedSystem.setComponents(Collections.singletonList(addedComponent));
-//            return null;
-//        }).when(sdkAMQPClient).addComponent(any(), any(), anyList(), anyString());
+        doAnswer(invocation -> {
+            final Component addedComponent = new Component();
+            addedComponent.setIdentity(new Identity("elementType", discoveredNodeInfo.getSymphonyUuid(), "address", "serialNumber", null));
+            convergedSystem.setComponents(Collections.singletonList(addedComponent));
+            return null;
+        }).when(sdkAMQPClient).addComponent(any(), any(), anyList(), anyString());
 
         addNodeToSystemDefinitionSpy.delegateExecute(delegateExecution);
 
