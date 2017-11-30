@@ -13,6 +13,7 @@ import com.dell.cpsd.NodeAllocationInfo.AllocationStatus;
 import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.StartNodeAllocationResponseMessage;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.VCenter;
@@ -291,9 +292,12 @@ public class AmqpNodeServiceTest
             }
         };
 
-        assertEquals(1, nodeService.listDiscoveredNodeInfo().size());
-        assertEquals("testserial", nodeService.listDiscoveredNodeInfo().get(0).getSerialNumber());
-        assertEquals("testproduct", nodeService.listDiscoveredNodeInfo().get(0).getProduct());
+        final List<DiscoveredNodeInfo> nodeInfos = nodeService.listDiscoveredNodeInfo();
+
+        assertEquals(1, nodeInfos.size());
+        assertEquals("testserial", nodeInfos.get(0).getSerialNumber());
+        assertEquals("testproduct", nodeInfos.get(0).getProduct());
+        Mockito.verify(repository).saveDiscoveredNodeInfo(any());
     }
 
     /**

@@ -6,10 +6,18 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.sdk.AMQPClient;
+import com.dell.cpsd.service.system.definition.api.Component;
+import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
+import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
+import com.dell.cpsd.service.system.definition.api.Definition;
 import com.dell.cpsd.service.system.definition.api.Group;
+import com.dell.cpsd.service.system.definition.api.Identity;
+import org.apache.commons.collections.CollectionUtils;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +28,7 @@ import org.springframework.context.annotation.Scope;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_NODE_TO_SYSTEM_DEFINITION_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @org.springframework.stereotype.Component
@@ -27,30 +36,18 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 @Qualifier("addNodeToSystemDefinition")
 public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
 {
-    /*
-     * The logger instance
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeToSystemDefinition.class);
 
-    /*
-     * The <code>AMQPClient</code> instance
-     */
-    private final AMQPClient sdkAMQPClient;
-    /*
-     * Reference to H2 repository
-     */
-    private final DataServiceRepository repository;
-
-    /*
-    * The component on which to base new components.
-    */
     private static final String COMPONENT_SERVER_TEMPLATE = "COMMON-DELL-POWEREDGE";
+
+    private final AMQPClient            sdkAMQPClient;
+    private final DataServiceRepository repository;
 
     /**
      * AddNodeToSystemDefinition constructor.
      *
      * @param sdkAMQPClient - The <code>AMQPClient</code> instance.
-     * @param repository
+     * @param repository - The <code>DataServiceRepository</code> instance.
      * @since 1.0
      */
     @Autowired
@@ -60,113 +57,96 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
         this.repository = repository;
     }
 
-//    /*
-//     * Given a list of group names map each one to its corresponding UUID.
-//     */
-//    private List<String> mapGroupNamesToUUIDs(List<String> groupNames, List<Group> groups)
-//    {
-//        List<String> groupUuids = new ArrayList<>();
-//        groups.forEach(group -> {
-//            if (groupNames.contains(group.getName()))
-//            {
-//                groupUuids.add(group.getUuid());
-//            }
-//        });
-//        return groupUuids;
-//    }
+    /*
+     * Given a list of group names map each one to its corresponding UUID.
+     */
+    private List<String> mapGroupNamesToUUIDs(List<String> groupNames, List<Group> groups)
+    {
+        List<String> groupUuids = new ArrayList<>();
+        groups.forEach(group -> {
+            if (groupNames.contains(group.getName()))
+            {
+                groupUuids.add(group.getUuid());
+            }
+        });
+        return groupUuids;
+    }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        /*LOGGER.info("Execute AddNodeToSystemDefinitionTaskHandler task");
+        LOGGER.info("Execute Add Node To System Definition task");
         final String taskMessage = "Add Node To System Definition";
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+
         try
         {
-            final NodeExpansionRequest inputParams = job.getInputParams();
-
-            if (inputParams == null)
-            {
-                throw new IllegalStateException("Job input parameters are null");
-            }
-
-            final String symphonyUuid = inputParams.getSymphonyUuid();
-
-            if (StringUtils.isEmpty(symphonyUuid))
-            {
-                throw new IllegalStateException("Symphony Id is null");
-            }
-
-            List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
+            final List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
             if (CollectionUtils.isEmpty(allConvergedSystems))
             {
                 throw new IllegalStateException("No converged systems found.");
             }
 
-            ConvergedSystem system = allConvergedSystems.get(0);
-            ComponentsFilter componentsFilter = new ComponentsFilter();
+            final ConvergedSystem system = allConvergedSystems.get(0);
+            final ComponentsFilter componentsFilter = new ComponentsFilter();
             componentsFilter.setSystemUuid(system.getUuid());
 
-            List<ConvergedSystem> systemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
+            final List<ConvergedSystem> systemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
             if (CollectionUtils.isEmpty(systemDetails))
             {
                 throw new IllegalStateException("No converged system found.");
             }
 
-            ConvergedSystem systemToBeUpdated = systemDetails.get(0);
+            final ConvergedSystem systemToBeUpdated = systemDetails.get(0);
 
-            DiscoveredNodeInfo nodeInfo = repository.getDiscoveredNodeInfo(symphonyUuid);
+            final DiscoveredNodeInfo nodeInfo = repository.getDiscoveredNodeInfo(nodeDetail.getId());
+
             if (nodeInfo == null)
             {
-                {
-                    throw new IllegalStateException("No discovered node info.");
-                }
+                throw new IllegalStateException("No discovered node info.");
             }
-            Component newNode = new Component();
-            List<String> parentGroups = new ArrayList<>();
-            List<String> endpoints = new ArrayList<>();
+
+            final Component newNode = new Component();
+            final List<String> parentGroups = new ArrayList<>();
+            final List<String> endpoints = new ArrayList<>();
             parentGroups.add("SystemCompute");
             endpoints.add("RACKHD-EP");
             newNode.setUuid(nodeInfo.getSymphonyUuid());
-            newNode.setIdentity(new Identity("SERVER", nodeInfo.getSymphonyUuid(), nodeInfo.getSymphonyUuid(),
-                                             nodeInfo.getSerialNumber(), null));
+            newNode.setIdentity(
+                    new Identity("SERVER", nodeInfo.getSymphonyUuid(), nodeInfo.getSymphonyUuid(), nodeInfo.getSerialNumber(), null));
             newNode.setDefinition(
-                    new Definition(nodeInfo.getProductFamily(), nodeInfo.getProduct(), nodeInfo.getModelFamily(),
-                                   nodeInfo.getModel()));
+                    new Definition(nodeInfo.getProductFamily(), nodeInfo.getProduct(), nodeInfo.getModelFamily(), nodeInfo.getModel()));
             newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(parentGroups, systemToBeUpdated.getGroups()));
             newNode.setEndpoints(new ArrayList<>());
 
-            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
-
-            // Need to make sure the node was really added.
-            // The SDK has a habit of swallowing exceptions making it difficult to know
-            // if there was an error...
-            List<ConvergedSystem> updateSystemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
-            ConvergedSystem systemThatWasUpdated = updateSystemDetails.get(0);
-
-            Component newComponent = systemThatWasUpdated.getComponents().stream().filter(
-                    c -> c.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier())).findFirst()
-                                                         .orElse(null);
-
-            if (newComponent == null)
-            {
-                throw new IllegalStateException("Discovered node was not added to the system definition.");
-            }
-
-            response.setWorkFlowTaskStatus(Status.SUCCEEDED);
-            return true;
+            LOGGER.info(taskMessage + " DID NOT CALL addComponent - need to convert task to a long running task...");
+//            this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
+//
+//            // Need to make sure the node was really added.
+//            // The SDK has a habit of swallowing exceptions making it difficult to know
+//            // if there was an error...
+//            final List<ConvergedSystem> updateSystemDetails = this.sdkAMQPClient.getComponents(componentsFilter);
+//            final ConvergedSystem systemThatWasUpdated = updateSystemDetails.get(0);
+//
+//            final Component newComponent = systemThatWasUpdated.getComponents().stream()
+//                    .filter(c -> c.getIdentity().getIdentifier().equals(newNode.getIdentity().getIdentifier())).findFirst().orElse(null);
+//
+//            if (newComponent == null)
+//            {
+//                throw new IllegalStateException("The discovered node was not added to the system definition.");
+//            }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            LOGGER.error("Error adding node to the system definition", e);
-            response.addError(e.toString());
+            final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed! Reason: ";
+            LOGGER.error(message, ex);
+            updateDelegateStatus(message + ex.getMessage());
+            throw new BpmnError(ADD_NODE_TO_SYSTEM_DEFINITION_FAILED, message + ex.getMessage());
         }
 
-        response.setWorkFlowTaskStatus(Status.FAILED);
-        return false;
-        LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-*/
+        final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
+        LOGGER.info(message);
+        updateDelegateStatus(message);
     }
 
 }

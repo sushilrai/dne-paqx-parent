@@ -462,6 +462,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                         node.getSerial(), node.getConvergedUuid());
                 discoveredNodeInfo.setNodeStatus(NodeStatus.valueOf(node.getNodeStatus().toString()));
                 discoveredNodeInfo.setVendor(node.getVendor());
+                repository.saveDiscoveredNodeInfo(discoveredNodeInfo);
                 retList.add(discoveredNodeInfo);
             }
 
