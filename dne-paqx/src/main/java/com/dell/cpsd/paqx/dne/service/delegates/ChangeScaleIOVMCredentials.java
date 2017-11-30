@@ -48,7 +48,7 @@ public class ChangeScaleIOVMCredentials extends BaseWorkflowDelegate
     private final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     /**
-     * ChangeSvmCredentialsTaskHandler constructor.
+     * ChangeSvmCredentials constructor.
      *
      * @param nodeService                              - The <code>NodeService</code> instance
      * @param remoteCommandExecutionRequestTransformer
@@ -64,7 +64,7 @@ public class ChangeScaleIOVMCredentials extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute ChangeSvmCredentialsTaskHandler task");
+        LOGGER.info("Execute ChangeSvmCredentials task");
         final String taskMessage = "Change ScaleIO VM factory credentials";
 
         try

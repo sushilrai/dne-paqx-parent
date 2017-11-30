@@ -47,7 +47,7 @@ public class InstallScaleIoVib extends BaseWorkflowDelegate
     private final SoftwareVibRequestTransformer softwareVibRequestTransformer;
 
     /**
-     * InstallScaleIoVibTaskHandler constructor
+     * InstallScaleIoVib constructor
      *
      * @param nodeService                   - The <code>NodeService</code> instance
      * @param softwareVibRequestTransformer

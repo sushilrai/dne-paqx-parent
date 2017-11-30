@@ -37,7 +37,7 @@ public class NotifyNodeDiscoveryToUpdateStatusFailed extends BaseWorkflowDelegat
     private final NodeService nodeService;
 
     /**
-     * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
+     * NotifyNodeDiscoveryToUpdateStatusFailed constructor.
      *
      * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0

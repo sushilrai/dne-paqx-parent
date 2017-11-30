@@ -48,7 +48,7 @@ public class ConfigureVMNetworkSettings extends BaseWorkflowDelegate
     private final ConfigureVmNetworkSettingsRequestTransformer requestTransformer;
 
     /**
-     * ConfigureVmNetworkSettingsTaskHandler constructor.
+     * ConfigureVMNetworkSettings constructor.
      *
      * @param nodeService        - The <code>NodeService</code> instance
      * @param requestTransformer

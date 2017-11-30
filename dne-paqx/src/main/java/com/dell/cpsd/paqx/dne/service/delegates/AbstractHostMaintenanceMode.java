@@ -38,7 +38,7 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     private final String taskName;
 
     /**
-     * AbstractHostMaintenanceModeTaskHandler constructor
+     * AbstractHostMaintenanceMode constructor
      *
      * @param nodeService        - The <code>NodeService</code> instance
      * @param requestTransformer

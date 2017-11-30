@@ -48,7 +48,7 @@ public class UpdateSDCPerformanceProfile extends BaseWorkflowDelegate
     private final SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer;
 
     /**
-     * UpdateSdcPerformanceProfileTaskHandler constructor
+     * UpdateSdcPerformanceProfile constructor
      *
      * @param nodeService                             - The <code>NodeService</code> instance
      * @param sdcPerformanceProfileRequestTransformer The request building transformer

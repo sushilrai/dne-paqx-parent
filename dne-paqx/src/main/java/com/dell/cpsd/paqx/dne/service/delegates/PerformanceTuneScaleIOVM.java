@@ -48,7 +48,7 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     private final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     /**
-     * PerformanceTuneSvmTaskHandler constructor.
+     * PerformanceTuneScaleIOVM constructor.
      *
      * @param nodeService                              - The <code>NodeService</code> instance
      * @param remoteCommandExecutionRequestTransformer
@@ -64,7 +64,7 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute PerformanceTuneSvmTaskHandler task");
+        LOGGER.info("Execute PerformanceTuneSvm task");
         final String taskMessage = "Performance Tune Scale IO VM";
 
         try

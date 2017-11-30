@@ -47,7 +47,7 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
     private static final String COMPONENT_SERVER_TEMPLATE = "COMMON-DELL-POWEREDGE";
 
     /**
-     * AddNodeToSystemDefinitionTaskHandler constructor.
+     * AddNodeToSystemDefinition constructor.
      *
      * @param sdkAMQPClient - The <code>AMQPClient</code> instance.
      * @param repository

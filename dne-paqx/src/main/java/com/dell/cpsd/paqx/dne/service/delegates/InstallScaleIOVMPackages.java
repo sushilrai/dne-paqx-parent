@@ -48,7 +48,7 @@ public class InstallScaleIOVMPackages extends BaseWorkflowDelegate
     private final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
 
     /**
-     * InstallSvmPackagesTaskHandler constructor.
+     * InstallSvmPackages constructor.
      *
      * @param nodeService                              - The <code>NodeService</code> instance
      * @param remoteCommandExecutionRequestTransformer
@@ -64,7 +64,7 @@ public class InstallScaleIOVMPackages extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute InstallSvmPackagesTaskHandler task");
+        LOGGER.info("Execute InstallSvmPackages task");
         final String taskMessage = "Install Scale IO VM Packages";
 
         try

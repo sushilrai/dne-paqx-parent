@@ -37,7 +37,7 @@ public class NotifyNodeDiscoveryToUpdateStatusCompleted extends BaseWorkflowDele
     private final NodeService nodeService;
 
     /**
-     * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
+     * NotifyNodeDiscoveryToUpdateStatusCompleted constructor.
      *
      * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0

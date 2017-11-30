@@ -37,7 +37,7 @@ public class NotifyNodeDiscoveryToUpdateStatusStarted extends BaseWorkflowDelega
     private final NodeService nodeService;
 
     /**
-     * NotifyNodeDiscoveryToUpdateStatusTaskHandler constructor.
+     * NotifyNodeDiscoveryToUpdateStatusStarted constructor.
      *
      * @param nodeService - The <code>NodeService</code> instance.
      * @since 1.0

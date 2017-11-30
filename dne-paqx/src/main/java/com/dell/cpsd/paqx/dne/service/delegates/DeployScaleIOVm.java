@@ -49,7 +49,7 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
     private final DeployScaleIoVmRequestTransformer deployScaleIoVmRequestTransformer;
 
     /**
-     * DeployScaleIoVmTaskHandler constructor
+     * DeployScaleIoVm constructor
      *
      * @param nodeService                       - The <code>DataServiceRepository</code> instance
      * @param deployScaleIoVmRequestTransformer
