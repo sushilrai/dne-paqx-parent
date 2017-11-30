@@ -6,8 +6,10 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -18,7 +20,6 @@ import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -28,12 +29,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.SELECT_STORAGE_POOLS_FAILED;
 
 @Component
@@ -43,19 +46,8 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
- */
-public class SelectStoragePools extends BaseWorkflowDelegate
+ */ public class SelectStoragePools extends BaseWorkflowDelegate
 {
-    /**
-     * Default name for new storage pool
-     */
-    private static final String DEFAULT_STORAGE_POOL_NAME = "temp";
-
-    /**
-     * ScaleIO gateway credential components
-     */
-    private static final String COMPONENT_TYPE = "SCALEIO-CLUSTER";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectStoragePools.class);
     private final NodeService nodeService;
 
@@ -70,16 +62,27 @@ public class SelectStoragePools extends BaseWorkflowDelegate
     {
         LOGGER.info("In selectStoragePools");
 
-        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String symphonyUuid = nodeDetail.getId();
-
-        Map<String, DeviceAssignment> deviceMap = new HashMap<>();
+        //        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        List<NodeDetail> nodeDetails = (List<NodeDetail>) delegateExecution.getVariable(NODE_DETAILS);
+        if (CollectionUtils.isEmpty(nodeDetails))
+        {
+            final String message = "The List of Node Detail was not found!  Please add at least one Node Detail and try again.";
+            LOGGER.error(message);
+            updateDelegateStatus(message);
+            throw new BpmnError(SELECT_STORAGE_POOLS_FAILED, message);
+        }
 
         try
         {
-            List<Device> newDevices = getNewDevices(symphonyUuid);
 
-            if (CollectionUtils.isEmpty(newDevices))
+            Map<String, List<Device>> protectionDomainToDevicesMap = new HashMap<>();
+            Map<String, List<Device>> nodeToDeviceMap = new HashMap<>();
+
+            List<DiscoveredNodeInfo> discoveredNodes = nodeService.listDiscoveredNodeInfo();
+
+            populateDeviceMaps(nodeDetails, discoveredNodes, nodeToDeviceMap, protectionDomainToDevicesMap);
+
+            if (CollectionUtils.isEmpty(protectionDomainToDevicesMap.values()))
             {
                 String message = "No disks found in the node inventory data.";
                 updateDelegateStatus(message);
@@ -87,31 +90,86 @@ public class SelectStoragePools extends BaseWorkflowDelegate
                 throw new BpmnError(SELECT_STORAGE_POOLS_FAILED, message);
             }
 
-            // retrieve scale IO data
-            List<ScaleIOData> scaleIODataList = nodeService.listScaleIOData();
-
             // retrieve vCenter data
             Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = nodeService
                     .getHostToStorageDeviceMap(nodeService.findVcenterHosts());
 
+            // retrieve scale IO data
+            List<ScaleIOData> scaleIODataList = nodeService.listScaleIOData();
+
             ScaleIOData scaleIOData = scaleIODataList.get(0);
 
             List<ScaleIOProtectionDomain> protectionDomains = scaleIOData.getProtectionDomains();
+
+            Map<String, DeviceAssignment> deviceMap = new HashMap<>();
+
             if (protectionDomains != null)
             {
-                validateStoragePoolsAndSetResponse(deviceMap, newDevices, hostToStorageDeviceMap, protectionDomains,
-                        nodeDetail.getProtectionDomainId());
+                // call ESS based on protection domain and corresponding devices
+                protectionDomainToDevicesMap.entrySet().stream().forEach(pd -> {
+                    try
+                    {
+                        validateStoragePoolsAndSetResponse(deviceMap, pd.getValue(), hostToStorageDeviceMap, protectionDomains,
+                                pd.getKey());
+                    }
+                    catch (ServiceTimeoutException | ServiceExecutionException e)
+                    {
+                        String message = "Error validating storage pool(s) for protection domain: " + pd.getKey();
+                        LOGGER.error(message, e);
+                        updateDelegateStatus(message);
+                    }
+                });
             }
+            setDeviceMapToNodeDetail(nodeDetails, nodeToDeviceMap, deviceMap);
 
-            nodeDetail.setDeviceToDeviceStoragePool(deviceMap);
-            delegateExecution.setVariable(NODE_DETAIL, nodeDetail);
         }
         catch (Exception ex)
         {
-            LOGGER.error("Error finding or creating a valid storage pool", ex);
-            updateDelegateStatus("Error finding or creating a valid storage pool " + ex.getMessage());
+            LOGGER.error("Error finding valid storage pool(s)", ex);
+            updateDelegateStatus("Error finding valid storage pool(s) " + ex.getMessage());
             throw new BpmnError(SELECT_STORAGE_POOLS_FAILED, ex.getMessage());
         }
+    }
+
+    public void setDeviceMapToNodeDetail(final List<NodeDetail> nodeDetails, final Map<String, List<Device>> nodeToDeviceMap,
+            final Map<String, DeviceAssignment> deviceMap)
+    {
+        // set devices to storage pool map back to node
+        nodeDetails.stream().forEach(nodeDetail -> {
+            Map<String, DeviceAssignment> deviceAssignmentMap = new HashMap<>();
+            List<Device> nodeDevices = nodeToDeviceMap.get(nodeDetail.getId());
+            nodeDevices.stream().filter(Objects::nonNull).forEach(device -> {
+                deviceAssignmentMap.put(device.getId(), deviceMap.get(device.getId()));
+            });
+            nodeDetail.setDeviceToDeviceStoragePool(deviceAssignmentMap);
+        });
+    }
+
+    public void populateDeviceMaps(final List<NodeDetail> nodeDetails, final List<DiscoveredNodeInfo> discoveredNodes,
+            final Map<String, List<Device>> nodeToDeviceMap, final Map<String, List<Device>> protectionDomainToDevicesMap)
+    {
+        // separate devices based on protection domain, as calls to ESS are based on protection domain
+        discoveredNodes.stream().forEach(discoveredNode -> {
+            nodeDetails.stream().forEach(nodeDetail -> {
+                if (nodeDetail.getServiceTag().equalsIgnoreCase(discoveredNode.getSerialNumber()))
+                {
+                    if (nodeDetail.getProtectionDomainId() == null) {
+                        throw new IllegalStateException("Could not find a valid protection domain for node: " + nodeDetail.getId());
+                    }
+                    String symphonyUuid = nodeDetail.getId();
+
+                    List<Device> newDevices = getNewDevices(symphonyUuid);
+                    nodeToDeviceMap.put(symphonyUuid, newDevices);
+
+                    if (protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId()) == null)
+                    {
+                        protectionDomainToDevicesMap.put(nodeDetail.getProtectionDomainId(), new ArrayList<Device>());
+                    }
+                    protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId())
+                            .addAll(newDevices != null ? newDevices : Collections.emptyList());
+                }
+            });
+        });
     }
 
     /**
@@ -125,14 +183,10 @@ public class SelectStoragePools extends BaseWorkflowDelegate
      * @throws ServiceTimeoutException
      * @throws ServiceExecutionException
      */
-    private void validateStoragePoolsAndSetResponse(Map<String, DeviceAssignment> deviceMap, final List<Device> newDevices,
+    public void validateStoragePoolsAndSetResponse(Map<String, DeviceAssignment> deviceMap, final List<Device> newDevices,
             final Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap, final List<ScaleIOProtectionDomain> protectionDomains,
             final String protectionDomainId) throws ServiceTimeoutException, ServiceExecutionException
     {
-        if (StringUtils.isEmpty(protectionDomainId))
-        {
-            throw new IllegalStateException("Protection domain id is null");
-        }
 
         final ScaleIOProtectionDomain scaleIOProtectionDomain = protectionDomains.stream().filter(Objects::nonNull)
                 .filter(protectionDomain -> protectionDomain.getId().equals(protectionDomainId)).findFirst().orElse(null);
@@ -142,14 +196,38 @@ public class SelectStoragePools extends BaseWorkflowDelegate
             throw new IllegalStateException("Could not find a valid protection domain");
         }
 
-        if (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain))
-        {
-            //If we do not find a storage pool, then for now we assume it's going to be a newly-created
-            //"temp" storage pool and the devices will be assigned to it.
-            newDevices.stream()
-                    .filter(Objects::nonNull)
-                    .forEach(device->deviceMap.put(device.getId(), new DeviceAssignment(device.getId(), device.getSerialNumber(), device.getLogicalName(), device.getName(),null, "temp")));
+
+        // ESS has to be called N number of times (to a max of 5 times), as we do not really know how many new storage pools are
+        // really required
+        int numberOfIterations = 1;
+        int storagePoolNameCounter = 1;
+        while (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain)) {
+            // max 5 attempts to ensure all drives are assigned
+            if (numberOfIterations >= 5) {
+                break;
+            }
+            String storagePoolName = "Storage Pool " + storagePoolNameCounter;
+
+            // ensure the name used for dummy pool is not already used
+            while (protectionDomainContainsStoragePoolName(scaleIOProtectionDomain, storagePoolName)) {
+                storagePoolName = "Storage Pool " + storagePoolNameCounter++;
+            }
+
+            // create a dummy storage pool and add it to the pool list and see if it is enough
+            ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
+            storagePool.setUseRfcache(false);
+            storagePool.setUseRmcache(false);
+            storagePool.setZeroPaddingEnabled(true);
+            storagePool.setId(storagePoolName);
+            storagePool.setName(storagePoolName);
+            scaleIOProtectionDomain.addStoragePool(storagePool);
+            numberOfIterations++;
         }
+    }
+
+    public boolean protectionDomainContainsStoragePoolName(ScaleIOProtectionDomain scaleIOProtectionDomain, String storagePoolName) {
+        return scaleIOProtectionDomain.getStoragePools().stream().filter(Objects::nonNull)
+                .filter(sp -> storagePoolName.equalsIgnoreCase(sp.getName())).findAny().isPresent();
     }
 
     /**
@@ -169,10 +247,11 @@ public class SelectStoragePools extends BaseWorkflowDelegate
     {
         EssValidateStoragePoolResponseMessage storageResponseMessage = nodeService
                 .validateStoragePools(protectionDomain.getStoragePools(), newDevices, hostToStorageDeviceMap);
+        LOGGER.info("Response from ESS: " + storageResponseMessage);
 
         storageResponseMessage.getWarnings().forEach(f -> updateDelegateStatus(f.getMessage()));
 
-        // if all devices are allocated to existing pools or some of the disks already allocated or < 90GB and no errors
+        // if all devices are allocated to existing pools OR some of the disks already allocated or < 90GB and no errors
         if (CollectionUtils.size(storageResponseMessage.getDeviceToStoragePoolMap()) == CollectionUtils.size(newDevices) || CollectionUtils
                 .isEmpty(storageResponseMessage.getErrors()))
         {
