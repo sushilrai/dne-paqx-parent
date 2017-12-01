@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,6 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
     {
         LOGGER.info("In selectStoragePools");
 
-        //        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         List<NodeDetail> nodeDetails = (List<NodeDetail>) delegateExecution.getVariable(NODE_DETAILS);
         if (CollectionUtils.isEmpty(nodeDetails))
         {
@@ -82,7 +82,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
 
             populateDeviceMaps(nodeDetails, discoveredNodes, nodeToDeviceMap, protectionDomainToDevicesMap);
 
-            if (CollectionUtils.isEmpty(protectionDomainToDevicesMap.values()))
+            if (protectionDomainToDevicesMap.values().stream().mapToInt(Collection::size).sum() == 0)
             {
                 String message = "No disks found in the node inventory data.";
                 updateDelegateStatus(message);
@@ -117,6 +117,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
                         String message = "Error validating storage pool(s) for protection domain: " + pd.getKey();
                         LOGGER.error(message, e);
                         updateDelegateStatus(message);
+                        throw new BpmnError(SELECT_STORAGE_POOLS_FAILED, message);
                     }
                 });
             }
@@ -153,7 +154,8 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             nodeDetails.stream().forEach(nodeDetail -> {
                 if (nodeDetail.getServiceTag().equalsIgnoreCase(discoveredNode.getSerialNumber()))
                 {
-                    if (nodeDetail.getProtectionDomainId() == null) {
+                    if (nodeDetail.getProtectionDomainId() == null)
+                    {
                         throw new IllegalStateException("Could not find a valid protection domain for node: " + nodeDetail.getId());
                     }
                     String symphonyUuid = nodeDetail.getId();
@@ -196,21 +198,24 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             throw new IllegalStateException("Could not find a valid protection domain");
         }
 
-
         // ESS has to be called N number of times (to a max of 5 times), as we do not really know how many new storage pools are
         // really required
         int numberOfIterations = 1;
         int storagePoolNameCounter = 1;
-        while (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain)) {
-            // max 5 attempts to ensure all drives are assigned
-            if (numberOfIterations >= 5) {
+        String storagePoolName = "Storage Pool " + storagePoolNameCounter;
+        while (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain))
+        {
+            // max 6 attempts to ensure all drives are assigned
+            if (numberOfIterations >= 6)
+            {
                 break;
             }
-            String storagePoolName = "Storage Pool " + storagePoolNameCounter;
 
-            // ensure the name used for dummy pool is not already used
-            while (protectionDomainContainsStoragePoolName(scaleIOProtectionDomain, storagePoolName)) {
-                storagePoolName = "Storage Pool " + storagePoolNameCounter++;
+            // ensure the name used for dummy pool is not already used, max 5 pools to be created
+            while (protectionDomainContainsStoragePoolName(scaleIOProtectionDomain, storagePoolName))
+            {
+                storagePoolNameCounter++;
+                storagePoolName = "Storage Pool " + storagePoolNameCounter;
             }
 
             // create a dummy storage pool and add it to the pool list and see if it is enough
@@ -225,7 +230,8 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
         }
     }
 
-    public boolean protectionDomainContainsStoragePoolName(ScaleIOProtectionDomain scaleIOProtectionDomain, String storagePoolName) {
+    private boolean protectionDomainContainsStoragePoolName(ScaleIOProtectionDomain scaleIOProtectionDomain, String storagePoolName)
+    {
         return scaleIOProtectionDomain.getStoragePools().stream().filter(Objects::nonNull)
                 .filter(sp -> storagePoolName.equalsIgnoreCase(sp.getName())).findAny().isPresent();
     }

@@ -3,16 +3,16 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
+import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
 import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.DeviceAssignment;
@@ -25,16 +25,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.SELECT_STORAGE_POOLS_FAILED;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -44,19 +48,18 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
 /**
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
- */
-public class SelectStoragePoolsTest
+ */ public class SelectStoragePoolsTest
 {
     private SelectStoragePools selectStoragePools;
-
-    private NodeDetail nodeDetail;
 
     @Mock
     private NodeService nodeService;
@@ -64,26 +67,22 @@ public class SelectStoragePoolsTest
     @Mock
     private DelegateExecution delegateExecution;
 
+    private List<ScaleIOData>        scaleIODataList        = new ArrayList<>();
     private List<DiscoveredNodeInfo> discoveredNodeInfoList = new ArrayList<>();
-    List<NodeDetail> nodeDetails = new ArrayList<>();
-    List<Device> newDevices = new ArrayList<>();
+    List<NodeDetail>              nodeDetails       = new ArrayList<>();
+    List<Device>                  newDevices        = new ArrayList<>();
     List<ScaleIOProtectionDomain> protectionDomains = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception
     {
         selectStoragePools = Mockito.spy(new SelectStoragePools(nodeService));
-        nodeDetail = new NodeDetail("1", "abc");
-        nodeDetail.setProtectionDomainId("pdId1");
-//        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
         setupMockScaleIODataList();
         setupDiscoveredNodeInfo();
         setupNodeDetails();
-        setupNewDevices();
+        this.newDevices = setupNewDevices(1);
         setupProtectionDomains();
     }
-
-
 
     private void setupMockScaleIODataList()
     {
@@ -94,10 +93,11 @@ public class SelectStoragePoolsTest
         scaleIOData.addProtectionDomain(protectionDomain1);
         protectionDomain1.setScaleIOData(scaleIOData);
         scaleIODataList.add(scaleIOData);
-//        doReturn(scaleIODataList).when(nodeService).listScaleIOData();
+        this.scaleIODataList = scaleIODataList;
     }
 
-    private void setupDiscoveredNodeInfo() {
+    private void setupDiscoveredNodeInfo()
+    {
         List<DiscoveredNodeInfo> discoveredNodeInfoList = new ArrayList<>();
         DiscoveredNodeInfo discoveredNodeInfo1 = new DiscoveredNodeInfo("M-1", "MF-1", "P-1", "PF-1", "SN-1", "UUID-1");
         discoveredNodeInfoList.add(discoveredNodeInfo1);
@@ -106,7 +106,8 @@ public class SelectStoragePoolsTest
         this.discoveredNodeInfoList = discoveredNodeInfoList;
     }
 
-    private void setupNodeDetails() {
+    private void setupNodeDetails()
+    {
         List<NodeDetail> nodeDetails = new ArrayList<>();
         NodeDetail nodeDetail1 = new NodeDetail("ND-1", "SN-1");
         nodeDetail1.setProtectionDomainId("PD-1");
@@ -117,32 +118,36 @@ public class SelectStoragePoolsTest
         this.nodeDetails = nodeDetails;
     }
 
-    private void setupNewDevices()
+    private List<Device> setupNewDevices(int i)
     {
         List<Device> mockDevices = new ArrayList<>();
-        Device device1 = new Device("dev1Id-1", "dev1Name-1", "active", "dev1Serial-1", "dev1CanName", "dev1LogicalName", Device.Type.SSD,
-                "1800000000");
+        Device device1 = new Device("dev1Id-" + i, "dev1Name-" + i, "active", "dev1Serial-" + i, "dev1CanName", "dev1LogicalName",
+                Device.Type.SSD, "1800000000");
         mockDevices.add(device1);
-        Device device2 = new Device("dev1Id-2", "dev1Name-2", "active", "dev1Serial-2", "dev1CanName", "dev1LogicalName", Device.Type.SSD,
-                "1800000000");
+        Device device2 = new Device("dev1Id-" + (i + 1), "dev1Name-" + (i + 1), "active", "dev1Serial-" + (i + 1), "dev1CanName",
+                "dev1LogicalName", Device.Type.SSD, "1800000000");
         mockDevices.add(device2);
-        Device device3 = new Device("dev1Id-3", "dev1Name-3", "active", "dev1Serial-3", "dev1CanName", "dev1LogicalName", Device.Type.SSD,
-                "1800000000");
+        Device device3 = new Device("dev1Id-" + (i + 2), "dev1Name-" + (i + 2), "active", "dev1Serial-" + (i + 2), "dev1CanName",
+                "dev1LogicalName", Device.Type.SSD, "1800000000");
         mockDevices.add(device3);
-        this.newDevices = mockDevices;
+        return mockDevices;
     }
 
-    private void setupProtectionDomains() {
+    private void setupProtectionDomains()
+    {
         List<ScaleIOProtectionDomain> protectionDomains = new ArrayList<>();
         ScaleIOProtectionDomain protectionDomain1 = new ScaleIOProtectionDomain("PD-1", "pdName1", "ACTIVE");
+        protectionDomain1.addStoragePool(new ScaleIOStoragePool());
         protectionDomains.add(protectionDomain1);
         ScaleIOProtectionDomain protectionDomain2 = new ScaleIOProtectionDomain("PD-2", "pdName2", "ACTIVE");
+        protectionDomain2.addStoragePool(new ScaleIOStoragePool());
         protectionDomains.add(protectionDomain2);
         this.protectionDomains = protectionDomains;
     }
 
     @Test
-    public void populateDeviceMaps_success() {
+    public void populateDeviceMaps_success()
+    {
         Map<String, List<Device>> nodeToDeviceMap = new HashMap<>();
         Map<String, List<Device>> protectionDomainToDevicesMap = new HashMap<>();
         doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-1");
@@ -159,23 +164,28 @@ public class SelectStoragePoolsTest
     }
 
     @Test
-    public void populateDeviceMaps_noProtectionDomainId() {
+    public void populateDeviceMaps_noProtectionDomainId()
+    {
         Map<String, List<Device>> nodeToDeviceMap = new HashMap<>();
         Map<String, List<Device>> protectionDomainToDevicesMap = new HashMap<>();
         doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-1");
-//        doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-2");
+        //        doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-2");
         this.nodeDetails.get(1).setProtectionDomainId(null);
-        try {
-            selectStoragePools.populateDeviceMaps(this.nodeDetails, this.discoveredNodeInfoList, nodeToDeviceMap, protectionDomainToDevicesMap);
+        try
+        {
+            selectStoragePools
+                    .populateDeviceMaps(this.nodeDetails, this.discoveredNodeInfoList, nodeToDeviceMap, protectionDomainToDevicesMap);
             fail("Expected IllegalStateException.");
-        } catch(IllegalStateException e) {
+        }
+        catch (IllegalStateException e)
+        {
             assertEquals("Could not find a valid protection domain for node: ND-2", e.getMessage());
         }
     }
 
-
     @Test
-    public void validateStoragePoolsAndSetResponse_success() throws Exception {
+    public void validateStoragePoolsAndSetResponse_success() throws Exception
+    {
         EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
         storageResponseMessage.setWarnings(Collections.emptyList());
         storageResponseMessage.setErrors(Collections.emptyList());
@@ -187,100 +197,176 @@ public class SelectStoragePoolsTest
         doReturn(storageResponseMessage).when(nodeService).validateStoragePools(anyList(), anyList(), anyMap());
 
         Map<String, DeviceAssignment> deviceMap = new HashMap<>();
-        selectStoragePools.validateStoragePoolsAndSetResponse(deviceMap, newDevices, new HashMap<String, Map<String, HostStorageDevice>>(), protectionDomains, "PD-1");
+        selectStoragePools.validateStoragePoolsAndSetResponse(deviceMap, newDevices, new HashMap<String, Map<String, HostStorageDevice>>(),
+                protectionDomains, "PD-1");
         assertFalse(deviceMap.isEmpty());
         assertEquals(2, deviceMap.size());
     }
 
-    /*@Test
-    public void testSuccessful() throws ServiceTimeoutException, ServiceExecutionException
+    @Test
+    public void validateStoragePoolsAndSetResponse_noProtectionDomain() throws Exception
     {
-        mockPopulatedNewDevices();
-        mockFoundValidStoragePoolResponse();
-
-        selectStoragePools.delegateExecute(delegateExecution);
-        Map<String, DeviceAssignment> deviceAssignment = nodeDetail.getDeviceToDeviceStoragePool();
-        assertFalse(deviceAssignment.isEmpty());
-    }
-
-    @Test(expected = BpmnError.class)
-    public void testEmptyDisks() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        mockUnpopulatedNewDevices();
-        selectStoragePools.delegateExecute(delegateExecution);
+        try
+        {
+            selectStoragePools
+                    .validateStoragePoolsAndSetResponse(new HashMap<>(), newDevices, new HashMap<String, Map<String, HostStorageDevice>>(),
+                            protectionDomains, "PD-3");
+            fail("Expected IllegalStateException with no protection domain found.");
+        }
+        catch (IllegalStateException e)
+        {
+            assertEquals("Could not find a valid protection domain", e.getMessage());
+        }
     }
 
     @Test
-    public void testNoValidStoragePoolsInitially() throws ServiceTimeoutException, ServiceExecutionException, TaskResponseFailureException
+    public void validateStoragePoolsAndSetResponse_addDummyPool() throws Exception
     {
-        mockPopulatedNewDevices();
-        setupInvalidStoragePoolMock();
+        EssValidateStoragePoolResponseMessage storageResponseMessage = new EssValidateStoragePoolResponseMessage();
+        storageResponseMessage.setWarnings(Collections.emptyList());
+        storageResponseMessage.setErrors(Collections.emptyList());
+
+        Map<String, DeviceAssignment> deviceToStoragePoolMap = new HashMap<>();
+        deviceToStoragePoolMap.put("id-1", new DeviceAssignment("id-1", "sn-1", "ln-1", "dn-1", "spid-1", "spn-1"));
+        deviceToStoragePoolMap.put("id-2", new DeviceAssignment("id-2", "sn-2", "ln-2", "dn-2", "spid-1", "spn-1"));
+        storageResponseMessage.setDeviceToStoragePoolMap(deviceToStoragePoolMap);
+        List<Error> errors = new ArrayList<>();
+        Error error = new Error("", "No Storage pool found.");
+        errors.add(error);
+        storageResponseMessage.setErrors(errors);
+        doReturn(storageResponseMessage).when(nodeService).validateStoragePools(anyList(), anyList(), anyMap());
+
+        Map<String, DeviceAssignment> deviceMap = new HashMap<>();
+        selectStoragePools.validateStoragePoolsAndSetResponse(deviceMap, newDevices, new HashMap<String, Map<String, HostStorageDevice>>(),
+                protectionDomains, "PD-1");
+        assertTrue(deviceMap.isEmpty());
+        assertEquals(6, protectionDomains.get(0).getStoragePools().size());
+    }
+
+    @Test
+    public void delegateExecute_nullNodeDetails()
+    {
+
+        doReturn(null).when(delegateExecution).getVariable(NODE_DETAILS);
+        try
+        {
+            selectStoragePools.delegateExecute(delegateExecution);
+            fail("Expecting node details not found error.");
+        }
+        catch (BpmnError ex)
+        {
+            assertEquals(SELECT_STORAGE_POOLS_FAILED, ex.getErrorCode());
+            assertEquals("The List of Node Detail was not found!  Please add at least one Node Detail and try again.", ex.getMessage());
+        }
+        catch (Exception e)
+        {
+            fail("Unexpected exception.");
+        }
+
+    }
+
+    @Test
+    public void delegateExecute_noNewDeviceForProtectionDomain() throws Exception
+    {
+
+        doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
+        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
+        try
+        {
+            selectStoragePools.delegateExecute(delegateExecution);
+            fail("Expecting no devices found for protection domain.");
+        }
+        catch (BpmnError ex)
+        {
+            assertEquals(SELECT_STORAGE_POOLS_FAILED, ex.getErrorCode());
+            assertEquals("No disks found in the node inventory data.", ex.getMessage());
+        }
+        catch (Exception e)
+        {
+            fail("Unexpected exception.");
+        }
+
+    }
+
+    @Test
+    public void delegateExecute_timeoutException() throws Exception
+    {
+
+        doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
+        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
+        doReturn(newDevices).when(selectStoragePools).getNewDevices(anyString());
+        doReturn(new HashMap<String, Map<String, HostStorageDevice>>()).when(nodeService).getHostToStorageDeviceMap(anyList());
+        doReturn(scaleIODataList).when(nodeService).listScaleIOData();
+        doThrow(new ServiceTimeoutException()).when(selectStoragePools)
+                .validateStoragePoolsAndSetResponse(anyMap(), anyList(), anyMap(), anyList(), anyString());
+        try
+        {
+            selectStoragePools.delegateExecute(delegateExecution);
+            fail("Expecting service timeout exception.");
+        }
+        catch (BpmnError ex)
+        {
+            assertEquals(SELECT_STORAGE_POOLS_FAILED, ex.getErrorCode());
+            assertEquals("Error validating storage pool(s) for protection domain: PD-2", ex.getMessage());
+        }
+        catch (Exception e)
+        {
+            fail("Unexpected exception.");
+        }
+    }
+
+    @Test
+    public void delegateExecute_success() throws Exception
+    {
+
+        doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
+        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
+        doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-1");
+        doReturn(setupNewDevices(4)).when(selectStoragePools).getNewDevices("ND-2");
+        doReturn(new HashMap<String, Map<String, HostStorageDevice>>()).when(nodeService).getHostToStorageDeviceMap(anyList());
+        doReturn(scaleIODataList).when(nodeService).listScaleIOData();
+        doAnswer(new Answer<Object>()
+        {
+            public Object answer(InvocationOnMock invocation)
+            {
+                if (((String) invocation.getArguments()[4]).equals("PD-1"))
+                {
+                    Map<String, DeviceAssignment> deviceMap = (Map<String, DeviceAssignment>) invocation.getArguments()[0];
+                    deviceMap.put("dev1Id-1",
+                            new DeviceAssignment("dev1Id-1", "dev1Serial-1", "dev1LogicalName", "dev1Name-1", "SP-1", "StoragePool-1"));
+                    deviceMap.put("dev1Id-2",
+                            new DeviceAssignment("dev1Id-2", "dev1Serial-2", "dev1LogicalName", "dev1Name-2", "SP-1", "StoragePool-1"));
+                    deviceMap.put("dev1Id-3",
+                            new DeviceAssignment("dev1Id-3", "dev1Serial-3", "dev1LogicalName", "dev1Name-3", "SP-1", "StoragePool-1"));
+                }
+                else
+                {
+                    Map<String, DeviceAssignment> deviceMap = (Map<String, DeviceAssignment>) invocation.getArguments()[0];
+                    deviceMap.put("dev1Id-4",
+                            new DeviceAssignment("dev1Id-4", "dev1Serial-4", "dev1LogicalName", "dev1Name-4", "SP-2", "StoragePool-2"));
+                    deviceMap.put("dev1Id-5",
+                            new DeviceAssignment("dev1Id-5", "dev1Serial-5", "dev1LogicalName", "dev1Name-5", "SP-2", "StoragePool-2"));
+                    deviceMap.put("dev1Id-6",
+                            new DeviceAssignment("dev1Id-6", "dev1Serial-6", "dev1LogicalName", "dev1Name-6", "SP-2", "StoragePool-2"));
+                }
+
+                return null;
+            }
+        }).when(selectStoragePools).validateStoragePoolsAndSetResponse(anyMap(), anyList(), anyMap(), anyList(), anyString());
 
         selectStoragePools.delegateExecute(delegateExecution);
-        Map<String, DeviceAssignment> deviceAssignment = nodeDetail.getDeviceToDeviceStoragePool();
-        assertFalse(deviceAssignment.isEmpty());
-        deviceAssignment.values().stream().filter(Objects::nonNull)
-                .forEach(da -> assertTrue(da.getStoragePoolId() == null && da.getStoragePoolName().equals("temp")));
+        assertNotNull(nodeDetails.get(0).getDeviceToDeviceStoragePool());
+        assertNotNull(nodeDetails.get(1).getDeviceToDeviceStoragePool());
+        assertEquals(3, nodeDetails.get(0).getDeviceToDeviceStoragePool().size());
+        assertEquals(3, nodeDetails.get(1).getDeviceToDeviceStoragePool().size());
+        nodeDetails.get(0).getDeviceToDeviceStoragePool().entrySet().stream().forEach(entry -> {
+            assertThat(entry.getKey(), anyOf(equalTo("dev1Id-1"), equalTo("dev1Id-2"), equalTo("dev1Id-3")));
+            assertThat(entry.getValue().getDeviceId(), anyOf(equalTo("dev1Id-1"), equalTo("dev1Id-2"), equalTo("dev1Id-3")));
+        });
+        nodeDetails.get(1).getDeviceToDeviceStoragePool().entrySet().stream().forEach(entry -> {
+            assertThat(entry.getKey(), anyOf(equalTo("dev1Id-4"), equalTo("dev1Id-5"), equalTo("dev1Id-6")));
+            assertThat(entry.getValue().getDeviceId(), anyOf(equalTo("dev1Id-4"), equalTo("dev1Id-5"), equalTo("dev1Id-6")));
+        });
     }
 
-    private void setupInvalidStoragePoolMock() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        EssValidateStoragePoolResponseMessage invalidStoragePoolResponse = setupInvalidStoragePoolResponse();
-
-        doReturn(invalidStoragePoolResponse).when(nodeService)
-                .validateStoragePools(Mockito.anyList(), Mockito.anyList(), Mockito.anyMap());
-    }
-
-    private EssValidateStoragePoolResponseMessage setupInvalidStoragePoolResponse()
-    {
-        Map<String, DeviceAssignment> emptyDeviceToStoragePoolMap = new HashMap<>();
-        EssValidateStoragePoolResponseMessage invalidValidateStoragePoolsResponse = new EssValidateStoragePoolResponseMessage();
-        invalidValidateStoragePoolsResponse.setDeviceToStoragePoolMap(emptyDeviceToStoragePoolMap);
-        List<Error> errors = new ArrayList<>();
-        errors.add(new Error());
-        invalidValidateStoragePoolsResponse.setErrors(errors);
-        return invalidValidateStoragePoolsResponse;
-    }
-
-    private EssValidateStoragePoolResponseMessage createValidStoragePoolResponse()
-    {
-        Map<String, DeviceAssignment> deviceToStoragePoolMap = new HashMap<>();
-        deviceToStoragePoolMap.put("jack", new DeviceAssignment("id1", "ser1", "lname1", "dname", "spid", "spname"));
-        EssValidateStoragePoolResponseMessage validateStoragePoolsResponse = new EssValidateStoragePoolResponseMessage();
-        validateStoragePoolsResponse.setDeviceToStoragePoolMap(deviceToStoragePoolMap);
-        return validateStoragePoolsResponse;
-    }
-
-    private void mockFoundValidStoragePoolResponse() throws ServiceTimeoutException, ServiceExecutionException
-    {
-        doReturn(createValidStoragePoolResponse()).when(nodeService)
-                .validateStoragePools(Mockito.anyList(), Mockito.anyList(), Mockito.anyMap());
-    }
-
-    private void setupMockScaleIODataList()
-    {
-        List<ScaleIOData> scaleIODataList = new ArrayList<>();
-        ScaleIOData scaleIOData = new ScaleIOData("sio1", "name1", "installId", "mdmMode", "systemVersion", "clusterState", "version");
-
-        ScaleIOProtectionDomain protectionDomain1 = new ScaleIOProtectionDomain("pdId1", "pdName1", "ACTIVE");
-        scaleIOData.addProtectionDomain(protectionDomain1);
-        protectionDomain1.setScaleIOData(scaleIOData);
-        scaleIODataList.add(scaleIOData);
-        doReturn(scaleIODataList).when(nodeService).listScaleIOData();
-    }
-
-    private void mockPopulatedNewDevices()
-    {
-        List<Device> mockDevices = new ArrayList<>();
-        Device device = new Device("dev1Id", "dev1Name", "active", "dev1Serial", "dev1CanName", "dev1LogicalName", Device.Type.SSD,
-                "900000000");
-        mockDevices.add(device);
-        doReturn(mockDevices).when(selectStoragePools).getNewDevices(anyString());
-    }
-
-    private void mockUnpopulatedNewDevices()
-    {
-        List<Device> mockDevices = new ArrayList<>();
-        doReturn(mockDevices).when(selectStoragePools).getNewDevices(anyString());
-    }*/
 }
