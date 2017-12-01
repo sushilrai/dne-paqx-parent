@@ -14,10 +14,12 @@ import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
 import com.dell.cpsd.service.common.client.callback.ServiceResponse;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionResponseMessage;
 
 /**
  * Node service interface.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -27,18 +29,14 @@ import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMe
  */
 public interface AsynchronousNodeService
 {
-    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> bootDeviceIdracStatusRequest(String processId,
-                                                                                                          String activityId,
-                                                                                                          String messageId,
-                                                                                                          ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest);
+    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> bootDeviceIdracStatusRequest(String processId, String activityId,
+            String messageId, ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest);
 
     BootDeviceIdracStatus bootDeviceIdracStatusResponse(AsynchronousNodeServiceCallback<?> serviceCallback)
             throws ServiceExecutionException;
 
-    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallEsxi(String processId,
-                                                                                         String activityId,
-                                                                                         String messageId,
-                                                                                         EsxiInstallationInfo esxiInstallationInfo);
+    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallEsxi(String processId, String activityId,
+            String messageId, EsxiInstallationInfo esxiInstallationInfo);
 
     String requestInstallEsxi(AsynchronousNodeServiceCallback<?> serviceCallback) throws ServiceExecutionException;
 
@@ -51,4 +49,10 @@ public interface AsynchronousNodeService
             ConfigurePxeBootRequestMessage requestMessage);
 
     void processConfigurePxeBootResponse(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
+
+    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> sendInstallScaleIoVmPackages(String processId, String activityId,
+            String messageId, RemoteCommandExecutionRequestMessage requestMessage) throws TaskResponseFailureException;
+
+    RemoteCommandExecutionResponseMessage.Status processInstallScaleioVmPackages(AsynchronousNodeServiceCallback<?> serviceCallback)
+            throws ServiceExecutionException;
 }

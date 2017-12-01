@@ -2,6 +2,7 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
  * Dell EMC Confidential/Proprietary Information
  */
+
 package com.dell.cpsd.paqx.dne.service.amqp;
 
 import com.dell.cpsd.ConfigureBootDeviceIdracError;
@@ -25,6 +26,7 @@ import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallScaleIoVmPackagesResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
@@ -40,6 +42,8 @@ import com.dell.cpsd.service.common.client.rpc.ServiceRequestCallback;
 import com.dell.cpsd.service.common.client.task.ServiceTask;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionResponseMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.util.CollectionUtils;
@@ -55,8 +59,7 @@ import java.util.stream.Collectors;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PXE_BOOT;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
 
-public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager implements ServiceCallbackRegistry,
-        AsynchronousNodeService
+public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager implements ServiceCallbackRegistry, AsynchronousNodeService
 {
     /*
      * The logger instance
@@ -88,22 +91,18 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
      */
     private RuntimeService runtimeService;
 
-
     /**
      * AmqpNodeService constructor.
      *
-     * @param consumer                                - The <code>DelegatingMessageConsumer</code> instance.
-     * @param producer                                - The <code>DneProducer</code> instance.
-     * @param replyTo                                 - The replyTo queue name.
-     * @param repository                              - The <code>DataServiceRepository</code> instance.
-     * @param runtimeService                          - The <code>RuntimeService</code> instance.
+     * @param consumer       - The <code>DelegatingMessageConsumer</code> instance.
+     * @param producer       - The <code>DneProducer</code> instance.
+     * @param replyTo        - The replyTo queue name.
+     * @param repository     - The <code>DataServiceRepository</code> instance.
+     * @param runtimeService - The <code>RuntimeService</code> instance.
      * @since 1.1
      */
-    public AmqpAsynchronousNodeService(final DelegatingMessageConsumer consumer,
-                                       final DneProducer producer,
-                                       final String replyTo,
-                                       final DataServiceRepository repository,
-                                       final RuntimeService runtimeService)
+    public AmqpAsynchronousNodeService(final DelegatingMessageConsumer consumer, final DneProducer producer, final String replyTo,
+            final DataServiceRepository repository, final RuntimeService runtimeService)
     {
         this.consumer = consumer;
         this.producer = producer;
@@ -120,6 +119,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
  */
     private void initCallbacks()
     {
+        this.consumer.addAdapter(new InstallScaleIoVmPackagesResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new InstallEsxiResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new RebootHostResponseAdapter(this, this.runtimeService));
@@ -127,7 +127,6 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
     }
 
     /**
-     *
      * @param activityId
      * @param messageId
      * @param timeout
@@ -137,23 +136,26 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
      * @throws ServiceExecutionException
      */
     protected <RES extends ServiceResponse<?>> AsynchronousNodeServiceCallback<RES> processRequest(final String processInstanceId,
-                                                                                                final String activityId,
-                                                                                                final String messageId,
-                                                                                                long timeout,
-                                                                                                ServiceRequestCallback serviceRequestCallback) throws ServiceExecutionException
+            final String activityId, final String messageId, long timeout, ServiceRequestCallback serviceRequestCallback)
+            throws ServiceExecutionException
     {
         this.shutdownCheck();
         String requestId = serviceRequestCallback.getRequestId();
-        if (requestId == null) {
+        if (requestId == null)
+        {
             requestId = this.createRequestId();
         }
 
-        AsynchronousNodeServiceCallback<RES> serviceCallback = new AsynchronousNodeServiceCallback(processInstanceId, activityId, messageId);
+        AsynchronousNodeServiceCallback<RES> serviceCallback = new AsynchronousNodeServiceCallback(processInstanceId, activityId,
+                messageId);
         this.createAndAddServiceTask(requestId, serviceCallback, timeout);
 
-        try {
+        try
+        {
             serviceRequestCallback.executeRequest(requestId);
-        } catch (Exception var7) {
+        }
+        catch (Exception var7)
+        {
             this.removeServiceTask(requestId);
             this.logAndThrowException(var7);
         }
@@ -197,38 +199,47 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         return response;
     }
 
-    public void release() {
+    public void release()
+    {
         super.release();
     }
 
-    private void createAndAddServiceTask(String requestId, AsynchronousNodeServiceCallback<?> callback, long timeout) {
+    private void createAndAddServiceTask(String requestId, AsynchronousNodeServiceCallback<?> callback, long timeout)
+    {
         ServiceTask<IServiceCallback<?>> task = new ServiceTask(requestId, callback, timeout);
         this.addServiceTask(requestId, task);
     }
 
-    private void checkForServiceError(AsynchronousNodeServiceCallback<?> callback) throws ServiceExecutionException {
+    private void checkForServiceError(AsynchronousNodeServiceCallback<?> callback) throws ServiceExecutionException
+    {
         ServiceError error = callback.getServiceError();
-        if (error != null) {
+        if (error != null)
+        {
             throw new ServiceExecutionException(error.getErrorMessage());
         }
     }
 
-    private void logAndThrowException(Exception exception) throws ServiceExecutionException {
-        Object[] lparams = new Object[]{exception.getMessage()};
+    private void logAndThrowException(Exception exception) throws ServiceExecutionException
+    {
+        Object[] lparams = new Object[] {exception.getMessage()};
         String lmessage = LOGGER.error(SCCLMessageCode.PUBLISH_MESSAGE_FAIL_E.getMessageCode(), lparams, exception);
         throw new ServiceExecutionException(lmessage, exception);
     }
 
-    protected String createRequestId() {
+    protected String createRequestId()
+    {
         return this.uuid();
     }
 
-    protected String uuid() {
+    protected String uuid()
+    {
         return UUID.randomUUID().toString();
     }
 
-    private void shutdownCheck() throws ServiceExecutionException {
-        if (this.isShutDown()) {
+    private void shutdownCheck() throws ServiceExecutionException
+    {
+        if (this.isShutDown())
+        {
             String lmessage = LOGGER.error(SCCLMessageCode.MANAGER_SHUTDOWN_E.getMessageCode());
             throw new ServiceExecutionException(lmessage);
         }
@@ -236,14 +247,11 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
 
     @Override
     public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> bootDeviceIdracStatusRequest(final String processId,
-                                                                                                          final String activityId,
-                                                                                                          final String messageId,
-                                                                                                          final ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
+            final String activityId, final String messageId, final ConfigureBootDeviceIdracRequest configureBootDeviceIdracRequest)
     {
         AsynchronousNodeServiceCallback<?> response = null;
-        if (configureBootDeviceIdracRequest != null &&
-            StringUtils.isNotEmpty(configureBootDeviceIdracRequest.getUuid()) &&
-            StringUtils.isNotEmpty(configureBootDeviceIdracRequest.getIdracIpAddress()))
+        if (configureBootDeviceIdracRequest != null && StringUtils.isNotEmpty(configureBootDeviceIdracRequest.getUuid()) && StringUtils
+                .isNotEmpty(configureBootDeviceIdracRequest.getIdracIpAddress()))
         {
             try
             {
@@ -288,8 +296,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         BootDeviceIdracStatus bootDeviceIdracStatus = null;
         if (serviceCallback != null)
         {
-            ConfigureBootDeviceIdracResponseMessage resp = processResponse(serviceCallback,
-                                                                           ConfigureBootDeviceIdracResponseMessage.class);
+            ConfigureBootDeviceIdracResponseMessage resp = processResponse(serviceCallback, ConfigureBootDeviceIdracResponseMessage.class);
             if (resp != null)
             {
                 bootDeviceIdracStatus = new BootDeviceIdracStatus();
@@ -303,7 +310,8 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
                         List<ConfigureBootDeviceIdracError> errors = resp.getConfigureBootDeviceIdracErrors();
                         if (!CollectionUtils.isEmpty(errors))
                         {
-                            List<String> errorMsgs = errors.stream().map(ConfigureBootDeviceIdracError::getMessage).collect(Collectors.toList());
+                            List<String> errorMsgs = errors.stream().map(ConfigureBootDeviceIdracError::getMessage)
+                                    .collect(Collectors.toList());
                             bootDeviceIdracStatus.setErrors(errorMsgs);
                         }
                     }
@@ -315,9 +323,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
 
     @Override
     public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallEsxi(final String processId,
-                                                                                                final String activityId,
-                                                                                                final String messageId,
-                                                                                                final EsxiInstallationInfo esxiInstallationInfo)
+            final String activityId, final String messageId, final EsxiInstallationInfo esxiInstallationInfo)
     {
 
         AsynchronousNodeServiceCallback<?> response = null;
@@ -344,7 +350,8 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
             });
 
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             LOGGER.error(" An unexpected exception occurred requesting Installation of Esxi on Node.", e);
         }
         return response;
@@ -357,6 +364,61 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         if (serviceCallback != null)
         {
             InstallESXiResponseMessage responseMessage = processResponse(serviceCallback, InstallESXiResponseMessage.class);
+            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            {
+                status = responseMessage.getStatus();
+            }
+        }
+        return status;
+    }
+
+    @Override
+    public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> sendInstallScaleIoVmPackages(String processId,
+            String activityId, String messageId, RemoteCommandExecutionRequestMessage requestMessage) throws TaskResponseFailureException
+    {
+        AsynchronousNodeServiceCallback<?> response = null;
+        final String correlationId = UUID.randomUUID().toString();
+
+        com.dell.cpsd.virtualization.capabilities.api.MessageProperties messageProperties = new com.dell.cpsd.virtualization.capabilities.api.MessageProperties();
+        messageProperties.setCorrelationId(correlationId);
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+        messageProperties.setReplyTo(replyTo);
+        requestMessage.setMessageProperties(messageProperties);
+
+        try
+        {
+            response = processRequest(processId, activityId, messageId, 0L, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return correlationId;
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishRemoteCommandExecution(requestMessage);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(" An unexpected exception occurred requesting Installation ScaleIo Vm Packages on Node.", e);
+        }
+
+        return response;
+    }
+
+    @Override
+    public RemoteCommandExecutionResponseMessage.Status processInstallScaleioVmPackages(AsynchronousNodeServiceCallback<?> serviceCallback)
+            throws ServiceExecutionException
+    {
+        RemoteCommandExecutionResponseMessage.Status status = RemoteCommandExecutionResponseMessage.Status.FAILED;
+        if (serviceCallback != null)
+        {
+            RemoteCommandExecutionResponseMessage responseMessage = processResponse(serviceCallback,
+                    RemoteCommandExecutionResponseMessage.class);
             if (responseMessage != null && responseMessage.getMessageProperties() != null)
             {
                 status = responseMessage.getStatus();
@@ -410,7 +472,8 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
                 throw new TaskResponseFailureException(REBOOT_HOST.getCode(), error);
             }
 
-            final HostPowerOperationResponseMessage responseMessage = processResponse(serviceCallback, HostPowerOperationResponseMessage.class);
+            final HostPowerOperationResponseMessage responseMessage = processResponse(serviceCallback,
+                    HostPowerOperationResponseMessage.class);
             if (responseMessage == null)
             {
                 final String error = "Response message is null";

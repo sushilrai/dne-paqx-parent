@@ -82,6 +82,9 @@ public class DelegateConstants
     public static final String SELECT_STORAGE_POOLS_FAILED              = "Select-Storage-Pools-Failed";
     public static final String CONFIGURE_PXE_FAILED                     = "Disable-Pxe-failed";
     public static final String ADD_NODE_TO_SYSTEM_DEFINITION_FAILED     = "Add-Node-To-System-Definition-Failed";
+    public static final String SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED   = "Send-Install-ScaleIo-Vm-Packages-Failed";
+    public static final String INSTALL_SCALEIO_VM_PACKAGES_MESSAGE_ID   = "receiveInstallScaleIoVmPackagesMsgId";
+    public static final String COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED   = "Complete-Install-ScaleIo-Vm-Packages-Failed";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED                   = "Failed";

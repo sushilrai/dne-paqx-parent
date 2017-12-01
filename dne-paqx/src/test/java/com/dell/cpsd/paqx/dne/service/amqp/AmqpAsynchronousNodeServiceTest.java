@@ -22,6 +22,8 @@ import com.dell.cpsd.service.common.client.rpc.DefaultMessageConsumer;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationResponseMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
+import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionResponseMessage;
 import org.camunda.bpm.engine.RuntimeService;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -312,5 +314,43 @@ public class AmqpAsynchronousNodeServiceTest
             assertTrue(e.getCode() == 1025);
             assertThat(e.getMessage(), containsString("Rackhd failed yet again"));
         }
+    }
+
+    @Test
+    public void sendInstallScaleIoVmPAckagesExceptionThrownReturnsNullResponse() throws Exception
+    {
+        final RemoteCommandExecutionRequestMessage request = new RemoteCommandExecutionRequestMessage();
+
+        amqpAsynchronousNodeService.release();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .sendInstallScaleIoVmPackages(processInstanceId, activityId, messageId, request);
+
+        assertNull(callback);
+        verify(dneProducer, times(0)).publishRemoteCommandExecution(any());
+    }
+
+    @Test
+    public void sendInstallScaleIoVmPAckagesSuccess() throws Exception
+    {
+        final RemoteCommandExecutionRequestMessage request = new RemoteCommandExecutionRequestMessage();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .sendInstallScaleIoVmPackages(processInstanceId, activityId, messageId, request);
+
+        assertNotNull(callback);
+        assertEquals(callback.getProcessInstanceId(), processInstanceId);
+        assertEquals(callback.getActivityId(), activityId);
+        assertEquals(callback.getMessageId(), messageId);
+        verify(dneProducer, times(1)).publishRemoteCommandExecution(any());
+    }
+
+    @Test
+    public void processInstallScaleioVmPackagesCallbackIsNull() throws Exception
+    {
+        RemoteCommandExecutionResponseMessage.Status response = amqpAsynchronousNodeService.processInstallScaleioVmPackages(null);
+
+        assertEquals(response, RemoteCommandExecutionResponseMessage.Status.FAILED);
+
     }
 }

@@ -65,7 +65,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListScaleIoComponentsResponse
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ListVCenterComponentsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodeInventoryResponseMessageAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.NodesListedResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.amqp.adapter.RemoteCommandExecutionResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SetPciPassthroughResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SioSdcUpdatePerformanceProfileResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.SoftwareVibResponseAdapter;
@@ -75,7 +74,6 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateClusterResponseAdapte
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateProtectionDomainResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ValidateStoragePoolResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.VmPowerOperationResponseAdapter;
-import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import com.dell.cpsd.paqx.dne.service.model.DiscoveredNode;
@@ -316,7 +314,6 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new VCenterUpdateSoftwareAcceptanceResponseAdapter(this));
         this.consumer.addAdapter(new VmPowerOperationResponseAdapter(this));
         this.consumer.addAdapter(new ConfigureVmNetworkSettingsResponseAdapter(this));
-        this.consumer.addAdapter(new RemoteCommandExecutionResponseAdapter(this));
         this.consumer.addAdapter(new AddHostToProtectionDomainResponseAdapter(this));
         this.consumer.addAdapter(new SioSdcUpdatePerformanceProfileResponseAdapter(this));
         this.consumer.addAdapter(new CreateStoragePoolAdapter(this));
