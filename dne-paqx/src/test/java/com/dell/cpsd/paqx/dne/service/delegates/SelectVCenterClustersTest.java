@@ -33,11 +33,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FindVCenterClusterTest
+public class SelectVCenterClustersTest
 {
 
-    private FindVCenterCluster findVCenterCluster;
-    private List<NodeDetail> nodeDetail;
+    private SelectVCenterClusters selectVCenterClusters;
+    private List<NodeDetail> nodeDetails;
     private ValidateVcenterClusterResponseMessage responseMessage;
     private Map<String, String> clusterMap;
     @Mock
@@ -51,24 +51,25 @@ public class FindVCenterClusterTest
 
     @Before
     public void setUp() throws Exception {
-        findVCenterCluster = new FindVCenterCluster(nodeService);
-        ValidateVcenterClusterResponseMessage responseMsg = new ValidateVcenterClusterResponseMessage();
+        selectVCenterClusters = new SelectVCenterClusters(nodeService);
 
-        nodeDetail = new ArrayList<>();
-        nodeDetail.add(new NodeDetail("1", "abc"));
+        nodeDetails = new ArrayList<>();
+        nodeDetails.add(new NodeDetail("1", "abc"));
+        nodeDetails.add(new NodeDetail("2", "def"));
 
-        doReturn(nodeDetail). when(delegateExecution).getVariable(NODE_DETAILS);
+        doReturn(nodeDetails). when(delegateExecution).getVariable(NODE_DETAILS);
         clusterMap = new HashMap<>();
-        clusterMap.put("abc", "TestCluster");
-        responseMsg.setClusters(clusterMap);
+        clusterMap.put("abc", "TestCluster1");
+        clusterMap.put("def", "TestCluster2");
         responseMessage = new ValidateVcenterClusterResponseMessage(messageProperties, clusterMap, null, "Description" );
         doReturn(responseMessage).when(nodeService).validateClusters(any(), any());
     }
 
     @Test
     public void testSuccessful() {
-        findVCenterCluster.delegateExecute(delegateExecution);
-        assertEquals(nodeDetail.get(0).getClusterName(), "TestCluster");
+        selectVCenterClusters.delegateExecute(delegateExecution);
+        assertEquals(nodeDetails.get(0).getClusterName(), "TestCluster1");
+        assertEquals(nodeDetails.get(1).getClusterName(), "TestCluster2");
     }
 
     @Test
@@ -76,11 +77,39 @@ public class FindVCenterClusterTest
         try
         {
             doThrow(new ServiceTimeoutException("Timeout")).when(nodeService).listClusters();
-            findVCenterCluster.delegateExecute(delegateExecution);
+            selectVCenterClusters.delegateExecute(delegateExecution);
             fail("Should not get here!");
         } catch( BpmnError bpmnError) {
             assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
             assertEquals(bpmnError.getMessage(), "An unexpected Exception occurred while retrieving the list of Clusters for selection.  Reason: Timeout");
         }
     }
+
+    @Test
+    public void testFailedClustersException() throws Exception {
+        try
+        {
+            responseMessage.setClusters(null);
+            responseMessage.setFailedCluster(new ArrayList<>(clusterMap.values()));
+            selectVCenterClusters.delegateExecute(delegateExecution);
+            fail("Should not get here!");
+        } catch( BpmnError bpmnError) {
+            assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
+            assertEquals(bpmnError.getMessage(), "Selecting VCenter Clusters Failed. Reason: TestCluster1 TestCluster2 ");
+        }
+    }
+
+    @Test
+    public void testClusterNotFound() {
+        clusterMap.remove("def");
+        try
+        {
+            selectVCenterClusters.delegateExecute(delegateExecution);
+            fail("Should not get here!");
+        } catch( BpmnError bpmnError) {
+            assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
+            assertEquals(bpmnError.getMessage(), "Selecting VCenter Cluster for Node def Failed.");
+        }
+    }
+
 }

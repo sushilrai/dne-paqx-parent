@@ -49,7 +49,7 @@
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_039pnxr" sourceRef="StartEvent_19l4h89" targetRef="EndEvent_0fze39b" />
     </bpmn:subProcess>
-    <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${findVCenterCluster}">
+    <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectVCenterClusters}">
       <bpmn:incoming>SequenceFlow_16g64dr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0qxxk7u</bpmn:outgoing>
     </bpmn:serviceTask>

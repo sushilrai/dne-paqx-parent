@@ -73,18 +73,20 @@ public class ConfigureBootDevice extends BaseWorkflowDelegate
         }
         if (bootDeviceIdracStatusRequest == null || !"SUCCESS".equalsIgnoreCase(bootDeviceIdracStatusRequest.getStatus()))
         {
-            final String[] message = {taskMessage + " was unsuccessful on Node " + nodeDetail.getServiceTag() +
-                                      ". Please correct the following errors and try again.\n"};
+            final StringBuilder messageBuilder = new StringBuilder();
+            messageBuilder.append(taskMessage + " was unsuccessful on Node " + nodeDetail.getServiceTag() +
+                                      ". Please correct the following errors and try again.\n");
             if (bootDeviceIdracStatusRequest != null && CollectionUtils
                     .isNotEmpty(bootDeviceIdracStatusRequest.getErrors()))
             {
                 bootDeviceIdracStatusRequest.getErrors().forEach(error -> {
-                    message[0] += error + "\n";
+                    messageBuilder.append(error + "\n");
                 });
             }
-            LOGGER.error(message[0]);
-            updateDelegateStatus(message[0]);
-            throw new BpmnError(CONFIGURE_BOOT_DEVICE_FAILED, message[0]);
+            final String message = messageBuilder.toString();
+            LOGGER.error(message);
+            updateDelegateStatus(message);
+            throw new BpmnError(CONFIGURE_BOOT_DEVICE_FAILED, message);
         }
         LOGGER.info(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());
         updateDelegateStatus(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());

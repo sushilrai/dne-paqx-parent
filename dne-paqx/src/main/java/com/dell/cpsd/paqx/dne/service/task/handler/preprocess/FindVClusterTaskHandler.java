@@ -43,7 +43,7 @@
 //    @Override
 //    public boolean executeTask(Job job)
 //    {
-//        LOGGER.info("Execute FindVCenterCluster task");
+//        LOGGER.info("Execute SelectVCenterClusters task");
 //
 //        TaskResponse response = initializeResponse(job);
 //
