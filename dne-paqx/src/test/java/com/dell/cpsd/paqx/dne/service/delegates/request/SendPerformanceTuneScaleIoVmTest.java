@@ -35,9 +35,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendInstallScaleIoVmPackagesTest
+public class SendPerformanceTuneScaleIoVmTest
 {
-    private SendInstallScaleIoVmPackages sendInstallScaleIoVmPackages;
+    private SendPerformanceTuneScaleIoVm sendPerformanceTuneScaleIoVm;
 
     @Mock
     private RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
@@ -59,7 +59,7 @@ public class SendInstallScaleIoVmPackagesTest
     @Before
     public void setUp() throws Exception
     {
-        sendInstallScaleIoVmPackages = new SendInstallScaleIoVmPackages(asynchronousNodeService, remoteCommandExecutionRequestTransformer);
+        sendPerformanceTuneScaleIoVm = new SendPerformanceTuneScaleIoVm(asynchronousNodeService, remoteCommandExecutionRequestTransformer);
 
         doReturn(asynchronousNodeServiceCallback).when(asynchronousNodeService).executeRemoteCommand(any(), any(), any(), any());
 
@@ -75,18 +75,18 @@ public class SendInstallScaleIoVmPackagesTest
         doReturn("1").when(delegateExecution).getProcessInstanceId();
 
         doReturn(requestModel).when(remoteCommandExecutionRequestTransformer).buildRemoteCodeExecutionRequest(delegateExecution,
-                RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
+                RemoteCommandExecutionRequestMessage.RemoteCommand.PERFORMANCE_TUNING_SVM);
     }
 
     @Test
     public void delegateExecuteSuccess() throws Exception
     {
-        SendInstallScaleIoVmPackages sendInstallScaleIoVmPackagesSpy = spy(sendInstallScaleIoVmPackages);
+        SendPerformanceTuneScaleIoVm sendPerformanceTuneScaleIoVmSpy = spy(sendPerformanceTuneScaleIoVm);
 
-        sendInstallScaleIoVmPackagesSpy.delegateExecute(delegateExecution);
+        sendPerformanceTuneScaleIoVmSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(sendInstallScaleIoVmPackagesSpy).updateDelegateStatus(captor.capture());
+        verify(sendPerformanceTuneScaleIoVmSpy).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 
@@ -97,12 +97,12 @@ public class SendInstallScaleIoVmPackagesTest
         doReturn(null).when(asynchronousNodeService).executeRemoteCommand(any(), any(), any(), any());
         try
         {
-            sendInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            sendPerformanceTuneScaleIoVm.delegateExecute(delegateExecution);
             fail("An exception was expected.");
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED));
             assertThat(error.getMessage(), containsString("Failed to send the request"));
         }
     }
@@ -117,11 +117,11 @@ public class SendInstallScaleIoVmPackagesTest
 
         try
         {
-            sendInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            sendPerformanceTuneScaleIoVm.delegateExecute(delegateExecution);
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED));
             assertThat(error.getMessage(), containsString(errorMessage));
         }
 

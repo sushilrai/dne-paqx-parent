@@ -50,9 +50,9 @@ public interface AsynchronousNodeService
 
     void processConfigurePxeBootResponse(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
 
-    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> sendInstallScaleIoVmPackages(String processId, String activityId,
+    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> executeRemoteCommand(String processId, String activityId,
             String messageId, RemoteCommandExecutionRequestMessage requestMessage) throws TaskResponseFailureException;
 
-    RemoteCommandExecutionResponseMessage.Status processInstallScaleioVmPackages(AsynchronousNodeServiceCallback<?> serviceCallback)
+    RemoteCommandExecutionResponseMessage.Status processRemoteCommandResponse(AsynchronousNodeServiceCallback<?> serviceCallback)
             throws ServiceExecutionException;
 }

@@ -23,10 +23,12 @@ import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.log.DneLoggingManager;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeScaleIoVmCredentialsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureBootDeviceIdracResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigurePxeBootResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallEsxiResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.InstallScaleIoVmPackagesResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.PerformanceTuneScaleIoVmResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.RebootHostResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
 import com.dell.cpsd.paqx.dne.service.model.ConfigureBootDeviceIdracRequest;
@@ -120,6 +122,8 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
     private void initCallbacks()
     {
         this.consumer.addAdapter(new InstallScaleIoVmPackagesResponseAdapter(this, this.runtimeService));
+        this.consumer.addAdapter(new PerformanceTuneScaleIoVmResponseAdapter(this, this.runtimeService));
+        this.consumer.addAdapter(new ChangeScaleIoVmCredentialsResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new ConfigureBootDeviceIdracResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new InstallEsxiResponseAdapter(this, this.runtimeService));
         this.consumer.addAdapter(new RebootHostResponseAdapter(this, this.runtimeService));
@@ -373,7 +377,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
     }
 
     @Override
-    public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> sendInstallScaleIoVmPackages(String processId,
+    public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> executeRemoteCommand(String processId,
             String activityId, String messageId, RemoteCommandExecutionRequestMessage requestMessage) throws TaskResponseFailureException
     {
         AsynchronousNodeServiceCallback<?> response = null;
@@ -411,7 +415,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
     }
 
     @Override
-    public RemoteCommandExecutionResponseMessage.Status processInstallScaleioVmPackages(AsynchronousNodeServiceCallback<?> serviceCallback)
+    public RemoteCommandExecutionResponseMessage.Status processRemoteCommandResponse(AsynchronousNodeServiceCallback<?> serviceCallback)
             throws ServiceExecutionException
     {
         RemoteCommandExecutionResponseMessage.Status status = RemoteCommandExecutionResponseMessage.Status.FAILED;

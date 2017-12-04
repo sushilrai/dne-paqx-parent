@@ -19,9 +19,9 @@ import org.camunda.bpm.engine.RuntimeService;
  * @version 1.0
  * @since 1.0
  */
-public class InstallScaleIoVmPackagesResponseAdapter extends AsyncRemoteCommandExecutionResponseAdapter
+public class PerformanceTuneScaleIoVmResponseAdapter extends AsyncRemoteCommandExecutionResponseAdapter
 {
-    public InstallScaleIoVmPackagesResponseAdapter(final ServiceCallbackRegistry serviceCallbackRegistry, final RuntimeService runtimeService)
+    public PerformanceTuneScaleIoVmResponseAdapter(final ServiceCallbackRegistry serviceCallbackRegistry, final RuntimeService runtimeService)
     {
         super(serviceCallbackRegistry, runtimeService);
     }

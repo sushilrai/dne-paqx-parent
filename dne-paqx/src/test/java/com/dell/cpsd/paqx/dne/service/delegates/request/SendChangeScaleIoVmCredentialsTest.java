@@ -35,9 +35,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendInstallScaleIoVmPackagesTest
+public class SendChangeScaleIoVmCredentialsTest
 {
-    private SendInstallScaleIoVmPackages sendInstallScaleIoVmPackages;
+    private SendChangeScaleIoVmCredentials sendChangeScaleIoVmCredentials;
 
     @Mock
     private RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer;
@@ -59,7 +59,7 @@ public class SendInstallScaleIoVmPackagesTest
     @Before
     public void setUp() throws Exception
     {
-        sendInstallScaleIoVmPackages = new SendInstallScaleIoVmPackages(asynchronousNodeService, remoteCommandExecutionRequestTransformer);
+        sendChangeScaleIoVmCredentials = new SendChangeScaleIoVmCredentials(asynchronousNodeService, remoteCommandExecutionRequestTransformer);
 
         doReturn(asynchronousNodeServiceCallback).when(asynchronousNodeService).executeRemoteCommand(any(), any(), any(), any());
 
@@ -75,18 +75,18 @@ public class SendInstallScaleIoVmPackagesTest
         doReturn("1").when(delegateExecution).getProcessInstanceId();
 
         doReturn(requestModel).when(remoteCommandExecutionRequestTransformer).buildRemoteCodeExecutionRequest(delegateExecution,
-                RemoteCommandExecutionRequestMessage.RemoteCommand.INSTALL_PACKAGE_SDS_LIA);
+                RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD);
     }
 
     @Test
     public void delegateExecuteSuccess() throws Exception
     {
-        SendInstallScaleIoVmPackages sendInstallScaleIoVmPackagesSpy = spy(sendInstallScaleIoVmPackages);
+        SendChangeScaleIoVmCredentials sendChangeScaleIoVmCredentialsSpy = spy(sendChangeScaleIoVmCredentials);
 
-        sendInstallScaleIoVmPackagesSpy.delegateExecute(delegateExecution);
+        sendChangeScaleIoVmCredentialsSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(sendInstallScaleIoVmPackagesSpy).updateDelegateStatus(captor.capture());
+        verify(sendChangeScaleIoVmCredentialsSpy).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 
@@ -97,12 +97,12 @@ public class SendInstallScaleIoVmPackagesTest
         doReturn(null).when(asynchronousNodeService).executeRemoteCommand(any(), any(), any(), any());
         try
         {
-            sendInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            sendChangeScaleIoVmCredentials.delegateExecute(delegateExecution);
             fail("An exception was expected.");
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
             assertThat(error.getMessage(), containsString("Failed to send the request"));
         }
     }
@@ -117,11 +117,11 @@ public class SendInstallScaleIoVmPackagesTest
 
         try
         {
-            sendInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            sendChangeScaleIoVmCredentials.delegateExecute(delegateExecution);
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.SEND_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
             assertThat(error.getMessage(), containsString(errorMessage));
         }
 

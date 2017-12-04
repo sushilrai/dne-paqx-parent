@@ -7,6 +7,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
+import com.dell.cpsd.paqx.dne.service.delegates.CompleteChangeScaleIoVmCredentials;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
@@ -20,7 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_SCALEIO_VM_PACKAGES_MESSAGE_ID;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CHANGE_SCALEIO_VM_CREDENTIALS_MESSAGE_ID;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
@@ -31,10 +32,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompleteInstallScaleIoVmPackagesTest
+public class CompleteIChangeScaleIoVmCredentialsTest
 {
-    private CompleteInstallScaleIoVmPackages completeInstallScaleIoVmPackages;
-    private NodeDetail                       nodeDetail;
+    private CompleteChangeScaleIoVmCredentials completeChangeScaleIoVmCredentials;
+    private NodeDetail                         nodeDetail;
 
     @Mock
     private AsynchronousNodeService asynchronousNodeService;
@@ -48,7 +49,7 @@ public class CompleteInstallScaleIoVmPackagesTest
     @Before
     public void setUp()
     {
-        completeInstallScaleIoVmPackages = new CompleteInstallScaleIoVmPackages(asynchronousNodeService);
+        completeChangeScaleIoVmCredentials = new CompleteChangeScaleIoVmCredentials(asynchronousNodeService);
 
         doReturn(true).when(asynchronousNodeServiceCallback).isDone();
 
@@ -61,7 +62,7 @@ public class CompleteInstallScaleIoVmPackagesTest
         nodeDetail.setEsxiManagementHostname("hostName");
         doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
 
-        doReturn(asynchronousNodeServiceCallback).when(this.delegateExecution).getVariable(INSTALL_SCALEIO_VM_PACKAGES_MESSAGE_ID);
+        doReturn(asynchronousNodeServiceCallback).when(this.delegateExecution).getVariable(CHANGE_SCALEIO_VM_CREDENTIALS_MESSAGE_ID);
     }
 
     @Test
@@ -70,12 +71,12 @@ public class CompleteInstallScaleIoVmPackagesTest
         doReturn(RemoteCommandExecutionResponseMessage.Status.SUCCESS).when(asynchronousNodeService)
                 .processRemoteCommandResponse(asynchronousNodeServiceCallback);
 
-        CompleteInstallScaleIoVmPackages completeInstallScaleIoVmPackagesSpy = spy(completeInstallScaleIoVmPackages);
+        CompleteChangeScaleIoVmCredentials completeChangeScaleIoVmCredentialsSpy = spy(completeChangeScaleIoVmCredentials);
 
-        completeInstallScaleIoVmPackagesSpy.delegateExecute(delegateExecution);
+        completeChangeScaleIoVmCredentialsSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(completeInstallScaleIoVmPackagesSpy).updateDelegateStatus(captor.capture());
+        verify(completeChangeScaleIoVmCredentialsSpy).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 
@@ -87,11 +88,11 @@ public class CompleteInstallScaleIoVmPackagesTest
                 .processRemoteCommandResponse(asynchronousNodeServiceCallback);
         try
         {
-            completeInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            completeChangeScaleIoVmCredentials.delegateExecute(delegateExecution);
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
             assertTrue((error.getMessage().contains(errorMessage)));
         }
     }
@@ -102,12 +103,12 @@ public class CompleteInstallScaleIoVmPackagesTest
         doReturn(RemoteCommandExecutionResponseMessage.Status.FAILED).when(asynchronousNodeService).processRemoteCommandResponse(asynchronousNodeServiceCallback);
         try
         {
-            completeInstallScaleIoVmPackages.delegateExecute(delegateExecution);
+            completeChangeScaleIoVmCredentials.delegateExecute(delegateExecution);
         }
         catch (BpmnError error)
         {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED));
-            assertTrue((error.getMessage().equals("Install ScaleIo Vm Packages on Node abc failed!")));
+            assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
+            assertTrue((error.getMessage().equals("Complete Change ScaleIo Vm Credentials on Node abc failed!")));
         }
     }
 }

@@ -324,7 +324,7 @@ public class AmqpAsynchronousNodeServiceTest
         amqpAsynchronousNodeService.release();
 
         final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
-                .sendInstallScaleIoVmPackages(processInstanceId, activityId, messageId, request);
+                .executeRemoteCommand(processInstanceId, activityId, messageId, request);
 
         assertNull(callback);
         verify(dneProducer, times(0)).publishRemoteCommandExecution(any());
@@ -336,7 +336,7 @@ public class AmqpAsynchronousNodeServiceTest
         final RemoteCommandExecutionRequestMessage request = new RemoteCommandExecutionRequestMessage();
 
         final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
-                .sendInstallScaleIoVmPackages(processInstanceId, activityId, messageId, request);
+                .executeRemoteCommand(processInstanceId, activityId, messageId, request);
 
         assertNotNull(callback);
         assertEquals(callback.getProcessInstanceId(), processInstanceId);
@@ -348,7 +348,7 @@ public class AmqpAsynchronousNodeServiceTest
     @Test
     public void processInstallScaleioVmPackagesCallbackIsNull() throws Exception
     {
-        RemoteCommandExecutionResponseMessage.Status response = amqpAsynchronousNodeService.processInstallScaleioVmPackages(null);
+        RemoteCommandExecutionResponseMessage.Status response = amqpAsynchronousNodeService.processRemoteCommandResponse(null);
 
         assertEquals(response, RemoteCommandExecutionResponseMessage.Status.FAILED);
 
