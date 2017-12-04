@@ -119,7 +119,6 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
             newNode.setParentGroupUuids(this.mapGroupNamesToUUIDs(parentGroups, systemToBeUpdated.getGroups()));
             newNode.setEndpoints(new ArrayList<>());
 
-            LOGGER.info(taskMessage + " DID NOT CALL addComponent - need to convert task to a long running task...");
             this.sdkAMQPClient.addComponent(systemToBeUpdated, newNode, endpoints, COMPONENT_SERVER_TEMPLATE);
 
             // Need to make sure the node was really added.
