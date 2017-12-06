@@ -2255,13 +2255,13 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             if (responseMessage == null)
             {
                 final String error = "Response message is null";
-                LOGGER.error(error);
+                LOGGER.error("Null returned from create storage pool request, " + error);
                 throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), error);
             }
 
             if (responseMessage.getStatus().equals(CreateStoragePoolResponseMessage.Status.FAILED))
             {
-                LOGGER.error(responseMessage.getDescription());
+                LOGGER.error("Failed to create storage pool with error: " + responseMessage.getDescription());
                 throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), responseMessage.getDescription());
             }
 
@@ -2269,7 +2269,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         }
         catch (ServiceTimeoutException | ServiceExecutionException e)
         {
-            LOGGER.error("Exception occurred", e);
+            LOGGER.error("Service exception while creating storage pool, ", e);
             throw new TaskResponseFailureException(CREATE_STORAGE_POOL.getCode(), e.getMessage());
         }
     }

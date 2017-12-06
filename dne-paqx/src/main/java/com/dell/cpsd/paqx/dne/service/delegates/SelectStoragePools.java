@@ -40,17 +40,23 @@ import java.util.Objects;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.SELECT_STORAGE_POOLS_FAILED;
 
-@Component
-@Scope("prototype")
-@Qualifier("selectStoragePools")
 /**
+ * Task responsible for selecting storage pool(s) for nodes
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
- */ public class SelectStoragePools extends BaseWorkflowDelegate
+ *
+ * @since 1.0
+ */
+@Component
+@Scope("prototype")
+@Qualifier("selectStoragePools")
+public class SelectStoragePools extends BaseWorkflowDelegate
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SelectStoragePools.class);
     private final NodeService nodeService;
+    private static final String STORAGE_POOL_PREFIX = "temp-";
 
     @Autowired
     public SelectStoragePools(NodeService nodeService)
@@ -78,9 +84,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             Map<String, List<Device>> protectionDomainToDevicesMap = new HashMap<>();
             Map<String, List<Device>> nodeToDeviceMap = new HashMap<>();
 
-            List<DiscoveredNodeInfo> discoveredNodes = nodeService.listDiscoveredNodeInfo();
-
-            populateDeviceMaps(nodeDetails, discoveredNodes, nodeToDeviceMap, protectionDomainToDevicesMap);
+            populateDeviceMaps(nodeDetails, nodeToDeviceMap, protectionDomainToDevicesMap);
 
             if (protectionDomainToDevicesMap.values().stream().mapToInt(Collection::size).sum() == 0)
             {
@@ -105,6 +109,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
 
             if (protectionDomains != null)
             {
+
                 // call ESS based on protection domain and corresponding devices
                 protectionDomainToDevicesMap.entrySet().stream().forEach(pd -> {
                     try
@@ -122,7 +127,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
                 });
             }
             setDeviceMapToNodeDetail(nodeDetails, nodeToDeviceMap, deviceMap);
-
+            LOGGER.info("Done selecting storage pool(s).");
         }
         catch (Exception ex)
         {
@@ -146,31 +151,26 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
         });
     }
 
-    public void populateDeviceMaps(final List<NodeDetail> nodeDetails, final List<DiscoveredNodeInfo> discoveredNodes,
-            final Map<String, List<Device>> nodeToDeviceMap, final Map<String, List<Device>> protectionDomainToDevicesMap)
+    public void populateDeviceMaps(final List<NodeDetail> nodeDetails, final Map<String, List<Device>> nodeToDeviceMap,
+            final Map<String, List<Device>> protectionDomainToDevicesMap)
     {
         // separate devices based on protection domain, as calls to ESS are based on protection domain
-        discoveredNodes.stream().forEach(discoveredNode -> {
-            nodeDetails.stream().forEach(nodeDetail -> {
-                if (nodeDetail.getServiceTag().equalsIgnoreCase(discoveredNode.getSerialNumber()))
-                {
-                    if (nodeDetail.getProtectionDomainId() == null)
-                    {
-                        throw new IllegalStateException("Could not find a valid protection domain for node: " + nodeDetail.getId());
-                    }
-                    String symphonyUuid = nodeDetail.getId();
+        nodeDetails.stream().forEach(nodeDetail -> {
+            if (nodeDetail.getProtectionDomainId() == null)
+            {
+                throw new IllegalStateException("Could not find a valid protection domain for node: " + nodeDetail.getId());
+            }
+            String symphonyUuid = nodeDetail.getId();
 
-                    List<Device> newDevices = getNewDevices(symphonyUuid);
-                    nodeToDeviceMap.put(symphonyUuid, newDevices);
+            List<Device> newDevices = getNewDevices(symphonyUuid);
+            nodeToDeviceMap.put(symphonyUuid, newDevices);
 
-                    if (protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId()) == null)
-                    {
-                        protectionDomainToDevicesMap.put(nodeDetail.getProtectionDomainId(), new ArrayList<Device>());
-                    }
-                    protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId())
-                            .addAll(newDevices != null ? newDevices : Collections.emptyList());
-                }
-            });
+            if (protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId()) == null)
+            {
+                protectionDomainToDevicesMap.put(nodeDetail.getProtectionDomainId(), new ArrayList<Device>());
+            }
+            protectionDomainToDevicesMap.get(nodeDetail.getProtectionDomainId())
+                    .addAll(newDevices != null ? newDevices : Collections.emptyList());
         });
     }
 
@@ -198,12 +198,14 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             throw new IllegalStateException("Could not find a valid protection domain");
         }
 
+        ScaleIOProtectionDomain dummyProtectionDomains = copyFromEntityToDomain(scaleIOProtectionDomain);
+
         // ESS has to be called N number of times (to a max of 5 times), as we do not really know how many new storage pools are
         // really required
         int numberOfIterations = 1;
         int storagePoolNameCounter = 1;
-        String storagePoolName = "Storage Pool " + storagePoolNameCounter;
-        while (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, scaleIOProtectionDomain))
+        String storagePoolName = STORAGE_POOL_PREFIX + storagePoolNameCounter;
+        while (!findValidStoragePool(deviceMap, newDevices, hostToStorageDeviceMap, dummyProtectionDomains))
         {
             // max 6 attempts to ensure all drives are assigned
             if (numberOfIterations >= 6)
@@ -212,20 +214,21 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             }
 
             // ensure the name used for dummy pool is not already used, max 5 pools to be created
-            while (protectionDomainContainsStoragePoolName(scaleIOProtectionDomain, storagePoolName))
+            while (protectionDomainContainsStoragePoolName(dummyProtectionDomains, storagePoolName))
             {
                 storagePoolNameCounter++;
-                storagePoolName = "Storage Pool " + storagePoolNameCounter;
+                storagePoolName = STORAGE_POOL_PREFIX + storagePoolNameCounter;
             }
+            LOGGER.info("Allocating dummy storage pool with name, " + storagePoolName);
 
             // create a dummy storage pool and add it to the pool list and see if it is enough
             ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
             storagePool.setUseRfcache(false);
             storagePool.setUseRmcache(false);
             storagePool.setZeroPaddingEnabled(true);
-            storagePool.setId(storagePoolName);
+            storagePool.setId(null);
             storagePool.setName(storagePoolName);
-            scaleIOProtectionDomain.addStoragePool(storagePool);
+            dummyProtectionDomains.addStoragePool(storagePool);
             numberOfIterations++;
         }
     }
@@ -267,7 +270,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
             updateDelegateStatus(message);
             return true;
         }
-
+        LOGGER.info("Valid storage pool not found.");
         storageResponseMessage.getErrors().forEach(f -> updateDelegateStatus(f.getMessage()));
         return false;
     }
@@ -275,5 +278,19 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.S
     public List<Device> getNewDevices(String symphonyUuid)
     {
         return NodeInventoryParsingUtil.parseNewDevices(nodeService.getNodeInventoryData(symphonyUuid));
+    }
+
+    private ScaleIOProtectionDomain copyFromEntityToDomain(ScaleIOProtectionDomain scaleIOProtectionDomain)
+    {
+        ScaleIOProtectionDomain newScaleIOProtectionDomain = new ScaleIOProtectionDomain();
+        newScaleIOProtectionDomain.setId(scaleIOProtectionDomain.getId());
+        scaleIOProtectionDomain.getStoragePools().stream().forEach(sp -> {
+            ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
+            storagePool.setName(sp.getName());
+            storagePool.setId(sp.getId());
+            storagePool.setDevices(sp.getDevices());
+            newScaleIOProtectionDomain.addStoragePool(storagePool);
+        });
+        return newScaleIOProtectionDomain;
     }
 }

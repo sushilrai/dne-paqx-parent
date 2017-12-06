@@ -67,8 +67,7 @@ import static org.mockito.Mockito.doThrow;
     @Mock
     private DelegateExecution delegateExecution;
 
-    private List<ScaleIOData>        scaleIODataList        = new ArrayList<>();
-    private List<DiscoveredNodeInfo> discoveredNodeInfoList = new ArrayList<>();
+    private List<ScaleIOData> scaleIODataList = new ArrayList<>();
     List<NodeDetail>              nodeDetails       = new ArrayList<>();
     List<Device>                  newDevices        = new ArrayList<>();
     List<ScaleIOProtectionDomain> protectionDomains = new ArrayList<>();
@@ -78,7 +77,7 @@ import static org.mockito.Mockito.doThrow;
     {
         selectStoragePools = Mockito.spy(new SelectStoragePools(nodeService));
         setupMockScaleIODataList();
-        setupDiscoveredNodeInfo();
+        //        setupDiscoveredNodeInfo();
         setupNodeDetails();
         this.newDevices = setupNewDevices(1);
         setupProtectionDomains();
@@ -96,7 +95,7 @@ import static org.mockito.Mockito.doThrow;
         this.scaleIODataList = scaleIODataList;
     }
 
-    private void setupDiscoveredNodeInfo()
+    /*private void setupDiscoveredNodeInfo()
     {
         List<DiscoveredNodeInfo> discoveredNodeInfoList = new ArrayList<>();
         DiscoveredNodeInfo discoveredNodeInfo1 = new DiscoveredNodeInfo("M-1", "MF-1", "P-1", "PF-1", "SN-1", "UUID-1");
@@ -104,7 +103,7 @@ import static org.mockito.Mockito.doThrow;
         DiscoveredNodeInfo discoveredNodeInfo2 = new DiscoveredNodeInfo("M-2", "MF-2", "P-2", "PF-2", "SN-2", "UUID-2");
         discoveredNodeInfoList.add(discoveredNodeInfo2);
         this.discoveredNodeInfoList = discoveredNodeInfoList;
-    }
+    }*/
 
     private void setupNodeDetails()
     {
@@ -152,7 +151,7 @@ import static org.mockito.Mockito.doThrow;
         Map<String, List<Device>> protectionDomainToDevicesMap = new HashMap<>();
         doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-1");
         doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-2");
-        selectStoragePools.populateDeviceMaps(this.nodeDetails, this.discoveredNodeInfoList, nodeToDeviceMap, protectionDomainToDevicesMap);
+        selectStoragePools.populateDeviceMaps(this.nodeDetails, nodeToDeviceMap, protectionDomainToDevicesMap);
         assertNotNull(nodeToDeviceMap);
         assertNotNull(protectionDomainToDevicesMap);
         assertEquals(2, nodeToDeviceMap.size());
@@ -173,8 +172,7 @@ import static org.mockito.Mockito.doThrow;
         this.nodeDetails.get(1).setProtectionDomainId(null);
         try
         {
-            selectStoragePools
-                    .populateDeviceMaps(this.nodeDetails, this.discoveredNodeInfoList, nodeToDeviceMap, protectionDomainToDevicesMap);
+            selectStoragePools.populateDeviceMaps(this.nodeDetails, nodeToDeviceMap, protectionDomainToDevicesMap);
             fail("Expected IllegalStateException.");
         }
         catch (IllegalStateException e)
@@ -240,7 +238,7 @@ import static org.mockito.Mockito.doThrow;
         selectStoragePools.validateStoragePoolsAndSetResponse(deviceMap, newDevices, new HashMap<String, Map<String, HostStorageDevice>>(),
                 protectionDomains, "PD-1");
         assertTrue(deviceMap.isEmpty());
-        assertEquals(6, protectionDomains.get(0).getStoragePools().size());
+        assertEquals(1, protectionDomains.get(0).getStoragePools().size());
     }
 
     @Test
@@ -270,7 +268,6 @@ import static org.mockito.Mockito.doThrow;
     {
 
         doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
-        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
         try
         {
             selectStoragePools.delegateExecute(delegateExecution);
@@ -293,7 +290,6 @@ import static org.mockito.Mockito.doThrow;
     {
 
         doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
-        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
         doReturn(newDevices).when(selectStoragePools).getNewDevices(anyString());
         doReturn(new HashMap<String, Map<String, HostStorageDevice>>()).when(nodeService).getHostToStorageDeviceMap(anyList());
         doReturn(scaleIODataList).when(nodeService).listScaleIOData();
@@ -320,7 +316,6 @@ import static org.mockito.Mockito.doThrow;
     {
 
         doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
-        doReturn(discoveredNodeInfoList).when(nodeService).listDiscoveredNodeInfo();
         doReturn(newDevices).when(selectStoragePools).getNewDevices("ND-1");
         doReturn(setupNewDevices(4)).when(selectStoragePools).getNewDevices("ND-2");
         doReturn(new HashMap<String, Map<String, HostStorageDevice>>()).when(nodeService).getHostToStorageDeviceMap(anyList());

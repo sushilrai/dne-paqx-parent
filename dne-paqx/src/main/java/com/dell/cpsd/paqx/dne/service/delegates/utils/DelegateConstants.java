@@ -80,6 +80,7 @@ public class DelegateConstants
     public static final String ESXI_HOST_MAINTENANCE_MODE_FAILED             = "Esxi-Host-Maintenance-Mode-Failed";
     public static final String SELECT_PROTECTION_DOMAINS_FAILED              = "Select-Protection-Domains-Failed";
     public static final String SELECT_STORAGE_POOLS_FAILED                   = "Select-Storage-Pools-Failed";
+    public static final String CONFIGURE_STORAGE_POOLS_FAILED                = "Configure-Storage-Pools-Failed";
     public static final String CONFIGURE_PXE_FAILED                          = "Disable-Pxe-failed";
     public static final String ADD_NODE_TO_SYSTEM_DEFINITION_FAILED          = "Add-Node-To-System-Definition-Failed";
     public static final String SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED        = "Send-Install-ScaleIo-Vm-Packages-Failed";
