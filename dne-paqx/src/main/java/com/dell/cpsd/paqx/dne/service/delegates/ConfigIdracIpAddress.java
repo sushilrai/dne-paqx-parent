@@ -40,16 +40,16 @@ public class ConfigIdracIpAddress extends BaseWorkflowDelegate
     @Autowired
     public ConfigIdracIpAddress(NodeService nodeService)
     {
+        super(LOGGER, "Configure IP Address");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Executing Config IP Address");
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        final String taskMessage = "Configure IP Address";
-        
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
+
         IdracInfo idracInfo;
         try
         {
@@ -63,24 +63,20 @@ public class ConfigIdracIpAddress extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception Occurred attempting to Configure IP Address on Node " +
-                         nodeDetail.getServiceTag(), e);
-            updateDelegateStatus("An Unexpected Exception Occurred attempting to Configure IP Address on Node " +
-                                 nodeDetail.getServiceTag());
-            throw new BpmnError(CONFIGURE_IP_ADDRESS_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " +
-                                e.getMessage());
+            final String message = "An Unexpected Exception Occurred attempting to Configure IP Address on Node " +
+                                   nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(message, e);
+            throw new BpmnError(CONFIGURE_IP_ADDRESS_FAILED,message + e.getMessage());
         }
         if (idracInfo == null || !"SUCCESS".equalsIgnoreCase(idracInfo.getMessage()))
         {
-            String errorMessage=taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " +
+            String errorMessage= taskName + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " +
                     (idracInfo==null?null:idracInfo.getMessage());
-            LOGGER.error(errorMessage);
             updateDelegateStatus(errorMessage);
             throw new BpmnError(CONFIGURE_IP_ADDRESS_FAILED,
                                 errorMessage);
         }
-        LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
+
+        updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
     }
 }

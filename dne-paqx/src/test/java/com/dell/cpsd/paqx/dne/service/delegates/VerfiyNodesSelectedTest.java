@@ -250,7 +250,7 @@ public class VerfiyNodesSelectedTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.VERIFY_NODES_SELECTED_FAILED));
-            assertTrue(error.getMessage().contains("An unexpected exception occurred attempting to verify selected Nodes"));
+            assertTrue(error.getMessage().contains("The following Nodes have already been added.  Please remove the Nodes from the request and try again.  Nodes currently in use: abc"));
         }
     }
 }

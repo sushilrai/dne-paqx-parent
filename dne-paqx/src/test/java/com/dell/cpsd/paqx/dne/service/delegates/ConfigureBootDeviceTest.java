@@ -62,7 +62,7 @@ public class ConfigureBootDeviceTest {
             fail("An exception was expected.");
         } catch (BpmnError error) {
             assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_BOOT_DEVICE_FAILED));
-            assertTrue(error.getMessage().equals("Configure Boot Device on Node abc failed!  Reason: An Error happened!"));
+            assertTrue(error.getMessage().equals("An Unexpected Exception Occurred attempting to Configure Boot Device on Node abcAn Error happened!"));
         }
     }
 

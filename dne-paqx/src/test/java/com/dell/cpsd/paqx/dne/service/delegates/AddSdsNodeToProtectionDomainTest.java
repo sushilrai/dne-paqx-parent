@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,7 +138,7 @@ public class AddSdsNodeToProtectionDomainTest
         addSdsNodeToProtectionDomainSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(addSdsNodeToProtectionDomainSpy).updateDelegateStatus(captor.capture());
+        verify(addSdsNodeToProtectionDomainSpy, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), CoreMatchers.containsString("was successful"));
     }
 }

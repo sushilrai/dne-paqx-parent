@@ -49,6 +49,7 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
     public SendPerformanceTuneScaleIoVm(AsynchronousNodeService asynchronousNodeService,
             RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
+        super(LOGGER, "Send Performance Tune ScaleIo Vm");
         this.asynchronousNodeService = asynchronousNodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -56,11 +57,8 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Send Performance Tune ScaleIo Vm task");
-        final String taskMessage = "Send Performance Tune ScaleIo Vm";
-
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-
+        updateDelegateStatus("Attempting to " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         AsynchronousNodeServiceCallback<?> requestCallback;
 
         final DelegateRequestModel<RemoteCommandExecutionRequestMessage> delegateRequestModel = remoteCommandExecutionRequestTransformer
@@ -76,23 +74,19 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
         catch (TaskResponseFailureException ex)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Send Performance Tune ScaleIo Vm on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message, ex);
-            updateDelegateStatus(message);
+                    "An Unexpected Exception Occurred attempting to Send Performance Tune ScaleIo Vm on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(message, ex);
             throw new BpmnError(SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED,
-                    taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " + ex.getMessage());
+                    message + ex.getMessage());
         }
 
         if (requestCallback != null)
         {
-            final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful");
         }
         else
         {
             final String message = "Failed to send the request for Send Performance Tune ScaleIo Vm on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED, message);
         }

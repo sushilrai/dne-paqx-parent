@@ -35,15 +35,15 @@ public class CompletePerformanceTuneScaleIoVm extends BaseWorkflowDelegate
     @Autowired
     public CompletePerformanceTuneScaleIoVm(final AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "Complete Performance Tune ScaleIo Vm");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        String taskName = "Complete Performance Tune ScaleIo Vm";
-        LOGGER.info(taskName);
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
                 .getVariable(PERFORMANCE_TUNE_SCALEIO_VM_MESSAGE_ID);
@@ -58,8 +58,7 @@ public class CompletePerformanceTuneScaleIoVm extends BaseWorkflowDelegate
             catch (Exception e)
             {
                 final String message = taskName + " " + nodeDetail.getServiceTag() + " failed!  Reason: ";
-                LOGGER.error(message, e);
-                updateDelegateStatus(message + e.getMessage());
+                updateDelegateStatus(message, e);
                 throw new BpmnError(COMPLETE_PERFORMANCE_TUNE_SCALEIO_VM_FAILED, message + e.getMessage());
             }
         }
@@ -67,13 +66,10 @@ public class CompletePerformanceTuneScaleIoVm extends BaseWorkflowDelegate
         if (status == null || !"success".equalsIgnoreCase(status.toString()))
         {
             final String message = taskName + " on Node " + nodeDetail.getServiceTag() + " failed!";
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(COMPLETE_PERFORMANCE_TUNE_SCALEIO_VM_FAILED, message);
         }
 
-        String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
+        updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
     }
 }

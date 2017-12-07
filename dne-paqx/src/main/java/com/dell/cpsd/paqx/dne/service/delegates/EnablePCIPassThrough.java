@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.transformers.PciPassThroughRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.EnablePCIPassthroughRequestMessage;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ENABLE_PCI_PASSTHROUGH_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
 @Scope("prototype")
@@ -42,6 +43,7 @@ public class EnablePCIPassThrough extends BaseWorkflowDelegate
     @Autowired
     public EnablePCIPassThrough(final NodeService nodeService, final PciPassThroughRequestTransformer pciPassThroughRequestTransformer)
     {
+        super(LOGGER, "Enable PCI Pass Through for ESXi Host");
         this.nodeService = nodeService;
         this.pciPassThroughRequestTransformer = pciPassThroughRequestTransformer;
     }
@@ -49,8 +51,8 @@ public class EnablePCIPassThrough extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Enable PCI Pass through task");
-        final String taskMessage = "Enable PCI pass through for ESXi host";
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         try
         {
@@ -60,20 +62,12 @@ public class EnablePCIPassThrough extends BaseWorkflowDelegate
 
             delegateExecution
                     .setVariable(DelegateConstants.HOST_PCI_DEVICE_ID, delegateRequestModel.getRequestMessage().getHostPciDeviceId());
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(ENABLE_PCI_PASSTHROUGH_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(ENABLE_PCI_PASSTHROUGH_FAILED, errorMessage + ex.getMessage());
         }
     }

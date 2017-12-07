@@ -35,14 +35,15 @@ public class CompleteInstallScaleIoVmPackages extends BaseWorkflowDelegate
     @Autowired
     public CompleteInstallScaleIoVmPackages(final AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "Install ScaleIo Vm Packages");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Complete Install ScaleIo Vm Packages ...");
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
                 .getVariable(INSTALL_SCALEIO_VM_PACKAGES_MESSAGE_ID);
@@ -56,23 +57,19 @@ public class CompleteInstallScaleIoVmPackages extends BaseWorkflowDelegate
             }
             catch (Exception e)
             {
-                final String message = "Install ScaleIo Vm Packages " + nodeDetail.getServiceTag() + " failed!  Reason: ";
-                LOGGER.error(message, e);
-                updateDelegateStatus(message + e.getMessage());
+                final String message = taskName + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: ";
+                updateDelegateStatus(message, e);
                 throw new BpmnError(COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED, message + e.getMessage());
             }
         }
 
         if (status == null || !"success".equalsIgnoreCase(status.toString()))
         {
-            final String message = "Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag() + " failed!";
-            LOGGER.error(message);
+            final String message = taskName + " on Node " + nodeDetail.getServiceTag() + " failed!";
             updateDelegateStatus(message);
             throw new BpmnError(COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED, message);
         }
 
-        String returnMessage = "Install ScaleIo Vm Pacakges on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
+        updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
     }
 }

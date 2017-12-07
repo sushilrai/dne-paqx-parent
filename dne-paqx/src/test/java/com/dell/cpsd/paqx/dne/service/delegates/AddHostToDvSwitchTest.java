@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ConfigureDvSwitchesTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_HOST_TO_DV_SWITCH_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -52,6 +55,8 @@ public class AddHostToDvSwitchTest
     public void setup() throws Exception
     {
         addHostToDvSwitch = new AddHostToDvSwitch(nodeService, configureDvSwitchesTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -70,12 +75,12 @@ public class AddHostToDvSwitchTest
         {
             assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
             assertThat(error.getMessage(), containsString(errorMessage));
-            assertThat(error.getMessage(), containsString("Add Host To DV Switch"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Add Host to DV Switch. Reason: Illegal state exception"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_DV_SWITCH_FAILED));
         }
 
         verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request Add Host To DV Switch. Reason: " + errorMessage);
+                "Attempting Add Host to DV Switch on Node service-tag.");
     }
 
     @Test
@@ -94,11 +99,11 @@ public class AddHostToDvSwitchTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Add Host to DV Switch. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_DV_SWITCH_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Add Host to DV Switch on Node service-tag.");
     }
 
     @Test
@@ -114,6 +119,6 @@ public class AddHostToDvSwitchTest
         final AddHostToDvSwitch spy = spy(addHostToDvSwitch);
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus("Add Host To DV Switch on Node " + serviceTag + " was successful.");
+        verify(spy).updateDelegateStatus("Attempting Add Host to DV Switch on Node service-tag.");
     }
 }

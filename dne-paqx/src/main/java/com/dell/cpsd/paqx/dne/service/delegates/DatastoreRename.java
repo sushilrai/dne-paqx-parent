@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.transformers.DatastoreRenameRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DATASTORE_RENAME_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
 @Scope("prototype")
@@ -40,6 +41,7 @@ public class DatastoreRename extends BaseWorkflowDelegate
 
     public DatastoreRename(final NodeService nodeService, final DatastoreRenameRequestTransformer datastoreRenameRequestTransformer)
     {
+        super(LOGGER, "Rename Datastore for ESXi Host");
         this.nodeService = nodeService;
         this.datastoreRenameRequestTransformer = datastoreRenameRequestTransformer;
     }
@@ -47,9 +49,8 @@ public class DatastoreRename extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute datastore rename");
-        final String taskMessage = "Rename datastore for ESXi host";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<DatastoreRenameRequestMessage> delegateRequestModel = datastoreRenameRequestTransformer
@@ -57,20 +58,13 @@ public class DatastoreRename extends BaseWorkflowDelegate
             final String newDatastoreName = this.nodeService.requestDatastoreRename(delegateRequestModel.getRequestMessage());
 
             delegateExecution.setVariable(DelegateConstants.DATASTORE_NAME, newDatastoreName);
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(DATASTORE_RENAME_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex );
             throw new BpmnError(DATASTORE_RENAME_FAILED, errorMessage + ex.getMessage());
         }
     }

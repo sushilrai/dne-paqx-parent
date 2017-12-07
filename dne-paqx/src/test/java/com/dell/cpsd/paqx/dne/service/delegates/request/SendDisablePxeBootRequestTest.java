@@ -9,6 +9,7 @@ import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.transformers.ConfigurePxeBootRequestTransformer;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,12 +21,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +65,8 @@ public class SendDisablePxeBootRequestTest
     {
         sendDisablePxeBootRequest = new SendDisablePxeBootRequest(asynchronousNodeService, requestTransformer);
         requestMessage = new ConfigurePxeBootRequestMessage();
+        NodeDetail nodeDetail = new NodeDetail("1", "service-tag");
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -92,8 +97,7 @@ public class SendDisablePxeBootRequestTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_PXE_FAILED));
-            assertThat(error.getMessage(), containsString("An Unexpected Exception occurred attempting to request"));
-            assertThat(error.getMessage(), containsString("Request callback is null"));
+            assertThat(error.getMessage(), containsString("Send Disable PXE Boot on Node service-tag failed."));
         }
     }
 
@@ -112,8 +116,8 @@ public class SendDisablePxeBootRequestTest
         spy.delegateExecute(delegateExecution);
 
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(spy).updateDelegateStatus(captor.capture());
-        assertThat(captor.getValue(), containsString("was successful"));
-        assertThat(captor.getValue(), containsString("Send disable PXE boot task"));
+        verify(spy, times(2)).updateDelegateStatus(captor.capture());
+
+        assertThat(captor.getValue(), containsString("Send Disable PXE Boot on Node service-tag was successful."));
     }
 }

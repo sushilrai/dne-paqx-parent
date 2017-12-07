@@ -53,7 +53,7 @@ public class InventoryScaleIOTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_SCALE_IO_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to inventory Scale IO."));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve Scale IO Component Endpoints. Reason:null"));
         }
     }
 

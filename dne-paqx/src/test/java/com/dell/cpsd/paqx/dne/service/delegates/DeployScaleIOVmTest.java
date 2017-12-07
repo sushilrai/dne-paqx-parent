@@ -8,6 +8,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.DeployScaleIoVmRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,12 +21,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_VM_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -56,6 +59,8 @@ public class DeployScaleIOVmTest
     public void setup() throws Exception
     {
         delegate = new DeployScaleIOVm(nodeService, requestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -78,7 +83,7 @@ public class DeployScaleIOVmTest
         }
 
         verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
+                "Attempting Deploy ScaleIo Vm on Node service-tag.");
     }
 
     @Test
@@ -98,11 +103,11 @@ public class DeployScaleIOVmTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Deploy ScaleIo Vm on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(DEPLOY_SCALEIO_VM_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIo Vm on Node service-tag.");
     }
 
     @Test
@@ -112,7 +117,6 @@ public class DeployScaleIOVmTest
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
         when(mockRequestMessage.getNewVMName()).thenReturn(vmName);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildDeployVmRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestDeployScaleIoVm(mockRequestMessage);
 
@@ -120,7 +124,7 @@ public class DeployScaleIOVmTest
 
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus(taskMessage + " on Node " + serviceTag + " was successful.");
+        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIo Vm on Node service-tag.");
         final ArgumentCaptor<String> setVariableCaptor = ArgumentCaptor.forClass(String.class);
         verify(delegateExecution).setVariable(anyString(), setVariableCaptor.capture());
         assertEquals(vmName, setVariableCaptor.getValue());

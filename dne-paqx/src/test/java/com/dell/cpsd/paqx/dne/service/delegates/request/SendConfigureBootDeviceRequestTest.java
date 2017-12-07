@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class SendConfigureBootDeviceRequestTest
@@ -66,7 +67,7 @@ public class SendConfigureBootDeviceRequestTest
         sendConfigureBootDeviceRequestSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(sendConfigureBootDeviceRequestSpy).updateDelegateStatus(captor.capture());
+        verify(sendConfigureBootDeviceRequestSpy, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 

@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_STORAGE_POOLS_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 
 /**
  * Task responsible for creating new storage pools
@@ -61,6 +61,7 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
     @Autowired
     public ConfigureStoragePools(final NodeService nodeService)
     {
+        super(LOGGER, "Validate Storage Pools");
         this.nodeService = nodeService;
     }
 

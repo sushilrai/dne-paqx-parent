@@ -53,6 +53,7 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
     @Autowired
     public AddNodeToSystemDefinition(AMQPClient sdkAMQPClient, DataServiceRepository repository)
     {
+        super(LOGGER, "Add Node To System Definition");
         this.sdkAMQPClient = sdkAMQPClient;
         this.repository = repository;
     }
@@ -75,10 +76,8 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Add Node To System Definition task");
-        final String taskMessage = "Add Node To System Definition";
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final List<ConvergedSystem> allConvergedSystems = this.sdkAMQPClient.getConvergedSystems();
@@ -137,14 +136,12 @@ public class AddNodeToSystemDefinition extends BaseWorkflowDelegate
         }
         catch (Exception ex)
         {
-            final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed! Reason: ";
-            LOGGER.error(message, ex);
-            updateDelegateStatus(message + ex.getMessage());
+            final String message = this.taskName + " on Node " + nodeDetail.getServiceTag() + " failed! Reason: ";
+            updateDelegateStatus(message, ex );
             throw new BpmnError(ADD_NODE_TO_SYSTEM_DEFINITION_FAILED, message + ex.getMessage());
         }
 
-        final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(message);
+        final String message = this.taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
         updateDelegateStatus(message);
     }
 

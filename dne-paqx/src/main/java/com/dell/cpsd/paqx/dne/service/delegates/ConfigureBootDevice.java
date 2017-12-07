@@ -42,15 +42,16 @@ public class ConfigureBootDevice extends BaseWorkflowDelegate
     @Autowired
     public ConfigureBootDevice(AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "Boot Device Configuration");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Configure Boot Device");
-        final String taskMessage = "Boot Device Configuration";
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
+
         AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>)
                 delegateExecution.getVariable(CONFIGURE_BOOT_DEVICE_MESSAGE_ID);
         BootDeviceIdracStatus bootDeviceIdracStatusRequest = null;
@@ -62,19 +63,17 @@ public class ConfigureBootDevice extends BaseWorkflowDelegate
             }
             catch (Exception e)
             {
-                LOGGER.error("An Unexpected Exception Occurred attempting to Configure Boot Device on Node " +
-                             nodeDetail.getServiceTag(), e);
-                updateDelegateStatus("An Unexpected Exception Occurred attempting to Configure Boot Device on Node " +
-                                     nodeDetail.getServiceTag());
+                final String message = "An Unexpected Exception Occurred attempting to Configure Boot Device on Node " +
+                                       nodeDetail.getServiceTag();
+                updateDelegateStatus(message, e);
                 throw new BpmnError(CONFIGURE_BOOT_DEVICE_FAILED,
-                                    "Configure Boot Device on Node " + nodeDetail.getServiceTag() +
-                                    " failed!  Reason: " + e.getMessage());
+                                    message + e.getMessage());
             }
         }
         if (bootDeviceIdracStatusRequest == null || !"SUCCESS".equalsIgnoreCase(bootDeviceIdracStatusRequest.getStatus()))
         {
             final StringBuilder messageBuilder = new StringBuilder();
-            messageBuilder.append(taskMessage + " was unsuccessful on Node " + nodeDetail.getServiceTag() +
+            messageBuilder.append(taskName + " was unsuccessful on Node " + nodeDetail.getServiceTag() +
                                       ". Please correct the following errors and try again.\n");
             if (bootDeviceIdracStatusRequest != null && CollectionUtils
                     .isNotEmpty(bootDeviceIdracStatusRequest.getErrors()))
@@ -82,11 +81,9 @@ public class ConfigureBootDevice extends BaseWorkflowDelegate
                 bootDeviceIdracStatusRequest.getErrors().forEach(error -> messageBuilder.append(error).append("\n"));
             }
             final String message = messageBuilder.toString();
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(CONFIGURE_BOOT_DEVICE_FAILED, message);
         }
-        LOGGER.info(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());
-        updateDelegateStatus(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());
+        updateDelegateStatus(taskName + " was successful on Node " + nodeDetail.getServiceTag());
     }
 }

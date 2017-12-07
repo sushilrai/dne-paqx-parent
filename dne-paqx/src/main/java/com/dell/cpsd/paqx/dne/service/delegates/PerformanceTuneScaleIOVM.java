@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.RemoteCommandExecutionRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.PERFORMANCE_TUNE_SCALEIO_VM;
 
 /**
@@ -57,6 +58,7 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     public PerformanceTuneScaleIOVM(final NodeService nodeService,
             final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
+        super(LOGGER, "Performance Tune Scale IO VM");
         this.nodeService = nodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -64,8 +66,8 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute PerformanceTuneSvm task");
-        final String taskMessage = "Performance Tune Scale IO VM";
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         try
         {
@@ -74,20 +76,14 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
                             RemoteCommandExecutionRequestMessage.RemoteCommand.PERFORMANCE_TUNING_SVM);
             this.nodeService.requestRemoteCommandExecution(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             LOGGER.info(returnMessage);
             updateDelegateStatus(returnMessage);
         }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
-        }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(PERFORMANCE_TUNE_SCALEIO_VM, errorMessage + ex.getMessage());
         }
     }

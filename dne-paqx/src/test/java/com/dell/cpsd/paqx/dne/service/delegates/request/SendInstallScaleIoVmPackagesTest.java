@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,7 +87,7 @@ public class SendInstallScaleIoVmPackagesTest
         sendInstallScaleIoVmPackagesSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(sendInstallScaleIoVmPackagesSpy).updateDelegateStatus(captor.capture());
+        verify(sendInstallScaleIoVmPackagesSpy, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 

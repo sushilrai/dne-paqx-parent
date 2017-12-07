@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.AddHostToVCenterClusterRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_HOST_TO_CLUSTER_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
 @Scope("prototype")
@@ -41,6 +42,7 @@ public class AddHostToVCenter extends BaseWorkflowDelegate
     @Autowired
     public AddHostToVCenter(final NodeService nodeService, final AddHostToVCenterClusterRequestTransformer requestTransformer)
     {
+        super(LOGGER, "Add ESXi Host to VCenter Cluster");
         this.nodeService = nodeService;
         this.requestTransformer = requestTransformer;
     }
@@ -48,29 +50,21 @@ public class AddHostToVCenter extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Add Host to VCenter");
-        final String taskMessage = "Add ESXi host to vcenter cluster";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<ClusterOperationRequestMessage> delegateRequestModel = requestTransformer
                     .buildAddHostToVCenterRequest(delegateExecution);
             this.nodeService.requestAddHostToVCenter(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = this.taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(ADD_HOST_TO_CLUSTER_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to " + this.taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage + ex.getMessage(), ex);
             throw new BpmnError(ADD_HOST_TO_CLUSTER_FAILED, errorMessage + ex.getMessage());
         }
     }

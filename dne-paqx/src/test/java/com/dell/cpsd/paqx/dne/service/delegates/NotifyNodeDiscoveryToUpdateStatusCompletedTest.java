@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +61,7 @@ public class NotifyNodeDiscoveryToUpdateStatusCompletedTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.NOTIFY_NODE_STATUS_COMPLETED_FAILED));
-            assertTrue(error.getMessage().contains("Node Status was not updated to added."));
+            assertTrue(error.getMessage().contains("Updating Node Status on Node test.ServiceTag failed."));
         }
     }
 
@@ -80,7 +81,7 @@ public class NotifyNodeDiscoveryToUpdateStatusCompletedTest
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.NOTIFY_NODE_STATUS_COMPLETED_FAILED));
             assertThat(error.getMessage(),
-                    containsString("An unexpected exception occurred attempting to update the node status to completed"));
+                    containsString("An Unexpected Exception occurred attempting to test.ServiceTag on Node test.ServiceTag. Reason: null"));
         }
 
     }
@@ -95,7 +96,7 @@ public class NotifyNodeDiscoveryToUpdateStatusCompletedTest
         nus.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(nus).updateDelegateStatus(captor.capture());
+        verify(nus, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), CoreMatchers.containsString("was successful"));
     }
 }

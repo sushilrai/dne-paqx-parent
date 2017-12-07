@@ -45,15 +45,15 @@ public class ConfigureNodeCredentials extends BaseWorkflowDelegate
     @Autowired
     public ConfigureNodeCredentials(NodeService nodeService)
     {
+        super(LOGGER, "Configure Node Credentials");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute ConfigureNodeCredentials");
-        final String taskMessage = "Configure Node Credentials";
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         final String symphonuUuid = nodeDetail.getId();
         ChangeIdracCredentialsResponse responseMessage = null;
@@ -63,22 +63,19 @@ public class ConfigureNodeCredentials extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception Occurred attempting to Change iDrac Credentials on Node " +
-                         nodeDetail.getServiceTag(), e);
-            updateDelegateStatus("An Unexpected Exception Occurred attempting to Change iDrac Credentials on Node " +
-                                 nodeDetail.getServiceTag());
-            throw new BpmnError(INSTALL_ESXI_FAILED, taskMessage + " on Node " + nodeDetail.getServiceTag() +
-                                                     " failed!  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception Occurred attempting to Change iDrac Credentials on Node " +
+                                   nodeDetail.getServiceTag() + " failed.  Reason: ";
+            updateDelegateStatus(message, e);
+            throw new BpmnError(INSTALL_ESXI_FAILED, message + e.getMessage());
         }
         if (responseMessage != null && !"SUCCESS".equalsIgnoreCase(responseMessage.getMessage()))
         {
-            LOGGER.error(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
-            updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
+            final String message = taskName + " on Node " + nodeDetail.getServiceTag() + " failed!";
+            updateDelegateStatus(message);
             throw new BpmnError(INSTALL_ESXI_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!");
+                                message);
         }
-        LOGGER.info(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus(taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.");
 
+        updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
     }
 }

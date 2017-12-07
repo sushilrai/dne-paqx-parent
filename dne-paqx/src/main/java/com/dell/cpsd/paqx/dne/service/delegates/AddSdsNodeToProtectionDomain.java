@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -63,6 +62,7 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
     @Autowired
     public AddSdsNodeToProtectionDomain(final NodeService nodeService, final DataServiceRepository repository)
     {
+        super(LOGGER, "Add Host To Protection Domain");
         this.nodeService = nodeService;
         this.repository = repository;
     }
@@ -163,9 +163,8 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute AddVCenterHostToProtectionDomain task");
-        final String taskMessage = "Add Host To Protection Domain";
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         AddHostToProtectionDomainRequestMessage requestMessage = new AddHostToProtectionDomainRequestMessage();
 
@@ -198,20 +197,13 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
         {
             this.nodeService.requestAddHostToProtectionDomain(requestMessage);
 
-            final String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ".  Reason: ";
-            LOGGER.error(errorMessage, e);
-            updateDelegateStatus(errorMessage + e.getMessage());
+            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskName + ".  Reason: ";
+            updateDelegateStatus(errorMessage, e);
             throw new BpmnError(ADD_VCENTER_HOST_TO_PROTECTION_DOMAIN, errorMessage + e.getMessage());
         }
     }

@@ -11,7 +11,6 @@ import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.ObmSettingsResponse;
-import java.util.Arrays;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -21,6 +20,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_OBM_SETTINGS_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
@@ -50,15 +51,15 @@ public class ConfigureObmSettings extends BaseWorkflowDelegate
     @Autowired
     public ConfigureObmSettings(NodeService nodeService)
     {
+        super(LOGGER, "Configuring Obm Settings");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Configuring Obm Settings");
-
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         ObmSettingsResponse obmSettingsResponse = null;
         try
@@ -78,23 +79,19 @@ public class ConfigureObmSettings extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred while attempting to Configure the Obm Settings on Node " +
-                         nodeDetail.getServiceTag(), e);
-            updateDelegateStatus(
-                    "An Unexpected Exception occurred while attempting to Configure the Obm Settings on Node " +
-                    nodeDetail.getServiceTag());
+            final String message = "An Unexpected Exception occurred while attempting to Configure the Obm Settings on Node " +
+                         nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(CONFIGURE_OBM_SETTINGS_FAILED,
-                                "An Unexpected Exception occurred while attempting to Configure the Obm Settings on Node " +
-                                nodeDetail.getServiceTag() + ".  Reason: " + e.getMessage());
+                                message + e.getMessage());
         }
         if (obmSettingsResponse == null || !"SUCCESS".equalsIgnoreCase(obmSettingsResponse.getStatus()))
         {
-            LOGGER.error("Obm Settings on Node " + nodeDetail.getServiceTag() + " were not configured.");
-            updateDelegateStatus("Obm Settings on Node " + nodeDetail.getServiceTag() + " were not configured.");
+            final String message = "Obm Settings on Node " + nodeDetail.getServiceTag() + " were not configured.";
+            updateDelegateStatus(message);
             throw new BpmnError(CONFIGURE_OBM_SETTINGS_FAILED,
-                                "Obm Settings on Node " + nodeDetail.getServiceTag() + " were not configured.");
+                                message);
         }
-        LOGGER.info("Obm Settings on Node " + nodeDetail.getServiceTag() + " were configured successfully.");
         updateDelegateStatus("Obm Settings on Node " + nodeDetail.getServiceTag() + " were configured successfully.");
 
     }

@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.SoftwareVibRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBConfigureRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_SCALEIO_VIB_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -53,6 +56,8 @@ public class ConfigureScaleIOVIBTest
     public void setup() throws Exception
     {
         delegate = new ConfigureScaleIOVIB(nodeService, requestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -75,7 +80,7 @@ public class ConfigureScaleIOVIBTest
         }
 
         verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
+                "Attempting Configure ScaleIO Vib on Node service-tag.");
     }
 
     @Test
@@ -94,11 +99,11 @@ public class ConfigureScaleIOVIBTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Configure ScaleIO Vib. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(CONFIGURE_SCALEIO_VIB_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Configure ScaleIO Vib on Node service-tag.");
     }
 
     @Test
@@ -107,7 +112,6 @@ public class ConfigureScaleIOVIBTest
         final SoftwareVIBConfigureRequestMessage mockRequestMessage = mock(SoftwareVIBConfigureRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildConfigureSoftwareVibRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestConfigureScaleIoVib(mockRequestMessage);
 

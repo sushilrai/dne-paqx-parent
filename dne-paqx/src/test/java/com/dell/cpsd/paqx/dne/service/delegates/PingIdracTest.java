@@ -137,7 +137,7 @@ public class PingIdracTest
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(pingIdrac, times(2)).updateDelegateStatus(captor.capture());
-        assertThat(captor.getAllValues().get(0), CoreMatchers.containsString("Attempting to Ping iDrac"));
+        assertThat(captor.getAllValues().get(0), CoreMatchers.containsString("Attempting Ping iDrac on Node abc."));
         assertThat(captor.getAllValues().get(1), CoreMatchers.containsString("was successful"));
     }
 }

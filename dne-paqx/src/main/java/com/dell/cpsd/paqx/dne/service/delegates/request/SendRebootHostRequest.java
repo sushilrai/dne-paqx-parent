@@ -9,6 +9,7 @@ import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.BaseWorkflowDelegate;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.HostPowerOperationsTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.PowerOperationRequest;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.REBOOT_HOST_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.REBOOT_HOST_MESSAGE_ID;
 
@@ -42,12 +44,13 @@ public class SendRebootHostRequest extends BaseWorkflowDelegate
 
     private static final String REBOOT_HOST_ACTIVITY_ID = "receiveRebootHostResponse";
 
-    private final AsynchronousNodeService        asynchronousNodeService;
+    private final AsynchronousNodeService asynchronousNodeService;
     private final HostPowerOperationsTransformer hostPowerOperationsRequestTransformer;
 
     public SendRebootHostRequest(final AsynchronousNodeService asynchronousNodeService,
-            final HostPowerOperationsTransformer hostPowerOperationsRequestTransformer)
+                                 final HostPowerOperationsTransformer hostPowerOperationsRequestTransformer)
     {
+        super(LOGGER, "Send Reboot Host");
         this.asynchronousNodeService = asynchronousNodeService;
         this.hostPowerOperationsRequestTransformer = hostPowerOperationsRequestTransformer;
     }
@@ -55,33 +58,35 @@ public class SendRebootHostRequest extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute send reboot host task");
-        final String taskMessage = "Send reboot host task";
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting to " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
+        AsynchronousNodeServiceCallback<?> requestCallback = null;
         try
         {
             final DelegateRequestModel<HostPowerOperationRequestMessage> delegateRequestModel = hostPowerOperationsRequestTransformer
-                    .buildHostPowerOperationsRequestMessage(delegateExecution, PowerOperationRequest.PowerOperation.REBOOT);
+                    .buildHostPowerOperationsRequestMessage(delegateExecution,
+                                                            PowerOperationRequest.PowerOperation.REBOOT);
 
-            final AsynchronousNodeServiceCallback<?> requestCallback = this.asynchronousNodeService
-                    .sendRebootHostRequest(delegateExecution.getProcessInstanceId(), REBOOT_HOST_ACTIVITY_ID, REBOOT_HOST_MESSAGE_ID,
-                            delegateRequestModel.getRequestMessage());
+            requestCallback = this.asynchronousNodeService.sendRebootHostRequest(
+                    delegateExecution.getProcessInstanceId(), REBOOT_HOST_ACTIVITY_ID, REBOOT_HOST_MESSAGE_ID,
+                    delegateRequestModel.getRequestMessage());
 
-            if (requestCallback == null)
-            {
-                throw new IllegalStateException("Request callback is null");
-            }
-
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(REBOOT_HOST_FAILED, errorMessage + ex.getMessage());
         }
+        if (requestCallback == null)
+        {
+            String errorMessage = "The Request to " + taskName + " failed.";
+            updateDelegateStatus(errorMessage);
+            throw new BpmnError(REBOOT_HOST_FAILED, errorMessage);
+        }
+
+        updateDelegateStatus("The Request to " + taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
+
     }
 }

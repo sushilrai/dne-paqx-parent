@@ -40,13 +40,13 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
     @Autowired
     public SelectVCenterClusters(NodeService nodeService)
     {
+        super(LOGGER, "Select VCenter Clusters");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute SelectVCenterClusters");
         List<NodeDetail> nodeDetails = (List<NodeDetail>) delegateExecution.getVariable(NODE_DETAILS);
         ValidateVcenterClusterResponseMessage responseMsg = null;
         List<String> nodeIds = new ArrayList<>();
@@ -61,10 +61,9 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            final String message = "An unexpected Exception occurred while retrieving the list of Clusters for selection.";
-            LOGGER.error(message, e);
-            updateDelegateStatus(message + "  Reason: " + e.getMessage());
-            throw new BpmnError(FIND_VCLUSTER_FAILED, message + "  Reason: " + e.getMessage());
+            final String message = "An unexpected Exception occurred while retrieving the list of Clusters for selection. Reason: ";
+            updateDelegateStatus(message, e );
+            throw new BpmnError(FIND_VCLUSTER_FAILED, message + e.getMessage());
         }
         Map<String, String> clusterMap = null;
         if (responseMsg != null && responseMsg.getClusters() != null)
@@ -81,26 +80,23 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
                     messageBuilder.append(failed + " ");
                 });
                 final String message = messageBuilder.toString();
-                LOGGER.error(message);
                 updateDelegateStatus(message);
                 throw new BpmnError(FIND_VCLUSTER_FAILED, message);
             }
         }
         for (NodeDetail nd : nodeDetails)
         {
-            updateDelegateStatus("Selecting VCenter Cluster for Node " + nd.getServiceTag());
+            updateDelegateStatus("Selecting VCenter Cluster for Node " + nd.getServiceTag() + ".");
             String clusterName = clusterMap.get(nd.getServiceTag());
             if (clusterName == null)
             {
                 final String message = "Selecting VCenter Cluster for Node " + nd.getServiceTag() + " Failed.";
-                LOGGER.error(message);
                 updateDelegateStatus(message);
                 throw new BpmnError(FIND_VCLUSTER_FAILED, message);
             }
             nd.setClusterName(clusterName);
-            final String message = "VCenter Cluster " + clusterName + " was selected for Node " +
-                                   nd.getServiceTag();
-            updateDelegateStatus(message);
+            updateDelegateStatus("VCenter Cluster " + clusterName + " was selected for Node " +
+                                 nd.getServiceTag() + ".");
         }
         delegateExecution.setVariable(NODE_DETAILS, nodeDetails);
     }

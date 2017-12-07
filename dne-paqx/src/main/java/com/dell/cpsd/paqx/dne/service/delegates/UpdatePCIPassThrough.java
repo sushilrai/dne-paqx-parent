@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.PciPassThroughRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.UPDATE_PCI_PASSTHROUGH;
 
 /**
@@ -50,6 +51,7 @@ public class UpdatePCIPassThrough extends BaseWorkflowDelegate
     @Autowired
     public UpdatePCIPassThrough(final NodeService nodeService, final PciPassThroughRequestTransformer pciPassThroughRequestTransformer)
     {
+        super(LOGGER, "Update PCI pass through for ScaleIO VM");
         this.nodeService = nodeService;
         this.pciPassThroughRequestTransformer = pciPassThroughRequestTransformer;
     }
@@ -57,29 +59,20 @@ public class UpdatePCIPassThrough extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Update PCI pass through task");
-        final String taskMessage = "Update PCI pass through for ScaleIO VM";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<UpdatePCIPassthruSVMRequestMessage> delegateRequestModel = pciPassThroughRequestTransformer
                     .buildUpdatePciPassThroughRequest(delegateExecution);
             this.nodeService.requestSetPciPassThrough(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(UPDATE_PCI_PASSTHROUGH, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag()+ ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(UPDATE_PCI_PASSTHROUGH, errorMessage + ex.getMessage());
         }
     }

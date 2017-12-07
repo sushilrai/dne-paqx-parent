@@ -6,11 +6,11 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,12 +23,25 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.D
 public abstract class BaseWorkflowDelegate implements JavaDelegate
 {
 
-    private static final Log LOGGER = LogFactory.getLog(BaseWorkflowDelegate.class);
+    private Logger logger;
+    protected String taskName;
     private List<String> delegateStatus = new CopyOnWriteArrayList<>();
+
+    public BaseWorkflowDelegate(final Logger logger, final String taskName)
+    {
+        this.logger = logger;
+        this.taskName = taskName;
+    }
 
     @Override
     public void execute(final DelegateExecution delegateExecution) throws Exception
     {
+        final RepositoryService repositoryService = delegateExecution.getProcessEngineServices().getRepositoryService();
+        final String jobId = delegateExecution.getBusinessKey();
+        final String processInstanceId = delegateExecution.getProcessInstanceId();
+        final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(delegateExecution.getProcessDefinitionId()).singleResult().getName();
+
+        logger.info("Starting Execution on Job Id(" + jobId + ") Process Instance Id("+ processInstanceId + ") Workflow(" + workflowName + ") Step(" + taskName + ")");
         preExecute(delegateExecution);
         try
         {
@@ -41,14 +54,15 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
         catch (Exception e)
         {
             final String errorMessage = "An Unexpected Exception occurred in the workflow.";
-            LOGGER.error("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-            LOGGER.error(errorMessage, e);
-            LOGGER.error("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+            logger.error("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+            logger.error(errorMessage, e);
+            logger.error("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
             throw e;
         }
         finally
         {
             postExecute(delegateExecution);
+            logger.info("Completing Execution on Job Id: " + jobId + " Workflow: " + workflowName + " Step: " + taskName);
         }
     }
 
@@ -58,7 +72,8 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
      * PreExecute functionality to allow for updating status information before execution.
      * @param delegateExecution
      */
-    public void preExecute(final DelegateExecution delegateExecution) {}
+    public void preExecute(final DelegateExecution delegateExecution) {
+    }
 
     public void postExecute(final DelegateExecution delegateExecution)
     {
@@ -77,7 +92,17 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
         }
     }
 
-    public void updateDelegateStatus(String statusString) {
+    public void updateDelegateStatus(final String statusString) {
+        updateDelegateStatus(statusString, null);
+    }
+
+    public void updateDelegateStatus(final String statusString, final Exception exception) {
+        if (exception != null) {
+            logger.error(statusString, exception);
+        } else
+        {
+            logger.info(statusString);
+        }
         delegateStatus.add(statusString);
     }
 }

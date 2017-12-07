@@ -42,15 +42,15 @@ public class SendConfigureBootDeviceRequest extends BaseWorkflowDelegate
     @Autowired
     public SendConfigureBootDeviceRequest(AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "The Request for Boot Device Configuration");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Configure Boot Device");
-        final String taskMessage = "The Request for Boot Device Configuration";
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         AsynchronousNodeServiceCallback<?> requestCallback = null;
         String uuid = nodeDetail.getId();
@@ -66,12 +66,10 @@ public class SendConfigureBootDeviceRequest extends BaseWorkflowDelegate
                                                                                configureBootDeviceIdracRequest);
         if (requestCallback != null)
         {
-            LOGGER.info(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());
-            updateDelegateStatus(taskMessage + " was successful on Node " + nodeDetail.getServiceTag());
+            updateDelegateStatus(taskName + " was successful on Node " + nodeDetail.getServiceTag());
         }
         else
         {
-            LOGGER.error("Failed to send the request for Configure Boot Device on Node " + nodeDetail.getServiceTag());
             updateDelegateStatus(
                     "Failed to send the request for Configure Boot Device on Node " + nodeDetail.getServiceTag());
             throw new BpmnError(SEND_CONFIGURE_BOOT_DEVICE_FAILED,

@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.DatastoreRenameRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.DatastoreRenameRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,11 +22,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DATASTORE_RENAME_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -66,6 +69,8 @@ public class DatastoreRenameTest
     public void setup() throws Exception
     {
         delegate = new DatastoreRename(nodeService, requestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -81,14 +86,12 @@ public class DatastoreRenameTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
-            assertThat(error.getMessage(), containsString(errorMessage));
-            assertThat(error.getMessage(), containsString(taskMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Rename Datastore for ESXi Host on Node service-tag. Reason: Illegal state exception"));
             assertTrue(error.getErrorCode().equals(DATASTORE_RENAME_FAILED));
         }
 
         verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
+                "Attempting Rename Datastore for ESXi Host on Node service-tag.");
     }
 
     @Test
@@ -107,11 +110,11 @@ public class DatastoreRenameTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Rename Datastore for ESXi Host on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(DATASTORE_RENAME_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Rename Datastore for ESXi Host on Node service-tag.");
     }
 
     @Test
@@ -120,14 +123,13 @@ public class DatastoreRenameTest
         final DatastoreRenameRequestMessage mockRequestMessage = mock(DatastoreRenameRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildDatastoreRenameRequest(delegateExecution)).thenReturn(requestModel);
         when(nodeService.requestDatastoreRename(mockRequestMessage)).thenReturn(datastoreName);
         final DatastoreRename spy = spy(delegate);
 
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus(taskMessage + " on Node " + serviceTag + " was successful.");
+        verify(spy).updateDelegateStatus("Attempting Rename Datastore for ESXi Host on Node service-tag.");
         final ArgumentCaptor<String> setVariableCaptor = ArgumentCaptor.forClass(String.class);
         verify(delegateExecution).setVariable(anyString(), setVariableCaptor.capture());
         assertEquals(datastoreName, setVariableCaptor.getValue());

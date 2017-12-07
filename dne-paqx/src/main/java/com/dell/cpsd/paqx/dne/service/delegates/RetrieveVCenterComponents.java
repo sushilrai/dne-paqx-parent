@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -37,33 +36,24 @@ public class RetrieveVCenterComponents extends BaseWorkflowDelegate
     @Autowired
     public RetrieveVCenterComponents(final NodeService nodeService)
     {
+        super(LOGGER, "List VCenter Components");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute List VCenter Components");
-
         try
         {
             this.nodeService.requestVCenterComponents();
 
-            final String message = "VCenter Components were retrieved successfully.";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus("VCenter Components were retrieved successfully.");
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred while retrieving VCenter Components.";
-            LOGGER.error(message, e);
-            updateDelegateStatus(message + " Reason: " + e.getMessage());
-            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, message + " Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred while retrieving VCenter Components. Reason: ";
+            updateDelegateStatus(message, e);
+            throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, message + e.getMessage());
         }
     }
 }

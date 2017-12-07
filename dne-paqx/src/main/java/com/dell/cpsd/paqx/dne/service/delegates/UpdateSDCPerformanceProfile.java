@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.SdcPerformanceProfileRequestTransformer;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.UPDATE_SDC_PERFORMANCE_PROFILE_FAILED;
 
 /**
@@ -57,6 +58,7 @@ public class UpdateSDCPerformanceProfile extends BaseWorkflowDelegate
     public UpdateSDCPerformanceProfile(final NodeService nodeService,
             final SdcPerformanceProfileRequestTransformer sdcPerformanceProfileRequestTransformer)
     {
+        super(LOGGER, "Update ScaleIO SDC Performance Profile");
         this.nodeService = nodeService;
         this.sdcPerformanceProfileRequestTransformer = sdcPerformanceProfileRequestTransformer;
     }
@@ -64,29 +66,20 @@ public class UpdateSDCPerformanceProfile extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute UpdateSDCPerformanceProfile");
-        final String taskMessage = "Update ScaleIO SDC Performance Profile";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<SioSdcUpdatePerformanceProfileRequestMessage> delegateRequestModel = sdcPerformanceProfileRequestTransformer
                     .buildSdcPerformanceProfileRequest(delegateExecution);
             this.nodeService.requestUpdateSdcPerformanceProfile(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            final String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            final String errorMessage = "An unexpected exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED, errorMessage + ex.getMessage());
         }
     }

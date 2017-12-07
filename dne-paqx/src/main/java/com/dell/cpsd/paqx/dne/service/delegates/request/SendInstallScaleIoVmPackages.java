@@ -49,6 +49,7 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
     public SendInstallScaleIoVmPackages(AsynchronousNodeService asynchronousNodeService,
             RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
+        super(LOGGER, "Send Install ScaleIo Vm Packages");
         this.asynchronousNodeService = asynchronousNodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -56,10 +57,8 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Send Install Scaleio Vm Packages task");
-        final String taskMessage = "Send Install Scaleio Vm Packages";
-
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         AsynchronousNodeServiceCallback<?> requestCallback;
 
@@ -76,23 +75,18 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
         catch (TaskResponseFailureException ex)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message, ex);
-            updateDelegateStatus(message);
-            throw new BpmnError(SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED,
-                    taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " + ex.getMessage());
+                    "An Unexpected Exception Occurred attempting to Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(message, ex);
+            throw new BpmnError(SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED,message + ex.getMessage());
         }
 
         if (requestCallback != null)
         {
-            final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful");
         }
         else
         {
             final String message = "Failed to send the request for Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED, message);
         }

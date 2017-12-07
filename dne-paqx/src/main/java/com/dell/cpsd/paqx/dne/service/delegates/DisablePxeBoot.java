@@ -7,7 +7,6 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -48,38 +47,28 @@ public class DisablePxeBoot extends BaseWorkflowDelegate
 
     public DisablePxeBoot(final AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "Configure PXE boot");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute configure PXE task");
-        final String taskMessage = "Configure PXE boot";
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         try
         {
-            final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
             final AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
                     .getVariable(CONFIGURE_PXE_BOOT_MESSAGE_ID);
             this.asynchronousNodeService.processConfigurePxeBootResponse(responseCallback);
 
-            final String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            final String errorMessage = "Exception Code: " + ex.getCode() + "::" + ex.getMessage();
-            updateDelegateStatus(ex.getMessage());
-            LOGGER.error(errorMessage);
-            throw new BpmnError(CONFIGURE_PXE_FAILED, errorMessage);
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An Unexpected Exception occurred attempting to " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(CONFIGURE_PXE_FAILED, errorMessage + ex.getMessage());
         }
     }

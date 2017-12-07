@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ConfigureVmNetworkSettingsRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_VM_NETWORK_SETTINGS;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -53,6 +56,8 @@ public class ConfigureVMNetworkSettingsTest
     public void setup() throws Exception
     {
         delegate = new ConfigureVMNetworkSettings(nodeService, requestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -76,7 +81,7 @@ public class ConfigureVMNetworkSettingsTest
         }
 
         verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: " + errorMessage);
+                "Attempting Configure VM Network Settings on Node service-tag.");
     }
 
     @Test
@@ -95,11 +100,11 @@ public class ConfigureVMNetworkSettingsTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Configure VM Network Settings on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(CONFIGURE_VM_NETWORK_SETTINGS));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Configure VM Network Settings on Node service-tag.");
     }
 
     @Test
@@ -108,7 +113,6 @@ public class ConfigureVMNetworkSettingsTest
         final ConfigureVmNetworkSettingsRequestMessage mockRequestMessage = mock(ConfigureVmNetworkSettingsRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildConfigureVmNetworkSettingsRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestConfigureVmNetworkSettings(mockRequestMessage);
 

@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.RemoteCommandExecutionRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.RemoteCommandExecutionRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CHANGE_SCALEIO_VM_CREDENTIALS_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Change ScaleIo VM credentials.
@@ -57,6 +58,7 @@ public class ChangeScaleIOVMCredentials extends BaseWorkflowDelegate
     public ChangeScaleIOVMCredentials(final NodeService nodeService,
             final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
+        super(LOGGER, "Change ScaleIO VM factory credentials");
         this.nodeService = nodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -64,29 +66,20 @@ public class ChangeScaleIOVMCredentials extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute ChangeSvmCredentials task");
-        final String taskMessage = "Change ScaleIO VM factory credentials";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<RemoteCommandExecutionRequestMessage> delegateRequestModel = remoteCommandExecutionRequestTransformer
                     .buildRemoteCodeExecutionRequest(delegateExecution, RemoteCommandExecutionRequestMessage.RemoteCommand.CHANGE_PASSWORD);
             this.nodeService.requestRemoteCommandExecution(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(CHANGE_SCALEIO_VM_CREDENTIALS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " on Node " + delegateRequestModel.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(CHANGE_SCALEIO_VM_CREDENTIALS_FAILED, errorMessage + ex.getMessage());
         }
     }

@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -37,34 +36,25 @@ public class RetrieveScaleIoComponents extends BaseWorkflowDelegate
     @Autowired
     public RetrieveScaleIoComponents(final NodeService nodeService)
     {
+        super(LOGGER, "Retrieve ScaleIO Components");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Retrieve ScaleIO Components");
-
         try
         {
             this.nodeService.requestScaleIoComponents();
 
-            final String message = "Scale IO Components were retrieved successfully.";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus("Scale IO Components were retrieved successfully.");
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred while retrieving Scale IO Components.";
-            LOGGER.error(message, e);
-            updateDelegateStatus(message + " Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred while retrieving Scale IO Components. Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED,
-                    message + " Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
     }
 }

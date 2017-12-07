@@ -16,7 +16,6 @@ import com.dell.cpsd.paqx.dne.service.model.IdracNetworkSettingsRequest;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -87,11 +86,11 @@ public class ConfigIdracIpAddressTest {
         try {
             idracInfo.setMessage("FAIL");
             when(delegateExecution.getVariable(NODE_DETAIL)).thenReturn(nodeDetail);
-            given(nodeService.idracNetworkSettings(any())).willThrow(new NullPointerException());
+            given(nodeService.idracNetworkSettings(any())).willThrow(new NullPointerException("Test"));
             configIdracIpAddress.delegateExecute(delegateExecution);
         } catch (BpmnError error) {
             assertTrue(error.getErrorCode().equals(DelegateConstants.CONFIGURE_IP_ADDRESS_FAILED));
-            assertTrue(error.getMessage().contains("Configure IP Address on Node abc failed!"));
+            assertTrue(error.getMessage().contains("An Unexpected Exception Occurred attempting to Configure IP Address on Node abc. Reason: Test"));
         }
     }
 }

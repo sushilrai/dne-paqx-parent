@@ -7,7 +7,6 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -39,38 +38,28 @@ public class RebootHost extends BaseWorkflowDelegate
 
     public RebootHost(final AsynchronousNodeService asynchronousNodeService)
     {
+        super(LOGGER, "Reboot Host");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Reboot Host task");
-        final String taskMessage = "Reboot Host";
-
         try
         {
             final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+            updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
+
             final AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
                     .getVariable(REBOOT_HOST_MESSAGE_ID);
             this.asynchronousNodeService.processRebootHostResponse(responseCallback);
 
-            final String returnMessage = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            final String errorMessage = "Exception Code: " + ex.getCode() + "::" + ex.getMessage();
-            updateDelegateStatus(ex.getMessage());
-            LOGGER.error(errorMessage);
-            throw new BpmnError(REBOOT_HOST_FAILED, errorMessage);
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(REBOOT_HOST_FAILED, errorMessage + ex.getMessage());
         }
     }

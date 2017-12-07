@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.HostMaintenanceRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_HOST_MAINTENANCE_MODE_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -64,6 +67,9 @@ public class AbstractHostMaintenanceModeTest
     {
         abstractHostMaintenanceModeEnable = new EnterHostMaintenanceMode(nodeService, hostMaintenanceRequestTransformer);
         abstractHostMaintenanceModeExit = new ExitHostMaintenanceMode(nodeService, hostMaintenanceRequestTransformer);
+
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -87,7 +93,7 @@ public class AbstractHostMaintenanceModeTest
         }
 
         verify(abstractHostMaintenanceModeSpy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request Enter Host Maintenance Mode. Reason: " + errorMessage);
+                "Attempting to Enter Host Maintenance Mode on Node service-tag.");
     }
 
     @Test
@@ -111,7 +117,7 @@ public class AbstractHostMaintenanceModeTest
         }
 
         verify(abstractHostMaintenanceModeSpy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request Exit Host Maintenance Mode. Reason: " + errorMessage);
+                "Attempting to Exit Host Maintenance Mode on Node service-tag.");
     }
 
     @Test
@@ -130,11 +136,11 @@ public class AbstractHostMaintenanceModeTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Enter Host Maintenance Mode on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(ESXI_HOST_MAINTENANCE_MODE_FAILED));
         }
 
-        verify(abstractHostMaintenanceModeSpy).updateDelegateStatus(errorMessage);
+        verify(abstractHostMaintenanceModeSpy).updateDelegateStatus( "Attempting to Enter Host Maintenance Mode on Node service-tag.");
     }
 
     @Test
@@ -153,11 +159,11 @@ public class AbstractHostMaintenanceModeTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Exit Host Maintenance Mode on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(ESXI_HOST_MAINTENANCE_MODE_FAILED));
         }
 
-        verify(abstractHostMaintenanceModeSpy).updateDelegateStatus(errorMessage);
+        verify(abstractHostMaintenanceModeSpy).updateDelegateStatus("Attempting to Exit Host Maintenance Mode on Node service-tag.");
     }
 
     @Test
@@ -165,7 +171,6 @@ public class AbstractHostMaintenanceModeTest
     {
         final HostMaintenanceModeRequestMessage mockRequestMessage = mock(HostMaintenanceModeRequestMessage.class);
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(hostMaintenanceRequestTransformer.buildHostMaintenanceRequest(delegateExecution, true)).thenReturn(requestModel);
         doNothing().when(nodeService).requestHostMaintenanceMode(mockRequestMessage);
 
@@ -182,7 +187,6 @@ public class AbstractHostMaintenanceModeTest
     {
         final HostMaintenanceModeRequestMessage mockRequestMessage = mock(HostMaintenanceModeRequestMessage.class);
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(hostMaintenanceRequestTransformer.buildHostMaintenanceRequest(delegateExecution, false)).thenReturn(requestModel);
         doNothing().when(nodeService).requestHostMaintenanceMode(mockRequestMessage);
 

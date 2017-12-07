@@ -48,6 +48,7 @@ public class SendInstallEsxiRequest extends BaseWorkflowDelegate
     public SendInstallEsxiRequest(final AsynchronousNodeService asynchronousNodeService,
                                   final HostToInstallEsxiRequestTransformer hostToInstallEsxiRequestTransformer)
     {
+        super( LOGGER, "Send Install ESXi Request");
         this.asynchronousNodeService = asynchronousNodeService;
         this.hostToInstallEsxiRequestTransformer = hostToInstallEsxiRequestTransformer;
     }
@@ -68,9 +69,8 @@ public class SendInstallEsxiRequest extends BaseWorkflowDelegate
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
 
-        LOGGER.info("Execute Send Install ESXi Request");
-        final String taskMessage = "The Request to Send Install ESXi";
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting to " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         final String symphonyUuid = nodeDetail.getId();
 
@@ -111,24 +111,18 @@ public class SendInstallEsxiRequest extends BaseWorkflowDelegate
         catch (Exception e)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Install Esxi on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message, e);
-            updateDelegateStatus(message);
-            throw new BpmnError(SEND_INSTALL_ESXI_FAILED,
-                                taskMessage + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " +
-                                e.getMessage());
+                    "An Unexpected Exception Occurred attempting to  request Install Esxi on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(message, e);
+            throw new BpmnError(SEND_INSTALL_ESXI_FAILED,message + e.getMessage());
         }
 
         if (requestCallback != null)
         {
-            final String message = taskMessage + " on Node " + nodeDetail.getServiceTag() + " was successful";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful");
         }
         else
         {
             final String message = "Failed to send the request for Install ESXi on Node " + nodeDetail.getServiceTag();
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(SEND_INSTALL_ESXI_FAILED, message);
         }

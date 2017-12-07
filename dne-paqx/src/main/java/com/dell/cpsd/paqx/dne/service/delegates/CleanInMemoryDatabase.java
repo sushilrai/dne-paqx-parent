@@ -7,7 +7,6 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
-import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CLEAN_IN_MEMORY_DATABASE_ERROR;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * It is responsible for cleaning in memory database.
@@ -44,13 +42,14 @@ public class CleanInMemoryDatabase extends BaseWorkflowDelegate
     @Autowired
     public CleanInMemoryDatabase(final DataServiceRepository repository)
     {
+        super(LOGGER, "Cleaning up the Database");
         this.repository = repository;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Cleaning in memory database ...");
+        updateDelegateStatus(this.taskName + ".");
         boolean result;
         try
         {
@@ -58,21 +57,16 @@ public class CleanInMemoryDatabase extends BaseWorkflowDelegate
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Error occurred while cleaning up the Database. Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An Unexpected Error occurred while " + taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(CLEAN_IN_MEMORY_DATABASE_ERROR, errorMessage + ex.getMessage());
         }
 
         if(!result) {
-            String errorMessage = "Cleaning up the Database failed.";
-            LOGGER.error(errorMessage);
+            final String errorMessage = taskName + " failed.";
             updateDelegateStatus(errorMessage);
             throw new BpmnError(CLEAN_IN_MEMORY_DATABASE_ERROR, errorMessage);
         }
-
-        String returnMessage = "Cleaning up the Database was successful.";
-        LOGGER.info(returnMessage);
-        updateDelegateStatus(returnMessage);
+        updateDelegateStatus(taskName + " was successful.");
     }
 }

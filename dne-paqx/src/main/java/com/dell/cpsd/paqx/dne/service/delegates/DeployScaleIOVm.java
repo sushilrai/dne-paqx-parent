@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.DeployScaleIoVmRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.DeployVMFromTemplateRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DEPLOY_SCALEIO_VM_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VIRTUAL_MACHINE_NAME;
 
 /**
@@ -57,6 +58,7 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
     @Autowired
     public DeployScaleIOVm(final NodeService nodeService, final DeployScaleIoVmRequestTransformer deployScaleIoVmRequestTransformer)
     {
+        super(LOGGER, "Deploy ScaleIo Vm");
         this.nodeService = nodeService;
         this.deployScaleIoVmRequestTransformer = deployScaleIoVmRequestTransformer;
     }
@@ -64,9 +66,8 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Deploy ScaleIO VM From Template");
-        final String taskMessage = "Deploy ScaleIo Vm";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<DeployVMFromTemplateRequestMessage> delegateRequestModel = deployScaleIoVmRequestTransformer
@@ -74,22 +75,12 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
             this.nodeService.requestDeployScaleIoVm(delegateRequestModel.getRequestMessage());
 
             delegateExecution.setVariable(VIRTUAL_MACHINE_NAME, delegateRequestModel.getRequestMessage().getNewVMName());
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            String errorMsg = "Exception Code: ";
-            LOGGER.error(errorMsg, ex);
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(DEPLOY_SCALEIO_VM_FAILED,  errorMsg + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful. Virtual Machine Name is being set to " + delegateRequestModel.getRequestMessage().getNewVMName());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(DEPLOY_SCALEIO_VM_FAILED, errorMessage + ex.getMessage());
         }
     }

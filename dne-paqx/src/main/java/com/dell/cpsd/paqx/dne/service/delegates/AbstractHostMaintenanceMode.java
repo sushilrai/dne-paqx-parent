@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.HostMaintenanceRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.HostMaintenanceModeRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ESXI_HOST_MAINTENANCE_MODE_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
 {
@@ -47,6 +48,7 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     public AbstractHostMaintenanceMode(final NodeService nodeService, final HostMaintenanceRequestTransformer requestTransformer,
             final String taskName)
     {
+        super(LOGGER, taskName);
         this.nodeService = nodeService;
         this.requestTransformer = requestTransformer;
         this.taskName = taskName;
@@ -63,29 +65,22 @@ public abstract class AbstractHostMaintenanceMode extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute {}", this.taskName);
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting to " + taskName + " on Node " + nodeDetail.getServiceTag()+".");
         final boolean maintenanceModeEnable = this.getMaintenanceModeEnable();
-
         try
         {
             final DelegateRequestModel<HostMaintenanceModeRequestMessage> delegateRequestModel = requestTransformer
                     .buildHostMaintenanceRequest(delegateExecution, maintenanceModeEnable);
             this.nodeService.requestHostMaintenanceMode(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskName + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(ESXI_HOST_MAINTENANCE_MODE_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(ESXI_HOST_MAINTENANCE_MODE_FAILED, errorMessage + ex.getMessage());
         }
     }

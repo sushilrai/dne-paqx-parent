@@ -27,6 +27,7 @@ public class ConfigureProtectionDomains extends BaseWorkflowDelegate
     @Autowired
     public ConfigureProtectionDomains(final NodeService nodeService)
     {
+        super(LOGGER, "Validate Protection Domains");
         this.nodeService = nodeService;
     }
 

@@ -8,6 +8,7 @@ package com.dell.cpsd.paqx.dne.service.delegates.request;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.transformers.HostPowerOperationsTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.HostPowerOperationRequestMessage;
@@ -21,12 +22,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +66,8 @@ public class SendRebootHostRequestTest
     {
         sendRebootHostRequest = new SendRebootHostRequest(asynchronousNodeService, hostPowerOperationsRequestTransformer);
         requestMessage = new HostPowerOperationRequestMessage();
+        NodeDetail nodeDetail = new NodeDetail("1", "service-tag");
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -97,8 +102,7 @@ public class SendRebootHostRequestTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.REBOOT_HOST_FAILED));
-            assertThat(error.getMessage(), containsString("An Unexpected Exception occurred attempting to request"));
-            assertThat(error.getMessage(), containsString("Request callback is null"));
+            assertThat(error.getMessage(), containsString("The Request to Send Reboot Host failed."));
         }
     }
 
@@ -119,8 +123,7 @@ public class SendRebootHostRequestTest
         rebootHostSpy.delegateExecute(delegateExecution);
 
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(rebootHostSpy).updateDelegateStatus(captor.capture());
-        assertThat(captor.getValue(), containsString("was successful"));
-        assertThat(captor.getValue(), containsString("Send reboot host task"));
+        verify(rebootHostSpy, times(2)).updateDelegateStatus(captor.capture());
+        assertThat(captor.getValue(), containsString("The Request to Send Reboot Host on Node service-tag was successful."));
     }
 }

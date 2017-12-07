@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -197,7 +198,7 @@ public class AddNodeToSystemDefinitionTest
         addNodeToSystemDefinitionSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(addNodeToSystemDefinitionSpy).updateDelegateStatus(captor.capture());
+        verify(addNodeToSystemDefinitionSpy, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 }

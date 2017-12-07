@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ConfigureVmNetworkSettingsRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.ConfigureVmNetworkSettingsRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_VM_NETWORK_SETTINGS;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Configure virtual machine network settings.
@@ -56,6 +57,7 @@ public class ConfigureVMNetworkSettings extends BaseWorkflowDelegate
     @Autowired
     public ConfigureVMNetworkSettings(final NodeService nodeService, final ConfigureVmNetworkSettingsRequestTransformer requestTransformer)
     {
+        super(LOGGER, "Configure VM Network Settings");
         this.nodeService = nodeService;
         this.requestTransformer = requestTransformer;
     }
@@ -63,8 +65,8 @@ public class ConfigureVMNetworkSettings extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Configure vm network settings");
-        final String taskMessage = "Configure VM Network Settings";
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         try
         {
@@ -72,20 +74,13 @@ public class ConfigureVMNetworkSettings extends BaseWorkflowDelegate
                     .buildConfigureVmNetworkSettingsRequest(delegateExecution);
             this.nodeService.requestConfigureVmNetworkSettings(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(CONFIGURE_VM_NETWORK_SETTINGS, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(CONFIGURE_VM_NETWORK_SETTINGS, errorMessage + ex.getMessage());
         }
     }

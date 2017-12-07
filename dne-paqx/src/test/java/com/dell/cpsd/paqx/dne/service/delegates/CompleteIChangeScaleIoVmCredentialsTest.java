@@ -7,7 +7,6 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
-import com.dell.cpsd.paqx.dne.service.delegates.CompleteChangeScaleIoVmCredentials;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
@@ -29,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -76,7 +76,7 @@ public class CompleteIChangeScaleIoVmCredentialsTest
         completeChangeScaleIoVmCredentialsSpy.delegateExecute(delegateExecution);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(completeChangeScaleIoVmCredentialsSpy).updateDelegateStatus(captor.capture());
+        verify(completeChangeScaleIoVmCredentialsSpy, times(2)).updateDelegateStatus(captor.capture());
         assertThat(captor.getValue(), containsString("was successful"));
     }
 

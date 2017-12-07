@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ConfigureDvSwitchesTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddHostToDvSwitchRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_HOST_TO_DV_SWITCH_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
 @Scope("prototype")
@@ -39,6 +40,7 @@ public class AddHostToDvSwitch extends BaseWorkflowDelegate
 
     public AddHostToDvSwitch(final NodeService nodeService, final ConfigureDvSwitchesTransformer requestTransformer)
     {
+        super(LOGGER, "Add Host to DV Switch");
         this.nodeService = nodeService;
         this.requestTransformer = requestTransformer;
     }
@@ -46,29 +48,21 @@ public class AddHostToDvSwitch extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Add Host to DV Switch");
-        final String taskMessage = "Add Host To DV Switch";
-
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
         try
         {
             final DelegateRequestModel<AddHostToDvSwitchRequestMessage> delegateRequestModel = requestTransformer
                     .buildAddHostToDvSwitchRequest(delegateExecution);
             this.nodeService.requestAddHostToDvSwitch(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = this.taskName + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(ADD_HOST_TO_DV_SWITCH_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            final String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            final String errorMessage = "An unexpected exception occurred attempting to request " + this.taskName + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(ADD_HOST_TO_DV_SWITCH_FAILED, errorMessage + ex.getMessage());
         }
     }

@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ApplyEsxiLicenseRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.APPLY_ESXI_LICENSE_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -52,6 +55,9 @@ public class ApplyEsxiLicenseTest
     public void setup() throws Exception
     {
         delegate = new ApplyEsxiLicense(nodeService, requestTransformer);
+
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -74,7 +80,7 @@ public class ApplyEsxiLicenseTest
         }
 
         verify(spy)
-                .updateDelegateStatus("An unexpected exception occurred attempting to request Apply Esxi License. Reason: " + errorMessage);
+                .updateDelegateStatus("Attempting Apply Esxi License on Node service-tag.");
     }
 
     @Test
@@ -93,11 +99,11 @@ public class ApplyEsxiLicenseTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Apply Esxi License. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(APPLY_ESXI_LICENSE_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus( "Attempting Apply Esxi License on Node service-tag.");
     }
 
     @Test
@@ -106,7 +112,6 @@ public class ApplyEsxiLicenseTest
         final AddEsxiHostVSphereLicenseRequest mockRequestMessage = mock(AddEsxiHostVSphereLicenseRequest.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestInstallEsxiLicense(mockRequestMessage);
 

@@ -81,7 +81,7 @@ public class SelectVCenterClustersTest
             fail("Should not get here!");
         } catch( BpmnError bpmnError) {
             assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
-            assertEquals(bpmnError.getMessage(), "An unexpected Exception occurred while retrieving the list of Clusters for selection.  Reason: Timeout");
+            assertEquals(bpmnError.getMessage(), "An unexpected Exception occurred while retrieving the list of Clusters for selection. Reason: Timeout");
         }
     }
 

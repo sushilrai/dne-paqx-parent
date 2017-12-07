@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.ESXiCredentialDetails;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -41,14 +40,13 @@ public class RetrieveDefaultESXiCredentials extends BaseWorkflowDelegate
     @Autowired
     public RetrieveDefaultESXiCredentials(final NodeService nodeService)
     {
+        super(LOGGER, "Retrieve ESXi Credential Details");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Retrieve ESXi Credential Details");
-
         try
         {
             final ListEsxiCredentialDetailsRequestMessage requestMessage = getListDefaultCredentialsRequestMessage();
@@ -61,23 +59,14 @@ public class RetrieveDefaultESXiCredentials extends BaseWorkflowDelegate
 
             delegateExecution.setVariable(ESXI_CREDENTIAL_DETAILS, esXiCredentialDetails);
 
-            final String message = "Default ESXi host default credential ids retrieved successfully";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
+            updateDelegateStatus(taskName + " was successful.");
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception Occurred attempting to retrieve the ESXi Default Credentials.";
-            LOGGER.error(message, e);
-            updateDelegateStatus(
-                    message + " Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception Occurred attempting to " + taskName + ". Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED,
-                    message + " Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
     }
 

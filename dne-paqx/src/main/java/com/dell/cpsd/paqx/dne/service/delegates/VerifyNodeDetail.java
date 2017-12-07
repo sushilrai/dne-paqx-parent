@@ -23,23 +23,25 @@ public class VerifyNodeDetail extends BaseWorkflowDelegate
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(VerifyNodeDetail.class);
 
+    public VerifyNodeDetail()
+    {
+        super(LOGGER, "Verify Node Detail");
+    }
+
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Verify Node Detail");
-        final String taskMessage = "Verify Node Detail";
-
         final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-
-        List<String> missingFields = new ArrayList<>();
 
         if (nodeDetail == null) {
             final String message = "Node details were not found!  Please add Node details and try again.";
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(VERIFY_NODE_DETAIL_FAILED,
                                 message);
         }
+
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
+        List<String> missingFields = new ArrayList<>();
 
         if (StringUtils.isBlank(nodeDetail.getId())) {
             missingFields.add("id");
@@ -122,14 +124,11 @@ public class VerifyNodeDetail extends BaseWorkflowDelegate
             final String message =
                     "Node details are incomplete!  Please update Node details with the following information and try again.  Missing values for "
                             + StringUtils.join(missingFields, ", ") + ".";
-            LOGGER.error(message);
             updateDelegateStatus(message);
             throw new BpmnError(VERIFY_NODE_DETAIL_FAILED,
                                 message);
         }
 
-        final String message = "Verification of Details on Node " + nodeDetail.getServiceTag() + " was successful.";
-        LOGGER.info(message);
-        updateDelegateStatus(message);
+        updateDelegateStatus("Verification of Details on Node " + nodeDetail.getServiceTag() + " was successful.");
     }
 }

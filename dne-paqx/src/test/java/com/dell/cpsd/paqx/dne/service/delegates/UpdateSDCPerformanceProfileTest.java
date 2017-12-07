@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.SdcPerformanceProfileRequestTransformer;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -19,11 +20,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.UPDATE_SDC_PERFORMANCE_PROFILE_FAILED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -52,6 +55,8 @@ public class UpdateSDCPerformanceProfileTest
     public void setup() throws Exception
     {
         updateSDCPerformanceProfile = new UpdateSDCPerformanceProfile(nodeService, sdcPerformanceProfileRequestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -75,7 +80,7 @@ public class UpdateSDCPerformanceProfileTest
         }
 
         verify(updateSDCPerformanceProfileSpy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request Update ScaleIO SDC Performance Profile. Reason: " + errorMessage);
+                "Attempting Update ScaleIO SDC Performance Profile on Node service-tag.");
     }
 
     @Test
@@ -94,11 +99,11 @@ public class UpdateSDCPerformanceProfileTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Update ScaleIO SDC Performance Profile on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(UPDATE_SDC_PERFORMANCE_PROFILE_FAILED));
         }
 
-        verify(updateSDCPerformanceProfileSpy).updateDelegateStatus(errorMessage);
+        verify(updateSDCPerformanceProfileSpy).updateDelegateStatus("Attempting Update ScaleIO SDC Performance Profile on Node service-tag.");
     }
 
     @Test
@@ -107,7 +112,6 @@ public class UpdateSDCPerformanceProfileTest
         final SioSdcUpdatePerformanceProfileRequestMessage mockRequestMessage = mock(SioSdcUpdatePerformanceProfileRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(sdcPerformanceProfileRequestTransformer.buildSdcPerformanceProfileRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestUpdateSdcPerformanceProfile(mockRequestMessage);
 

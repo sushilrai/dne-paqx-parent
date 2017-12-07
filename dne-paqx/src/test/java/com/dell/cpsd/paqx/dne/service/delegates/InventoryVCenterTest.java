@@ -53,7 +53,7 @@ public class InventoryVCenterTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_VCENTER_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to inventory VCenter."));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: null"));
         }
     }
 
@@ -84,7 +84,7 @@ public class InventoryVCenterTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_VCENTER_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to inventory VCenter."));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to Inventory VCenter. Reason: null"));
         }
     }
 

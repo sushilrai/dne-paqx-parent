@@ -45,39 +45,36 @@ public class NotifyNodeDiscoveryToUpdateStatusCompleted extends BaseWorkflowDele
     @Autowired
     public NotifyNodeDiscoveryToUpdateStatusCompleted(NodeService nodeService)
     {
+        super(LOGGER, "Update Node Status");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute NotifyNodeDiscoveryToUpdateStatusCompleted task");
-        final String taskMessage = "Update Node Status";
         final NodeDetail nd = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nd.getServiceTag() + ".");
+
+        boolean succeeded;
         try
         {
-            boolean succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), COMPLETED);
-            if (!succeeded)
-            {
-                final String message = "Node Status was not updated to added.";
-                LOGGER.error(message);
-                updateDelegateStatus(message);
-                throw new BpmnError(NOTIFY_NODE_STATUS_COMPLETED_FAILED, message);
-            }
-
-            final String message = taskMessage + " on Node " + nd.getServiceTag() + " was successful.";
-            LOGGER.info(message);
-            updateDelegateStatus(message);
+            succeeded = this.nodeService.notifyNodeAllocationStatus(nd.getId(), COMPLETED);
         }
         catch (Exception e)
         {
             final String message =
-                    "An unexpected exception occurred attempting to update the node status to completed for Node " + nd.getServiceTag()
+                    "An Unexpected Exception occurred attempting to " + nd.getServiceTag() + " on Node " + nd.getServiceTag()
                             + ". Reason: ";
-            LOGGER.error(message, e);
-            updateDelegateStatus(message + e.getMessage());
+            updateDelegateStatus(message, e);
             throw new BpmnError(NOTIFY_NODE_STATUS_COMPLETED_FAILED, message + e.getMessage());
         }
+        if (!succeeded)
+        {
+            final String message = "Updating Node Status on Node " + nd.getServiceTag() + " failed.";
+            updateDelegateStatus(message);
+            throw new BpmnError(NOTIFY_NODE_STATUS_COMPLETED_FAILED, message);
+        }
 
+        updateDelegateStatus(taskName + " on Node " + nd.getServiceTag() + " was successful.");
     }
 }

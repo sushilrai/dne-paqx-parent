@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -41,6 +40,7 @@ public class InventoryScaleIO extends BaseWorkflowDelegate
     @Autowired
     public InventoryScaleIO(final NodeService nodeService, final DataServiceRepository repository)
     {
+        super(LOGGER, "Inventory Scale IO");
         this.nodeService = nodeService;
         this.repository = repository;
     }
@@ -48,8 +48,6 @@ public class InventoryScaleIO extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Inventory ScaleIO");
-
         ComponentEndpointIds componentEndpointIds = null;
         try
         {
@@ -57,36 +55,29 @@ public class InventoryScaleIO extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred attempting to retrieve Scale IO Component Endpoints.", e);
-            updateDelegateStatus("An Unexpected Exception occurred attempting to inventory Scale IO.  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred attempting to retrieve Scale IO Component Endpoints. Reason:";
+            updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_SCALE_IO_FAILED,
-                    "An Unexpected Exception occurred attempting to inventory Scale IO.  Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
         if (componentEndpointIds == null)
         {
-            LOGGER.error("Scale IO Endpoints not found.");
-            updateDelegateStatus("Scale IO Endpoints not found.");
-            throw new BpmnError(SCALE_IO_INFORMATION_NOT_FOUND, "Scale IO Endpoints not found.");
+            final String message = "Scale IO Endpoints not found.";
+            updateDelegateStatus(message);
+            throw new BpmnError(SCALE_IO_INFORMATION_NOT_FOUND, message);
         }
 
         try
         {
             this.nodeService.requestDiscoverScaleIo(componentEndpointIds, delegateExecution.getProcessInstanceId());
-
-            LOGGER.info("Request for Inventory Scale IO completed successfully.");
             updateDelegateStatus("Inventory request for Scale IO completed successfully.");
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(INVENTORY_SCALE_IO_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred attempting to Inventory Scale IO.", e);
-            updateDelegateStatus("An Unexpected Exception occurred attempting to inventory Scale IO.  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred attempting to inventory Scale IO.  Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_SCALE_IO_FAILED,
-                    "An Unexpected Exception occurred attempting to inventory Scale IO.  Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
     }
 }

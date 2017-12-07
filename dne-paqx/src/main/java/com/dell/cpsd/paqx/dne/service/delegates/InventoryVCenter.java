@@ -6,7 +6,6 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
@@ -41,6 +40,7 @@ public class InventoryVCenter extends BaseWorkflowDelegate
     @Autowired
     public InventoryVCenter(final NodeService nodeService, final DataServiceRepository repository)
     {
+        super(LOGGER, "Inventory VCenter");
         this.nodeService = nodeService;
         this.repository = repository;
     }
@@ -48,8 +48,6 @@ public class InventoryVCenter extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Inventory VCenter");
-
         ComponentEndpointIds componentEndpointIds = null;
         try
         {
@@ -57,36 +55,30 @@ public class InventoryVCenter extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints.", e);
-            updateDelegateStatus("An Unexpected Exception occurred attempting to inventory VCenter.  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_VCENTER_FAILED,
-                    "An Unexpected Exception occurred attempting to inventory VCenter.  Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
         if (componentEndpointIds == null)
         {
-            LOGGER.error("VCenter Endpoints not found.");
-            updateDelegateStatus("VCenter Endpoints not found.");
-            throw new BpmnError(VCENTER_INFORMATION_NOT_FOUND, "VCenter Endpoints not found.");
+            final String message = "VCenter Endpoints not found.";
+            updateDelegateStatus(message);
+            throw new BpmnError(VCENTER_INFORMATION_NOT_FOUND, message);
         }
 
         try
         {
             this.nodeService.requestDiscoverVCenter(componentEndpointIds, delegateExecution.getProcessInstanceId());
 
-            LOGGER.info("Request for Inventory VCenter completed successfully.");
             updateDelegateStatus("Inventory request for VCenter completed successfully.");
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(INVENTORY_VCENTER_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("An Unexpected Exception occurred attempting to Inventory VCenter.", e);
-            updateDelegateStatus("An Unexpected Exception occurred attempting to inventory VCenter.  Reason: " + e.getMessage());
+            final String message = "An Unexpected Exception occurred attempting to Inventory VCenter. Reason: ";
+            updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_VCENTER_FAILED,
-                    "An Unexpected Exception occurred attempting to inventory VCenter.  Reason: " + e.getMessage());
+                    message + e.getMessage());
         }
     }
 }

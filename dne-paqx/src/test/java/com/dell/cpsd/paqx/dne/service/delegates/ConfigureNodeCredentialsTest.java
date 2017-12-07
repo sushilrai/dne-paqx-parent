@@ -7,23 +7,23 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.ChangeIdracCredentialsResponse;
-import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ConfigureNodeCredentialsTest {
 
@@ -55,7 +55,7 @@ public class ConfigureNodeCredentialsTest {
         } catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
-            assertTrue(error.getMessage().contains("Configure Node Credentials on Node abc failed!"));
+            assertTrue(error.getMessage().contains("An Unexpected Exception Occurred attempting to Change iDrac Credentials on Node abc failed.  Reason: null"));
         }
     }
 

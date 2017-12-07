@@ -9,6 +9,7 @@ package com.dell.cpsd.paqx.dne.service.delegates;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.AddHostToVCenterClusterRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterOperationRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,10 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.ADD_HOST_TO_CLUSTER_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -52,6 +55,8 @@ public class AddHostToVCenterTest
     public void setup() throws Exception
     {
         delegate = new AddHostToVCenter(nodeService, requestTransformer);
+        NodeDetail nodeDetail = new NodeDetail("1", serviceTag);
+        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
     }
 
     @Test
@@ -69,12 +74,11 @@ public class AddHostToVCenterTest
         {
             assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
             assertThat(error.getMessage(), containsString(errorMessage));
-            assertThat(error.getMessage(), containsString("Add ESXi host to vcenter cluster"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to VCenter Cluster. Reason: Illegal state exception"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_CLUSTER_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(
-                "An unexpected exception occurred attempting to request Add ESXi host to vcenter cluster. Reason: " + errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
     }
 
     @Test
@@ -93,11 +97,11 @@ public class AddHostToVCenterTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("Exception Code: " + 1 + "::" + errorMessage));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to VCenter Cluster. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_CLUSTER_FAILED));
         }
 
-        verify(spy).updateDelegateStatus(errorMessage);
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
     }
 
     @Test
@@ -106,13 +110,12 @@ public class AddHostToVCenterTest
         final ClusterOperationRequestMessage mockRequestMessage = mock(ClusterOperationRequestMessage.class);
 
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
-        when(requestModel.getServiceTag()).thenReturn(serviceTag);
         when(requestTransformer.buildAddHostToVCenterRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestAddHostToVCenter(mockRequestMessage);
 
         final AddHostToVCenter spy = spy(delegate);
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus("Add ESXi host to vcenter cluster on Node " + serviceTag + " was successful.");
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
     }
 }

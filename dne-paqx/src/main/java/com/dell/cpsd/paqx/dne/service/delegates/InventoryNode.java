@@ -9,13 +9,9 @@ import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
-import com.dell.cpsd.paqx.dne.service.model.FirstAvailableDiscoveredNodeResponse;
-import com.dell.cpsd.paqx.dne.service.model.NodeInfo;
-import com.dell.cpsd.paqx.dne.service.model.TaskResponse;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.collections.CollectionUtils;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -25,13 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DISCOVERED_NODES;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INVENTORY_NODE_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NO_DISCOVERED_NODES;
 
 @Component
 @Scope("prototype")
@@ -56,6 +47,7 @@ public class InventoryNode extends BaseWorkflowDelegate
     @Autowired
     public InventoryNode(final NodeService nodeService, final DataServiceRepository repository)
     {
+        super(LOGGER, "Update Node Inventory");
         this.nodeService = nodeService;
         this.repository = repository;
     }
@@ -64,8 +56,6 @@ public class InventoryNode extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.debug("Execute InventoryNode");
-
         NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
         Object nodeInventoryResponse = null;
         if (nodeDetail != null && nodeDetail.getId() != null)
@@ -78,8 +68,7 @@ public class InventoryNode extends BaseWorkflowDelegate
             catch (ServiceTimeoutException | ServiceExecutionException ex)
             {
                 final String message = "Update Node Inventory request failed for Node " + nodeDetail.getServiceTag();
-                LOGGER.error(message, ex);
-                updateDelegateStatus(message);
+                updateDelegateStatus(message, ex);
                 throw new BpmnError(INVENTORY_NODE_FAILED, message);
             }
         }
@@ -92,8 +81,7 @@ public class InventoryNode extends BaseWorkflowDelegate
             }
             catch (JsonProcessingException jpe) {
                 final String message = "Update Node Inventory failed due to unrecognized response for Node " + (nodeDetail==null?null:nodeDetail.getServiceTag());
-                LOGGER.error(message, jpe);
-                updateDelegateStatus(message);
+                updateDelegateStatus(message, jpe);
                 throw new BpmnError(INVENTORY_NODE_FAILED, message);
             }
         }
@@ -104,14 +92,11 @@ public class InventoryNode extends BaseWorkflowDelegate
         }
         if (!isNodeInventorySaved)
         {
-            final String message = "Update Node Inventory failed for Node " + (nodeDetail==null?null:nodeDetail.getServiceTag());
-            LOGGER.error(message);
+            final String message = "Update Node Inventory on Node " + nodeDetail.getServiceTag() + " failed.";
             updateDelegateStatus(message);
             throw new BpmnError(INVENTORY_NODE_FAILED, message);
         }
-        final String message = "Update Node Inventory was successful for Node " + nodeDetail.getServiceTag();
-        LOGGER.debug(message);
-        updateDelegateStatus(message);
+        updateDelegateStatus("Update Node Inventory was successful for Node " + nodeDetail.getServiceTag());
 
     }
 }

@@ -6,9 +6,9 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.SoftwareVibRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.SoftwareVIBRequestMessage;
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_SCALEIO_VIB_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Install ScaleIo Data Client (SDC)
@@ -54,6 +55,7 @@ public class InstallScaleIoVib extends BaseWorkflowDelegate
      */
     public InstallScaleIoVib(final NodeService nodeService, final SoftwareVibRequestTransformer softwareVibRequestTransformer)
     {
+        super(LOGGER, "Install ScaleIO Vib");
         this.nodeService = nodeService;
         this.softwareVibRequestTransformer = softwareVibRequestTransformer;
     }
@@ -61,8 +63,8 @@ public class InstallScaleIoVib extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute Install ScaleIO VIB task");
-        final String taskMessage = "Install ScaleIO Vib";
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
         try
         {
@@ -70,20 +72,13 @@ public class InstallScaleIoVib extends BaseWorkflowDelegate
                     .buildInstallSoftwareVibRequest(delegateExecution);
             this.nodeService.requestInstallSoftwareVib(delegateRequestModel.getRequestMessage());
 
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
+            final String returnMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.";
             updateDelegateStatus(returnMessage);
-        }
-        catch (TaskResponseFailureException ex)
-        {
-            updateDelegateStatus(ex.getMessage());
-            throw new BpmnError(INSTALL_SCALEIO_VIB_FAILED, "Exception Code: " + ex.getCode() + "::" + ex.getMessage());
         }
         catch (Exception ex)
         {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An unexpected exception occurred attempting to " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(INSTALL_SCALEIO_VIB_FAILED, errorMessage + ex.getMessage());
         }
     }

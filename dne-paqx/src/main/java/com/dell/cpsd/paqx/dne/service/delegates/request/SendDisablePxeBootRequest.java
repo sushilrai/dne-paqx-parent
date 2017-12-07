@@ -10,6 +10,7 @@ import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.BaseWorkflowDelegate;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ConfigurePxeBootRequestTransformer;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_PXE_BOOT_MESSAGE_ID;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_PXE_FAILED;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 /**
  * Send disable PXE boot request
@@ -47,6 +49,7 @@ public class SendDisablePxeBootRequest extends BaseWorkflowDelegate
     public SendDisablePxeBootRequest(final AsynchronousNodeService asynchronousNodeService,
             final ConfigurePxeBootRequestTransformer requestTransformer)
     {
+        super(LOGGER, "Send Disable PXE Boot");
         this.asynchronousNodeService = asynchronousNodeService;
         this.requestTransformer = requestTransformer;
     }
@@ -54,33 +57,34 @@ public class SendDisablePxeBootRequest extends BaseWorkflowDelegate
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("Execute send disable PXE boot task");
-        final String taskMessage = "Send disable PXE boot task";
+        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        updateDelegateStatus("Attempting " + this.taskName + " on Node " + nodeDetail.getServiceTag() + ".");
 
+        AsynchronousNodeServiceCallback<?> requestCallback = null;
         try
         {
             final DelegateRequestModel<ConfigurePxeBootRequestMessage> delegateRequestModel = requestTransformer
                     .buildConfigurePxeBootRequest(delegateExecution);
 
-            final AsynchronousNodeServiceCallback<?> requestCallback = this.asynchronousNodeService
+            requestCallback = this.asynchronousNodeService
                     .sendConfigurePxeBootRequest(delegateExecution.getProcessInstanceId(), DISABLE_PXE_BOOT_ACTIVITY_ID,
                             CONFIGURE_PXE_BOOT_MESSAGE_ID, delegateRequestModel.getRequestMessage());
 
-            if (requestCallback == null)
-            {
-                throw new IllegalStateException("Request callback is null");
-            }
-
-            final String returnMessage = taskMessage + " on Node " + delegateRequestModel.getServiceTag() + " was successful.";
-            LOGGER.info(returnMessage);
-            updateDelegateStatus(returnMessage);
         }
         catch (Exception ex)
         {
-            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskMessage + ". Reason: ";
-            LOGGER.error(errorMessage, ex);
-            updateDelegateStatus(errorMessage + ex.getMessage());
+            String errorMessage = "An Unexpected Exception occurred attempting to request " + taskName + " on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+            updateDelegateStatus(errorMessage, ex);
             throw new BpmnError(CONFIGURE_PXE_FAILED, errorMessage + ex.getMessage());
         }
+            if (requestCallback == null)
+            {
+                String errorMessage = taskName + " on Node " + nodeDetail.getServiceTag() + " failed.";
+                updateDelegateStatus(errorMessage);
+                throw new BpmnError(CONFIGURE_PXE_FAILED, errorMessage);
+            }
+
+            updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
+
     }
 }
