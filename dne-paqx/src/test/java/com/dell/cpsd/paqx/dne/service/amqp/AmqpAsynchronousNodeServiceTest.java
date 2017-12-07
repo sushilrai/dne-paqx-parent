@@ -8,6 +8,9 @@ import com.dell.cpsd.ConfigureBootDeviceIdracResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
+import com.dell.cpsd.EsxiInstallationInfo;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.InstallESXiResponseMessage;
 import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
@@ -109,6 +112,75 @@ public class AmqpAsynchronousNodeServiceTest
                                                                                                                messageId,
                                                                                                                request);
         assertNull(callback);
+    }
+
+    @Test
+    public void requestInstallEsxiSendRequestExceptionThrownReturnsNull() throws Exception
+    {
+        final EsxiInstallationInfo request = new EsxiInstallationInfo();
+
+        amqpAsynchronousNodeService.release();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .requestInstallEsxi(processInstanceId, activityId, messageId, request);
+
+        assertNull(callback);
+        verify(dneProducer, times(0)).publishInstallEsxiRequest(any());
+    }
+
+    @Test
+    public void requestInstallEsxiSuccess() throws Exception
+    {
+        final EsxiInstallationInfo request = new EsxiInstallationInfo();
+
+        final AsynchronousNodeServiceCallback<?> callback = amqpAsynchronousNodeService
+                .requestInstallEsxi(processInstanceId, activityId, messageId, request);
+        assertNotNull(callback);
+        assertEquals(callback.getProcessInstanceId(), processInstanceId);
+        assertEquals(callback.getActivityId(), activityId);
+        assertEquals(callback.getMessageId(), messageId);
+        verify(dneProducer, times(1)).publishInstallEsxiRequest(any());
+    }
+
+    @Test
+    public void processInstallEsxiResponseMessageIsNullExceptionThrown() throws Exception
+    {
+        final AsynchronousNodeServiceCallback<ServiceResponse<InstallESXiResponseMessage>> callback = mock(
+                AsynchronousNodeServiceCallback.class);
+        try
+        {
+            amqpAsynchronousNodeService.requestInstallEsxi(callback);
+        }
+        catch (TaskResponseFailureException e)
+        {
+            assertTrue(e.getCode() == 1026);
+            assertThat(e.getMessage(), containsString("Response message is null"));
+        }
+    }
+
+    @Test
+    public void processInstallEsxiResponseFailedThrowsException() throws Exception
+    {
+        final AsynchronousNodeServiceCallback<ServiceResponse<InstallESXiResponseMessage>> callback = mock(
+                AsynchronousNodeServiceCallback.class);
+
+        final InstallESXiResponseMessage responseMessage = new InstallESXiResponseMessage();
+        final MessageProperties messageProperties = mock(MessageProperties.class);
+        responseMessage.setMessageProperties(messageProperties);
+        responseMessage.setInstallEsxiErrorDescription("Rackhd failure");
+        responseMessage.setStatus("failed");
+        ServiceResponse<InstallESXiResponseMessage> response = new ServiceResponse<>("UUID1", responseMessage, "Configure");
+        when(callback.getServiceResponse()).thenReturn(response);
+
+        try
+        {
+            amqpAsynchronousNodeService.requestInstallEsxi(callback);
+        }
+        catch (TaskResponseFailureException e)
+        {
+            assertTrue(e.getCode() == 1026);
+            assertThat(e.getMessage(), containsString("Rackhd failure"));
+        }
     }
 
     @Test

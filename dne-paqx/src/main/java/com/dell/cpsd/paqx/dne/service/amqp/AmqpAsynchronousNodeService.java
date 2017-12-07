@@ -376,7 +376,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
                 throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), error);
             }
 
-            if ("succeeded".equalsIgnoreCase(responseMessage.getStatus()))
+            if (!"succeeded".equalsIgnoreCase(responseMessage.getStatus()))
             {
                 LOGGER.error(responseMessage.getInstallEsxiErrorDescription());
                 throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), responseMessage.getInstallEsxiErrorDescription());

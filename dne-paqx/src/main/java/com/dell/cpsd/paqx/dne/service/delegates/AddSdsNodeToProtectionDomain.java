@@ -15,6 +15,7 @@ import com.dell.cpsd.storage.capabilities.api.DeviceInfo;
 import com.dell.cpsd.storage.capabilities.api.HostToProtectionDomain;
 import com.dell.cpsd.storage.capabilities.api.SdsIp;
 import com.dell.cpsd.storage.capabilities.api.SdsIpDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
     private NodeService nodeService;
 
     private final DataServiceRepository repository;
+    private static final int MAX_LENGTH = 31;
 
     @Autowired
     public AddSdsNodeToProtectionDomain(final NodeService nodeService, final DataServiceRepository repository)
@@ -89,6 +91,11 @@ public class AddSdsNodeToProtectionDomain extends BaseWorkflowDelegate
         else if (nodeDetail.getEsxiManagementIpAddress() != null)
         {
             name = (nodeDetail.getEsxiManagementIpAddress() + "-ESX");
+        }
+
+        if (StringUtils.isNotEmpty(name) && name.length() > MAX_LENGTH)
+        {
+            name = StringUtils.truncate(name, MAX_LENGTH);
         }
 
         return name;
