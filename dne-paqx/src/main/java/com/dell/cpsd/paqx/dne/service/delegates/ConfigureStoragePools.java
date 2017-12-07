@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_STORAGE_POOLS_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.CONFIGURE_STORAGE_POOLS_FAILED;
 
 /**
  * Task responsible for creating new storage pools
@@ -61,56 +61,70 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
     @Autowired
     public ConfigureStoragePools(final NodeService nodeService)
     {
-        super(LOGGER, "Validate Storage Pools");
+        super(LOGGER, "Configure Storage Pools");
         this.nodeService = nodeService;
     }
 
     @Override
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
-        LOGGER.info("In ConfigureStoragePools");
-        List<NodeDetail> nodeDetails = (List<NodeDetail>) delegateExecution.getVariable(NODE_DETAILS);
-        if (CollectionUtils.isEmpty(nodeDetails))
-        {
-            final String message = "The List of Node Detail was not found!  Please add at least one Node Detail and try again.";
-            LOGGER.error(message);
-            updateDelegateStatus(message);
-            throw new BpmnError(CONFIGURE_STORAGE_POOLS_FAILED, message);
-        }
-
         try
         {
+            List<NodeDetail> nodeDetails = (List<NodeDetail>) delegateExecution.getVariable(NODE_DETAILS);
+            if (CollectionUtils.isEmpty(nodeDetails))
+            {
+                throw new IllegalStateException("The List of Node Detail was not found!  Please add at least one Node Detail and try again.");
+            }
             Map<String, Set<String>> protectionDomainToStoragePool = new HashMap<>();
             // Create a mapping of protection domain to their dummy storage pools
             nodeDetails.stream().filter(Objects::nonNull).forEach(nodeDetail -> {
-                if (protectionDomainToStoragePool.get(nodeDetail.getProtectionDomainId()) == null && MapUtils
-                        .isNotEmpty(nodeDetail.getDeviceToDeviceStoragePool()))
+
+                if (MapUtils.isNotEmpty(nodeDetail.getDeviceToDeviceStoragePool()))
                 {
-                    protectionDomainToStoragePool.put(nodeDetail.getProtectionDomainId(), new HashSet<String>());
+                    if (protectionDomainToStoragePool.get(nodeDetail.getProtectionDomainId()) == null)
+                    {
+                        protectionDomainToStoragePool.put(nodeDetail.getProtectionDomainId(), new HashSet<String>());
+                    }
+                    nodeDetail.getDeviceToDeviceStoragePool().values().stream().filter(device -> device.getStoragePoolId() == null)
+                            .forEach(value -> {
+                                protectionDomainToStoragePool.get(nodeDetail.getProtectionDomainId()).add(value.getStoragePoolName());
+                            });
                 }
-                nodeDetail.getDeviceToDeviceStoragePool().values().stream().filter(device -> device.getStoragePoolId() == null)
-                        .forEach(value -> {
-                            protectionDomainToStoragePool.get(nodeDetail.getProtectionDomainId()).add(value.getStoragePoolName());
-                        });
             });
+
+            // proetection domain id: (storage pool name : storage pool id), used to update the storage pool id in NODE_DETAILS
+            Map<String, Map<String, String>> pdToSPToSPId = new HashMap<>();
 
             // For each protection domain, create storage pool
             if (MapUtils.isNotEmpty(protectionDomainToStoragePool))
             {
                 protectionDomainToStoragePool.entrySet().stream().filter(entry -> !CollectionUtils.isEmpty(entry.getValue()))
                         .forEach(entry -> {
-                            createValidStoragePool(entry.getKey(), entry.getValue());
+                            // once the storage pools are created, collect the ids so that the same can be updated in NODE_DETAILS
+                            Map<String, String> storagePoolNameToId = createValidStoragePool(entry.getKey(), entry.getValue());
+                            pdToSPToSPId.put(entry.getKey(), storagePoolNameToId);
                         });
             }
+
+            // once the storage pools are created and ids generated, update the same in request
+            nodeDetails.stream().filter(Objects::nonNull).forEach(nodeDetail -> {
+                if (MapUtils.isNotEmpty(nodeDetail.getDeviceToDeviceStoragePool()))
+                {
+                    nodeDetail.getDeviceToDeviceStoragePool().values().stream().filter(device -> device.getStoragePoolId() == null)
+                            .forEach(value -> {
+                                String storagePoolId = pdToSPToSPId.get(nodeDetail.getProtectionDomainId()).get(value.getStoragePoolName());
+                                value.setStoragePoolId(storagePoolId);
+                            });
+                }
+            });
+
+            updateDelegateStatus("Successfully configured Storage pool.");
         }
         catch (Exception e)
         {
-            LOGGER.error("Error configuring valid storage pool(s)", e);
-            updateDelegateStatus("Error configuring valid storage pool(s) " + e.getMessage());
+            updateDelegateStatus("Error configuring valid storage pool(s) " + e.getMessage(), e);
             throw new BpmnError(CONFIGURE_STORAGE_POOLS_FAILED, e.getMessage());
         }
-
-        LOGGER.info("Done configuring storage pool(s).");
     }
 
     /**
@@ -118,7 +132,7 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
      *
      * @param protectionDomainId Protection domain id for which to create the storage pool
      */
-    private void createValidStoragePool(final String protectionDomainId, Set<String> storagePoolNames)
+    private Map<String, String> createValidStoragePool(final String protectionDomainId, Set<String> storagePoolNames)
     {
         final ComponentEndpointIds componentEndpointIds = nodeService.getComponentEndpointIds(COMPONENT_TYPE);
 
@@ -127,13 +141,20 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
             throw new IllegalStateException("No component ids found.");
         }
 
+        Map<String, String> storagePoolNameToId = new HashMap<>();
+
         storagePoolNames.stream().forEach(storagePoolName -> {
-            String newStoragePool = createScaleIOStoragePool(protectionDomainId, componentEndpointIds, storagePoolName);
+            String newStoragePoolId = createScaleIOStoragePool(protectionDomainId, componentEndpointIds, storagePoolName);
 
             // Sync up the same storage pool into H2 db
-            ScaleIOStoragePool newlyCreatedStoragePool = nodeService.createStoragePool(storagePoolName, newStoragePool, protectionDomainId);
+            ScaleIOStoragePool newlyCreatedStoragePool = nodeService
+                    .createStoragePool(storagePoolName, newStoragePoolId, protectionDomainId);
             LOGGER.info("Successfully saved new storage pool to database, " + newlyCreatedStoragePool.toString());
+
+            storagePoolNameToId.put(storagePoolName, newStoragePoolId);
         });
+
+        return storagePoolNameToId;
     }
 
     private String createScaleIOStoragePool(final String protectionDomainId, final ComponentEndpointIds componentEndpointIds,
@@ -153,20 +174,20 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
         storagePoolSpec.setZeroPaddingEnabled(true);
         requestMessage.setStoragePoolSpec(storagePoolSpec);
 
-        String newStoragePool = null;
+        String newStoragePoolId = null;
         try
         {
-            newStoragePool = nodeService.createStoragePool(requestMessage);
+            newStoragePoolId = nodeService.createStoragePool(requestMessage);
         }
         catch (TaskResponseFailureException e)
         {
             LOGGER.error("Failed to create storage pool", e);
             updateDelegateStatus("Failed to create storage pool: " + e.getMessage());
         }
-        if (newStoragePool == null || newStoragePool.length() == 0)
+        if (newStoragePoolId == null || newStoragePoolId.length() == 0)
         {
             throw new IllegalStateException("Create storage pool request failed");
         }
-        return newStoragePool;
+        return newStoragePoolId;
     }
 }

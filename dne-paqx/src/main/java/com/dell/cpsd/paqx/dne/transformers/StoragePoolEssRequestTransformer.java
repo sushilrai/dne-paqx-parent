@@ -15,6 +15,8 @@ import com.dell.cpsd.paqx.dne.domain.vcenter.HostStorageDevice;
 import com.dell.cpsd.service.engineering.standards.Device;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.service.engineering.standards.StoragePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -38,6 +40,8 @@ import java.util.stream.Collectors;
 @Component
 public class StoragePoolEssRequestTransformer
 {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoragePoolEssRequestTransformer.class);
 
     /**
      * Transforms the scale io storage pools to request object
@@ -69,6 +73,7 @@ public class StoragePoolEssRequestTransformer
     public StoragePool collectDevicesInPool(ScaleIOStoragePool scaleIOStoragePool,
             Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap)
     {
+        LOGGER.info("Collecting devices in storage pool: " + scaleIOStoragePool.getName());
         StoragePool storagePool = new StoragePool();
         storagePool.setId(scaleIOStoragePool.getId());
         storagePool.setName(scaleIOStoragePool.getName());
@@ -82,10 +87,12 @@ public class StoragePoolEssRequestTransformer
             // for empty storage pools validate that it satisfies useRfcache = false, useRmcache = false, zeroPaddingEnabled = true;
             if (!scaleIOStoragePool.isUseRfcache() && !scaleIOStoragePool.isUseRmcache() && scaleIOStoragePool.isZeroPaddingEnabled()) {
                 // set the type to SSD for empty pools
+                LOGGER.info("Found empty storage pool " + scaleIOStoragePool.getName() +", setting type to SSD.");
                 storagePool.setType(StoragePool.Type.SSD);
             }
             else
             {
+                LOGGER.info("Found empty storage pool " + scaleIOStoragePool.getName() +", flags set incorrectly, so discarding it.");
                 return null;
             }
         }
@@ -126,6 +133,7 @@ public class StoragePoolEssRequestTransformer
                             // if type = SSD already set on the pool, don't set it again
                             if (StoragePool.Type.HDD.equals(storagePool.getType()))
                             {
+                                LOGGER.info("Found atleast one device of type SSD, setting storage pool type to SSD for storage pool: " + storagePool.getName());
                                 storagePool.setType(StoragePool.Type.SSD);
                             }
                         }
@@ -136,6 +144,7 @@ public class StoragePoolEssRequestTransformer
         }
 
         storagePool.setDevices(devices);
+        LOGGER.info("Done collecting devices for pool: " + storagePool);
 
         return storagePool;
     }

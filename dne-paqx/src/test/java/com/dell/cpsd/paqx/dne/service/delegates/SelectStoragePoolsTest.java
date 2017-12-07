@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
@@ -241,6 +242,28 @@ import static org.mockito.Mockito.doThrow;
     }
 
     @Test
+    public void delegateExecute_nullNodeDetails()
+    {
+
+        doReturn(null).when(delegateExecution).getVariable(NODE_DETAILS);
+        try
+        {
+            selectStoragePools.delegateExecute(delegateExecution);
+            fail("Expecting node details not found error.");
+        }
+        catch (BpmnError ex)
+        {
+            assertEquals(SELECT_STORAGE_POOLS_FAILED, ex.getErrorCode());
+            assertEquals("The List of Node Detail was not found!  Please add at least one Node Detail and try again.", ex.getMessage());
+        }
+        catch (Exception e)
+        {
+            fail("Unexpected exception.");
+        }
+
+    }
+
+    @Test
     public void delegateExecute_noNewDeviceForProtectionDomain() throws Exception
     {
 
@@ -280,7 +303,7 @@ import static org.mockito.Mockito.doThrow;
         catch (BpmnError ex)
         {
             assertEquals(SELECT_STORAGE_POOLS_FAILED, ex.getErrorCode());
-            assertEquals("Error validating storage pool(s) for protection domain: PD-2. Reason: null", ex.getMessage());
+            assertEquals("Error validating storage pool(s) for protection domain: PD-2", ex.getMessage());
         }
         catch (Exception e)
         {
