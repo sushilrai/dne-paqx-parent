@@ -7,6 +7,7 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -15,7 +16,6 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -36,10 +36,8 @@ public class InstallEsxi extends BaseWorkflowDelegate
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallEsxi.class);
 
     private final AsynchronousNodeService asynchronousNodeService;
-
     private final DataServiceRepository repository;
 
-    @Autowired
     public InstallEsxi(final AsynchronousNodeService asynchronousNodeService, final DataServiceRepository repository)
     {
         this.asynchronousNodeService = asynchronousNodeService;
@@ -53,13 +51,13 @@ public class InstallEsxi extends BaseWorkflowDelegate
     */
     private String generateHostFqdn(String hostName)
     {
-        String domainName = this.repository.getDomainName();
+        final String domainName = this.repository.getDomainName();
         if (StringUtils.isEmpty(domainName))
         {
             return hostName;
         }
 
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append(hostName);
         builder.append(".");
         builder.append(domainName);
@@ -70,37 +68,41 @@ public class InstallEsxi extends BaseWorkflowDelegate
     public void delegateExecute(final DelegateExecution delegateExecution)
     {
         LOGGER.info("Execute Install ESXi");
-        NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
-        AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
+
+        final NodeDetail nodeDetail = (NodeDetail) delegateExecution.getVariable(NODE_DETAIL);
+        final AsynchronousNodeServiceCallback<?> responseCallback = (AsynchronousNodeServiceCallback<?>) delegateExecution
                 .getVariable(INSTALL_ESXI_MESSAGE_ID);
 
-        String status = null;
-        if (responseCallback != null && responseCallback.isDone())
+        try
         {
-            try
+            if (responseCallback == null)
             {
-                status = this.asynchronousNodeService.requestInstallEsxi(responseCallback);
+                throw new IllegalStateException("Response callback is null");
             }
-            catch (Exception e)
+
+            if (responseCallback.isDone())
             {
-                final String message = "Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!  Reason: ";
-                LOGGER.error(message, e);
-                updateDelegateStatus(message + e.getMessage());
-                throw new BpmnError(INSTALL_ESXI_FAILED, message + e.getMessage());
+                this.asynchronousNodeService.requestInstallEsxi(responseCallback);
+
+                final String fqdn = this.generateHostFqdn(nodeDetail.getEsxiManagementHostname());
+                delegateExecution.setVariable(HOSTNAME, fqdn);
+                LOGGER.info("Install Esxi on Node " + nodeDetail.getServiceTag() + " was successful.");
+                updateDelegateStatus("Install Esxi on Node " + nodeDetail.getServiceTag() + " was successful.");
             }
         }
-
-        if (status == null || !"succeeded".equalsIgnoreCase(status))
+        catch (TaskResponseFailureException ex)
         {
-            final String message = "Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!";
-            LOGGER.error(message);
-            updateDelegateStatus(message);
-            throw new BpmnError(INSTALL_ESXI_FAILED, message);
+            final String errorMessage = "Exception Code: " + ex.getCode() + "::" + ex.getMessage();
+            updateDelegateStatus(ex.getMessage());
+            LOGGER.error(errorMessage);
+            throw new BpmnError(INSTALL_ESXI_FAILED, errorMessage);
         }
-
-        String fqdn = this.generateHostFqdn(nodeDetail.getEsxiManagementHostname());
-        delegateExecution.setVariable(HOSTNAME, fqdn);
-        LOGGER.info("Install Esxi on Node " + nodeDetail.getServiceTag() + " was successful.");
-        updateDelegateStatus("Install Esxi on Node " + nodeDetail.getServiceTag() + " was successful.");
+        catch (Exception e)
+        {
+            final String message = "Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!  Reason: ";
+            LOGGER.error(message, e);
+            updateDelegateStatus(message + e.getMessage());
+            throw new BpmnError(INSTALL_ESXI_FAILED, message + e.getMessage());
+        }
     }
 }

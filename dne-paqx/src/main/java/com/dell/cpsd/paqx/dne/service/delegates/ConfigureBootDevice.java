@@ -79,9 +79,7 @@ public class ConfigureBootDevice extends BaseWorkflowDelegate
             if (bootDeviceIdracStatusRequest != null && CollectionUtils
                     .isNotEmpty(bootDeviceIdracStatusRequest.getErrors()))
             {
-                bootDeviceIdracStatusRequest.getErrors().forEach(error -> {
-                    messageBuilder.append(error + "\n");
-                });
+                bootDeviceIdracStatusRequest.getErrors().forEach(error -> messageBuilder.append(error).append("\n"));
             }
             final String message = messageBuilder.toString();
             LOGGER.error(message);

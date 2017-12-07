@@ -41,7 +41,8 @@ public enum TaskResponseExceptionCode
     UPDATE_SDC_PERFORMANCE_PROFILE(1022),
     CREATE_STORAGE_POOL(1023),
     CREATE_PROTECTION_DOMAIN(1024),
-    CONFIGURE_PXE_BOOT(1025);
+    CONFIGURE_PXE_BOOT(1025),
+    INSTALL_ESXI(1026);
 
     private final int code;
 

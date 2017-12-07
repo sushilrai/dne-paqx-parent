@@ -81,6 +81,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.dell.cpsd</groupId>
+            <artifactId>discovered-nodes-capabilities-api</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+            <type>zip</type>
+            <classifier>schemas</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.dell.cpsd</groupId>
+                    <artifactId>common-rabbitmq</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <artifactId>storage-capabilities-api</artifactId>
             <groupId>com.dell.cpsd</groupId>
             <version>1.0.1-SNAPSHOT</version>
@@ -372,7 +386,18 @@
                             <includes>**\/*.jsd</includes>
                         </configuration>
                     </execution>
-
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <id>unpack-json-schemas-discovered-nodes-capabilities-api</id>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.dell.cpsd</includeGroupIds>
+                            <includeArtifactIds>discovered-nodes-capabilities-api</includeArtifactIds>
+                            <includes>**\/*.jsd</includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -408,6 +433,7 @@
                             <includeConstructors>true</includeConstructors>
                             <serializable>true</serializable>
                             <useCommonsLang3>true</useCommonsLang3>
+                            <sourceSortOrder>FILES_FIRST</sourceSortOrder>
                             <includeAdditionalProperties>false</includeAdditionalProperties>
                             <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
                             <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
@@ -461,37 +487,31 @@
                             <serializable>true</serializable>
                             <useCommonsLang3>true</useCommonsLang3>
                             <includeAdditionalProperties>false</includeAdditionalProperties>
+                            <sourceSortOrder>FILES_FIRST</sourceSortOrder>
                             <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
                             <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
                         </configuration>
                     </execution>
-                    <!--<execution>-->
-                        <!--<id>generate-json-type-credential-service-api</id>-->
-                        <!--<phase>generate-resources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<sourceDirectory>${project.build.directory}/dependency/credentials-service-api/schema/json-->
-                            <!--</sourceDirectory>-->
-                            <!--<targetPackage>com.dell.cpsd.credential.model.api-->
-                            <!--</targetPackage>-->
-                            <!--<outputDirectory>${project.build.directory}/generated-sources/credential-service-api</outputDirectory>-->
-                            <!--<removeOldOutput>true</removeOldOutput>-->
-                            <!--<useLongIntegers>true</useLongIntegers>-->
-                            <!--<includeConstructors>true</includeConstructors>-->
-                            <!--<generateBuilders>true</generateBuilders>-->
-                            <!--<includeAdditionalProperties>false</includeAdditionalProperties>-->
-                            <!--<serializable>false</serializable>-->
-                            <!--<useCommonsLang3>true</useCommonsLang3>-->
-                            <!--<includeJsr303Annotations>true</includeJsr303Annotations>-->
-                            <!--<sourceSortOrder>FILES_FIRST</sourceSortOrder>-->
-                            <!--<customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator-->
-                            <!--</customAnnotator>-->
-                            <!--<customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory-->
-                            <!--</customRuleFactory>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+                    <execution>
+                        <id>generate-json-discovered-nodes-capabilities-api</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/dependency/discovered-nodes-capabilities/schema/json</sourceDirectory>
+                            <targetPackage>com.dell.cpsd</targetPackage>
+                            <outputDirectory>${project.build.directory}/generated-sources/discovered-nodes-capabilities-api</outputDirectory>
+                            <removeOldOutput>true</removeOldOutput>
+                            <includeConstructors>true</includeConstructors>
+                            <serializable>true</serializable>
+                            <useCommonsLang3>true</useCommonsLang3>
+                            <sourceSortOrder>FILES_FIRST</sourceSortOrder>
+                            <includeAdditionalProperties>false</includeAdditionalProperties>
+                            <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
+                            <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

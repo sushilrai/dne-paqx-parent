@@ -6,33 +6,40 @@
 package com.dell.cpsd.paqx.dne.service.delegates;
 
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.AsynchronousNodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
-import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.HOSTNAME;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_ESXI_MESSAGE_ID;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstallEsxiTest
 {
-    private InstallEsxi installEsxi;
-    private NodeDetail  nodeDetail;
+    @Mock
+    private DelegateExecution delegateExecution;
 
     @Mock
     private AsynchronousNodeService asynchronousNodeService;
@@ -41,13 +48,13 @@ public class InstallEsxiTest
     private DataServiceRepository repository;
 
     @Mock
-    private DelegateExecution delegateExecution;
-
-    @Mock
     private AsynchronousNodeServiceCallback<?> asynchronousNodeServiceCallback;
 
+    private InstallEsxi installEsxi;
+    private NodeDetail  nodeDetail;
+
     @Before
-    public void setUp()
+    public void setUp() throws Exception
     {
         installEsxi = new InstallEsxi(asynchronousNodeService, repository);
 
@@ -68,41 +75,53 @@ public class InstallEsxiTest
     }
 
     @Test
+    public void testTaskResponseFailureException() throws Exception
+    {
+        final String exceptionMsg = "request failed";
+
+        try
+        {
+            willThrow(new TaskResponseFailureException(1, exceptionMsg)).given(asynchronousNodeService).requestInstallEsxi(any());
+
+            installEsxi.delegateExecute(delegateExecution);
+
+            fail("Expected exception to be thrown but was not");
+        }
+        catch (BpmnError error)
+        {
+            assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
+            assertThat(error.getMessage(), containsString(exceptionMsg));
+        }
+    }
+
+    @Test
+    public void testGeneralException() throws Exception
+    {
+        try
+        {
+            installEsxi.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError error)
+        {
+            assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
+            assertThat(error.getMessage(), containsString("Install Esxi on Node"));
+            assertThat(error.getMessage(), containsString("failed!  Reason: "));
+        }
+    }
+
+    @Test
     public void testSuccess() throws Exception
     {
-        doReturn("succeeded").when(asynchronousNodeService).requestInstallEsxi(asynchronousNodeServiceCallback);
-        installEsxi.delegateExecute(delegateExecution);
-        verify(delegateExecution, times(1)).setVariable(HOSTNAME, "hostName.domain");
-    }
+        final InstallEsxi spy = spy(new InstallEsxi(asynchronousNodeService, repository));
 
-    @Test
-    public void testException() throws Exception
-    {
-        doThrow(new ServiceExecutionException("Error1")).when(asynchronousNodeService).requestInstallEsxi(asynchronousNodeServiceCallback);
-        try
-        {
-            installEsxi.delegateExecute(delegateExecution);
-        }
-        catch (BpmnError error)
-        {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
-            assertTrue((error.getMessage().equals("Install Esxi on Node " + nodeDetail.getServiceTag() + " failed!  Reason: Error1")));
-        }
-    }
+        doNothing().when(asynchronousNodeService).requestInstallEsxi(any());
+        when(delegateExecution.getVariable(DelegateConstants.INSTALL_ESXI_MESSAGE_ID)).thenReturn(asynchronousNodeServiceCallback);
 
-    @Test
-    public void testFailed() throws Exception
-    {
-        doReturn("failed").when(asynchronousNodeService).requestInstallEsxi(asynchronousNodeServiceCallback);
-        try
-        {
-            installEsxi.delegateExecute(delegateExecution);
-        }
-        catch (BpmnError error)
-        {
-            assertTrue(error.getErrorCode().equals(DelegateConstants.INSTALL_ESXI_FAILED));
-            assertTrue((error.getMessage().equals("Install Esxi on Node abc failed!")));
-        }
+        spy.delegateExecute(delegateExecution);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(spy).updateDelegateStatus(captor.capture());
+        assertThat(captor.getValue(), CoreMatchers.containsString("was successful"));
     }
 
 }

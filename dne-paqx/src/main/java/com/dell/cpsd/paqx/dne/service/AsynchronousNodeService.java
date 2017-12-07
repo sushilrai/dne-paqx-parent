@@ -38,7 +38,7 @@ public interface AsynchronousNodeService
     <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallEsxi(String processId, String activityId,
             String messageId, EsxiInstallationInfo esxiInstallationInfo);
 
-    String requestInstallEsxi(AsynchronousNodeServiceCallback<?> serviceCallback) throws ServiceExecutionException;
+    void requestInstallEsxi(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
 
     AsynchronousNodeServiceCallback<?> sendRebootHostRequest(String processId, String activityId, String messageId,
             HostPowerOperationRequestMessage requestMessage);

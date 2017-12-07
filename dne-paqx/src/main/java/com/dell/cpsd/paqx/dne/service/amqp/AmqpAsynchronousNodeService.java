@@ -59,6 +59,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PXE_BOOT;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL_ESXI;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
 
 public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager implements ServiceCallbackRegistry, AsynchronousNodeService
@@ -362,18 +363,30 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
     }
 
     @Override
-    public String requestInstallEsxi(final AsynchronousNodeServiceCallback<?> serviceCallback) throws ServiceExecutionException
+    public void requestInstallEsxi(final AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException
     {
-        String status = null;
-        if (serviceCallback != null)
+        try
         {
-            InstallESXiResponseMessage responseMessage = processResponse(serviceCallback, InstallESXiResponseMessage.class);
-            if (responseMessage != null && responseMessage.getMessageProperties() != null)
+            final InstallESXiResponseMessage responseMessage = processResponse(serviceCallback,
+                    InstallESXiResponseMessage.class);
+            if (responseMessage == null)
             {
-                status = responseMessage.getStatus();
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), error);
+            }
+
+            if ("succeeded".equalsIgnoreCase(responseMessage.getStatus()))
+            {
+                LOGGER.error(responseMessage.getInstallEsxiErrorDescription());
+                throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), responseMessage.getInstallEsxiErrorDescription());
             }
         }
-        return status;
+        catch (ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), e.getMessage());
+        }
     }
 
     @Override
