@@ -664,7 +664,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             @Override
             public void executeRequest(String requestId) throws Exception
             {
-                LOGGER.info("publish validate cluster request message");
+                LOGGER.info("publish ESS validate cluster request message");
                 producer.publishValidateClusters(request);
             }
         });
@@ -1244,7 +1244,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
                 final VCenter vCenterData = discoveryInfoToVCenterDomainTransformer.transform(responseMessage);
                 if (vCenterData == null)
                 {
-                    final String error = "Unable to transform the VCenter data";
+                    final String error = "Unable to transform the vCenter data";
                     LOGGER.error(error);
                     throw new TaskResponseFailureException(DISCOVER_VCENTER.getCode(), error);
                 }

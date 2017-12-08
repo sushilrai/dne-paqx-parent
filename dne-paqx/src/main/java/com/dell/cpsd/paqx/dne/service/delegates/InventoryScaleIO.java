@@ -55,7 +55,7 @@ public class InventoryScaleIO extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred attempting to retrieve Scale IO Component Endpoints. Reason:";
+            final String message = "An Unexpected Exception occurred attempting to retrieve ScaleIO Component Endpoints. Reason:";
             updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_SCALE_IO_FAILED,
                     message + e.getMessage());
@@ -70,7 +70,7 @@ public class InventoryScaleIO extends BaseWorkflowDelegate
         try
         {
             this.nodeService.requestDiscoverScaleIo(componentEndpointIds, delegateExecution.getProcessInstanceId());
-            updateDelegateStatus("Inventory request for Scale IO completed successfully.");
+            updateDelegateStatus("Inventory request for ScaleIO completed successfully.");
         }
         catch (Exception e)
         {

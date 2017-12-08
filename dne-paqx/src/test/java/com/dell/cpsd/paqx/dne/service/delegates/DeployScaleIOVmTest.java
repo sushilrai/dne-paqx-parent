@@ -53,7 +53,7 @@ public class DeployScaleIOVmTest
     private DeployScaleIOVm delegate;
     private final String serviceTag  = "service-tag";
     private final String vmName      = "vm-name";
-    private final String taskMessage = "Deploy ScaleIo Vm";
+    private final String taskMessage = "Deploy ScaleIO Vm";
 
     @Before
     public void setup() throws Exception
@@ -83,7 +83,7 @@ public class DeployScaleIOVmTest
         }
 
         verify(spy).updateDelegateStatus(
-                "Attempting Deploy ScaleIo Vm on Node service-tag.");
+                "Attempting Deploy ScaleIO Vm on Node service-tag.");
     }
 
     @Test
@@ -103,11 +103,11 @@ public class DeployScaleIOVmTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Deploy ScaleIo Vm on Node service-tag. Reason: Service timeout"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Deploy ScaleIO Vm on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(DEPLOY_SCALEIO_VM_FAILED));
         }
 
-        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIo Vm on Node service-tag.");
+        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIO Vm on Node service-tag.");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class DeployScaleIOVmTest
 
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIo Vm on Node service-tag.");
+        verify(spy).updateDelegateStatus("Attempting Deploy ScaleIO Vm on Node service-tag.");
         final ArgumentCaptor<String> setVariableCaptor = ArgumentCaptor.forClass(String.class);
         verify(delegateExecution).setVariable(anyString(), setVariableCaptor.capture());
         assertEquals(vmName, setVariableCaptor.getValue());

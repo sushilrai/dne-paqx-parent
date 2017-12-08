@@ -8,9 +8,12 @@
 package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.service.delegates.exception.JobNotFoundException;
+import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Activity;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Error;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Status;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +40,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 
 @Service
 public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
@@ -48,6 +54,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     private HistoryService historyService;
     private IdGenerator idGenerator;
 
+    private ObjectMapper mapper = new ObjectMapper();
 
     private static final Log LOGGER = LogFactory.getLog(CamundaWorkflowServiceImpl.class);
 
@@ -58,12 +65,24 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         this.runtimeService = runtimeService;
         this.historyService = historyService;
         this.repositoryService = repositoryService;
+
     }
 
     @Override
     public String startWorkflow(final String processId, final Map<String, Object> inputVariables)
     {
         String businessKeyId = getIdGenerator().getNextId();
+        final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(processId).singleResult().getName();
+        final List<NodeDetail> nodeDetails = (List<NodeDetail>) inputVariables.get(NODE_DETAILS);
+        LOGGER.info("Starting Workflow " + workflowName + " with Job Id " + businessKeyId + " Node Details:");
+        try
+        {
+            LOGGER.info( mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodeDetails));
+        }
+        catch (JsonProcessingException e)
+        {
+            LOGGER.warn("Error Occurred processing Json from NodeDetails List", e);
+        }
         Thread processThread = new Thread(() -> runtimeService.startProcessInstanceByKey(processId, businessKeyId, inputVariables));
         processThread.start();
         return businessKeyId;

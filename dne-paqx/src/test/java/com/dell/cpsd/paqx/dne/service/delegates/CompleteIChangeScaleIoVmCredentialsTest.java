@@ -108,7 +108,7 @@ public class CompleteIChangeScaleIoVmCredentialsTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED));
-            assertTrue((error.getMessage().equals("Complete Change ScaleIo Vm Credentials on Node abc failed!")));
+            assertTrue((error.getMessage().equals("Complete Change ScaleIO Vm Credentials on Node abc failed!")));
         }
     }
 }

@@ -82,7 +82,7 @@ public class VerifyNodesSelected extends BaseWorkflowDelegate
 
                         if (foundHost.isPresent())
                         {
-                            LOGGER.error("Node [{}] was found in VCenter hosts", nodeDetail.getServiceTag());
+                            LOGGER.error("Node [{}] was found in vCenter hosts", nodeDetail.getServiceTag());
                             provisioned.add(nodeDetail);
                         }
                         else

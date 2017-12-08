@@ -31,7 +31,7 @@
       <bpmn:outgoing>SequenceFlow_1jatz0h</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1r03k38" sourceRef="ServiceTask_1pf3hp9" targetRef="datastoreRename" />
-    <bpmn:serviceTask id="exitHostMaintenanceMode" name="Exit Maintenenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
+    <bpmn:serviceTask id="exitHostMaintenanceMode" name="Exit Maintenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
       <bpmn:incoming>SequenceFlow_1jatz0h</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1roraqw</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -44,7 +44,7 @@
       <bpmn:incoming>SequenceFlow_0azcblc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1mfb2oz</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="exitHostMaintenanceMode2" name="Exit Maintenenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
+    <bpmn:serviceTask id="exitHostMaintenanceMode2" name="Exit Maintenance Mode " camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${exitHostMaintenanceMode}">
       <bpmn:incoming>SequenceFlow_0qagw4h</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0povkuy</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -92,7 +92,7 @@
       <bpmn:incoming>SequenceFlow_0m5kmyh</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1a7jt45</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="addNodeToSystemDefinition" name="Add Node To System Defintion" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${addNodeToSystemDefinition}">
+    <bpmn:serviceTask id="addNodeToSystemDefinition" name="Add Node To System Definition" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${addNodeToSystemDefinition}">
       <bpmn:incoming>SequenceFlow_1a7jt45</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_192loht</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -210,14 +210,14 @@
     <bpmn:sequenceFlow id="SequenceFlow_1vpucf9" sourceRef="verifyNodeInformation" targetRef="notifyNodeDiscoveryToUpdateStatusStarted" />
     <bpmn:sequenceFlow id="SequenceFlow_06re85c" sourceRef="configureScaleIOVIB" targetRef="waitConfigScaleioVib" />
     <bpmn:sequenceFlow id="SequenceFlow_0povkuy" sourceRef="exitHostMaintenanceMode2" targetRef="addHostToDvSwitch" />
-    <bpmn:intermediateCatchEvent id="waitConfigScaleioVib" name="Wait for ScaleIo Vib configuration being applied">
+    <bpmn:intermediateCatchEvent id="waitConfigScaleioVib" name="Wait for ScaleIO Vib configuration being applied">
       <bpmn:incoming>SequenceFlow_06re85c</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_15j5htc</bpmn:outgoing>
       <bpmn:timerEventDefinition>
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT20S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:serviceTask id="installScaleIoVib" name="Install ScaleIo VIB" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${installScaleIoVib}">
+    <bpmn:serviceTask id="installScaleIoVib" name="Install ScaleIO VIB" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${installScaleIoVib}">
       <bpmn:incoming>SequenceFlow_0xhfrwq</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0azcblc</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -366,7 +366,7 @@
         <bpmn:incoming>SequenceFlow_1ycqa4u</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0jnnrzr" sourceRef="startInstallScaleIoVmPackages" targetRef="sendInstallScaleioVmPackages" />
-      <bpmn:serviceTask id="completeInstallScaleIoVmPackages" name="Complete Install ScaleIo Vm Packages" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completeInstallScaleIoVmPackages}">
+      <bpmn:serviceTask id="completeInstallScaleIoVmPackages" name="Complete Install ScaleIO Vm Packages" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completeInstallScaleIoVmPackages}">
         <bpmn:incoming>SequenceFlow_1aqee3k</bpmn:incoming>
         <bpmn:incoming>SequenceFlow_03crj9u</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1ycqa4u</bpmn:outgoing>
@@ -376,12 +376,12 @@
         <bpmn:outgoing>SequenceFlow_0tiq121</bpmn:outgoing>
         <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
       </bpmn:boundaryEvent>
-      <bpmn:receiveTask id="receiveInstallScaleIoVmPackages" name="Receive Install ScaleIo Vm Packages" messageRef="Message_1j7tnf1">
+      <bpmn:receiveTask id="receiveInstallScaleIoVmPackages" name="Receive Install ScaleIO Vm Packages" messageRef="Message_1j7tnf1">
         <bpmn:incoming>SequenceFlow_0zvut6c</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1aqee3k</bpmn:outgoing>
       </bpmn:receiveTask>
       <bpmn:sequenceFlow id="SequenceFlow_1aqee3k" sourceRef="receiveInstallScaleIoVmPackages" targetRef="completeInstallScaleIoVmPackages" />
-      <bpmn:boundaryEvent id="sendInstallScaleIoVmPackagesTimeout" name="Send ScaleIo Vm PAckages timeout" attachedToRef="receiveInstallScaleIoVmPackages">
+      <bpmn:boundaryEvent id="sendInstallScaleIoVmPackagesTimeout" name="Send ScaleIO Vm PAckages timeout" attachedToRef="receiveInstallScaleIoVmPackages">
         <bpmn:outgoing>SequenceFlow_03crj9u</bpmn:outgoing>
         <bpmn:timerEventDefinition>
           <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10M</bpmn:timeDuration>
@@ -405,25 +405,25 @@
       <bpmn:sequenceFlow id="SequenceFlow_0tiq121" sourceRef="BoundaryEvent_0e4rhoa" targetRef="EndEvent_1chtdvi" />
       <bpmn:sequenceFlow id="SequenceFlow_0xe05u6" sourceRef="startInstallScaleIoVmPackagesError" targetRef="EndEvent_1chtdvi" />
     </bpmn:subProcess>
-    <bpmn:subProcess id="performanceTuneScaleIoVm" name="Performance Tune ScaleIo Vm" camunda:asyncAfter="true" camunda:exclusive="false">
+    <bpmn:subProcess id="performanceTuneScaleIoVm" name="Performance Tune ScaleIO Vm" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:incoming>SequenceFlow_005hvu9</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0m5kmyh</bpmn:outgoing>
       <bpmn:startEvent id="StartPerformanceTuneScaleIoVm">
         <bpmn:outgoing>SequenceFlow_1pandnl</bpmn:outgoing>
       </bpmn:startEvent>
-      <bpmn:endEvent id="EndPerformanceTuneScaleIoVm" name="End Performance Tune ScaleIo Vm">
+      <bpmn:endEvent id="EndPerformanceTuneScaleIoVm" name="End Performance Tune ScaleIO Vm">
         <bpmn:incoming>SequenceFlow_04swi4d</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:serviceTask id="completePerformanceTuneScaleIoVm" name="Complete Performance Tune ScaleIo Vm" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completePerformanceTuneScaleIoVm}">
+      <bpmn:serviceTask id="completePerformanceTuneScaleIoVm" name="Complete Performance Tune ScaleIO Vm" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completePerformanceTuneScaleIoVm}">
         <bpmn:incoming>SequenceFlow_1c5qmx6</bpmn:incoming>
         <bpmn:incoming>SequenceFlow_0ruh5n0</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_04swi4d</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:receiveTask id="receivePerformanceTuneScaleIoVm" name="Receive Performance Tune ScaleIo Vm" messageRef="Message_0mo6gwt">
+      <bpmn:receiveTask id="receivePerformanceTuneScaleIoVm" name="Receive Performance Tune ScaleIO Vm" messageRef="Message_0mo6gwt">
         <bpmn:incoming>SequenceFlow_1e20o3n</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1c5qmx6</bpmn:outgoing>
       </bpmn:receiveTask>
-      <bpmn:sendTask id="sendPerformanceTuneScaleIoVm" name="Send Performance Tune ScaleIo Vm" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${sendPerformanceTuneScaleIoVm}">
+      <bpmn:sendTask id="sendPerformanceTuneScaleIoVm" name="Send Performance Tune ScaleIO Vm" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${sendPerformanceTuneScaleIoVm}">
         <bpmn:incoming>SequenceFlow_1pandnl</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1e20o3n</bpmn:outgoing>
       </bpmn:sendTask>
@@ -456,25 +456,25 @@
     </bpmn:subProcess>
     <bpmn:sequenceFlow id="SequenceFlow_0m5kmyh" sourceRef="performanceTuneScaleIoVm" targetRef="addSdsNodeToProtectionDomain" />
     <bpmn:sequenceFlow id="SequenceFlow_005hvu9" sourceRef="installScaleioVMPackages" targetRef="performanceTuneScaleIoVm" />
-    <bpmn:subProcess id="SubProcess_0x5eigc" name="Change ScaleIo Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false">
+    <bpmn:subProcess id="SubProcess_0x5eigc" name="Change ScaleIO Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:incoming>SequenceFlow_1x8709s</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0m94iq1</bpmn:outgoing>
       <bpmn:startEvent id="StartChangeScaleIOVMCredentials">
         <bpmn:outgoing>SequenceFlow_10mq0th</bpmn:outgoing>
       </bpmn:startEvent>
-      <bpmn:endEvent id="EndChangeScaleIoVmCredentials" name="Complete Change ScaleIo Vm Credentials">
+      <bpmn:endEvent id="EndChangeScaleIoVmCredentials" name="Complete Change ScaleIO Vm Credentials">
         <bpmn:incoming>SequenceFlow_0j64rto</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:serviceTask id="completeChangeScaleIoVmCredentials" name="Complete Change ScaleIo Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completeChangeScaleIoVmCredentials}">
+      <bpmn:serviceTask id="completeChangeScaleIoVmCredentials" name="Complete Change ScaleIO Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${completeChangeScaleIoVmCredentials}">
         <bpmn:incoming>SequenceFlow_1aloidz</bpmn:incoming>
         <bpmn:incoming>SequenceFlow_09bvtaj</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0j64rto</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:receiveTask id="receiveChangeScaleIoVmCredentials" name="Receive Change ScaleIo Vm Credentials" messageRef="Message_10m05bw">
+      <bpmn:receiveTask id="receiveChangeScaleIoVmCredentials" name="Receive Change ScaleIO Vm Credentials" messageRef="Message_10m05bw">
         <bpmn:incoming>SequenceFlow_0sf3frc</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1aloidz</bpmn:outgoing>
       </bpmn:receiveTask>
-      <bpmn:sendTask id="sendChangeScaleIoVmCredentials" name="Send Change ScaleIo Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${sendChangeScaleIoVmCredentials}">
+      <bpmn:sendTask id="sendChangeScaleIoVmCredentials" name="Send Change ScaleIO Vm Credentials" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${sendChangeScaleIoVmCredentials}">
         <bpmn:incoming>SequenceFlow_10mq0th</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0sf3frc</bpmn:outgoing>
       </bpmn:sendTask>
@@ -523,11 +523,11 @@
   <bpmn:message id="Message_1phy5p5" name="disablePxeResponseReceived" />
   <bpmn:error id="Error_1twqsit" name="DisablePxeError" errorCode="Disable-Pxe-failed" />
   <bpmn:message id="Message_1j7tnf1" name="receiveInstallScaleIoVmPackagesMsgId" />
-  <bpmn:error id="Error_0n53gt5" name="Install ScaleIo Vm Packages" errorCode="Install-ScaleIo-Vm-Packages-Failed" />
+  <bpmn:error id="Error_0n53gt5" name="Install ScaleIO Vm Packages" errorCode="Install-ScaleIo-Vm-Packages-Failed" />
   <bpmn:message id="Message_0mo6gwt" name="receivePerformanceTuneScaleIoVmMsgId" />
   <bpmn:message id="Message_10m05bw" name="receiveChangeScaleIoVmCredentialsMsgId" />
-  <bpmn:error id="Error_00vcla9" name="Change ScaleIo Vm Credentials Failed" errorCode="Change-ScaleIo-Vm-Credentials-Failed" />
-  <bpmn:error id="Error_01se11d" name="Performance Tune ScaleIo Vm Failed" errorCode="Performance-Tune-ScaleIo-Vm-Failed" />
+  <bpmn:error id="Error_00vcla9" name="Change ScaleIO Vm Credentials Failed" errorCode="Change-ScaleIo-Vm-Credentials-Failed" />
+  <bpmn:error id="Error_01se11d" name="Performance Tune ScaleIO Vm Failed" errorCode="Performance-Tune-ScaleIo-Vm-Failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="addNode">
       <bpmndi:BPMNShape id="StartEvent_1gjhh65_di" bpmnElement="StartEvent_1gjhh65">

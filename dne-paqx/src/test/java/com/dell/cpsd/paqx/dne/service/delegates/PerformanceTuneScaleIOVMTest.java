@@ -49,7 +49,7 @@ public class PerformanceTuneScaleIOVMTest
 
     private PerformanceTuneScaleIOVM delegate;
     private final String serviceTag  = "service-tag";
-    private final String taskMessage = "Performance Tune Scale IO VM";
+    private final String taskMessage = "Performance Tune ScaleIO VM";
 
     @Before
     public void setup() throws Exception
@@ -81,7 +81,7 @@ public class PerformanceTuneScaleIOVMTest
         }
 
         verify(spy).updateDelegateStatus(
-                "Attempting Performance Tune Scale IO VM on Node service-tag.");
+                "Attempting Performance Tune ScaleIO VM on Node service-tag.");
     }
 
     @Test
@@ -101,11 +101,11 @@ public class PerformanceTuneScaleIOVMTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Performance Tune Scale IO VM on Node service-tag. Reason: Service timeout"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Performance Tune ScaleIO VM on Node service-tag. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(PERFORMANCE_TUNE_SCALEIO_VM));
         }
 
-        verify(spy).updateDelegateStatus( "Attempting Performance Tune Scale IO VM on Node service-tag.");
+        verify(spy).updateDelegateStatus( "Attempting Performance Tune ScaleIO VM on Node service-tag.");
     }
 
     @Test

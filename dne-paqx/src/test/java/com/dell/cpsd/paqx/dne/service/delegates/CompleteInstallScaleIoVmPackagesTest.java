@@ -108,7 +108,7 @@ public class CompleteInstallScaleIoVmPackagesTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED));
-            assertTrue((error.getMessage().equals("Install ScaleIo Vm Packages on Node abc failed!")));
+            assertTrue((error.getMessage().equals("Install ScaleIO Vm Packages on Node abc failed!")));
         }
     }
 }

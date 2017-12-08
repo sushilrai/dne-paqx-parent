@@ -36,7 +36,7 @@ public class RetrieveVCenterComponents extends BaseWorkflowDelegate
     @Autowired
     public RetrieveVCenterComponents(final NodeService nodeService)
     {
-        super(LOGGER, "List VCenter Components");
+        super(LOGGER, "Retrieve vCenter Components");
         this.nodeService = nodeService;
     }
 
@@ -51,7 +51,7 @@ public class RetrieveVCenterComponents extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred while retrieving VCenter Components. Reason: ";
+            final String message = "An Unexpected Exception occurred while retrieving vCenter Components. Reason: ";
             updateDelegateStatus(message, e);
             throw new BpmnError(RETRIEVE_VCENTER_COMPONENTS_FAILED, message + e.getMessage());
         }

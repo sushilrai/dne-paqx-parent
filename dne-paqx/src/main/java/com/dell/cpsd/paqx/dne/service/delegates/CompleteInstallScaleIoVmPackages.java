@@ -35,7 +35,7 @@ public class CompleteInstallScaleIoVmPackages extends BaseWorkflowDelegate
     @Autowired
     public CompleteInstallScaleIoVmPackages(final AsynchronousNodeService asynchronousNodeService)
     {
-        super(LOGGER, "Install ScaleIo Vm Packages");
+        super(LOGGER, "Install ScaleIO Vm Packages");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 

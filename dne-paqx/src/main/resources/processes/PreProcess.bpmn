@@ -4,7 +4,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1xg9b7l</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="retrieveVCenterComponents" name="Retrieve VCenter Components" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveVCenterComponents}">
+    <bpmn:serviceTask id="retrieveVCenterComponents" name="Retrieve vCenter Components" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveVCenterComponents}">
       <bpmn:incoming>SequenceFlow_1n23832</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1t43ys6</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -17,7 +17,7 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1xg9b7l" sourceRef="StartEvent_1" targetRef="cleanInMemoryDatabase" />
     <bpmn:sequenceFlow id="SequenceFlow_1t43ys6" sourceRef="retrieveVCenterComponents" targetRef="inventoryScaleIO" />
-    <bpmn:serviceTask id="retrieveScaleIOComponents" name="Retrieve Scale IO Components" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveScaleIoComponents}">
+    <bpmn:serviceTask id="retrieveScaleIOComponents" name="Retrieve ScaleIO Components" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${retrieveScaleIoComponents}">
       <bpmn:incoming>SequenceFlow_03inz3b</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1n23832</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -37,7 +37,7 @@
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_039pnxr" sourceRef="StartEvent_19l4h89" targetRef="EndEvent_0fze39b" />
     </bpmn:subProcess>
-    <bpmn:serviceTask id="selectVCenterClusters" name="Select VCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectVCenterClusters}">
+    <bpmn:serviceTask id="selectVCenterClusters" name="Select vCenter Clusters" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectVCenterClusters}">
       <bpmn:incoming>SequenceFlow_09mr3f9</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0qxxk7u</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -48,7 +48,7 @@
     <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
       <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_0qxxk7u" sourceRef="selectVCenterClusters" targetRef="selectProtectionDomains" />
     <bpmn:sequenceFlow id="SequenceFlow_08ayndm" sourceRef="selectProtectionDomains" targetRef="selectStoragePools" />

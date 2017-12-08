@@ -95,7 +95,7 @@ public class SelectVCenterClustersTest
             fail("Should not get here!");
         } catch( BpmnError bpmnError) {
             assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
-            assertEquals(bpmnError.getMessage(), "Selecting VCenter Clusters Failed. Reason: TestCluster1 TestCluster2 ");
+            assertEquals(bpmnError.getMessage(), "Selecting vCenter Clusters Failed. Reason: TestCluster1 TestCluster2 ");
         }
     }
 
@@ -108,7 +108,7 @@ public class SelectVCenterClustersTest
             fail("Should not get here!");
         } catch( BpmnError bpmnError) {
             assertEquals(bpmnError.getErrorCode(), FIND_VCLUSTER_FAILED);
-            assertEquals(bpmnError.getMessage(), "Selecting VCenter Cluster for Node def Failed.");
+            assertEquals(bpmnError.getMessage(), "Selecting vCenter Cluster for Node def Failed.");
         }
     }
 

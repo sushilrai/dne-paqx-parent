@@ -16,6 +16,7 @@
       <bpmn:extensionElements>
         <camunda:in source="NodeDetail" target="NodeDetail" />
         <camunda:in source="ESXiCredentialDetails" target="ESXiCredentialDetails" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1l49wyb</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1igfdtf</bpmn:outgoing>

@@ -35,7 +35,7 @@ public class CompletePerformanceTuneScaleIoVm extends BaseWorkflowDelegate
     @Autowired
     public CompletePerformanceTuneScaleIoVm(final AsynchronousNodeService asynchronousNodeService)
     {
-        super(LOGGER, "Complete Performance Tune ScaleIo Vm");
+        super(LOGGER, "Complete Performance Tune ScaleIO Vm");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 

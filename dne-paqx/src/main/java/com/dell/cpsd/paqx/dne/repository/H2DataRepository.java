@@ -113,7 +113,7 @@ public class H2DataRepository implements DataServiceRepository
     @Transactional
     public boolean saveVCenterComponentDetails(final List<ComponentDetails> componentEndpointDetailsList)
     {
-        LOG.info("Persisting VCenter Component, Endpoint and Credential UUID");
+        LOG.info("Persisting vCenter Component, Endpoint and Credential UUID");
 
         if (componentEndpointDetailsList.isEmpty())
         {
@@ -146,7 +146,7 @@ public class H2DataRepository implements DataServiceRepository
                 }
                 catch (Exception e)
                 {
-                    LOG.error("Exception occurred while persisting vcenter component details[{}]", e);
+                    LOG.error("Exception occurred while persisting vCenter component details[{}]", e);
                 }
             });
 
@@ -154,7 +154,7 @@ public class H2DataRepository implements DataServiceRepository
         }
         catch (Exception e)
         {
-            LOG.error(" Exception occurred while persisting vcenter data", e);
+            LOG.error(" Exception occurred while persisting vCenter data", e);
             return false;
         }
     }
@@ -346,7 +346,7 @@ public class H2DataRepository implements DataServiceRepository
             //Don't allow multiple discoveries for now
             if (!CollectionUtils.isEmpty(vCenterList))
             {
-                LOG.info("Found vcenter data doing nothing");
+                LOG.info("Found vCenter data doing nothing");
                 return true;
             }
             else
@@ -392,10 +392,10 @@ public class H2DataRepository implements DataServiceRepository
                     }
                     catch (Exception e)
                     {
-                        LOG.error("No VCenter data exist");
+                        LOG.error("No vCenter data exist");
                     }
 
-                    LOG.info("DneJob != null for vcenter save");
+                    LOG.info("DneJob != null for vCenter save");
                     vCenterData.setJob(dneJob);
                     dneJob.setVcenter(vCenterData);
                     entityManager.merge(dneJob);

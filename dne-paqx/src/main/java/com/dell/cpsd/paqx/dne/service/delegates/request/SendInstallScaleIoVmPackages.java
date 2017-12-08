@@ -49,7 +49,7 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
     public SendInstallScaleIoVmPackages(AsynchronousNodeService asynchronousNodeService,
             RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
-        super(LOGGER, "Send Install ScaleIo Vm Packages");
+        super(LOGGER, "Send Install ScaleIO Vm Packages");
         this.asynchronousNodeService = asynchronousNodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -75,7 +75,7 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
         catch (TaskResponseFailureException ex)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+                    "An Unexpected Exception Occurred attempting to Install ScaleIO Vm Packages on Node " + nodeDetail.getServiceTag() + ". Reason: ";
             updateDelegateStatus(message, ex);
             throw new BpmnError(SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED,message + ex.getMessage());
         }
@@ -86,7 +86,7 @@ public class SendInstallScaleIoVmPackages extends BaseWorkflowDelegate
         }
         else
         {
-            final String message = "Failed to send the request for Install ScaleIo Vm Packages on Node " + nodeDetail.getServiceTag();
+            final String message = "Failed to send the request for Install ScaleIO Vm Packages on Node " + nodeDetail.getServiceTag();
             updateDelegateStatus(message);
             throw new BpmnError(SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED, message);
         }

@@ -55,7 +55,7 @@ public class RetrieveVCenterComponentsTest
         } catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_VCENTER_COMPONENTS_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving VCenter Components."));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving vCenter Components."));
         }
     }
 

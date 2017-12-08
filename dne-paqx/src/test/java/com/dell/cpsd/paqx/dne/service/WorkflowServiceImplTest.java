@@ -231,10 +231,10 @@ public class WorkflowServiceImplTest
 
 
         final Job captureScaleIojob = workflowServiceUnderTest
-                .createWorkflow("addNode", "listScaleIoComponents", "Capture VCenter component request submitted successfully",
+                .createWorkflow("addNode", "listScaleIoComponents", "Capture vCenter component request submitted successfully",
                         new HashMap<>());
         final Job captureVCenterJob = workflowServiceUnderTest
-                .createWorkflow("addNode", "listVCenterComponents", "Capture VCenter component request submitted successfully",
+                .createWorkflow("addNode", "listVCenterComponents", "Capture vCenter component request submitted successfully",
             new HashMap<>());
 
         assertNotNull(captureScaleIojob);

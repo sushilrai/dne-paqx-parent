@@ -27,7 +27,7 @@ public class ConfigureVCenterClusters extends BaseWorkflowDelegate
     @Autowired
     public ConfigureVCenterClusters(final NodeService nodeService)
     {
-        super(LOGGER, "Validate VCenter Clusters");
+        super(LOGGER, "Validate vCenter Clusters");
         this.nodeService = nodeService;
     }
 

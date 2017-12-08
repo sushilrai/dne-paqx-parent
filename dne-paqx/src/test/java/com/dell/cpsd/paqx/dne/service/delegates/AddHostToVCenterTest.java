@@ -74,11 +74,11 @@ public class AddHostToVCenterTest
         {
             assertThat(error.getMessage(), containsString("An unexpected exception occurred"));
             assertThat(error.getMessage(), containsString(errorMessage));
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to VCenter Cluster. Reason: Illegal state exception"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to vCenter Cluster. Reason: Illegal state exception"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_CLUSTER_FAILED));
         }
 
-        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to vCenter Cluster on Node service-tag.");
     }
 
     @Test
@@ -97,11 +97,11 @@ public class AddHostToVCenterTest
         }
         catch (BpmnError error)
         {
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to VCenter Cluster. Reason: Service timeout"));
+            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to Add ESXi Host to vCenter Cluster. Reason: Service timeout"));
             assertTrue(error.getErrorCode().equals(ADD_HOST_TO_CLUSTER_FAILED));
         }
 
-        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to vCenter Cluster on Node service-tag.");
     }
 
     @Test
@@ -116,6 +116,6 @@ public class AddHostToVCenterTest
         final AddHostToVCenter spy = spy(delegate);
         spy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to VCenter Cluster on Node service-tag.");
+        verify(spy).updateDelegateStatus("Attempting Add ESXi Host to vCenter Cluster on Node service-tag.");
     }
 }

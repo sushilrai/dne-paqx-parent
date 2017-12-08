@@ -48,7 +48,7 @@ public class SendChangeScaleIoVmCredentials extends BaseWorkflowDelegate
     public SendChangeScaleIoVmCredentials(AsynchronousNodeService asynchronousNodeService,
             RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
-        super(LOGGER, "Send Change ScaleIo Vm Credentials");
+        super(LOGGER, "Send Change ScaleIO Vm Credentials");
         this.asynchronousNodeService = asynchronousNodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -74,7 +74,7 @@ public class SendChangeScaleIoVmCredentials extends BaseWorkflowDelegate
         catch (Exception ex)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Send Change ScaleIo Vm Credentials on Node " + nodeDetail.getServiceTag();
+                    "An Unexpected Exception Occurred attempting to Send Change ScaleIO Vm Credentials on Node " + nodeDetail.getServiceTag();
             updateDelegateStatus(message, ex);
             throw new BpmnError(SEND_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED,
                     taskName + " on Node " + nodeDetail.getServiceTag() + " failed!  Reason: " + ex.getMessage());
@@ -86,7 +86,7 @@ public class SendChangeScaleIoVmCredentials extends BaseWorkflowDelegate
         }
         else
         {
-            final String message = "Failed to send the request for Send Change ScaleIo Vm Credentials on Node " + nodeDetail.getServiceTag();
+            final String message = "Failed to send the request for Send Change ScaleIO Vm Credentials on Node " + nodeDetail.getServiceTag();
             updateDelegateStatus(message);
             throw new BpmnError(SEND_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED, message);
         }

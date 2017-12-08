@@ -49,7 +49,7 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
     public SendPerformanceTuneScaleIoVm(AsynchronousNodeService asynchronousNodeService,
             RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
-        super(LOGGER, "Send Performance Tune ScaleIo Vm");
+        super(LOGGER, "Send Performance Tune ScaleIO Vm");
         this.asynchronousNodeService = asynchronousNodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }
@@ -74,7 +74,7 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
         catch (TaskResponseFailureException ex)
         {
             final String message =
-                    "An Unexpected Exception Occurred attempting to Send Performance Tune ScaleIo Vm on Node " + nodeDetail.getServiceTag() + ". Reason: ";
+                    "An Unexpected Exception Occurred attempting to Send Performance Tune ScaleIO Vm on Node " + nodeDetail.getServiceTag() + ". Reason: ";
             updateDelegateStatus(message, ex);
             throw new BpmnError(SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED,
                     message + ex.getMessage());
@@ -86,7 +86,7 @@ public class SendPerformanceTuneScaleIoVm extends BaseWorkflowDelegate
         }
         else
         {
-            final String message = "Failed to send the request for Send Performance Tune ScaleIo Vm on Node " + nodeDetail.getServiceTag();
+            final String message = "Failed to send the request for Send Performance Tune ScaleIO Vm on Node " + nodeDetail.getServiceTag();
             updateDelegateStatus(message);
             throw new BpmnError(SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED, message);
         }

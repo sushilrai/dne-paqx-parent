@@ -58,7 +58,7 @@ public class PerformanceTuneScaleIOVM extends BaseWorkflowDelegate
     public PerformanceTuneScaleIOVM(final NodeService nodeService,
             final RemoteCommandExecutionRequestTransformer remoteCommandExecutionRequestTransformer)
     {
-        super(LOGGER, "Performance Tune Scale IO VM");
+        super(LOGGER, "Performance Tune ScaleIO VM");
         this.nodeService = nodeService;
         this.remoteCommandExecutionRequestTransformer = remoteCommandExecutionRequestTransformer;
     }

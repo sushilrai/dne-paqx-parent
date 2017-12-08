@@ -53,7 +53,7 @@ public class InventoryScaleIOTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_SCALE_IO_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve Scale IO Component Endpoints. Reason:null"));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve ScaleIO Component Endpoints. Reason:null"));
         }
     }
 
@@ -101,7 +101,7 @@ public class InventoryScaleIOTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_SCALE_IO_FAILED));
-            assertTrue(error.getMessage().contains("Inventory request for Scale IO Failed."));
+            assertTrue(error.getMessage().contains("Inventory request for ScaleIO Failed."));
         }
     }
 
@@ -113,6 +113,6 @@ public class InventoryScaleIOTest
         doNothing().when(nodeService).requestDiscoverScaleIo(any(), any());
         final InventoryScaleIO c = spy(new InventoryScaleIO(nodeService, repository));
         c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Inventory request for Scale IO completed successfully.");
+        verify(c).updateDelegateStatus("Inventory request for ScaleIO completed successfully.");
     }
 }

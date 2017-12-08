@@ -55,7 +55,7 @@ public class InventoryVCenter extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: ";
+            final String message = "An Unexpected Exception occurred attempting to retrieve vCenter Component Endpoints. Reason: ";
             updateDelegateStatus(message, e);
             throw new BpmnError(INVENTORY_VCENTER_FAILED,
                     message + e.getMessage());
@@ -71,7 +71,7 @@ public class InventoryVCenter extends BaseWorkflowDelegate
         {
             this.nodeService.requestDiscoverVCenter(componentEndpointIds, delegateExecution.getProcessInstanceId());
 
-            updateDelegateStatus("Inventory request for VCenter completed successfully.");
+            updateDelegateStatus("Inventory request for vCenter completed successfully.");
         }
         catch (Exception e)
         {

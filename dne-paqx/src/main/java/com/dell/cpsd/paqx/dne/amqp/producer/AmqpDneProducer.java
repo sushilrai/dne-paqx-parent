@@ -85,7 +85,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish idrac network settings request message from DNE paqx.");
+            LOGGER.info("Publish idrac network settings request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -100,7 +100,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish configure boot device idrac request message from DNE paqx.");
+            LOGGER.info("Publish configure boot device idrac request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -115,7 +115,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish configure Pxe Boot request message from DNE paqx.");
+            LOGGER.info("Publish configure Pxe Boot request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -130,7 +130,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish configure obm settings request message from DNE paqx.");
+            LOGGER.info("Publish configure obm settings request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -145,7 +145,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish List ScaleIO Components request message from DNE paqx.");
+            LOGGER.info("Publish List ScaleIO Components request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -160,7 +160,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish List VCenter Components request message from DNE paqx.");
+            LOGGER.info("Publish List vCenter Components request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -175,7 +175,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Discover ScaleIO request message from DNE paqx.");
+            LOGGER.info("Publish Discover ScaleIO request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -190,7 +190,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Discover VCenter request message from DNE paqx.");
+            LOGGER.info("Publish Discover vCenter request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -205,7 +205,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Install ESXi License request from DNE paqx.");
+            LOGGER.info("Publish Install ESXi License request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -220,7 +220,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Add Host to VCenter request from DNE paqx.");
+            LOGGER.info("Publish Add Host to vCenter request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -235,7 +235,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Add Host to ProtectionDomain request from DNE paqx. " + request);
+            LOGGER.info("Publish Add Host to ProtectionDomain request from DNE Service. " + request);
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -250,7 +250,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Install ScaleIo VIB request from DNE paqx.");
+            LOGGER.info("Publish Install ScaleIO VIB request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -265,7 +265,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Configure ScaleIo VIB request from DNE paqx.");
+            LOGGER.info("Publish Configure ScaleIO VIB request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -280,7 +280,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Add Host to DV Switch request from DNE paqx.");
+            LOGGER.info("Publish Add Host to DV Switch request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -295,7 +295,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish deploy VM from template request from DNE paqx.");
+            LOGGER.info("Publish deploy VM from template request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
 
@@ -311,7 +311,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish enable PCI pass through request from DNE paqx.");
+            LOGGER.info("Publish enable PCI pass through request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -326,7 +326,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish reboot host request from DNE paqx.");
+            LOGGER.info("Publish reboot host request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
 
@@ -342,7 +342,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish Set PCI Pass through request from DNE paqx.");
+            LOGGER.info("Publish Set PCI Pass through request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -357,7 +357,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish apply ESXi license request from DNE paqx.");
+            LOGGER.info("Publish apply ESXi license request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -372,7 +372,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish list esxi credential details request from DNE paqx.");
+            LOGGER.info("Publish list ESXi credential details request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -387,7 +387,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish ESXi host maintenance mode request from DNE paqx.");
+            LOGGER.info("Publish ESXi host maintenance mode request from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -402,7 +402,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send node discovery request message from DNE paqx.");
+            LOGGER.info("Send node discovery request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -417,7 +417,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send discover cluster request message from DNE paqx.");
+            LOGGER.info("Send discover cluster request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -429,6 +429,7 @@ public class AmqpDneProducer implements DneProducer
     public void publishValidateClusters(ValidateVcenterClusterRequestMessage request)
     {
         // At this phase ESS is for DNE internal use only so no capability registry for ESS, use exchange, routing key directly.
+        LOGGER.info("Send request to ESS validation for vCenter clusters.");
         rabbitTemplate.convertAndSend(essRequestExchange, essReqRoutingKeyPrefix, request);
     }
 
@@ -461,7 +462,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send complete node allocation request message from DNE paqx.");
+            LOGGER.info("Send complete node allocation request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -476,7 +477,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Publish change idrac credentials request message from DNE paqx.");
+            LOGGER.info("Publish change idrac credentials request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -491,7 +492,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send node inventory discovery request message from DNE paqx.");
+            LOGGER.info("Send node inventory discovery request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }
@@ -506,7 +507,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send datastore rename request message from DNE paqx.");
+            LOGGER.info("Send datastore rename request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -521,7 +522,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send update software acceptance message from DNE paqx.");
+            LOGGER.info("Send update software acceptance message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -536,7 +537,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send vm power operation message from DNE paqx.");
+            LOGGER.info("Send vm power operation message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -548,7 +549,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send configure vm setwork settings message from DNE paqx.");
+            LOGGER.info("Send configure vm setwork settings message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -560,7 +561,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send execute remote command message from DNE paqx.");
+            LOGGER.info("Send execute remote command message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -572,7 +573,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send update ScaleIO SDC performance profile message from DNE paqx.");
+            LOGGER.info("Send update ScaleIO SDC performance profile message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
@@ -623,7 +624,7 @@ public class AmqpDneProducer implements DneProducer
 
         if (endpointHelper != null)
         {
-            LOGGER.info("Send Fail node allocation request message from DNE paqx.");
+            LOGGER.info("Send Fail node allocation request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
     }

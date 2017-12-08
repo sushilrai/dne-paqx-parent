@@ -35,7 +35,7 @@ public class CompleteChangeScaleIoVmCredentials extends BaseWorkflowDelegate
     @Autowired
     public CompleteChangeScaleIoVmCredentials(final AsynchronousNodeService asynchronousNodeService)
     {
-        super(LOGGER, "Complete Change ScaleIo Vm Credentials");
+        super(LOGGER, "Complete Change ScaleIO Vm Credentials");
         this.asynchronousNodeService = asynchronousNodeService;
     }
 

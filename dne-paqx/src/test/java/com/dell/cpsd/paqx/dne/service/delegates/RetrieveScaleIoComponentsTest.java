@@ -66,7 +66,7 @@ public class RetrieveScaleIoComponentsTest
         } catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.RETRIEVE_SCALE_IO_COMPONENTS_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving Scale IO Components."));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred while retrieving ScaleIO Components."));
         }
     }
 

@@ -42,7 +42,7 @@ public class AddHostToVCenter extends BaseWorkflowDelegate
     @Autowired
     public AddHostToVCenter(final NodeService nodeService, final AddHostToVCenterClusterRequestTransformer requestTransformer)
     {
-        super(LOGGER, "Add ESXi Host to VCenter Cluster");
+        super(LOGGER, "Add ESXi Host to vCenter Cluster");
         this.nodeService = nodeService;
         this.requestTransformer = requestTransformer;
     }

@@ -51,7 +51,7 @@ public class RetrieveScaleIoComponents extends BaseWorkflowDelegate
         }
         catch (Exception e)
         {
-            final String message = "An Unexpected Exception occurred while retrieving Scale IO Components. Reason: ";
+            final String message = "An Unexpected Exception occurred while retrieving ScaleIO Components. Reason: ";
             updateDelegateStatus(message, e);
             throw new BpmnError(RETRIEVE_SCALE_IO_COMPONENTS_FAILED,
                     message + e.getMessage());

@@ -40,7 +40,7 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
     @Autowired
     public SelectVCenterClusters(NodeService nodeService)
     {
-        super(LOGGER, "Select VCenter Clusters");
+        super(LOGGER, "Select vCenter Clusters");
         this.nodeService = nodeService;
     }
 
@@ -72,7 +72,7 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
         }
         if (clusterMap == null)
         {
-            final StringBuilder messageBuilder = new StringBuilder("Selecting VCenter Clusters Failed.");
+            final StringBuilder messageBuilder = new StringBuilder("Selecting vCenter Clusters Failed.");
             if (responseMsg != null && CollectionUtils.isNotEmpty(responseMsg.getFailedCluster()))
             {
                 messageBuilder.append(" Reason: ");
@@ -86,11 +86,11 @@ public class SelectVCenterClusters extends BaseWorkflowDelegate
         }
         for (NodeDetail nd : nodeDetails)
         {
-            updateDelegateStatus("Selecting VCenter Cluster for Node " + nd.getServiceTag() + ".");
+            updateDelegateStatus("Selecting vCenter Cluster for Node " + nd.getServiceTag() + ".");
             String clusterName = clusterMap.get(nd.getServiceTag());
             if (clusterName == null)
             {
-                final String message = "Selecting VCenter Cluster for Node " + nd.getServiceTag() + " Failed.";
+                final String message = "Selecting vCenter Cluster for Node " + nd.getServiceTag() + " Failed.";
                 updateDelegateStatus(message);
                 throw new BpmnError(FIND_VCLUSTER_FAILED, message);
             }

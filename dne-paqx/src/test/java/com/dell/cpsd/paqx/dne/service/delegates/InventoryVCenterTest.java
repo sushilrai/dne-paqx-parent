@@ -53,7 +53,7 @@ public class InventoryVCenterTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_VCENTER_FAILED));
-            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve VCenter Component Endpoints. Reason: null"));
+            assertTrue(error.getMessage().contains("An Unexpected Exception occurred attempting to retrieve vCenter Component Endpoints. Reason: null"));
         }
     }
 
@@ -101,7 +101,7 @@ public class InventoryVCenterTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.INVENTORY_VCENTER_FAILED));
-            assertTrue(error.getMessage().contains("Inventory request for VCenter Failed."));
+            assertTrue(error.getMessage().contains("Inventory request for vCenter Failed."));
         }
     }
 
@@ -113,6 +113,6 @@ public class InventoryVCenterTest
         doNothing().when(nodeService).requestDiscoverVCenter(any(), any());
         final InventoryVCenter c = spy(new InventoryVCenter(nodeService, repository));
         c.delegateExecute(delegateExecution);
-        verify(c).updateDelegateStatus("Inventory request for VCenter completed successfully.");
+        verify(c).updateDelegateStatus("Inventory request for vCenter completed successfully.");
     }
 }

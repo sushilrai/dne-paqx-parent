@@ -108,7 +108,7 @@ public class CompleteIPerformanceTuneScaleIoVmTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.COMPLETE_PERFORMANCE_TUNE_SCALEIO_VM_FAILED));
-            assertTrue((error.getMessage().equals("Complete Performance Tune ScaleIo Vm on Node abc failed!")));
+            assertTrue((error.getMessage().equals("Complete Performance Tune ScaleIO Vm on Node abc failed!")));
         }
     }
 }

@@ -58,7 +58,7 @@ public class DeployScaleIOVm extends BaseWorkflowDelegate
     @Autowired
     public DeployScaleIOVm(final NodeService nodeService, final DeployScaleIoVmRequestTransformer deployScaleIoVmRequestTransformer)
     {
-        super(LOGGER, "Deploy ScaleIo Vm");
+        super(LOGGER, "Deploy ScaleIO Vm");
         this.nodeService = nodeService;
         this.deployScaleIoVmRequestTransformer = deployScaleIoVmRequestTransformer;
     }

@@ -421,7 +421,7 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         }
         catch (Exception e)
         {
-            LOGGER.error(" An unexpected exception occurred requesting Installation ScaleIo Vm Packages on Node.", e);
+            LOGGER.error(" An unexpected exception occurred requesting Installation ScaleIO Vm Packages on Node.", e);
         }
 
         return response;

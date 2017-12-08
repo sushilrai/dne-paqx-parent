@@ -125,7 +125,7 @@ public class StoragePoolEssRequestTransformerTest
         }
         catch (NoSuchElementException ex)
         {
-            fail("Error when no correlation found between scale io sds and vcenter.");
+            fail("Error when no correlation found between ScaleIO sds and vcenter.");
         }
     }
 
