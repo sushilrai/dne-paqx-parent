@@ -1,3 +1,8 @@
+/**
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries.  All Rights Reserved.
+ * Dell EMC Confidential/Proprietary Information
+ */
+
 package com.dell.cpsd.paqx.dne.util;
 
 import com.dell.cpsd.service.engineering.standards.Device;

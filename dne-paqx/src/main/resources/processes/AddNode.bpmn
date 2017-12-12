@@ -21,7 +21,7 @@
       <bpmn:incoming>SequenceFlow_1yaw41q</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1r03k38</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="verifyNodeInformation" name="Verify Node Information" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:class="com.dell.cpsd.paqx.dne.service.delegates.VerifyNodeDetail">
+    <bpmn:serviceTask id="verifyNodeInformation" name="Verify Node Information" camunda:asyncBefore="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${verifyNodeDetail}">
       <bpmn:incoming>SequenceFlow_1fuan7p</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1vpucf9</bpmn:outgoing>
     </bpmn:serviceTask>

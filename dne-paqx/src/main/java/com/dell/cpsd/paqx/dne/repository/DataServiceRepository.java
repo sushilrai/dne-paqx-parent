@@ -8,7 +8,8 @@
 package com.dell.cpsd.paqx.dne.repository;
 
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
-import com.dell.cpsd.paqx.dne.domain.node.*;
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOData;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOProtectionDomain;
 import com.dell.cpsd.paqx.dne.domain.scaleio.ScaleIOStoragePool;
@@ -104,6 +105,7 @@ public interface DataServiceRepository
     NodeInventory getNodeInventory(String symphonyUUID);
 
     String getDomainName();
+
     boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo);
 
     DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid);
@@ -121,4 +123,6 @@ public interface DataServiceRepository
     ScaleIOProtectionDomain createProtectionDomain(String jobId, String protectionDomainId, String protectionDomainName);
 
     boolean cleanInMemoryDatabase();
+
+    List<String> getAllIpAddresses();
 }

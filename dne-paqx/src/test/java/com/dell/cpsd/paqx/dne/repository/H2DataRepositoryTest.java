@@ -63,7 +63,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * The tests for H2DataRepository.
- *
+ * <p>
  * <p>
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
@@ -145,7 +145,7 @@ public class H2DataRepositoryTest
     @Mock
     private TypedQuery<DiscoveredNodeInfo> discoveredNodeInfoTypedQuery;
 
-   @InjectMocks
+    @InjectMocks
     private H2DataRepository repository = new H2DataRepository();
 
     private Answer                  answer;
@@ -913,7 +913,7 @@ public class H2DataRepositoryTest
         doNothing().when(this.entityManager).persist(any());
         doNothing().when(this.entityManager).remove(any());
 
-        boolean result =repositorySpy.saveNodeInventory(nodeInventory);
+        boolean result = repositorySpy.saveNodeInventory(nodeInventory);
 
         assertEquals(true, result);
         verify(this.entityManager).flush();
@@ -932,7 +932,7 @@ public class H2DataRepositoryTest
         doNothing().when(this.entityManager).flush();
         doNothing().when(this.entityManager).persist(any());
 
-        boolean result =repositorySpy.saveNodeInventory(nodeInventory);
+        boolean result = repositorySpy.saveNodeInventory(nodeInventory);
 
         assertEquals(true, result);
         verify(this.entityManager).flush();
@@ -941,7 +941,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDomainName_should_return_the_host_dns_config_domain_name_if_its_not_empty()  throws Exception
+    public void getDomainName_should_return_the_host_dns_config_domain_name_if_its_not_empty() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(this.hostDnsConfigs).when(this.hostTypedQuery).getResultList();
@@ -953,7 +953,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDomainName_should_return_the_domain_name_from_the_list_of_search_domains()  throws Exception
+    public void getDomainName_should_return_the_domain_name_from_the_list_of_search_domains() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(this.hostDnsConfigs).when(this.hostTypedQuery).getResultList();
@@ -965,7 +965,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDomainName_should_return_null_when_the_host_dns_query_returns_null()  throws Exception
+    public void getDomainName_should_return_null_when_the_host_dns_query_returns_null() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(null).when(this.hostTypedQuery).getResultList();
@@ -976,7 +976,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDomainName_should_return_null_if_there_are_no_host_dns_configs()  throws Exception
+    public void getDomainName_should_return_null_if_there_are_no_host_dns_configs() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.hostTypedQuery).getResultList();
@@ -987,7 +987,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDomainName_should_return_null_if_there_are_no_search_domains()  throws Exception
+    public void getDomainName_should_return_null_if_there_are_no_search_domains() throws Exception
     {
         doReturn(this.hostTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(this.hostDnsConfigs).when(this.hostTypedQuery).getResultList();
@@ -999,7 +999,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDvSwitchNames_should_return_a_map_of_dvswitch_names()  throws Exception
+    public void getDvSwitchNames_should_return_a_map_of_dvswitch_names() throws Exception
     {
         doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn("dvswitch0", "dvswitch1", "dvswitch2").when(this.stringTypedQuery).getSingleResult();
@@ -1011,7 +1011,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDvSwitchNames_should_return_null_if_there_is_an_exception()  throws Exception
+    public void getDvSwitchNames_should_return_null_if_there_is_an_exception() throws Exception
     {
         doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
 
@@ -1021,7 +1021,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDvPortGroupNames_should_return_a_map_of_portgroup_names()  throws Exception
+    public void getDvPortGroupNames_should_return_a_map_of_portgroup_names() throws Exception
     {
         doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn("esx-mgmt", "vmotion", "sio-data1", "sio-data2").when(this.stringTypedQuery).getSingleResult();
@@ -1033,7 +1033,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getDvPortGroupNames_should_return_null_if_there_is_an_exception()  throws Exception
+    public void getDvPortGroupNames_should_return_null_if_there_is_an_exception() throws Exception
     {
         doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
 
@@ -1059,7 +1059,7 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void getScaleIoNetworkNames_should_return_null_if_there_is_an_exception()  throws Exception
+    public void getScaleIoNetworkNames_should_return_null_if_there_is_an_exception() throws Exception
     {
         doThrow(new IllegalStateException("aaaah")).when(this.entityManager).createQuery(anyString(), any());
 
@@ -1119,5 +1119,43 @@ public class H2DataRepositoryTest
 
         assertNotNull(result);
         assertThat(result, hasSize(1));
+    }
+
+    @Test
+    public void testGetAllIpAddresses() throws Exception
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Arrays.asList("1.2.3.4"), Arrays.asList("1.2.3.5"), Arrays.asList("1.2.3.6"), Arrays.asList("1.2.3.7"))
+                .when(this.stringTypedQuery).getResultList();
+
+        List<String> result = this.repository.getAllIpAddresses();
+
+        assertNotNull(result);
+        assertThat(result, hasSize(4));
+    }
+
+    @Test
+    public void testGetAllIpAddressesFiltersNulls() throws Exception
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(Arrays.asList("1.2.3.4"), null, Arrays.asList("1.2.3.6"), null)
+                .when(this.stringTypedQuery).getResultList();
+
+        List<String> result = this.repository.getAllIpAddresses();
+
+        assertNotNull(result);
+        assertThat(result, hasSize(2));
+    }
+
+    @Test
+    public void testGetAllIpAddressesWithAllNulls() throws Exception
+    {
+        doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());
+        doReturn(null).when(this.stringTypedQuery).getResultList();
+
+        List<String> result = this.repository.getAllIpAddresses();
+
+        assertNotNull(result);
+        assertThat(result, hasSize(0));
     }
 }

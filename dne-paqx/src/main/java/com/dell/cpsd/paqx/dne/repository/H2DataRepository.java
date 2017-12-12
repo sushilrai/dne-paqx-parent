@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * H2-InMemory Data Repository
@@ -907,5 +908,29 @@ public class H2DataRepository implements DataServiceRepository
         }
 
         return true;
+    }
+
+    @Override
+    public List<String> getAllIpAddresses()
+    {
+        List<String> allIps = new ArrayList<>();
+
+        TypedQuery<String> query = entityManager.createQuery("SELECT s.ip FROM ScaleIOIP as s", String.class);
+        List<String> allScaleIOIPs = query.getResultList();
+        allIps.addAll(allScaleIOIPs != null ? allScaleIOIPs : Collections.emptyList());
+
+        query = entityManager.createQuery("SELECT s.ip FROM ScaleIORoleIP as s", String.class);
+        List<String> allScaleIORoleIPs = query.getResultList();
+        allIps.addAll(allScaleIORoleIPs != null ? allScaleIORoleIPs : Collections.emptyList());
+
+        query = entityManager.createQuery("SELECT s.ip FROM VirtualNic as s", String.class);
+        List<String> allVirtualNicIps = query.getResultList();
+        allIps.addAll(allVirtualNicIps != null ? allVirtualNicIps : Collections.emptyList());
+
+        query = entityManager.createQuery("SELECT s.ipAddress FROM VMIP as s", String.class);
+        List<String> allVMIPs = query.getResultList();
+        allIps.addAll(allVMIPs != null ? allVMIPs : Collections.emptyList());
+
+        return allIps;
     }
 }
