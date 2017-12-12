@@ -15,6 +15,7 @@ import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.StoragePoolSpec;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
@@ -131,8 +132,9 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
      * Creates a valid storage pool through scaleio adapter and saves the same to H2 database
      *
      * @param protectionDomainId Protection domain id for which to create the storage pool
+     * @param storagePoolNames Names of the storage pools within that protection domain
      */
-    private Map<String, String> createValidStoragePool(final String protectionDomainId, Set<String> storagePoolNames)
+    protected Map<String, String> createValidStoragePool(final String protectionDomainId, Set<String> storagePoolNames)
     {
         final ComponentEndpointIds componentEndpointIds = nodeService.getComponentEndpointIds(COMPONENT_TYPE);
 
@@ -184,7 +186,7 @@ public class ConfigureStoragePools extends BaseWorkflowDelegate
             LOGGER.error("Failed to create storage pool", e);
             updateDelegateStatus("Failed to create storage pool: " + e.getMessage());
         }
-        if (newStoragePoolId == null || newStoragePoolId.length() == 0)
+        if (StringUtils.isEmpty(newStoragePoolId))
         {
             throw new IllegalStateException("Create storage pool request failed");
         }

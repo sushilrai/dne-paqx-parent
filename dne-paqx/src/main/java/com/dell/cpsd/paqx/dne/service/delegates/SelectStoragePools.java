@@ -250,10 +250,8 @@ public class SelectStoragePools extends BaseWorkflowDelegate
         if (CollectionUtils.size(storageResponseMessage.getDeviceToStoragePoolMap()) == CollectionUtils.size(newDevices) || CollectionUtils
                 .isEmpty(storageResponseMessage.getErrors()))
         {
-            String message = "Storage pool validated successfully.";
-            LOGGER.info(message);
             deviceMap.putAll(storageResponseMessage.getDeviceToStoragePoolMap());
-            updateDelegateStatus(message);
+            updateDelegateStatus("Storage pool validated successfully.");
             return true;
         }
         LOGGER.info("Valid storage pool not found.");
