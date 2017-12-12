@@ -48,7 +48,6 @@
     <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
       <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:asyncAfter="true" camunda:exclusive="false" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_0qxxk7u" sourceRef="selectVCenterClusters" targetRef="selectProtectionDomains" />
     <bpmn:sequenceFlow id="SequenceFlow_08ayndm" sourceRef="selectProtectionDomains" targetRef="selectStoragePools" />

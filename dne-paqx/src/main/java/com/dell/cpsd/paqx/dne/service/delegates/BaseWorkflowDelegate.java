@@ -10,6 +10,7 @@ import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -37,10 +38,22 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
     public void execute(final DelegateExecution delegateExecution) throws Exception
     {
         final RepositoryService repositoryService = delegateExecution.getProcessEngineServices().getRepositoryService();
-        final String jobId = delegateExecution.getBusinessKey() != null ? delegateExecution.getBusinessKey() : "";
         final String processInstanceId = delegateExecution.getProcessInstanceId();
         final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(delegateExecution.getProcessDefinitionId()).singleResult().getName();
-        
+        String jobId = delegateExecution.getProcessBusinessKey();
+        if (jobId == null) {
+            ExecutionEntity executionEntity = (ExecutionEntity) delegateExecution;
+            ExecutionEntity processInstance = executionEntity.getProcessInstance();
+            if (processInstance != null)
+            {
+                ExecutionEntity superProcessInstance = processInstance.getSuperExecution();
+                if (superProcessInstance != null)
+                {
+                    jobId = superProcessInstance.getProcessBusinessKey();
+                }
+            }
+        }
+
         logger.info("$$$$$$ Starting Execution on Job Id: " + jobId + " Process Instance Id: "+ processInstanceId + " Workflow: " + workflowName + " Step: " + taskName + " $$$$$$");
         preExecute(delegateExecution);
         try

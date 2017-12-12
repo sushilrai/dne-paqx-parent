@@ -14,6 +14,7 @@ import com.dell.cpsd.paqx.dne.service.model.multinode.Error;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Status;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +41,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
@@ -59,7 +59,8 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     private static final Log LOGGER = LogFactory.getLog(CamundaWorkflowServiceImpl.class);
 
     @Autowired
-    public CamundaWorkflowServiceImpl(final RuntimeService runtimeService, final HistoryService historyService,
+    public CamundaWorkflowServiceImpl(final RuntimeService runtimeService,
+                                      final HistoryService historyService,
                                       final RepositoryService repositoryService)
     {
         this.runtimeService = runtimeService;
@@ -72,16 +73,20 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     public String startWorkflow(final String processId, final Map<String, Object> inputVariables)
     {
         String businessKeyId = getIdGenerator().getNextId();
-        //final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(processId).singleResult().getName();
         final List<NodeDetail> nodeDetails = (List<NodeDetail>) inputVariables.get(NODE_DETAILS);
-        LOGGER.info("Starting Workflow with Job Id " + businessKeyId + " Node Details:");
-        try
+        LOGGER.info("Starting Job Id " + businessKeyId + " with Node Details:");
+        if (CollectionUtils.isNotEmpty(nodeDetails))
         {
-            LOGGER.info( mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodeDetails));
-        }
-        catch (JsonProcessingException e)
-        {
-            LOGGER.warn("Error Occurred processing Json from NodeDetails List", e);
+            try
+            {
+                LOGGER.info(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodeDetails));
+            }
+            catch (JsonProcessingException e)
+            {
+                LOGGER.warn("Error Occurred processing Json from NodeDetails List", e);
+            }
+        } else {
+            LOGGER.error("Node Details were not found.");
         }
         Thread processThread = new Thread(() -> runtimeService.startProcessInstanceByKey(processId, businessKeyId, inputVariables));
         processThread.start();
