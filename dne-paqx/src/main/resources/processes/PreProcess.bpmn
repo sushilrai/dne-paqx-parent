@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.11.3">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.11.2">
   <bpmn:process id="preProcess" name="Pre Process" isExecutable="true" camunda:versionTag="1.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1xg9b7l</bpmn:outgoing>
@@ -45,10 +45,6 @@
       <bpmn:incoming>SequenceFlow_08ayndm</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_116yf5e</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
-      <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
-    </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_0qxxk7u" sourceRef="selectVCenterClusters" targetRef="selectProtectionDomains" />
     <bpmn:sequenceFlow id="SequenceFlow_08ayndm" sourceRef="selectProtectionDomains" targetRef="selectStoragePools" />
     <bpmn:sequenceFlow id="SequenceFlow_116yf5e" sourceRef="selectStoragePools" targetRef="EndEvent_1cl1kmi" />
@@ -64,6 +60,10 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_12p6czj" sourceRef="inventoryVCenter" targetRef="inventoryNodes" />
     <bpmn:sequenceFlow id="SequenceFlow_09mr3f9" sourceRef="inventoryNodes" targetRef="selectVCenterClusters" />
+    <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">
+      <bpmn:incoming>SequenceFlow_0qxxk7u</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_08ayndm</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmn:error id="Error_0hu4d3v" name="Error_0k4c71h" errorCode="Inventory-Node-Failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -148,9 +148,6 @@
       <bpmndi:BPMNShape id="ServiceTask_0t5krno_di" bpmnElement="selectStoragePools">
         <dc:Bounds x="932" y="947" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1dyuci0_di" bpmnElement="selectProtectionDomains">
-        <dc:Bounds x="932" y="817" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0qxxk7u_di" bpmnElement="SequenceFlow_0qxxk7u">
         <di:waypoint xsi:type="dc:Point" x="982" y="765" />
         <di:waypoint xsi:type="dc:Point" x="982" y="817" />
@@ -199,6 +196,9 @@
           <dc:Bounds x="997" y="653" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1dyuci0_di" bpmnElement="selectProtectionDomains">
+        <dc:Bounds x="932" y="817" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
