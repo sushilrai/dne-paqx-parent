@@ -72,9 +72,9 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     public String startWorkflow(final String processId, final Map<String, Object> inputVariables)
     {
         String businessKeyId = getIdGenerator().getNextId();
-        final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(processId).singleResult().getName();
+        //final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(processId).singleResult().getName();
         final List<NodeDetail> nodeDetails = (List<NodeDetail>) inputVariables.get(NODE_DETAILS);
-        LOGGER.info("Starting Workflow " + workflowName + " with Job Id " + businessKeyId + " Node Details:");
+        LOGGER.info("Starting Workflow with Job Id " + businessKeyId + " Node Details:");
         try
         {
             LOGGER.info( mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodeDetails));
