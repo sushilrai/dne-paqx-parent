@@ -82,7 +82,6 @@ public class DelegateConstants
     public static final String SELECT_STORAGE_POOLS_FAILED                   = "Select-Storage-Pools-Failed";
     public static final String CONFIGURE_STORAGE_POOLS_FAILED                = "Configure-Storage-Pools-Failed";
     public static final String CONFIGURE_PXE_FAILED                          = "Disable-Pxe-failed";
-    public static final String ADD_NODE_TO_SYSTEM_DEFINITION_FAILED          = "Add-Node-To-System-Definition-Failed";
     public static final String SEND_INSTALL_SCALEIO_VM_PACKGES_FAILED        = "Send-Install-ScaleIo-Vm-Packages-Failed";
     public static final String INSTALL_SCALEIO_VM_PACKAGES_MESSAGE_ID        = "receiveInstallScaleIoVmPackagesMsgId";
     public static final String COMPLETE_INSTALL_SCALEIO_VM_PACKGES_FAILED    = "Complete-Install-ScaleIo-Vm-Packages-Failed";
@@ -90,12 +89,18 @@ public class DelegateConstants
     public static final String CHANGE_SCALEIO_VM_CREDENTIALS_MESSAGE_ID      = "receiveChangeScaleIoVmCredentialsMsgId";
     public static final String COMPLETE_CHANGE_SCALEIO_VM_CREDENTIALS_FAILED = "Complete-Change-ScaleIo-Vm-Credentials-Failed";
     public static final String SEND_PERFORMANCE_TUNE_SCALEIO_VM_FAILED       = "Send-Performance-Tune-ScaleIo-Vm-Failed";
-    public static final String PERFORMANCE_TUNE_SCALEIO_VM_MESSAGE_ID       = "receivePerformanceTuneScaleIoVmMsgId";
+    public static final String PERFORMANCE_TUNE_SCALEIO_VM_MESSAGE_ID        = "receivePerformanceTuneScaleIoVmMsgId";
     public static final String COMPLETE_PERFORMANCE_TUNE_SCALEIO_VM_FAILED   = "Complete-Performance-Tune-ScaleIo-Vm-Failed";
+    public static final String ADD_NODE_TO_SYSTEM_DEFINITION_FAILED          = "Add-Node-To-System-Definition-Failed";
+    public static final String SEND_ADD_NODE_TO_SYSTEM_DEFINITION_FAILED     = "Send-Node-To-System-Definition-Failed";
+    public static final String COMPLETE_ADD_NODE_TO_SYSTEM_DEFINITION_FAILED = "Complete-Node-To-System-Definition-Failed";
+    public static final String ADD_NODE_TO_SYSTEM_DEFINITION_MESSAGE_ID      = "receiveAddNodeToSystemDefinitionMsgId";
+    public static final String ADD_NODE_TO_SYSTEM_DEFINITION_ACTIVITY_ID     = "receiveAddNodeToSystemDefinition";
 
     public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED                   = "Failed";
     public static final String IN_PROGRESS              = "In Progress";
     public static final String STARTED                  = "Started";
     public static final String COMPLETED                = "Completed";
+    public static final String SUCCEEDED                = "Succeeded";
 }

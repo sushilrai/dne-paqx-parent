@@ -23,12 +23,17 @@ import com.dell.cpsd.sdk.config.SDKConfiguration;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>
@@ -41,18 +46,10 @@ import java.util.Map;
 
 @Configuration
 @ComponentScan({"com.dell.cpsd.paqx.dne.service", "com.dell.cpsd.paqx.dne.transformers", "com.dell.cpsd.paqx.dne.repository"})
-@Import({
-    RabbitConfig.class,
-    ConsumerConfig.class,
-    ProducerConfig.class,
-    SDKConfiguration.class,
-    SystemDefinitionMessenger.class,
-    AMQPClient.class,
-    PersistenceConfig.class
-})
+@Import({RabbitConfig.class, ConsumerConfig.class, ProducerConfig.class, SDKConfiguration.class, SystemDefinitionMessenger.class,
+        AMQPClient.class, PersistenceConfig.class})
 public class ServiceConfig
 {
-
     @Autowired
     private DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer;
 
@@ -71,21 +68,22 @@ public class ServiceConfig
     @Autowired
     private DataServiceRepository repository;
 
+    @Value("${executors.thread.count}")
+    private Integer threadCount;
+
     @Bean
-    public NodeService nodeServiceClient(@Autowired DelegatingMessageConsumer delegatingMessageConsumer,
-            @Autowired DneProducer dneProducer,
+    public NodeService nodeServiceClient(@Autowired DelegatingMessageConsumer delegatingMessageConsumer, @Autowired DneProducer dneProducer,
             @Autowired String replyTo)
     {
-        return new AmqpNodeService( delegatingMessageConsumer, dneProducer, replyTo, repository,
-                discoveryInfoToVCenterDomainTransformer, scaleIORestToScaleIODomainTransformer, storagePoolEssRequestTransformer);
+        return new AmqpNodeService(delegatingMessageConsumer, dneProducer, replyTo, repository, discoveryInfoToVCenterDomainTransformer,
+                scaleIORestToScaleIODomainTransformer, storagePoolEssRequestTransformer);
     }
 
     /**
      * This returns the workflow service that is used to control the add node.
-     * 
-     * @return  The workflow service that is used to control the add node.
-     * 
-     * @since   1.0
+     *
+     * @return The workflow service that is used to control the add node.
+     * @since 1.0
      */
     @Bean("addNodeWorkflowService")
     public WorkflowService addNodeWorkflowService(@Qualifier("addNodeWorkflowSteps") Map<String, Step> workflowSteps)
@@ -97,5 +95,29 @@ public class ServiceConfig
     public WorkflowService preProcessWorkflowService(@Qualifier("preProcessWorkflowSteps") Map<String, Step> workflowSteps)
     {
         return new WorkflowServiceImpl(jobRepository, workflowSteps);
+    }
+
+    @Bean("dneTaskExecutorService")
+    public ExecutorService dneTaskExecutorService()
+    {
+        return Executors.newFixedThreadPool(threadCount, dneTaskExecutorThreadFactory());
+    }
+
+    @Bean
+    ThreadFactory dneTaskExecutorThreadFactory()
+    {
+        return new ThreadFactory()
+        {
+            private final AtomicInteger idCounter = new AtomicInteger();
+            private static final String THREAD_NAME = "dne-task-executor-thread-%s";
+
+            @Override
+            public Thread newThread(final Runnable runnable)
+            {
+                return new Thread(() -> {
+                    runnable.run();
+                }, String.format(THREAD_NAME, idCounter.incrementAndGet()));
+            }
+        };
     }
 }
