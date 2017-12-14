@@ -20,6 +20,7 @@ public class DelegateConstants
 
     public static final String NODE_DETAILS            = "NodeDetails";
     public static final String NODE_DETAIL             = "NodeDetail";
+    public static final String FAILED_NODE_DETAILS     = "FailedNodeDetails";
     public static final String ESXI_CREDENTIAL_DETAILS = "ESXiCredentialDetails";
     public static final String HOSTNAME                = "Hostname";
     public static final String DATASTORE_NAME          = "DatastoreName";
@@ -39,10 +40,8 @@ public class DelegateConstants
     public static final String SCALE_IO_INFORMATION_NOT_FOUND                = "Scale-IO-Information-Missing";
     public static final String RETRIEVE_SCALE_IO_COMPONENTS_FAILED           = "Retrieve-Scale-IO-Components-Failed";
     public static final String RETRIEVE_VCENTER_COMPONENTS_FAILED            = "Retrieve-VCenter-Components-Failed";
-    public static final String NO_DISCOVERED_NODES                           = "No-Discovered-Nodes";
-    public static final String INVENTORY_NODE_FAILED                         = "Inventory-Node-Failed";
+    public static final String INVENTORY_NODES_FAILED                        = "Inventory-Nodes-Failed";
     public static final String CONFIGURE_IP_ADDRESS_FAILED                   = "Configure_IP_Address_Failed";
-    public static final String MISSING_CONFIGURE_IP_ADDRESS_DETAILS          = "Missing_Configure_IP_Address_Details";
     public static final String PING_IP_ADDRESS_FAILED                        = "Ping_IP_Address_Failed";
     public static final String CONFIGURE_OBM_SETTINGS_FAILED                 = "Configure_Obm_Settings_Failed";
     public static final String CONFIGURE_BOOT_DEVICE_FAILED                  = "Configure_Boot_Device_Failed";

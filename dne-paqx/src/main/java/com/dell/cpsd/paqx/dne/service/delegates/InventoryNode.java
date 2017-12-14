@@ -12,7 +12,6 @@ import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INVENTORY_NODE_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
 
 @Component
@@ -69,7 +67,7 @@ public class InventoryNode extends BaseWorkflowDelegate
             {
                 final String message = "Update Node Inventory request failed for Node " + nodeDetail.getServiceTag();
                 updateDelegateStatus(message, ex);
-                throw new BpmnError(INVENTORY_NODE_FAILED, message);
+                nodeDetail.setInventoryFailed(true);
             }
         }
         NodeInventory nodeInventory = null;
@@ -80,23 +78,27 @@ public class InventoryNode extends BaseWorkflowDelegate
                 nodeInventory = new NodeInventory(nodeDetail.getId(), nodeInventoryResponse);
             }
             catch (JsonProcessingException jpe) {
-                final String message = "Update Node Inventory failed due to unrecognized response for Node " + (nodeDetail==null?null:nodeDetail.getServiceTag());
+                final String message = "Update Node Inventory failed due to unrecognized response for Node " + nodeDetail.getServiceTag();
                 updateDelegateStatus(message, jpe);
-                throw new BpmnError(INVENTORY_NODE_FAILED, message);
+                nodeDetail.setInventoryFailed(true);
             }
         }
-        boolean isNodeInventorySaved = false;
         if (nodeInventory != null)
         {
-            isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
+            final boolean isNodeInventorySaved = repository.saveNodeInventory(nodeInventory);
+            if (!isNodeInventorySaved)
+            {
+                final String message = "Update Node Inventory on Node " + nodeDetail.getServiceTag() + " failed.";
+                updateDelegateStatus(message);
+                nodeDetail.setInventoryFailed(true);
+            }
         }
-        if (!isNodeInventorySaved)
+        if (nodeDetail.isInventoryFailed())
         {
-            final String message = "Update Node Inventory on Node " + nodeDetail.getServiceTag() + " failed.";
-            updateDelegateStatus(message);
-            throw new BpmnError(INVENTORY_NODE_FAILED, message);
+            delegateExecution.setVariable(NODE_DETAIL, nodeDetail);
+        } else {
+            updateDelegateStatus("Update Node Inventory was successful for Node " + nodeDetail.getServiceTag());
         }
-        updateDelegateStatus("Update Node Inventory was successful for Node " + nodeDetail.getServiceTag());
 
     }
 }
