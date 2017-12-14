@@ -18,9 +18,6 @@ package com.dell.cpsd.paqx.dne.service.delegates.utils;
 public class DelegateConstants
 {
 
-    public static final String DISCOVERED_NODES = "discoveredNodes";
-    public static final String DISCOVERED_NODE  = "discoveredNode";
-
     public static final String NODE_DETAILS            = "NodeDetails";
     public static final String NODE_DETAIL             = "NodeDetail";
     public static final String ESXI_CREDENTIAL_DETAILS = "ESXiCredentialDetails";
@@ -97,7 +94,6 @@ public class DelegateConstants
     public static final String ADD_NODE_TO_SYSTEM_DEFINITION_MESSAGE_ID      = "receiveAddNodeToSystemDefinitionMsgId";
     public static final String ADD_NODE_TO_SYSTEM_DEFINITION_ACTIVITY_ID     = "receiveAddNodeToSystemDefinition";
 
-    public static final String DELEGATE_STATUS_VARIABLE = "processStatusLogs";
     public static final String FAILED                   = "Failed";
     public static final String IN_PROGRESS              = "In Progress";
     public static final String STARTED                  = "Started";

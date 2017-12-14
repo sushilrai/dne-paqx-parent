@@ -5,18 +5,12 @@
  */
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.slf4j.Logger;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.DELEGATE_STATUS_VARIABLE;
 
 /**
  * Created by Amy_Reed on 8/15/2017.
@@ -26,7 +20,6 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
 
     private Logger logger;
     protected String taskName;
-    private List<String> delegateStatus = new CopyOnWriteArrayList<>();
 
     public BaseWorkflowDelegate(final Logger logger, final String taskName)
     {
@@ -88,21 +81,11 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
     public void preExecute(final DelegateExecution delegateExecution) {
     }
 
-    public void postExecute(final DelegateExecution delegateExecution)
-    {
-        if (CollectionUtils.isNotEmpty(delegateStatus))
-        {
-            List<String> currentDelegateStatus = (List<String>) delegateExecution.getVariable(DELEGATE_STATUS_VARIABLE);
-            if (currentDelegateStatus == null)
-            {
-                currentDelegateStatus = delegateStatus;
-            }
-            else
-            {
-                currentDelegateStatus.addAll(delegateStatus);
-            }
-            delegateExecution.setVariable(DELEGATE_STATUS_VARIABLE, currentDelegateStatus);
-        }
+    /**
+     * PostExecute functionality to allow for updating status information after execution.
+     * @param delegateExecution
+     */
+    public void postExecute(final DelegateExecution delegateExecution) {
     }
 
     public void updateDelegateStatus(final String statusString) {
@@ -116,6 +99,5 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
         {
             logger.info(statusString);
         }
-        delegateStatus.add(statusString);
     }
 }
