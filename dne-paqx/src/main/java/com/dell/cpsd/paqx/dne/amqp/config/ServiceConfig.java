@@ -8,6 +8,7 @@ package com.dell.cpsd.paqx.dne.amqp.config;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.JobRepository;
+import com.dell.cpsd.paqx.dne.service.IpAddressValidator;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.WorkflowService;
 import com.dell.cpsd.paqx.dne.service.WorkflowServiceImpl;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -104,7 +106,7 @@ public class ServiceConfig
     }
 
     @Bean
-    ThreadFactory dneTaskExecutorThreadFactory()
+    public ThreadFactory dneTaskExecutorThreadFactory()
     {
         return new ThreadFactory()
         {
@@ -119,5 +121,12 @@ public class ServiceConfig
                 }, String.format(THREAD_NAME, idCounter.incrementAndGet()));
             }
         };
+    }
+
+    @Bean
+    @Scope("prototype")
+    public IpAddressValidator ipAddressValidator(DataServiceRepository repository)
+    {
+        return new IpAddressValidator(repository);
     }
 }

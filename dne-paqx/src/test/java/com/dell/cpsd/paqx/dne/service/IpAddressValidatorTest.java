@@ -12,7 +12,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,7 +47,19 @@ public class IpAddressValidatorTest
     @Test
     public void testIsNotInRange() throws Exception
     {
-        // To do...
+        IpAddressValidator.IpAddress subnsetMask = new IpAddressValidator.IpAddress("255.255.255.0", "Subnet Mask");
+
+        List<IpAddressValidator.IpAddress> goodIpAddresses = new ArrayList<>();
+        goodIpAddresses.add(new IpAddressValidator.IpAddress("10.10.10.20", "Good Ip Address", subnsetMask));
+        goodIpAddresses.add(new IpAddressValidator.IpAddress("192.168.160.35", "Good Ip Address", subnsetMask));
+
+        goodIpAddresses.forEach(ip -> assertFalse(validator.isNotInRange(ip)));
+
+        List<IpAddressValidator.IpAddress> badIpAddresses = new ArrayList<>();
+        badIpAddresses.add(new IpAddressValidator.IpAddress("10.10.10.255", "Bad Ip Address", subnsetMask));
+        badIpAddresses.add(new IpAddressValidator.IpAddress("192.168.160.255", "Bad Ip Address", subnsetMask));
+
+        badIpAddresses.forEach(ip -> assertTrue(validator.isNotInRange(ip)));
     }
 
     @Test

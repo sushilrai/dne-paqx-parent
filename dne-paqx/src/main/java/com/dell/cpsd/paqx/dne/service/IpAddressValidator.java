@@ -8,8 +8,8 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.validator.routines.InetAddressValidator;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  */
-@Component
 public class IpAddressValidator
 {
     private final DataServiceRepository repository;
@@ -55,7 +54,11 @@ public class IpAddressValidator
      */
     public boolean isNotInRange(final IpAddress ipAddress)
     {
-        return false;
+        SubnetUtils subnetUtils = new SubnetUtils(ipAddress.getIpAddress(), ipAddress.getSubnetMask().getIpAddress());
+
+        SubnetUtils.SubnetInfo subnetInfo = subnetUtils.getInfo();
+
+        return !subnetInfo.isInRange(ipAddress.getIpAddress());
     }
 
     /**
