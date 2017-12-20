@@ -45,6 +45,9 @@ public class NodeDetail implements Serializable
     @JsonIgnore
     private boolean inventoryFailed;
 
+    @JsonIgnore
+    private boolean completed;
+
     public NodeDetail()
     {
     }
@@ -325,5 +328,15 @@ public class NodeDetail implements Serializable
     public void setInventoryFailed(final boolean inventoryFailed)
     {
         this.inventoryFailed = inventoryFailed;
+    }
+
+    public boolean isCompleted()
+    {
+        return completed;
+    }
+
+    public void setCompleted(final boolean completed)
+    {
+        this.completed = completed;
     }
 }
