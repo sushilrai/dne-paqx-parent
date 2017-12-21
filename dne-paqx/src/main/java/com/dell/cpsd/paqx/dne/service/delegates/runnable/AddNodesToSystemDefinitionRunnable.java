@@ -6,11 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates.runnable;
 
+import com.dell.cpsd.credential.model.api.Credential;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.sdk.AMQPClient;
-import com.dell.cpsd.service.cs.credential.service.api.Credential;
 import com.dell.cpsd.service.system.definition.api.Component;
 import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
 import com.dell.cpsd.service.system.definition.api.ConvergedSystem;
