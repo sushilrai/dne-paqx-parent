@@ -219,7 +219,6 @@ import static org.mockito.Mockito.doThrow;
         }
     }
 
-    @Ignore
     @Test
     public void validateStoragePoolsAndSetResponse_addDummyPool() throws Exception
     {
@@ -235,11 +234,11 @@ import static org.mockito.Mockito.doThrow;
         Error error = new Error("", "No Storage pool found.");
         errors.add(error);
         storageResponseMessage.setErrors(errors);
-        doReturn(storageResponseMessage).when(nodeService).validateStoragePools(anyList(), anyList(), anyMap(), null);
+        doReturn(storageResponseMessage).when(nodeService).validateStoragePools(anyList(), anyList(), anyMap(), anyMap());
 
         Map<String, DeviceAssignment> deviceMap = new HashMap<>();
         selectStoragePools.validateStoragePoolsAndSetResponse(deviceMap, newDevices, new HashMap<String, Map<String, HostStorageDevice>>(),
-                protectionDomains, "PD-1", null);
+                protectionDomains, "PD-1", new HashMap<>());
         assertTrue(deviceMap.isEmpty());
         assertEquals(1, protectionDomains.get(0).getStoragePools().size());
     }

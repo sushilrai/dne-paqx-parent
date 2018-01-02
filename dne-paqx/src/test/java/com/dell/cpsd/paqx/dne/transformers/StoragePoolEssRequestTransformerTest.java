@@ -29,6 +29,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -150,6 +151,38 @@ public class StoragePoolEssRequestTransformerTest
     }
 
     @Test
+    public void collectDevicesInPool_emptyPool()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 0);
+
+        StoragePool storagePool = transformer.collectDevicesInPool(scaleIOStoragePool, hostToStorageDeviceMap, null);
+
+        assertNotNull(storagePool);
+        assertEquals("1", storagePool.getId());
+        assertEquals("SP-1", storagePool.getName());
+        assertEquals("0", storagePool.getNumberOfDevices());
+        assertEquals(0, storagePool.getDevices().size());
+        assertEquals(StoragePool.Type.SSD, storagePool.getType());
+
+        storagePool.getDevices().stream().forEach(device -> {
+            assertEquals(Device.Type.SSD, device.getType());
+        });
+    }
+
+    @Test
+    public void collectDevicesInPool_emptyPoolIncorrectFlag()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(true);
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 0);
+        scaleIOStoragePool.setZeroPaddingEnabled(false);
+
+        StoragePool storagePool = transformer.collectDevicesInPool(scaleIOStoragePool, hostToStorageDeviceMap, null);
+
+        assertNull(storagePool);
+    }
+
+    @Test
     public void collectDevicesInPool_noFlash()
     {
         Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = buildHostToStorageDeviceMap(false);
@@ -183,6 +216,39 @@ public class StoragePoolEssRequestTransformerTest
         assertEquals(12, request.getStoragePools().get(0).getDevices().size());
     }
 
+    @Test
+    public void collectDevicesInPool_DneAddedDrives()
+    {
+        Map<String, Map<String, HostStorageDevice>> hostToStorageDeviceMap = new HashMap<>();
+
+        Map<String, HostStorageDevice> hostStorageDeviceMap1 = new HashMap<>();
+        hostStorageDeviceMap1.put("displayName0", buildHostStorageDevice("0", true));
+        hostStorageDeviceMap1.put("displayName1", buildHostStorageDevice("1", true));
+        hostStorageDeviceMap1.put("displayName2", buildHostStorageDevice("2", true));
+        hostToStorageDeviceMap.put("fpr1-h10.lab.vce.com", hostStorageDeviceMap1);
+
+        ScaleIOStoragePool scaleIOStoragePool = buildScaleIOStoragePool("1", 3);
+        scaleIOStoragePool.getDevices().stream().forEach(device -> device.setName(null));
+
+        Map<String, Device.Type> deviceTypeMap = new HashMap<>();
+        deviceTypeMap.put("1", Device.Type.SSD);
+        deviceTypeMap.put("2", Device.Type.SSD);
+        deviceTypeMap.put("3", Device.Type.SSD);
+
+        StoragePool storagePool = transformer.collectDevicesInPool(scaleIOStoragePool, hostToStorageDeviceMap, deviceTypeMap);
+
+        assertNotNull(storagePool);
+        assertEquals("1", storagePool.getId());
+        assertEquals("SP-1", storagePool.getName());
+        assertEquals("3", storagePool.getNumberOfDevices());
+        assertEquals(3, storagePool.getDevices().size());
+        assertEquals(StoragePool.Type.SSD, storagePool.getType());
+
+        storagePool.getDevices().stream().forEach(device -> {
+            assertEquals(Device.Type.SSD, device.getType());
+        });
+    }
+
     private ScaleIOStoragePool buildScaleIOStoragePool(String id, int numberOfDevices)
     {
         ScaleIOStoragePool storagePool = new ScaleIOStoragePool();
@@ -199,6 +265,7 @@ public class StoragePoolEssRequestTransformerTest
             device = new ScaleIODevice("" + i, "displayName" + i, null, "Normal");
             device.setSds(new ScaleIOSDS());
             device.getSds().setName("fpr1-h1" + j + ".lab.vce.com-ESX");
+            device.setDeviceCurrentPathName("/dev/disk/by-id/wwn-"+i);
             if ((i + 1) % 3 == 0)
             {
                 j++;

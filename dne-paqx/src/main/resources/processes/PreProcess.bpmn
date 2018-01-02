@@ -56,7 +56,6 @@
     <bpmn:serviceTask id="inventoryNodes" name="Inventory Nodes" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${inventoryNode}">
       <bpmn:incoming>SequenceFlow_12p6czj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ydwbh8</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:asyncAfter="true" camunda:exclusive="false" camunda:collection="${NodeDetails}" camunda:elementVariable="NodeDetail" />
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_12p6czj" sourceRef="inventoryVCenter" targetRef="inventoryNodes" />
     <bpmn:serviceTask id="selectProtectionDomains" name="Select Protection Domains" camunda:asyncAfter="true" camunda:exclusive="false" camunda:delegateExpression="${selectProtectionDomains}">

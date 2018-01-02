@@ -10,6 +10,8 @@ import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
+import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -18,7 +20,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAILS;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -40,64 +47,89 @@ public class InventoryNodeTest
 
     private InventoryNode inventoryNode;
 
-    private NodeDetail nodeDetail;
-    private String nodeInventoryResponse = "TestResponse";
+    private List<NodeDetail>    nodeDetails = new ArrayList<>();
+    private Map<String, Object> nodeInventoryResponse;
 
     @Before
     public void setUp() throws Exception
     {
         inventoryNode = spy(new InventoryNode(nodeService, dataServiceRepository));
 
-        nodeDetail = new NodeDetail("1", "abc");
+        nodeInventoryResponse = new HashMap<>();
+        nodeInventoryResponse.put("1", "{\"name\":\"name-1\"}");
 
-        doReturn(nodeDetail).when(delegateExecution).getVariable(NODE_DETAIL);
+        NodeDetail nodeDetail1 = new NodeDetail("1", "abc");
+        nodeDetails.add(nodeDetail1);
+        NodeDetail nodeDetail2 = new NodeDetail("2", "pqr");
+        nodeDetails.add(nodeDetail2);
 
-        doReturn(nodeInventoryResponse).when(nodeService).listNodeInventory("1");
+        doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
+
+        doReturn(nodeInventoryResponse).when(nodeService).listNodeInventory(null);
 
         doReturn(true).when(dataServiceRepository).saveNodeInventory(any());
 
     }
 
-    @Ignore
     @Test
     public void testSuccessful() throws Exception
     {
         inventoryNode.delegateExecute(delegateExecution);
     }
 
-    @Ignore
     @Test
     public void testServiceExecutionException() throws Exception
     {
         Exception e = new ServiceExecutionException("ServiceExecutionException");
-        doThrow(e).when(nodeService).listNodeInventory("1");
+        doThrow(e).when(nodeService).listNodeInventory(null);
         inventoryNode.delegateExecute(delegateExecution);
-        assertTrue(nodeDetail.isInventoryFailed());
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory for Node abc");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed for Node abc", e);
+        nodeDetails.stream().forEach(nodeDetail -> {
+            assertTrue(nodeDetail.isInventoryFailed());
+        });
+        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
     }
 
-    @Ignore
     @Test
     public void testServiceTimeoutException() throws Exception
     {
-        Exception e = new ServiceExecutionException("ServiceExecutionException");
-        doThrow(e).when(nodeService).listNodeInventory("1");
+        Exception e = new ServiceTimeoutException("ServiceTimeoutException");
+        doThrow(e).when(nodeService).listNodeInventory(null);
         inventoryNode.delegateExecute(delegateExecution);
-        assertTrue(nodeDetail.isInventoryFailed());
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory for Node abc");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed for Node abc", e);
+        nodeDetails.stream().forEach(nodeDetail -> {
+            assertTrue(nodeDetail.isInventoryFailed());
+        });
+        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
 
     }
 
-    @Ignore
     @Test
     public void testNodeInventorySaveFailed() throws Exception
     {
         doReturn(false).when(dataServiceRepository).saveNodeInventory(any());
         inventoryNode.delegateExecute(delegateExecution);
-        assertTrue(nodeDetail.isInventoryFailed());
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory for Node abc");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory on Node abc failed.");
+        nodeDetails.stream().forEach(nodeDetail -> {
+            assertTrue(nodeDetail.isInventoryFailed());
+        });
+        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+        verify(inventoryNode).updateDelegateStatus("Update Node Inventory on Node with uuid 1 failed.");
+    }
+
+    @Test
+    public void testJsonProcessingException() throws Exception
+    {
+        Map<String, Object> nodeInventoryResponse = new HashMap<>();
+        nodeInventoryResponse.put("1", new Object());
+        doReturn(nodeInventoryResponse).when(nodeService).listNodeInventory(null);
+
+        inventoryNode.delegateExecute(delegateExecution);
+
+        nodeDetails.stream().forEach(nodeDetail -> {
+            assertTrue(nodeDetail.isInventoryFailed());
+        });
+
+        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+        verify(inventoryNode).updateDelegateStatus("Update Node Inventory on Node with uuid 1 failed.");
     }
 }
