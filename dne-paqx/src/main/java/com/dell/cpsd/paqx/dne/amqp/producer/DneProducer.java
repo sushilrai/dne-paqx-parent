@@ -134,6 +134,13 @@ public interface DneProducer
     void publishInstallEsxiRequest(InstallESXiRequestMessage request);
 
     /**
+     * Install RHEL on a host
+     *
+     * @param request
+     */
+    void publishInstallRhelRequest(InstallRHELRequestMessage request);
+
+    /**
      * Add ESXi host to vCenter
      *
      * @param request

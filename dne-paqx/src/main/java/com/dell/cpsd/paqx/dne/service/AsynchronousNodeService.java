@@ -7,6 +7,7 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.EsxiInstallationInfo;
+import com.dell.cpsd.RhelInstallationInfo;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
 import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.model.BootDeviceIdracStatus;
@@ -39,6 +40,10 @@ public interface AsynchronousNodeService
             String messageId, EsxiInstallationInfo esxiInstallationInfo);
 
     void requestInstallEsxi(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
+
+    <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallRhel(String processId, String activityId,
+                                                                                         String messageId, RhelInstallationInfo rhelInstallationInfo);
+    void requestInstallRhel(AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException;
 
     AsynchronousNodeServiceCallback<?> sendRebootHostRequest(String processId, String activityId, String messageId,
             HostPowerOperationRequestMessage requestMessage);

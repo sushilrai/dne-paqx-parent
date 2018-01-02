@@ -32,6 +32,7 @@ public class DelegateConstants
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
     public static final String INSTALL_ESXI_MESSAGE_ID          = "installEsxiResponseReceived";
+    public static final String INSTALL_RHEL_MESSAGE_ID          = "installRhelResponseReceived";
     public static final String REBOOT_HOST_MESSAGE_ID           = "rebootHostResponseReceived";
     public static final String CONFIGURE_PXE_BOOT_MESSAGE_ID    = "disablePxeResponseReceived";
 
@@ -48,6 +49,7 @@ public class DelegateConstants
     public static final String CONFIGURE_BOOT_DEVICE_FAILED                   = "Configure_Boot_Device_Failed";
     public static final String RETRIEVE_DEFAULT_ESXI_CREDENTIALS_FAILED       = "Retrieve-Default-Esxi-Credentials";
     public static final String INSTALL_ESXI_FAILED                            = "Install-Esxi-Failed";
+    public static final String INSTALL_RHEL_FAILED                            = "Install-Rhel-Failed";
     public static final String ADD_HOST_TO_CLUSTER_FAILED                     = "Add-Host-To-Cluster-Failed";
     public static final String FIND_VCLUSTER_FAILED                           = "Find-VCluster-Failed";
     public static final String APPLY_ESXI_LICENSE_FAILED                      = "Apply-Esxi-License-Failed";
@@ -68,6 +70,7 @@ public class DelegateConstants
     public static final String DEPLOY_SCALEIO_VM_FAILED                       = "Deploy-ScaleIo-Vm-Failed";
     public static final String UPDATE_PCI_PASSTHROUGH                         = "Update-Pci-Passthrough";
     public static final String SEND_INSTALL_ESXI_FAILED                       = "Send-Install-Esxi-Failed";
+    public static final String SEND_INSTALL_RHEL_FAILED                       = "Send-Install-Rhel-Failed";
     public static final String NOTIFY_NODE_STATUS_STARTED_FAILED              = "Notify-Node-Status-Started-Failed";
     public static final String NOTIFY_NODE_STATUS_COMPLETED_FAILED            = "Notify-Node-Status-Completed-Failed";
     public static final String NOTIFY_NODE_STATUS_UPDATE_FAILED               = "Notify-node-status-update-failed";

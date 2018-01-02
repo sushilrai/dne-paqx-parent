@@ -14,6 +14,9 @@ import com.dell.cpsd.ConfigurePxeBootResponseMessage;
 import com.dell.cpsd.EsxiInstallationInfo;
 import com.dell.cpsd.InstallESXiRequestMessage;
 import com.dell.cpsd.InstallESXiResponseMessage;
+import com.dell.cpsd.RhelInstallationInfo;
+import com.dell.cpsd.InstallRHELRequestMessage;
+import com.dell.cpsd.InstallRHELResponseMessage;
 import com.dell.cpsd.MessageProperties;
 import com.dell.cpsd.common.logging.ILogger;
 import com.dell.cpsd.paqx.dne.amqp.callback.AsynchronousNodeServiceCallback;
@@ -60,6 +63,7 @@ import java.util.stream.Collectors;
 
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.CONFIGURE_PXE_BOOT;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL_ESXI;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL_RHEL;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
 
 public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager implements ServiceCallbackRegistry, AsynchronousNodeService
@@ -386,6 +390,71 @@ public class AmqpAsynchronousNodeService extends AbstractServiceCallbackManager 
         {
             LOGGER.error("Exception occurred", e);
             throw new TaskResponseFailureException(INSTALL_ESXI.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public <T extends ServiceResponse<?>> AsynchronousNodeServiceCallback<?> requestInstallRhel(final String processId,
+                                                                                                final String activityId,
+                                                                                                final String messageId,
+                                                                                                final RhelInstallationInfo rhelInstallationInfo)
+    {
+
+        AsynchronousNodeServiceCallback<?> response = null;
+        try
+        {
+            final InstallRHELRequestMessage requestMessage = new InstallRHELRequestMessage();
+            final String correlationId = UUID.randomUUID().toString();
+            requestMessage.setMessageProperties(new com.dell.cpsd.MessageProperties(new Date(), correlationId, replyTo));
+            requestMessage.setRhelInstallationInfo(rhelInstallationInfo);
+
+            response = processRequest(processId, activityId, messageId, 0L, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return correlationId;
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishInstallRhelRequest(requestMessage);
+                }
+            });
+
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(" An unexpected exception occurred requesting Installation of RHEL on Node.", e);
+        }
+        return response;
+    }
+
+    @Override
+    public void requestInstallRhel(final AsynchronousNodeServiceCallback<?> serviceCallback) throws TaskResponseFailureException
+    {
+        try
+        {
+            final InstallRHELResponseMessage responseMessage = processResponse(serviceCallback,
+                    InstallRHELResponseMessage.class);
+            if (responseMessage == null)
+            {
+                final String error = "Response message is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(INSTALL_RHEL.getCode(), error);
+            }
+
+            if (!"succeeded".equalsIgnoreCase(responseMessage.getStatus()))
+            {
+                LOGGER.error(responseMessage.getInstallRHELErrorDescription());
+                throw new TaskResponseFailureException(INSTALL_RHEL.getCode(), responseMessage.getInstallRHELErrorDescription());
+            }
+        }
+        catch (ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(INSTALL_RHEL.getCode(), e.getMessage());
         }
     }
 

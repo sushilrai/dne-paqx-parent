@@ -214,6 +214,21 @@ public class AmqpDneProducer implements DneProducer
      * {@inheritDoc}
      */
     @Override
+    public void publishInstallRhelRequest(final InstallRHELRequestMessage request)
+    {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(InstallRHELRequestMessage.class);
+
+        if (endpointHelper != null)
+        {
+            LOGGER.info("Publish Install RHEL License request from DNE Service.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void publishAddHostToVCenter(final ClusterOperationRequestMessage request)
     {
         AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ClusterOperationRequestMessage.class);

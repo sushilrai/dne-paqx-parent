@@ -42,7 +42,8 @@ public enum TaskResponseExceptionCode
     CREATE_STORAGE_POOL(1023),
     CREATE_PROTECTION_DOMAIN(1024),
     CONFIGURE_PXE_BOOT(1025),
-    INSTALL_ESXI(1026);
+    INSTALL_ESXI(1026),
+    INSTALL_RHEL(1027);
 
     private final int code;
 

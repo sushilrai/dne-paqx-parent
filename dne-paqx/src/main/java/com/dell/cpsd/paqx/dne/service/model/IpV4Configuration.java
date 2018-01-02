@@ -23,6 +23,11 @@ public class IpV4Configuration
 
     private String esxiManagementNetworkMask;
 
+    private String storageOnlyManagementIpAddress;
+    private String storageOnlyManagementNetworkMask;
+    private String storageOnlyManagementGateway;
+    private Integer storageOnlyManagementVlan;
+
     public String getEsxiManagementIpAddress()
     {
         return esxiManagementIpAddress;
@@ -51,5 +56,38 @@ public class IpV4Configuration
     public void setEsxiManagementNetworkMask(final String esxiManagementNetworkMask)
     {
         this.esxiManagementNetworkMask = esxiManagementNetworkMask;
+    }
+
+    public String getStorageOnlyManagementIpAddress()
+    {
+        return storageOnlyManagementIpAddress;
+    }
+
+    public String getStorageOnlyManagementNetworkMask() {
+        return storageOnlyManagementNetworkMask;
+    }
+
+    public String getStorageOnlyManagementGateway() {
+        return storageOnlyManagementGateway;
+    }
+
+    public void setStorageOnlyManagementIpAddress(final String storageOnlyManagementIpAddress) {
+        this.storageOnlyManagementIpAddress = storageOnlyManagementIpAddress;
+    }
+
+    public void setStorageOnlyManagementNetworkMask(final String storageOnlyManagementNetworkMask) {
+        this.storageOnlyManagementNetworkMask = storageOnlyManagementNetworkMask;
+    }
+
+    public void setStorageOnlyManagementGateway(final String storageOnlyManagementGateway) {
+        this.storageOnlyManagementGateway = storageOnlyManagementGateway;
+    }
+
+    public Integer getStorageOnlyManagementVlan() {
+        return storageOnlyManagementVlan;
+    }
+
+    public void setStorageOnlyManagementVlan(final Integer storageOnlyManagementVlan) {
+        this.storageOnlyManagementVlan = storageOnlyManagementVlan;
     }
 }
