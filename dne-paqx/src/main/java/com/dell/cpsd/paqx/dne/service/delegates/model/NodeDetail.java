@@ -43,9 +43,6 @@ public class NodeDetail implements Serializable
     private String protectionDomainId;
 
     @JsonIgnore
-    private boolean inventoryFailed;
-
-    @JsonIgnore
     private boolean completed;
 
     public NodeDetail()
@@ -318,16 +315,6 @@ public class NodeDetail implements Serializable
     public void setClusterName(final String clusterName)
     {
         this.clusterName = clusterName;
-    }
-
-    public boolean isInventoryFailed()
-    {
-        return inventoryFailed;
-    }
-
-    public void setInventoryFailed(final boolean inventoryFailed)
-    {
-        this.inventoryFailed = inventoryFailed;
     }
 
     public boolean isCompleted()

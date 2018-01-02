@@ -12,6 +12,7 @@ import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -47,7 +48,7 @@ public class InventoryNodeTest
 
     private InventoryNode inventoryNode;
 
-    private List<NodeDetail>    nodeDetails = new ArrayList<>();
+    private List<NodeDetail> nodeDetails = new ArrayList<>();
     private Map<String, Object> nodeInventoryResponse;
 
     @Before
@@ -62,8 +63,6 @@ public class InventoryNodeTest
         nodeDetails.add(nodeDetail1);
         NodeDetail nodeDetail2 = new NodeDetail("2", "pqr");
         nodeDetails.add(nodeDetail2);
-
-        doReturn(nodeDetails).when(delegateExecution).getVariable(NODE_DETAILS);
 
         doReturn(nodeInventoryResponse).when(nodeService).listNodeInventory(null);
 
@@ -82,12 +81,15 @@ public class InventoryNodeTest
     {
         Exception e = new ServiceExecutionException("ServiceExecutionException");
         doThrow(e).when(nodeService).listNodeInventory(null);
-        inventoryNode.delegateExecute(delegateExecution);
-        nodeDetails.stream().forEach(nodeDetail -> {
-            assertTrue(nodeDetail.isInventoryFailed());
-        });
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
+        try
+        {
+            inventoryNode.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError er)
+        {
+            verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+            verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
+        }
     }
 
     @Test
@@ -95,25 +97,30 @@ public class InventoryNodeTest
     {
         Exception e = new ServiceTimeoutException("ServiceTimeoutException");
         doThrow(e).when(nodeService).listNodeInventory(null);
-        inventoryNode.delegateExecute(delegateExecution);
-        nodeDetails.stream().forEach(nodeDetail -> {
-            assertTrue(nodeDetail.isInventoryFailed());
-        });
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
-
+        try
+        {
+            inventoryNode.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError er)
+        {
+            verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+            verify(inventoryNode).updateDelegateStatus("Update Node Inventory request failed.", e);
+        }
     }
 
     @Test
     public void testNodeInventorySaveFailed() throws Exception
     {
         doReturn(false).when(dataServiceRepository).saveNodeInventory(any());
-        inventoryNode.delegateExecute(delegateExecution);
-        nodeDetails.stream().forEach(nodeDetail -> {
-            assertTrue(nodeDetail.isInventoryFailed());
-        });
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory on Node with uuid 1 failed.");
+        try
+        {
+            inventoryNode.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError e)
+        {
+            verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+            verify(inventoryNode).updateDelegateStatus("Failed to update Node Inventory on Node(s) with uuid 1");
+        }
     }
 
     @Test
@@ -123,13 +130,14 @@ public class InventoryNodeTest
         nodeInventoryResponse.put("1", new Object());
         doReturn(nodeInventoryResponse).when(nodeService).listNodeInventory(null);
 
-        inventoryNode.delegateExecute(delegateExecution);
-
-        nodeDetails.stream().forEach(nodeDetail -> {
-            assertTrue(nodeDetail.isInventoryFailed());
-        });
-
-        verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
-        verify(inventoryNode).updateDelegateStatus("Update Node Inventory on Node with uuid 1 failed.");
+        try
+        {
+            inventoryNode.delegateExecute(delegateExecution);
+        }
+        catch (BpmnError e)
+        {
+            verify(inventoryNode).updateDelegateStatus("Requesting Update Node Inventory.");
+            verify(inventoryNode).updateDelegateStatus("Update Node Inventory failed due to unrecognized response for Node(s) with uuid 1");
+        }
     }
 }
