@@ -24,6 +24,16 @@ public class NodeDetail implements Serializable
     private String esxiManagementGatewayIpAddress;
     private String esxiManagementSubnetMask;
     private String esxiManagementHostname;
+    private String storageOnlyManagementHostname;
+    private String storageOnlyManagementIpAddress;
+    private String storageOnlyManagementSubnetMask;
+    private String storageOnlyManagementGateway;
+    private String storageOnlyData1IpAddress;
+    private String storageOnlyData1SubnetMask;
+    private String storageOnlyData1Gateway;
+    private String storageOnlyData2IpAddress;
+    private String storageOnlyData2SubnetMask;
+    private String storageOnlyData2Gateway;
 
     private String scaleIoData1SvmIpAddress;
     private String scaleIoData1SvmSubnetMask;
@@ -41,18 +51,7 @@ public class NodeDetail implements Serializable
     private String vMotionManagementSubnetMask;
     private String protectionDomainName;
     private String protectionDomainId;
-
-    private String storageOnlyManagementHostname;
-    private String storageOnlyManagementIpAddress;
-    private String storageOnlyManagementSubnetMask;
-    private String storageOnlyManagementGateway;
-    private String storageOnlyData1IpAddress;
-    private String storageOnlyData1SubnetMask;
-    private String storageOnlyData1Gateway;
-    private String storageOnlyData2IpAddress;
-    private String storageOnlyData2SubnetMask;
-    private String storageOnlyData2Gateway;
-
+    
     @JsonIgnore
     private boolean completed;
 
@@ -268,76 +267,8 @@ public class NodeDetail implements Serializable
         this.deviceToDeviceStoragePool = deviceToDeviceStoragePool;
     }
 
-    public String getId()
-    {
-        return id;
-    }
 
-    public void setId(final String id)
-    {
-        this.id = id;
-    }
-
-    public String getServiceTag()
-    {
-        return serviceTag;
-    }
-
-    public void setServiceTag(final String serviceTag)
-    {
-        this.serviceTag = serviceTag;
-    }
-
-    public String getScaleIoSvmManagementIpAddress()
-    {
-        return scaleIoSvmManagementIpAddress;
-    }
-
-    public void setScaleIoSvmManagementIpAddress(final String scaleIoSvmManagementIpAddress)
-    {
-        this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
-    }
-
-    public String getScaleIoSvmManagementGatewayAddress()
-    {
-        return scaleIoSvmManagementGatewayAddress;
-    }
-
-    public void setScaleIoSvmManagementGatewayAddress(final String scaleIoSvmManagementGatewayAddress)
-    {
-        this.scaleIoSvmManagementGatewayAddress = scaleIoSvmManagementGatewayAddress;
-    }
-
-    public String getScaleIoSvmManagementSubnetMask()
-    {
-        return scaleIoSvmManagementSubnetMask;
-    }
-
-    public void setScaleIoSvmManagementSubnetMask(final String scaleIoSvmManagementSubnetMask)
-    {
-        this.scaleIoSvmManagementSubnetMask = scaleIoSvmManagementSubnetMask;
-    }
-
-    public String getClusterName()
-    {
-        return clusterName;
-    }
-
-    public void setClusterName(final String clusterName)
-    {
-        this.clusterName = clusterName;
-    }
-
-    public boolean isCompleted()
-    {
-        return completed;
-    }
-
-    public void setCompleted(final boolean completed)
-    {
-        this.completed = completed;
-    }
-
+    /* Storage Only Node parameters */
     public String getStorageOnlyManagementHostname()
     {
         return storageOnlyManagementHostname;
@@ -436,5 +367,75 @@ public class NodeDetail implements Serializable
     public void setStorageOnlyData2Gateway(final String storageOnlyData2GW)
     {
         this.storageOnlyData2Gateway = storageOnlyData2GW;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
+    public void setId(final String id)
+    {
+        this.id = id;
+    }
+
+    public String getServiceTag()
+    {
+        return serviceTag;
+    }
+
+    public void setServiceTag(final String serviceTag)
+    {
+        this.serviceTag = serviceTag;
+    }
+
+    public String getScaleIoSvmManagementIpAddress()
+    {
+        return scaleIoSvmManagementIpAddress;
+    }
+
+    public void setScaleIoSvmManagementIpAddress(final String scaleIoSvmManagementIpAddress)
+    {
+        this.scaleIoSvmManagementIpAddress = scaleIoSvmManagementIpAddress;
+    }
+
+    public String getScaleIoSvmManagementGatewayAddress()
+    {
+        return scaleIoSvmManagementGatewayAddress;
+    }
+
+    public void setScaleIoSvmManagementGatewayAddress(final String scaleIoSvmManagementGatewayAddress)
+    {
+        this.scaleIoSvmManagementGatewayAddress = scaleIoSvmManagementGatewayAddress;
+    }
+
+    public String getScaleIoSvmManagementSubnetMask()
+    {
+        return scaleIoSvmManagementSubnetMask;
+    }
+
+    public void setScaleIoSvmManagementSubnetMask(final String scaleIoSvmManagementSubnetMask)
+    {
+        this.scaleIoSvmManagementSubnetMask = scaleIoSvmManagementSubnetMask;
+    }
+
+    public String getClusterName()
+    {
+        return clusterName;
+    }
+
+    public void setClusterName(final String clusterName)
+    {
+        this.clusterName = clusterName;
+    }
+
+    public boolean isCompleted()
+    {
+        return completed;
+    }
+
+    public void setCompleted(final boolean completed)
+    {
+        this.completed = completed;
     }
 }
