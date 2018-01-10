@@ -42,6 +42,17 @@ public class NodeDetail implements Serializable
     private String protectionDomainName;
     private String protectionDomainId;
 
+    private String storageOnlyManagementHostname;
+    private String storageOnlyManagementIpAddress;
+    private String storageOnlyManagementSubnetMask;
+    private String storageOnlyManagementGateway;
+    private String storageOnlyData1IpAddress;
+    private String storageOnlyData1SubnetMask;
+    private String storageOnlyData1Gateway;
+    private String storageOnlyData2IpAddress;
+    private String storageOnlyData2SubnetMask;
+    private String storageOnlyData2Gateway;
+
     @JsonIgnore
     private boolean completed;
 
@@ -325,5 +336,105 @@ public class NodeDetail implements Serializable
     public void setCompleted(final boolean completed)
     {
         this.completed = completed;
+    }
+
+    public String getStorageOnlyManagementHostname()
+    {
+        return storageOnlyManagementHostname;
+    }
+
+    public void setStorageOnlyManagementHostname(final String soManagementHostname)
+    {
+        this.storageOnlyManagementHostname = soManagementHostname;
+    }
+
+    public String getStorageOnlyManagementIpAddress()
+    {
+        return storageOnlyManagementIpAddress;
+    }
+
+    public String getStorageOnlyManagementSubnetMask()
+    {
+        return storageOnlyManagementSubnetMask;
+    }
+
+    public String getStorageOnlyManagementGateway()
+    {
+        return storageOnlyManagementGateway;
+    }
+
+    public String getStorageOnlyData1IpAddress()
+    {
+        return storageOnlyData1IpAddress;
+    }
+
+    public String getStorageOnlyData1SubnetMask()
+    {
+        return storageOnlyData1SubnetMask;
+    }
+
+    public String getStorageOnlyData1Gateway()
+    {
+        return storageOnlyData1Gateway;
+    }
+
+    public String getStorageOnlyData2IpAddress()
+    {
+        return storageOnlyData2IpAddress;
+    }
+
+    public String getStorageOnlyData2SubnetMask()
+    {
+        return storageOnlyData2SubnetMask;
+    }
+
+    public String getStorageOnlyData2Gateway()
+    {
+        return storageOnlyData2Gateway;
+    }
+
+    public void setStorageOnlyManagementIpAddress(final String storageOnlyManagementIp)
+    {
+        this.storageOnlyManagementIpAddress = storageOnlyManagementIp;
+    }
+
+    public void setStorageOnlyManagementSubnetMask(final String storageOnlyManagementSubnet)
+    {
+        this.storageOnlyManagementSubnetMask = storageOnlyManagementSubnet;
+    }
+
+    public void setStorageOnlyManagementGateway(final String storageOnlyManagementGW)
+    {
+        this.storageOnlyManagementGateway = storageOnlyManagementGW;
+    }
+
+    public void setStorageOnlyData1IpAddress(final String storageOnlyData1Ip)
+    {
+        this.storageOnlyData1IpAddress = storageOnlyData1Ip;
+    }
+
+    public void setStorageOnlyData1SubnetMask(final String storageOnlyData1Subnet)
+    {
+        this.storageOnlyData1SubnetMask = storageOnlyData1Subnet;
+    }
+
+    public void setStorageOnlyData1Gateway(final String storageOnlyData1GW)
+    {
+        this.storageOnlyData1Gateway = storageOnlyData1GW;
+    }
+
+    public void setStorageOnlyData2IpAddress(final String storageOnlyData2Ip)
+    {
+        this.storageOnlyData2IpAddress = storageOnlyData2Ip;
+    }
+
+    public void setStorageOnlyData2SubnetMask(final String storageOnlyData2Subnet)
+    {
+        this.storageOnlyData2SubnetMask = storageOnlyData2Subnet;
+    }
+
+    public void setStorageOnlyData2Gateway(final String storageOnlyData2GW)
+    {
+        this.storageOnlyData2Gateway = storageOnlyData2GW;
     }
 }
