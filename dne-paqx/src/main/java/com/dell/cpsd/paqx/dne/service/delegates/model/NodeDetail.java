@@ -338,6 +338,7 @@ public class NodeDetail implements Serializable
         this.completed = completed;
     }
 
+    /* Storage Only parameter */
     public String getStorageOnlyManagementHostname()
     {
         return storageOnlyManagementHostname;
