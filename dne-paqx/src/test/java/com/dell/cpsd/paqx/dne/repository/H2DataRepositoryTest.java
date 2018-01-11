@@ -1095,33 +1095,6 @@ public class H2DataRepositoryTest
     }
 
     @Test
-    public void saveDiscoveredNodeInfo_should_save_discovered_node_info() throws Exception
-    {
-        doReturn(this.discoveredNodeInfoTypedQuery).when(this.entityManager).createQuery(anyString(), any());
-        doReturn(this.discoveredNodeInfo).when(this.discoveredNodeInfoTypedQuery).getSingleResult();
-        doNothing().when(this.entityManager).remove(any());
-
-        boolean result = this.repository.saveDiscoveredNodeInfo(this.discoveredNodeInfo);
-
-        assertThat(result, is(true));
-        verify(this.entityManager).remove(any());
-        verify(this.entityManager).persist(any());
-        verify(this.entityManager).flush();
-    }
-
-    @Test
-    public void getDiscoveredNodeInfo_should_return_a_list_of_discovered_node_infos() throws Exception
-    {
-        doReturn(this.discoveredNodeInfoTypedQuery).when(this.entityManager).createQuery(anyString(), any());
-        doReturn(Arrays.asList(this.discoveredNodeInfo)).when(this.discoveredNodeInfoTypedQuery).getResultList();
-
-        List<DiscoveredNodeInfo> result = this.repository.getDiscoveredNodeInfo();
-
-        assertNotNull(result);
-        assertThat(result, hasSize(1));
-    }
-
-    @Test
     public void testGetAllIpAddresses() throws Exception
     {
         doReturn(this.stringTypedQuery).when(this.entityManager).createQuery(anyString(), any());

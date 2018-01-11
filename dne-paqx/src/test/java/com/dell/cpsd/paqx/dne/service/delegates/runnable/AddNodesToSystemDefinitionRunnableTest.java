@@ -5,7 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates.runnable;
 
-import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
@@ -16,12 +16,16 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.Execution;
 import org.camunda.bpm.engine.runtime.ExecutionQuery;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,10 +60,18 @@ public class AddNodesToSystemDefinitionRunnableTest
     private NodeDetail                         nodeDetail;
     private List<NodeDetail>                   completedNodeDetails;
     private ConvergedSystem                    convergedSystem;
-    private DiscoveredNodeInfo                 discoveredNodeInfo;
+    private NodeInventory                      nodeInventory;
     private Group                              systemComputeGroup;
 
     private String executionId = "executionId";
+
+    private static String jsonString;
+
+    @BeforeClass
+    public static void setUpNodeInventory() throws Exception
+    {
+        jsonString = new String(Files.readAllBytes(Paths.get("src/test/resources/node_inventory.json")), StandardCharsets.UTF_8);
+    }
 
     @Before
     public void setUp() throws Exception
@@ -78,13 +90,15 @@ public class AddNodesToSystemDefinitionRunnableTest
         convergedSystem = new ConvergedSystem();
         convergedSystem.setUuid("cs-uuid-1");
 
-        discoveredNodeInfo = new DiscoveredNodeInfo("model", "modelFamily", "product", "productFamily", "serialNumber", "symphonyUUID");
-
         systemComputeGroup = new Group();
         systemComputeGroup.setName("SystemCompute");
         systemComputeGroup.setUuid("group-uuid-1");
 
         convergedSystem.setGroups(Collections.singletonList(systemComputeGroup));
+
+        nodeInventory = new NodeInventory();
+        nodeInventory.setSymphonyUUID(nodeDetail.getId());
+        nodeInventory.setNodeInventory(jsonString);
     }
 
     @Test
@@ -123,11 +137,30 @@ public class AddNodesToSystemDefinitionRunnableTest
     }
 
     @Test
+    public void testNoNodeInventoryException() throws Exception
+    {
+        when(sdkAMQPClient.getConvergedSystems()).thenReturn(Collections.singletonList(convergedSystem));
+        when(sdkAMQPClient.getComponents(any())).thenReturn(Collections.singletonList(convergedSystem));
+        when(repository.getNodeInventory(anyString())).thenReturn(null);
+        when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
+        when(executionQuery.processInstanceId(anyString())).thenReturn(executionQuery);
+        when(executionQuery.activityId(anyString())).thenReturn(executionQuery);
+        when(executionQuery.singleResult()).thenReturn(execution);
+        when(execution.getId()).thenReturn(executionId);
+
+        addNodesToSystemDefinitionRunnable.run();
+
+        ArgumentCaptor<String> resultCaptor = ArgumentCaptor.forClass(String.class);
+        verify(runtimeService).setVariable(anyString(), anyString(), resultCaptor.capture());
+        assertThat(resultCaptor.getValue(), containsString("No node inventory"));
+    }
+
+    @Test
     public void testNoDiscoveredNodeInfoException() throws Exception
     {
         when(sdkAMQPClient.getConvergedSystems()).thenReturn(Collections.singletonList(convergedSystem));
         when(sdkAMQPClient.getComponents(any())).thenReturn(Collections.singletonList(convergedSystem));
-        when(repository.getDiscoveredNodeInfo(anyString())).thenReturn(null);
+        when(repository.getNodeInventory(anyString())).thenReturn(new NodeInventory());
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.processInstanceId(anyString())).thenReturn(executionQuery);
         when(executionQuery.activityId(anyString())).thenReturn(executionQuery);
@@ -164,7 +197,7 @@ public class AddNodesToSystemDefinitionRunnableTest
         when(sdkAMQPClient.getConvergedSystems()).thenReturn(Collections.singletonList(convergedSystem));
         when(sdkAMQPClient.getComponents(any())).thenReturn(Collections.singletonList(convergedSystem));
         when(sdkAMQPClient.addComponentToConvergedSystem(any(), any(), anyList(), anyString())).thenReturn(Collections.emptyList());
-        when(repository.getDiscoveredNodeInfo(anyString())).thenReturn(discoveredNodeInfo);
+        when(repository.getNodeInventory(anyString())).thenReturn(nodeInventory);
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.processInstanceId(anyString())).thenReturn(executionQuery);
         when(executionQuery.activityId(anyString())).thenReturn(executionQuery);

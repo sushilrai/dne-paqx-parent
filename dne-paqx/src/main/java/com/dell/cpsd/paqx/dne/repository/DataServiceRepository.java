@@ -108,12 +108,6 @@ public interface DataServiceRepository
 
     String getDomainName();
 
-    boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo);
-
-    DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid);
-
-    List<DiscoveredNodeInfo> getDiscoveredNodeInfo();
-
     Map<String, String> getDvSwitchNames();
 
     Map<String, String> getDvPortGroupNames(Map<String, String> dvSwitchMap);

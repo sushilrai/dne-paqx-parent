@@ -297,7 +297,6 @@ public class AmqpNodeServiceTest
         assertEquals(1, nodeInfos.size());
         assertEquals("testserial", nodeInfos.get(0).getSerialNumber());
         assertEquals("testproduct", nodeInfos.get(0).getProduct());
-        Mockito.verify(repository).saveDiscoveredNodeInfo(any());
     }
 
     /**

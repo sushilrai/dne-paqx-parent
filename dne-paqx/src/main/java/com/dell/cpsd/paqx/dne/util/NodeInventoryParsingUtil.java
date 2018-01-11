@@ -16,55 +16,85 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * NodeInventoryParsingUtil.
+ * <p>
+ * <p>
+ * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
+ * </p>
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class NodeInventoryParsingUtil
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NodeInventoryParsingUtil.class);
+
     private static final String DMI_FIELD          = "dmi";
-    private static final String SOURCE_FIELD       = "source";
-    private static final String DATA_FIELD         = "data";
-    private static final String SYSTEM_INFO_FIELD  = "System Information";
-    private static final String SERIAL_NUM_FIELD   = "Serial Number";
-    private static final String PRODUCT_FIELD      = "Product Name";
-    private static final String FAMILY_FIELD       = "Family";
     private static final String SMART_SOURCE       = "smart";
     private static final String SOLID_STATE_DEVICE = "Solid State Device";
+    private static final String DEVICE_PATH_BY_ID  = "/dev/disk/by-id/wwn-";
 
+    /**
+     * Given a JSON string representation of a a node's <code>NodeInventory</code>, parses the JSON for the node product,
+     * family and serial number and returns this information as a <code>DiscoveredNodeInfo</code> instance.
+     *
+     * @param nodeInventoryJson The <code>NodeInventory</code> JSON string representation
+     * @param nodeId            The node identifier
+     * @return <code>DiscoveredNodeInfo</code>
+     */
+    public static DiscoveredNodeInfo parseDiscoveredNodeInfo(String nodeInventoryJson, String nodeId)
+    {
+        if (nodeInventoryJson != null)
+        {
+            try
+            {
+                DocumentContext context = JsonPath.parse(nodeInventoryJson.toLowerCase());
+                int length = context.read("$.length()");
+                String source;
+
+                for (int iCount = 0; iCount < length; iCount++)
+                {
+                    source = context.read("$[" + iCount + "]['source']", String.class);
+
+                    if (DMI_FIELD.equalsIgnoreCase(source))
+                    {
+                        String product = context.read("$[" + iCount + "]['data']['system information']['product name']", String.class);
+                        // family is currently not specified in the inventory, so leave out for now...
+                        //String family = context.read("$[" + iCount + "]['data']['system information']['family']", String.class);
+                        String serialNumber = context
+                                .read("$[" + iCount + "]['data']['system information']['serial number']", String.class);
+                        return new DiscoveredNodeInfo(product, null, product, null, serialNumber, nodeId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LOGGER.error("Error reading system information for node with id " + nodeId, ex);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the device path by ID.
+     *
+     * @return THe device path by ID
+     */
     public static String getDevicePathById()
     {
         return DEVICE_PATH_BY_ID;
     }
 
-    private static final String DEVICE_PATH_BY_ID = "/dev/disk/by-id/wwn-";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NodeInventoryParsingUtil.class);
-
-    public static DiscoveredNodeInfo getDiscoveredNodeInfo(Object nodeInventory, String uuid)
-    {
-        if (nodeInventory == null)
-        {
-            return null;
-        }
-
-        List inventoryList = (ArrayList) nodeInventory;
-        for (Object obj : inventoryList)
-        {
-            Map map = (HashMap) obj;
-            if (((String) map.get(SOURCE_FIELD)).equalsIgnoreCase(DMI_FIELD))
-            {
-                Map data = (HashMap) map.get(DATA_FIELD);
-                Map sysInfo = (HashMap) data.get(SYSTEM_INFO_FIELD);
-                String serialNumber = (String) sysInfo.get(SERIAL_NUM_FIELD);
-                String product = (String) sysInfo.get(PRODUCT_FIELD);
-                String family = (String) sysInfo.get(FAMILY_FIELD);
-                return new DiscoveredNodeInfo(product, family, product, family, serialNumber, uuid);
-            }
-        }
-        return null;
-    }
-
+    /**
+     * Given a JSON string representation of node inventory, parses the JSON for the for new devices.
+     *
+     * @param jsonString The JSON string
+     * @return <code>List<Device></code>
+     */
     public static List<Device> parseNewDevices(String jsonString)
     {
         List<Device> newDevices = null;
