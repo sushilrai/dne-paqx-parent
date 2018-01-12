@@ -9,15 +9,25 @@
 
     <parent>
         <artifactId>dne-paqx-parent</artifactId>
-        <groupId>com.dell.cpsd.paqx.dne</groupId>
-        <version>1.1-SNAPSHOT</version>
+        <groupId>com.dell.cpsd</groupId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     
     <properties>
-        <skipITs>true</skipITs>
+        <!-- com.dell.cpsd Dependency Properties -->
+        <common-testing.version>0.1.0-SNAPSHOT</common-testing.version>
+
+        <!-- External Dependency Properties -->
         <spring-cloud-starter-version>1.2.1.RELEASE</spring-cloud-starter-version>
         <spring-cloud-commons-version>1.1.9.RELEASE</spring-cloud-commons-version>
         <spring-cloud-starter-consul-version>1.2.1.RELEASE</spring-cloud-starter-consul-version>
+        <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
+
+        <!-- Plugin Properties -->
+        <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+
+        <!-- Misc Properties -->
+        <skipITs>true</skipITs>
     </properties>
 
     <licenses>
@@ -44,12 +54,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.dell.cpsd.paqx.dne</groupId>
+            <groupId>com.dell.cpsd</groupId>
             <artifactId>dne-paqx</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.dell.cpsd.paqx.dne</groupId>
+            <groupId>com.dell.cpsd</groupId>
             <artifactId>dne-paqx</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
@@ -166,14 +176,14 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0.1</version>
+            <version>${javax.ws.rs-api.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>common-testing</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${common-testing.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -186,12 +196,12 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>common-testing</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${common-testing.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
             <exclusions>
                 <exclusion>
-                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <groupId>com.dell.cpsd</groupId>
                     <artifactId>common-rabbitmq</artifactId>
                 </exclusion>
             </exclusions>
@@ -227,7 +237,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>

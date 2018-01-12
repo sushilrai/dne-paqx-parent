@@ -8,14 +8,14 @@
     <parent>
         <groupId>com.dell.cpsd</groupId>
         <artifactId>root-parent</artifactId>
-        <version>0.2.6</version>
+        <version>1.1.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <groupId>com.dell.cpsd.paqx.dne</groupId>
+    <groupId>com.dell.cpsd</groupId>
     <artifactId>dne-paqx-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -40,18 +40,23 @@
     </scm>
 
     <properties>
-        <!-- Internal libraries -->
-        <common-rabbitmq-version>2.1.0</common-rabbitmq-version>
-        <!-- Common libraries -->
+        <!-- com.dell.cpsd Dependency Properties -->
+        <common-rabbitmq-version>0.1.0-SNAPSHOT</common-rabbitmq-version>
+        <common-dependencies.version>0.1.0-SNAPSHOT</common-dependencies.version>
+
+        <!-- External Dependency Properties -->
         <spring-boot.version>1.5.1.RELEASE</spring-boot.version>
-        <!-- Common test libraries -->
-        <!-- Maven plugins -->
-        <plugin-maven-dependency-version>2.10</plugin-maven-dependency-version>
-        <plugin-jsonschema2pojo-version>0.4.37</plugin-jsonschema2pojo-version>
         <javax-validation-version>1.1.0.Final</javax-validation-version>
         <spring.oxm.version>4.3.3.RELEASE</spring.oxm.version>
         <dbh2.version>1.4.195</dbh2.version>
         <hibernate-core.version>5.2.3.Final</hibernate-core.version>
+        <spring-cloud-dependencies>Camden.SR5</spring-cloud-dependencies>
+
+        <!-- Plugin Properties -->
+        <plugin-maven-dependency-version>2.10</plugin-maven-dependency-version>
+        <plugin-jsonschema2pojo-version>0.4.37</plugin-jsonschema2pojo-version>
+        <!-- Misc Properties -->
+
     </properties>
 
     <modules>
@@ -63,13 +68,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.dell.cpsd.paqx.dne</groupId>
+                <groupId>com.dell.cpsd</groupId>
                 <artifactId>dne-paqx</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.dell.cpsd.paqx.dne</groupId>
+                <groupId>com.dell.cpsd</groupId>
                 <artifactId>dne-paqx</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
@@ -92,7 +97,7 @@
             <dependency>
                 <groupId>com.dell.cpsd</groupId>
                 <artifactId>common-dependencies</artifactId>
-                <version>1.2.0</version>
+                <version>${common-dependencies.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -100,7 +105,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Camden.SR5</version>
+                <version>${spring-cloud-dependencies}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

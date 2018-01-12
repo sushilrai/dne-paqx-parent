@@ -4,16 +4,40 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>com.dell.cpsd.paqx.dne</groupId>
+        <groupId>com.dell.cpsd</groupId>
         <artifactId>dne-paqx-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
     <artifactId>dne-paqx</artifactId>
 
-    <properties/>
+    <properties>
+        <!-- com.dell.cpsd Dependency Properties -->
+        <common-client.version>0.1.0-SNAPSHOT</common-client.version>
+        <common-contract-enricher.version>0.1.0-SNAPSHOT</common-contract-enricher.version>
+        <common-testing.version>0.1.0-SNAPSHOT</common-testing.version>
+        <amqp-contract-extension.version>0.1.0-SNAPSHOT</amqp-contract-extension.version>
+        <hdp-capability-registry-client.version>0.1.0-SNAPSHOT</hdp-capability-registry-client.version>
+        <discovered-nodes-capabilities-api.version>0.1.0-SNAPSHOT</discovered-nodes-capabilities-api.version>
+        <discovered-nodes-capabilities-client.version>0.1.0-SNAPSHOT</discovered-nodes-capabilities-client.version>
+        <storage-capabilities-api.version>0.1.0-SNAPSHOT</storage-capabilities-api.version>
+        <virtualization-capabilities-api.version>0.1.0-SNAPSHOT</virtualization-capabilities-api.version>
+        <engineering-standards-service-api.version>0.1.0-SNAPSHOT</engineering-standards-service-api.version>
+        <SDKCLient-driver.version>0.1.0-SNAPSHOT</SDKCLient-driver.version>
+        <!-- External Dependency Properties -->
+        <commons-validator.version>1.6</commons-validator.version>
+        <commons-net.version>3.6</commons-net.version>
+        <jsson-path.version>2.3.0</jsson-path.version>
+        <camunda-bpm-spring-boot-starter.version>2.2.0</camunda-bpm-spring-boot-starter.version>
+        <validate-api.version>1.1.0.Final</validate-api.version>
+        <!-- Plugin Properties -->
+        <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+        <jsonschema2pojo-maven-plugin.version>0.4.37</jsonschema2pojo-maven-plugin.version>
+        <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
+        <!-- Misc Properties -->
+    </properties>
 
     <licenses>
         <license>
@@ -53,13 +77,13 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>common-client</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${common-client.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>hdp-capability-registry-client</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>${hdp-capability-registry-client.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.dell.cpsd</groupId>
@@ -71,7 +95,7 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>discovered-nodes-capabilities-client-java</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>${discovered-nodes-capabilities-client.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.dell.cpsd</groupId>
@@ -83,7 +107,7 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>discovered-nodes-capabilities-api</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>${discovered-nodes-capabilities-api.version}</version>
             <type>zip</type>
             <classifier>schemas</classifier>
             <exclusions>
@@ -97,7 +121,7 @@
         <dependency>
             <artifactId>storage-capabilities-api</artifactId>
             <groupId>com.dell.cpsd</groupId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>${storage-capabilities-api.version}</version>
             <type>zip</type>
             <classifier>schemas</classifier>
             <exclusions>
@@ -113,7 +137,7 @@
             <groupId>com.dell.cpsd</groupId>
             <classifier>schemas</classifier>
             <type>zip</type>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>${virtualization-capabilities-api.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.dell.cpsd</groupId>
@@ -127,7 +151,7 @@
             <artifactId>engineering-standards-service-api</artifactId>
             <classifier>schemas</classifier>
             <type>zip</type>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${engineering-standards-service-api.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.dell.cpsd</groupId>
@@ -144,19 +168,19 @@
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.6</version>
+            <version>${commons-validator.version}</version>
         </dependency>
 
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.6</version>
+            <version>${commons-net.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.3.0</version>
+            <version>${jsson-path.version}</version>
         </dependency>
 
         <dependency>
@@ -201,16 +225,16 @@
         </dependency>
 
         <dependency>
-            <groupId>com.dell.cpsd.sdk</groupId>
+            <groupId>com.dell.cpsd</groupId>
             <artifactId>SDKClient-driver</artifactId>
-            <version>1.02-SNAPSHOT</version>
+            <version>${SDKCLient-driver.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <groupId>com.dell.cpsd</groupId>
                     <artifactId>common-rabbitmq</artifactId>
                 </exclusion>
             </exclusions>
@@ -220,7 +244,7 @@
         <dependency>
             <groupId>org.camunda.bpm.extension.springboot</groupId>
             <artifactId>camunda-bpm-spring-boot-starter</artifactId>
-            <version>2.2.0</version>
+            <version>${camunda-bpm-spring-boot-starter.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
@@ -231,7 +255,7 @@
                     <artifactId>log4j-over-slf4j</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.dell.cpsd.common.messaging</groupId>
+                    <groupId>com.dell.cpsd</groupId>
                     <artifactId>common-rabbitmq</artifactId>
                 </exclusion>
             </exclusions>
@@ -241,7 +265,7 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>common-testing</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${common-testing.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -257,7 +281,7 @@
         <dependency>
             <groupId>com.dell.cpsd</groupId>
             <artifactId>common-testing</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${common-testing.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
             <exclusions>
@@ -318,7 +342,7 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
+            <version>${validate-api.version}</version>
         </dependency>
 
         <dependency>
@@ -360,7 +384,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -416,18 +440,23 @@
             <plugin>
                 <groupId>org.jsonschema2pojo</groupId>
                 <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-                <version>0.4.37</version>
+                <version>${jsonschema2pojo-maven-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.dell.cpsd</groupId>
                         <artifactId>common-contract-enricher</artifactId>
-                        <version>2.0.0</version>
+                        <version>${common-contract-enricher.version}</version>
                         <exclusions>
                             <exclusion>
-                                <groupId>com.dell.cpsd.common.messaging</groupId>
+                                <groupId>com.dell.cpsd</groupId>
                                 <artifactId>common-rabbitmq</artifactId>
                             </exclusion>
                         </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.dell.cpsd</groupId>
+                        <artifactId>amqp-contract-extension</artifactId>
+                        <version>${amqp-contract-extension.version}</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -535,7 +564,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+				<version>${maven-jar-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
