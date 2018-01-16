@@ -36,7 +36,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
  */
 
 @Configuration
-@Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class, RabbitConfig.class})
+@Import({CapabilityRegistryLookupManagerConfig.class, DneContextConfig.class, RabbitConfig.class})
 public class CapabilityConfig
 {
     /*

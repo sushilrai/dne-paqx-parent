@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan({"com.dell.cpsd.paqx.dne.service", "com.dell.cpsd.paqx.dne.transformers", "com.dell.cpsd.paqx.dne.repository"})
 @Import({
     RabbitConfig.class,
-    ConsumerConfig.class,
+    DneConsumerConfig.class,
     ProducerConfig.class,
     SDKConfiguration.class,
     SystemDefinitionMessenger.class,

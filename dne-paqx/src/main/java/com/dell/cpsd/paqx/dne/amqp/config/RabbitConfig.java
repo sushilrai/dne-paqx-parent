@@ -91,7 +91,7 @@ import java.util.Map;
  * @since    1.0
  */
 @Configuration
-@Import({ProductionConfig.class, PropertiesConfig.class})
+@Import({ProductionConfig.class, DneRabbitMQPropertiesConfig.class})
 public class RabbitConfig
 {
     /*
@@ -126,7 +126,7 @@ public class RabbitConfig
      * The configuration properties for the service.
      */
     @Autowired
-    private PropertiesConfig propertiesConfig;
+    private DneRabbitMQPropertiesConfig dneRabbitMQPropertiesConfig;
 
     /*
      * The support system-integration-sdk class mappings
@@ -199,7 +199,7 @@ public class RabbitConfig
      */
     @Bean
     String replyTo() {
-        return propertiesConfig.applicationName() + "." + hostName();
+        return dneRabbitMQPropertiesConfig.applicationName() + "." + hostName();
     }
 
     /**

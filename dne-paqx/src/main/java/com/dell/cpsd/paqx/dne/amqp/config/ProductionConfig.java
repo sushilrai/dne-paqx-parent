@@ -27,13 +27,13 @@ import org.springframework.context.annotation.Import;
  */
 
 @Configuration
-@Import({PropertiesConfig.class})
+@Import({DneRabbitMQPropertiesConfig.class})
 public class ProductionConfig
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductionConfig.class);
 
     @Autowired
-    private PropertiesConfig propertiesConfig;
+    private DneRabbitMQPropertiesConfig dneRabbitMQPropertiesConfig;
 
     @Bean
     @Qualifier("rabbitConnectionFactory")
@@ -44,23 +44,23 @@ public class ProductionConfig
         com.rabbitmq.client.ConnectionFactory connectionFactory;
 
         LOGGER.info("Rabbit connection properties : sslEnabled: [{}], host: [{}], port: [{}], tlsVersion:[{}]",
-                propertiesConfig.isSslEnabled(), propertiesConfig.rabbitHostname(), propertiesConfig.rabbitPort(),
-                propertiesConfig.tlsVersion());
+                dneRabbitMQPropertiesConfig.isSslEnabled(), dneRabbitMQPropertiesConfig.rabbitHostname(), dneRabbitMQPropertiesConfig.rabbitPort(),
+                dneRabbitMQPropertiesConfig.tlsVersion());
         try
         {
-            if (propertiesConfig.isSslEnabled())
+            if (dneRabbitMQPropertiesConfig.isSslEnabled())
             {
-                RabbitMQTLSFactoryBean rabbitMQTLSFactoryBean = new RabbitMQTLSFactoryBean(propertiesConfig);
+                RabbitMQTLSFactoryBean rabbitMQTLSFactoryBean = new RabbitMQTLSFactoryBean(dneRabbitMQPropertiesConfig);
 
                 connectionFactory = rabbitMQTLSFactoryBean.getObject();
 
-                cachingCF = new RabbitMQCachingConnectionFactory(connectionFactory, propertiesConfig);
+                cachingCF = new RabbitMQCachingConnectionFactory(connectionFactory, dneRabbitMQPropertiesConfig);
                 cachingCF.getRabbitConnectionFactory().setSaslConfig(DefaultSaslConfig.EXTERNAL);
             }
             else
             {
                 connectionFactory = new com.rabbitmq.client.ConnectionFactory();
-                cachingCF = new RabbitMQCachingConnectionFactory(connectionFactory, propertiesConfig);
+                cachingCF = new RabbitMQCachingConnectionFactory(connectionFactory, dneRabbitMQPropertiesConfig);
             }
         }
         catch (Exception e)

@@ -20,10 +20,11 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Test for {@link ConsumerConfig}
+ * Test for {@link DneConsumerConfig}
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ConsumerConfigTest {
+public class DneConsumerConfigTest
+{
 
     @Mock
     private ConnectionFactory rabbitConnectionFactory;
@@ -44,23 +45,23 @@ public class ConsumerConfigTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private ConsumerConfig consumerConfig;
+    private DneConsumerConfig dneConsumerConfig;
 
 
     @Test
     public void testDefaultMessageConsumer() {
-        assertNotNull(consumerConfig.defaultMessageConsumer());
+        assertNotNull(dneConsumerConfig.defaultMessageConsumer());
     }
 
     @Test
     public void testDenListnerRetryPolicy() {
-        assertNotNull(consumerConfig.dneListenerRetryPolicy());
+        assertNotNull(dneConsumerConfig.dneListenerRetryPolicy());
     }
 
     @Test
     public void testRequestListenerContainer() throws Exception {
 
-        assertNotNull(consumerConfig.requestListenerContainer(delegatingMessageConsumer, messageConverter));
+        assertNotNull(dneConsumerConfig.requestListenerContainer(delegatingMessageConsumer, messageConverter));
 
     }
 }
