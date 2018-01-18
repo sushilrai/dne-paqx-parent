@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
@@ -15,7 +16,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-
+import java.util.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +35,7 @@ public class NotifyNodeDiscoveryToUpdateStatusStartedTest
     private NodeService                              nodeService;
     private DelegateExecution                        delegateExecution;
     private NodeDetail                               nodeDetail;
+    private List<DiscoveredNodeInfo>                 discoveredNodeInfoList;
 
     @Before
     public void setUp() throws Exception
@@ -44,6 +46,12 @@ public class NotifyNodeDiscoveryToUpdateStatusStartedTest
         nodeDetail = new NodeDetail();
         nodeDetail.setId("abc");
         nodeDetail.setServiceTag("test.ServiceTag");
+
+        discoveredNodeInfoList = new ArrayList<>();
+        DiscoveredNodeInfo discoveredNodeInfo1 = new DiscoveredNodeInfo("M-1", "MF-1", "P-1", "PF-1", "SN-1", "abc");
+        discoveredNodeInfoList.add(discoveredNodeInfo1);
+        DiscoveredNodeInfo discoveredNodeInfo2 = new DiscoveredNodeInfo("M-2", "MF-2", "P-2", "PF-2", "SN-2", "UUID-2");
+        discoveredNodeInfoList.add(discoveredNodeInfo2);
     }
 
     @Test
@@ -81,7 +89,7 @@ public class NotifyNodeDiscoveryToUpdateStatusStartedTest
         catch (BpmnError error)
         {
             assertTrue(error.getErrorCode().equals(DelegateConstants.NOTIFY_NODE_STATUS_STARTED_FAILED));
-            assertThat(error.getMessage(), containsString("An Unexpected Exception occurred attempting to test.ServiceTag on Node test.ServiceTag. Reason: null"));
+            assertThat(error.getMessage(), containsString("Updating Node Status on Node test.ServiceTag failed."));
         }
     }
 
@@ -90,6 +98,7 @@ public class NotifyNodeDiscoveryToUpdateStatusStartedTest
     {
         final NotifyNodeDiscoveryToUpdateStatusStarted nus = spy(new NotifyNodeDiscoveryToUpdateStatusStarted(nodeService));
         when(delegateExecution.getVariable(DelegateConstants.NODE_DETAIL)).thenReturn(nodeDetail);
+        when(nodeService.listDiscoveredNodeInfo()).thenReturn(discoveredNodeInfoList);
         when(nodeService.notifyNodeAllocationStatus(anyString(), anyString())).thenReturn(true);
 
         nus.delegateExecute(delegateExecution);
