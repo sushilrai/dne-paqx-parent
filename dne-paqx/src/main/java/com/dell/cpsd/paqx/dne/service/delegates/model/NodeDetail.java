@@ -51,7 +51,7 @@ public class NodeDetail implements Serializable
     private String vMotionManagementSubnetMask;
     private String protectionDomainName;
     private String protectionDomainId;
-    
+
     @JsonIgnore
     private boolean completed;
 

@@ -6,20 +6,13 @@
 package com.dell.cpsd.paqx.dne.amqp.config;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.support.converter.ClassMapper;
-import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
-import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
@@ -42,7 +35,7 @@ public class RabbitConfigTest {
     private ConnectionFactory rabbitConnectionFactory;
 
     @Mock
-    private PropertiesConfig propertiesConfig;
+    private DneRabbitMQPropertiesConfig dneRabbitMQPropertiesConfig;
 
     @Mock
     @Qualifier("supportedIdClassMapping")
@@ -86,7 +79,7 @@ public class RabbitConfigTest {
 
     @Test
     public void testReplyTo() throws Exception {
-        when(propertiesConfig.applicationName()).thenReturn("DNE");
+        when(dneRabbitMQPropertiesConfig.applicationName()).thenReturn("DNE");
         assertTrue(rabbitConfig.replyTo().equals("DNE.testRabbit"));
     }
 

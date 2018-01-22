@@ -33,7 +33,7 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
 @Import({RabbitConfig.class})
-public class ConsumerConfig
+public class DneConsumerConfig
 {
 
     @Autowired

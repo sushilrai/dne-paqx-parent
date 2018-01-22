@@ -5,41 +5,48 @@
 
 package com.dell.cpsd.paqx.dne.util;
 
+import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.service.engineering.standards.Device;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
-public class NodeInventoryParsingUtilTest {
+public class NodeInventoryParsingUtilTest
+{
+    private static String jsonString;
 
-    private String jsonString;
-    @Before
-    public void setUp() throws IOException{
+    @BeforeClass
+    public static void setUpNodeInventory() throws IOException
+    {
         //read json string from file
-        BufferedReader reader = new BufferedReader(new FileReader("src/test/resources/node_inventory.json"));
-        String         line = null;
-        StringBuilder  stringBuilder = new StringBuilder();
-
-        try {
-            while((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-
-            jsonString = stringBuilder.toString();
-        } finally {
-            reader.close();
-        }
+        jsonString = new String(Files.readAllBytes(Paths.get("src/test/resources/node_inventory.json")), StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testParseNewDevices()  {
+    public void testParseNewDevices()
+    {
         List<Device> newDevices = NodeInventoryParsingUtil.parseNewDevices(jsonString);
         Assert.assertNotNull(newDevices);
-        Assert.assertEquals(21,newDevices.size());
+        Assert.assertEquals(21, newDevices.size());
+    }
+
+    @Test
+    public void testParseDiscoveredNodeInfoSuccess()
+    {
+        DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.parseDiscoveredNodeInfo(jsonString, "123456789abc");
+        Assert.assertNotNull(discoveredNodeInfo);
+    }
+
+    @Test
+    public void testParseDiscoveredNodeInfoException()
+    {
+        DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.parseDiscoveredNodeInfo("not a json string", "123456789abc");
+        Assert.assertNull(discoveredNodeInfo);
     }
 }

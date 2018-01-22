@@ -823,49 +823,6 @@ public class H2DataRepository implements DataServiceRepository
 
     @Override
     @Transactional
-    public boolean saveDiscoveredNodeInfo(DiscoveredNodeInfo discoveredNodeInfo)
-    {
-        LOG.info("Persisting discovered node info data ...");
-
-        try
-        {
-            DiscoveredNodeInfo nodeInfo = this.getDiscoveredNodeInfo(discoveredNodeInfo.getSymphonyUuid());
-            if (nodeInfo != null)
-            {
-                //If it already exists, delete and save the new one.
-                entityManager.remove(nodeInfo);
-            }
-        }
-        catch (NoResultException noResultEx)
-        {
-            //  Do not do anything as the result will be null indicating that no result found.
-        }
-
-        entityManager.persist(discoveredNodeInfo);
-        entityManager.flush();
-
-        return true;
-    }
-
-    @Override
-    public DiscoveredNodeInfo getDiscoveredNodeInfo(String uuid)
-    {
-        final TypedQuery<DiscoveredNodeInfo> query = entityManager
-                .createQuery("SELECT n FROM DiscoveredNodeInfo as n where n.symphonyUuid=:symphonyUuid", DiscoveredNodeInfo.class);
-        query.setParameter("symphonyUuid", uuid);
-        return query.getSingleResult();
-    }
-
-    @Override
-    public List<DiscoveredNodeInfo> getDiscoveredNodeInfo()
-    {
-        final TypedQuery<DiscoveredNodeInfo> query = entityManager
-                .createQuery("SELECT discoveryNodeInfo FROM DiscoveredNodeInfo as discoveryNodeInfo", DiscoveredNodeInfo.class);
-        return query.getResultList();
-    }
-
-    @Override
-    @Transactional
     public ScaleIOProtectionDomain createProtectionDomain(String jobId, String protectionDomainId, String protectionDomainName)
     {
         ScaleIOData scaleIOData = getScaleIoDataByJobId(jobId);

@@ -6,6 +6,7 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
@@ -59,6 +60,15 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
             this.nodeService.requestInstallEsxiLicense(delegateRequestModel.getRequestMessage());
 
             updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
+        }
+        catch (TaskResponseFailureException ex)
+        {
+            // Deliberately do not fail the workflow if the apply ESXi license fails on the
+            // adapter side because this is not a show stopper. By default an evaluation
+            // license will be applied which lasts for 60 days making it possible to reconfigure
+            // the license for the node via the VCenter UI.
+            String warningMessage = "WARNING: " + taskName + " failed. Reason: " + ex.getMessage();
+            updateDelegateStatus(warningMessage);
         }
         catch (Exception ex)
         {

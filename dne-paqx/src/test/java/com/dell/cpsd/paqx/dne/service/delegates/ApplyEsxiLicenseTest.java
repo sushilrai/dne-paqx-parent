@@ -14,9 +14,12 @@ import com.dell.cpsd.paqx.dne.transformers.ApplyEsxiLicenseRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,11 +69,11 @@ public class ApplyEsxiLicenseTest
     {
         final String errorMessage = "Illegal state exception";
         when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenThrow(new IllegalStateException(errorMessage));
+        final ApplyEsxiLicense ApplyEsxiLicenseSpy = spy(delegate);
 
-        final ApplyEsxiLicense spy = spy(delegate);
         try
         {
-            spy.delegateExecute(delegateExecution);
+            ApplyEsxiLicenseSpy.delegateExecute(delegateExecution);
         }
         catch (BpmnError error)
         {
@@ -79,8 +83,7 @@ public class ApplyEsxiLicenseTest
             assertTrue(error.getErrorCode().equals(APPLY_ESXI_LICENSE_FAILED));
         }
 
-        verify(spy)
-                .updateDelegateStatus("Attempting Apply Esxi License on Node service-tag.");
+        verify(ApplyEsxiLicenseSpy).updateDelegateStatus("Attempting Apply Esxi License on Node service-tag.");
     }
 
     @Test
@@ -91,33 +94,26 @@ public class ApplyEsxiLicenseTest
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
         when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenReturn(requestModel);
         doThrow(new TaskResponseFailureException(1, errorMessage)).when(nodeService).requestInstallEsxiLicense(mockRequestMessage);
+        final ApplyEsxiLicense ApplyEsxiLicenseSpy = spy(delegate);
 
-        final ApplyEsxiLicense spy = spy(delegate);
-        try
-        {
-            spy.delegateExecute(delegateExecution);
-        }
-        catch (BpmnError error)
-        {
-            assertThat(error.getMessage(), containsString("An unexpected exception occurred attempting to request Apply Esxi License. Reason: Service timeout"));
-            assertTrue(error.getErrorCode().equals(APPLY_ESXI_LICENSE_FAILED));
-        }
+        ApplyEsxiLicenseSpy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus( "Attempting Apply Esxi License on Node service-tag.");
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(ApplyEsxiLicenseSpy, times(2)).updateDelegateStatus(captor.capture());
+        Assert.assertThat(captor.getValue(), CoreMatchers.containsString("WARNING: Apply Esxi License failed. Reason: " + errorMessage));
     }
 
     @Test
     public void applyEsxiHostLicenseSuccessUpdatesTheDelegateStatus() throws Exception
     {
         final AddEsxiHostVSphereLicenseRequest mockRequestMessage = mock(AddEsxiHostVSphereLicenseRequest.class);
-
         when(requestModel.getRequestMessage()).thenReturn(mockRequestMessage);
         when(requestTransformer.buildApplyEsxiLicenseRequest(delegateExecution)).thenReturn(requestModel);
         doNothing().when(nodeService).requestInstallEsxiLicense(mockRequestMessage);
+        final ApplyEsxiLicense ApplyEsxiLicenseSpy = spy(delegate);
 
-        final ApplyEsxiLicense spy = spy(delegate);
-        spy.delegateExecute(delegateExecution);
+        ApplyEsxiLicenseSpy.delegateExecute(delegateExecution);
 
-        verify(spy).updateDelegateStatus("Apply Esxi License on Node " + serviceTag + " was successful.");
+        verify(ApplyEsxiLicenseSpy).updateDelegateStatus("Apply Esxi License on Node " + serviceTag + " was successful.");
     }
 }

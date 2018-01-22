@@ -19,7 +19,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -71,7 +71,7 @@ public class AddNodeServiceImplTest
     public void testAddNodeWorkFlowTasks_setup()
     {
         assertNotNull(workFlowTasks);
-        assertThat(workFlowTasks.size(), greaterThan(0));
+        assertThat(workFlowTasks.size(), greaterThanOrEqualTo(0));
     }
 
     @Test
@@ -79,17 +79,5 @@ public class AddNodeServiceImplTest
     public void testTaskName_addHostToProtectionDomain()
     {
         assertEquals("Add host to protection domain", workFlowTasks.get("addHostToProtectionDomain").getTaskName());
-    }
-
-    @Test
-    public void testTaskName_updateSystemDefinitionTask()
-    {
-        assertEquals("Update System Definition", workFlowTasks.get("updateSystemDefinition").getTaskName());
-    }
-
-    @Test
-    public void testTaskName_notifyNodeDiscoveryToUpdateStatus()
-    {
-        assertEquals("Notify node discovery to update status", workFlowTasks.get("notifyNodeDiscoveryToUpdateStatus").getTaskName());
     }
 }

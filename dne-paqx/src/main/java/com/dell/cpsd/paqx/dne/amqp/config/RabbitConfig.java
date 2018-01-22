@@ -14,6 +14,8 @@ import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponseMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsResponseMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
+import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolResponseMessage;
 import com.dell.cpsd.storage.capabilities.api.*;
 import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListComponentResponseMessage;
@@ -91,7 +93,7 @@ import java.util.Map;
  * @since    1.0
  */
 @Configuration
-@Import({ProductionConfig.class, PropertiesConfig.class})
+@Import({ProductionConfig.class, DneRabbitMQPropertiesConfig.class})
 public class RabbitConfig
 {
     /*
@@ -126,7 +128,7 @@ public class RabbitConfig
      * The configuration properties for the service.
      */
     @Autowired
-    private PropertiesConfig propertiesConfig;
+    private DneRabbitMQPropertiesConfig dneRabbitMQPropertiesConfig;
 
     /*
      * The support system-integration-sdk class mappings
@@ -199,7 +201,7 @@ public class RabbitConfig
      */
     @Bean
     String replyTo() {
-        return propertiesConfig.applicationName() + "." + hostName();
+        return dneRabbitMQPropertiesConfig.applicationName() + "." + hostName();
     }
 
     /**
@@ -315,6 +317,9 @@ public class RabbitConfig
 
         messageClasses.add(EssValidateProtectionDomainsRequestMessage.class);
         messageClasses.add(EssValidateProtectionDomainsResponseMessage.class);
+
+        messageClasses.add(EssValidateStoragePoolRequestMessage.class);
+        messageClasses.add(EssValidateStoragePoolResponseMessage.class);
 
         messageClasses.add(VCenterUpdateSoftwareAcceptanceRequestMessage.class);
         messageClasses.add(VCenterUpdateSoftwareAcceptanceResponseMessage.class);

@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 @ComponentScan({"com.dell.cpsd.paqx.dne.service", "com.dell.cpsd.paqx.dne.transformers", "com.dell.cpsd.paqx.dne.repository"})
-@Import({RabbitConfig.class, ConsumerConfig.class, ProducerConfig.class, SDKConfiguration.class, SystemDefinitionMessenger.class,
+@Import({RabbitConfig.class, DneConsumerConfig.class, ProducerConfig.class, SDKConfiguration.class, SystemDefinitionMessenger.class,
         AMQPClient.class, PersistenceConfig.class})
 public class ServiceConfig
 {

@@ -5,7 +5,8 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates.model;
 
-import com.dell.cpsd.common.rabbitmq.message.HasMessageProperties;
+
+import com.dell.cpsd.contract.extension.amqp.message.HasMessageProperties;
 
 /**
  * Delegate request model containing the request message and

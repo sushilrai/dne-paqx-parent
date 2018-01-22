@@ -28,7 +28,7 @@ public class ProductionConfigTest {
     private ProductionConfig productionConfig;
 
     @Mock
-    private PropertiesConfig propertiesConfig;
+    private DneRabbitMQPropertiesConfig dneRabbitMQPropertiesConfig;
 
     @Test
     public void testProductionCachingConnectionFactoryWithoutSSL() throws Exception {
@@ -41,10 +41,10 @@ public class ProductionConfigTest {
     @Test
     @Ignore
     public void testProductionCachingConnectionFactoryWithSSL() throws Exception {
-        when( propertiesConfig.isSslEnabled()).thenReturn(true);
-        when(propertiesConfig.rabbitPort()).thenReturn(5671);
-        when(propertiesConfig.rabbitHostname()).thenReturn("amqp");
-        when(propertiesConfig.tlsVersion()).thenReturn("1.2");
+        when( dneRabbitMQPropertiesConfig.isSslEnabled()).thenReturn(true);
+        when(dneRabbitMQPropertiesConfig.rabbitPort()).thenReturn(5671);
+        when(dneRabbitMQPropertiesConfig.rabbitHostname()).thenReturn("amqp");
+        when(dneRabbitMQPropertiesConfig.tlsVersion()).thenReturn("1.2");
 
         assertNotNull( productionConfig.productionCachingConnectionFactory());
         assertEquals ( ((RabbitMQCachingConnectionFactory)productionConfig.productionCachingConnectionFactory()).getRabbitConnectionFactory().getClass().getName(),

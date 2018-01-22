@@ -7,7 +7,7 @@
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
 import com.dell.cpsd.*;
-import com.dell.cpsd.common.rabbitmq.annotation.Message;
+import com.dell.cpsd.contract.extension.amqp.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.Capability;
 import com.dell.cpsd.hdp.capability.registry.api.EndpointProperty;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;

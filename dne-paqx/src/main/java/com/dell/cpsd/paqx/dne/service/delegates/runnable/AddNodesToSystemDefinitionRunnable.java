@@ -8,8 +8,10 @@ package com.dell.cpsd.paqx.dne.service.delegates.runnable;
 
 import com.dell.cpsd.credential.model.api.Credential;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
+import com.dell.cpsd.paqx.dne.domain.node.NodeInventory;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.paqx.dne.util.NodeInventoryParsingUtil;
 import com.dell.cpsd.sdk.AMQPClient;
 import com.dell.cpsd.service.system.definition.api.Component;
 import com.dell.cpsd.service.system.definition.api.ComponentsFilter;
@@ -109,11 +111,18 @@ public class AddNodesToSystemDefinitionRunnable implements Runnable
             List<Credential> credentialAdditions = new ArrayList<>();
 
             nodeDetails.stream().filter(Objects::nonNull).forEach(nodeDetail -> {
-                final DiscoveredNodeInfo nodeInfo = repository.getDiscoveredNodeInfo(nodeDetail.getId());
+                final NodeInventory nodeInventory = repository.getNodeInventory(nodeDetail.getId());
+                if (nodeInventory == null)
+                {
+                    throw new IllegalStateException("No node inventory for node " + nodeDetail.getId());
+                }
+
+                final DiscoveredNodeInfo nodeInfo = NodeInventoryParsingUtil
+                        .parseDiscoveredNodeInfo(nodeInventory.getNodeInventory(), nodeDetail.getId());
 
                 if (nodeInfo == null)
                 {
-                    throw new IllegalStateException("No discovered node info.");
+                    throw new IllegalStateException("No discovered node info for node " + nodeDetail.getId());
                 }
 
                 final Component newComponent = new Component();
