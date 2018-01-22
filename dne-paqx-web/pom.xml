@@ -18,9 +18,9 @@
         <common-testing.version>0.1.0-SNAPSHOT</common-testing.version>
 
         <!-- External Dependency Properties -->
-        <spring-cloud-starter-version>1.2.1.RELEASE</spring-cloud-starter-version>
-        <spring-cloud-commons-version>1.1.9.RELEASE</spring-cloud-commons-version>
-        <spring-cloud-starter-consul-version>1.2.1.RELEASE</spring-cloud-starter-consul-version>
+        <spring-cloud-starter.version>1.2.1.RELEASE</spring-cloud-starter.version>
+        <spring-cloud-commons.version>1.1.9.RELEASE</spring-cloud-commons.version>
+        <spring-cloud-starter-consul.version>1.2.1.RELEASE</spring-cloud-starter-consul.version>
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
 
         <!-- Plugin Properties -->
@@ -116,31 +116,31 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-commons</artifactId>
-            <version>${spring-cloud-commons-version}</version>
+            <version>${spring-cloud-commons.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter</artifactId>
-            <version>${spring-cloud-starter-version}</version>
+            <version>${spring-cloud-starter.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul</artifactId>
-            <version>${spring-cloud-starter-consul-version}</version>
+            <version>${spring-cloud-starter-consul.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-consul-config</artifactId>
-            <version>${spring-cloud-starter-consul-version}</version>
+            <version>${spring-cloud-starter-consul.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-discovery</artifactId>
-            <version>${spring-cloud-starter-consul-version}</version>
+            <version>${spring-cloud-starter-consul.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
