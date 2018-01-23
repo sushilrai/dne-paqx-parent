@@ -9,9 +9,11 @@ package com.dell.cpsd.paqx.dne.service;
 
 import com.dell.cpsd.paqx.dne.service.delegates.exception.JobNotFoundException;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
+import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Activity;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Error;
 import com.dell.cpsd.paqx.dne.service.model.multinode.Status;
+import com.dell.cpsd.paqx.dne.service.model.multinode.Warning;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -49,19 +51,18 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.N
 public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
 {
 
-    private RuntimeService runtimeService;
+    private RuntimeService    runtimeService;
     private RepositoryService repositoryService;
-    private HistoryService historyService;
-    private IdGenerator idGenerator;
+    private HistoryService    historyService;
+    private IdGenerator       idGenerator;
 
     private ObjectMapper mapper = new ObjectMapper();
 
     private static final Log LOGGER = LogFactory.getLog(CamundaWorkflowServiceImpl.class);
 
     @Autowired
-    public CamundaWorkflowServiceImpl(final RuntimeService runtimeService,
-                                      final HistoryService historyService,
-                                      final RepositoryService repositoryService)
+    public CamundaWorkflowServiceImpl(final RuntimeService runtimeService, final HistoryService historyService,
+            final RepositoryService repositoryService)
     {
         this.runtimeService = runtimeService;
         this.historyService = historyService;
@@ -85,7 +86,9 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             {
                 LOGGER.warn("Error Occurred processing Json from NodeDetails List", e);
             }
-        } else {
+        }
+        else
+        {
             LOGGER.error("Node Details were not found.");
         }
         Thread processThread = new Thread(() -> runtimeService.startProcessInstanceByKey(processId, businessKeyId, inputVariables));
@@ -113,8 +116,8 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         String processDefinitionId = null;
         try
         {
-            ProcessInstance parentProcessInstance = runtimeService.createProcessInstanceQuery()
-                                                                  .processInstanceBusinessKey(jobId).singleResult();
+            ProcessInstance parentProcessInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(jobId)
+                    .singleResult();
             if (parentProcessInstance != null)
             {
                 processInstanceId = parentProcessInstance.getProcessInstanceId();
@@ -131,8 +134,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             try
             {
                 HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                                                                                .processInstanceBusinessKey(jobId)
-                                                                                .singleResult();
+                        .processInstanceBusinessKey(jobId).singleResult();
                 if (historicProcessInstance != null)
                 {
                     processInstanceId = historicProcessInstance.getId();
@@ -152,12 +154,11 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             // get bpmn model of the process instance
             BpmnModelInstance bpmnModelInstance = repositoryService.getBpmnModelInstance(processDefinitionId);
 
-            final Status currentStatus = getWorkflowStatusByProcessInstanceId(jobId, processInstanceId,
-                                                                              bpmnModelInstance);
+            final Status currentStatus = getWorkflowStatusByProcessInstanceId(jobId, processInstanceId, bpmnModelInstance);
 
             Map<String, String> subprocessIdsMap = new HashMap<>();
-            List<ProcessInstance> subProcesses = runtimeService.createProcessInstanceQuery().superProcessInstanceId(
-                    processInstanceId).list();
+            List<ProcessInstance> subProcesses = runtimeService.createProcessInstanceQuery().superProcessInstanceId(processInstanceId)
+                    .list();
             if (subProcesses != null && subProcesses.size() > 0)
             {
                 subProcesses.stream().forEach(subProcess -> {
@@ -166,8 +167,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             }
 
             List<HistoricProcessInstance> historicSubProcesses = historyService.createHistoricProcessInstanceQuery()
-                                                                               .superProcessInstanceId(
-                                                                                       processInstanceId).list();
+                    .superProcessInstanceId(processInstanceId).list();
             if (historicSubProcesses != null && historicSubProcesses.size() > 0)
             {
                 historicSubProcesses.forEach(historicSubProcess -> {
@@ -179,8 +179,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             {
                 subprocessIdsMap.entrySet().forEach(entry -> {
                     BpmnModelInstance subBpmnModelInstance = repositoryService.getBpmnModelInstance(entry.getValue());
-                    Status subProcessStatus = getWorkflowStatusByProcessInstanceId(jobId, entry.getKey(),
-                                                                                   subBpmnModelInstance);
+                    Status subProcessStatus = getWorkflowStatusByProcessInstanceId(jobId, entry.getKey(), subBpmnModelInstance);
                     if (subProcessStatus != null)
                     {
                         currentStatus.getSubProcesses().add(subProcessStatus);
@@ -188,7 +187,9 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
                 });
             }
             workflowStatus = currentStatus;
-        } else {
+        }
+        else
+        {
             String errMsg = "Can not find the Job with jobId " + jobId;
             LOGGER.error(errMsg);
             throw new JobNotFoundException(HttpStatus.NOT_FOUND.value(), errMsg);
@@ -197,7 +198,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     }
 
     private Status getWorkflowStatusByProcessInstanceId(final String jobId, final String processInstanceId,
-                                                        final BpmnModelInstance bpmnModelInstance)
+            final BpmnModelInstance bpmnModelInstance)
     {
         Status status = null;
 
@@ -208,23 +209,20 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
             currentStatus.setId(processInstanceId);
 
             final HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                                                                                  .processInstanceId(processInstanceId)
-                                                                                  .singleResult();
+                    .processInstanceId(processInstanceId).singleResult();
 
             if (historicProcessInstance != null)
             {
                 currentStatus.setState(Status.StatusState.fromValue(historicProcessInstance.getState()));
 
-                List<HistoricActivityInstance> historicActivityInstances = historyService
-                        .createHistoricActivityInstanceQuery().processInstanceId(processInstanceId)
-                        .orderByHistoricActivityInstanceStartTime().asc().list();
+                List<HistoricActivityInstance> historicActivityInstances = historyService.createHistoricActivityInstanceQuery()
+                        .processInstanceId(processInstanceId).orderByHistoricActivityInstanceStartTime().asc().list();
 
-                List<Activity> completed = processHistoryActivities(historicProcessInstance, historicActivityInstances,
-                                                                    bpmnModelInstance);
+                List<Activity> completed = processHistoryActivities(historicProcessInstance, historicActivityInstances, bpmnModelInstance);
                 currentStatus.setCompletedSteps(completed);
 
                 List<HistoricVariableInstance> details = historyService.createHistoricVariableInstanceQuery()
-                                                                       .processInstanceId(processInstanceId).list();
+                        .processInstanceId(processInstanceId).list();
 
                 final Map<String, Object> properties = new HashMap<>();
                 if (details != null && !details.isEmpty())
@@ -245,11 +243,24 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
                         currentStatus.getErrors().add(error);
                         currentStatus.setState(Status.StatusState.FAILED);
                     }
+
+                    final Map<String, String> warnings = (Map<String, String>) properties.get(DelegateConstants.WORKFLOW_WARNING_MESSAGES);
+                    if (warnings != null)
+                    {
+                        warnings.keySet().forEach(warningCode -> {
+                            Warning warning = new Warning();
+                            warning.setWarningCode(warningCode);
+                            warning.setWarningMessage(warnings.get(warningCode));
+                            currentStatus.getWarnings().add(warning);
+                        });
+                    }
+
                     currentStatus.setAdditionalProperties(properties);
                 }
             }
 
-            if (Status.StatusState.ACTIVE.equals(currentStatus.getState())) {
+            if (Status.StatusState.ACTIVE.equals(currentStatus.getState()))
+            {
                 try
                 {
                     // get all active activities of the process instance (unique values)
@@ -290,8 +301,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
      * @return
      */
     private List<Activity> processHistoryActivities(HistoricProcessInstance historicProcessInstance,
-                                                    List<HistoricActivityInstance> historicActivityInstances,
-                                                    BpmnModelInstance bpmnModelInstance)
+            List<HistoricActivityInstance> historicActivityInstances, BpmnModelInstance bpmnModelInstance)
     {
 
         if (historicProcessInstance.getId() == null)
@@ -305,8 +315,8 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         for (HistoricActivityInstance hai : historicActivityInstances)
         {
             // skip some processes
-            if (!ActivityTypes.SUB_PROCESS.equals(hai.getActivityType()) && !ActivityTypes.TASK_SERVICE.equals(
-                    hai.getActivityType()) && !ActivityTypes.MULTI_INSTANCE_BODY.equals(hai.getActivityType()))
+            if (!ActivityTypes.SUB_PROCESS.equals(hai.getActivityType()) && !ActivityTypes.TASK_SERVICE.equals(hai.getActivityType())
+                    && !ActivityTypes.MULTI_INSTANCE_BODY.equals(hai.getActivityType()))
             {
                 continue;
             }
@@ -335,8 +345,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
         ModelElementInstance modelElementInstance = bpmnModelInstance.getModelElementById(activityId);
         if (modelElementInstance == null)
         {
-            modelElementInstance = bpmnModelInstance.getModelElementById(
-                    activityId.substring(0, activityId.indexOf("#multi")));
+            modelElementInstance = bpmnModelInstance.getModelElementById(activityId.substring(0, activityId.indexOf("#multi")));
         }
         if (modelElementInstance != null)
         {
@@ -349,8 +358,7 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
     {
         if (null == idGenerator)
         {
-            idGenerator = ((SpringProcessEngineConfiguration) ProcessEngines.getDefaultProcessEngine()
-                                                                            .getProcessEngineConfiguration())
+            idGenerator = ((SpringProcessEngineConfiguration) ProcessEngines.getDefaultProcessEngine().getProcessEngineConfiguration())
                     .getIdGenerator();
         }
         return idGenerator;

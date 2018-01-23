@@ -6,13 +6,11 @@
 
 package com.dell.cpsd.paqx.dne.service.delegates;
 
-import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.DelegateRequestModel;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.transformers.ApplyEsxiLicenseRequestTransformer;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
-import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,20 +59,16 @@ public class ApplyEsxiLicense extends BaseWorkflowDelegate
 
             updateDelegateStatus(taskName + " on Node " + nodeDetail.getServiceTag() + " was successful.");
         }
-        catch (TaskResponseFailureException ex)
+        catch (Exception ex)
         {
+            String warningMessage = "An unexpected exception occurred attempting to request " + taskName + ". Reason: " + ex.getMessage();
+            updateDelegateStatusWithWarning(delegateExecution, APPLY_ESXI_LICENSE_FAILED, warningMessage);
+
             // Deliberately do not fail the workflow if the apply ESXi license fails on the
             // adapter side because this is not a show stopper. By default an evaluation
             // license will be applied which lasts for 60 days making it possible to reconfigure
             // the license for the node via the VCenter UI.
-            String warningMessage = "WARNING: " + taskName + " failed. Reason: " + ex.getMessage();
-            updateDelegateStatus(warningMessage);
-        }
-        catch (Exception ex)
-        {
-            String errorMessage = "An unexpected exception occurred attempting to request " + taskName + ". Reason: ";
-            updateDelegateStatus(errorMessage, ex);
-            throw new BpmnError(APPLY_ESXI_LICENSE_FAILED, errorMessage + ex.getMessage());
+            //throw new BpmnError(APPLY_ESXI_LICENSE_FAILED, errorMessage + ex.getMessage());
         }
     }
 }
