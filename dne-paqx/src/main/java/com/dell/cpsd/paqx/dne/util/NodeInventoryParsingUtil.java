@@ -34,6 +34,7 @@ public class NodeInventoryParsingUtil
 
     private static final String DMI_FIELD          = "dmi";
     private static final String SMART_SOURCE       = "smart";
+    private static final String OHAI_SOURCE       = "ohai";
     private static final String SOLID_STATE_DEVICE = "Solid State Device";
     private static final String DEVICE_PATH_BY_ID  = "/dev/disk/by-id/wwn-";
 
@@ -190,5 +191,33 @@ public class NodeInventoryParsingUtil
         }
 
         return newDevices;
+    }
+
+    public static String parseToFetchMacAddress(String jsonString)
+    {
+        String macAddress = null;
+        if (jsonString != null)
+        {
+            DocumentContext context = JsonPath.parse(jsonString.toLowerCase());
+            int length = context.read("$.length()");
+            String source;
+            for (int iCount = 0; iCount < length; iCount++)
+            {
+                source = context.read("$[" + iCount + "]['source']", String.class);
+                if (OHAI_SOURCE.equalsIgnoreCase(source))
+                {
+                    try
+                    {
+                        macAddress = context.read("$[" + iCount + "]['data']['macaddress']", String.class);
+                        break;
+                    }
+                    catch (PathNotFoundException e)
+                    {
+                        LOGGER.error("Could not parse node inventory field : ", e);
+                    }
+                }
+            }
+        }
+        return macAddress;
     }
 }

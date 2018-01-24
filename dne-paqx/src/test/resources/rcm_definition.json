@@ -1,0 +1,74 @@
+{
+  "rcmInventoryItems": [
+    {
+      "uuid": "57a662f7-9d61-4d25-b59b-eccae1637488",
+      "systemProductFamily": "VxRack",
+      "systemModelFamily": "1000 FLEX",
+      "rcmTrain": "3.2",
+      "rcmVersion": "3.2.1",
+      "initialReleaseDate": "March 2017",
+      "lastModificationDate": "June 22, 2017 19:17:08",
+      "endOfLifeDate": "September 2018",
+      "viewOption": "ORIGINAL",
+      "links": [
+        {
+          "rel": "self",
+          "method": "GET",
+          "href": "/rcm/inventory/VxRack/1000 FLEX/3.2/3.2.1?rcmType=ORIGINAL"
+        },
+        {
+          "rel": "content",
+          "method": "GET",
+          "href": "/rcm/definition/57a662f7-9d61-4d25-b59b-eccae1637488"
+        }
+      ]
+    },
+    {
+      "uuid": "eb4c415e-2551-4cef-b41e-e019b35f24d1",
+      "systemProductFamily": "VxRack",
+      "systemModelFamily": "1000 FLEX",
+      "rcmTrain": "3.2",
+      "rcmVersion": "3.2.3",
+      "initialReleaseDate": "October 2017",
+      "lastModificationDate": "September 05, 2017 19:30:19",
+      "endOfLifeDate": "September 2018",
+      "viewOption": "ORIGINAL",
+      "links": [
+        {
+          "rel": "self",
+          "method": "GET",
+          "href": "/rcm/inventory/VxRack/1000 FLEX/3.2/3.2.3?rcmType=ORIGINAL"
+        },
+        {
+          "rel": "content",
+          "method": "GET",
+          "href": "/rcm/definition/eb4c415e-2551-4cef-b41e-e019b35f24d1"
+        }
+      ]
+    },
+    {
+      "uuid": "dc44c06e-dc6b-4a5e-9cde-0395b85255f2",
+      "systemProductFamily": "VxRack",
+      "systemModelFamily": "1000 FLEX",
+      "rcmTrain": "3.2",
+      "rcmVersion": "3.2.2",
+      "initialReleaseDate": "May 2017",
+      "lastModificationDate": "August 08, 2017 21:12:15",
+      "endOfLifeDate": "September 2018",
+      "viewOption": "ORIGINAL",
+      "links": [
+        {
+          "rel": "self",
+          "method": "GET",
+          "href": "/rcm/inventory/VxRack/1000 FLEX/3.2/3.2.2?rcmType=ORIGINAL"
+        },
+        {
+          "rel": "content",
+          "method": "GET",
+          "href": "/rcm/definition/dc44c06e-dc6b-4a5e-9cde-0395b85255f2"
+        }
+      ]
+    }
+  ],
+  "message": null
+}

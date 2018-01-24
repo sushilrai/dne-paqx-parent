@@ -6,6 +6,8 @@
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
 import com.dell.cpsd.*;
+//import com.dell.cpsd.common.rabbitmq.annotation.Message;
+import com.dell.cpsd.hal.service.api.CollectComponentVersions;
 import com.dell.cpsd.contract.extension.amqp.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
@@ -64,6 +66,12 @@ public class AmqpDneProducer implements DneProducer
 
     @Autowired
     private String essReqRoutingKeyPrefix;
+
+    @Autowired
+    private String rcmRequestExchange;
+
+    @Autowired
+    private String rcmRequestRoutingKey;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmqpDneProducer.class);
     private final RabbitTemplate   rabbitTemplate;
@@ -626,6 +634,26 @@ public class AmqpDneProducer implements DneProducer
         {
             LOGGER.info("Send Fail node allocation request message from DNE Service.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    }
+
+    @Override
+    public void publishTriggerRcmCollectComponents(CollectComponentVersions requestMessage)
+    {
+        // As there is no capability exposed to trigger the RCM collect components, there is no lookup from capability registry
+        LOGGER.info("Sending request to trigger RCM collections job.");
+        rabbitTemplate.convertAndSend(rcmRequestExchange, rcmRequestRoutingKey, requestMessage);
+    }
+
+    @Override
+    public void publishRacadmFirmwareListCatalogService(ConfigureRacadmFirmwareListCatalogRequestMessage requestMessage)
+    {
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ConfigureRacadmFirmwareListCatalogRequestMessage.class);
+
+        if (endpointHelper != null)
+        {
+            LOGGER.info("Send configure racadm firmware list catalog request message from DNE Service.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), requestMessage);
         }
     }
 

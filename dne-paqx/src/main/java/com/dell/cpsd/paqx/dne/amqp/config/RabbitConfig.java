@@ -8,6 +8,7 @@ import com.dell.cpsd.*;
 import com.dell.cpsd.common.rabbitmq.MessageAnnotationProcessor;
 import com.dell.cpsd.common.rabbitmq.message.DefaultMessageConverterFactory;
 import com.dell.cpsd.common.rabbitmq.retrypolicy.DefaultRetryPolicyFactory;
+import com.dell.cpsd.hal.service.api.CollectComponentVersions;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettings;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsResponse;
@@ -117,6 +118,13 @@ public class RabbitConfig
 
     @Value("${ess.res.routing.prefix}")
     private String              essRespRoutingKeyPrefix;
+
+    @Value("${rcm.req.exchange.name}")
+    private String              rcmRequestExchangeName;
+
+    @Value("${rcm.req.routing.key}")
+    private String              rcmRequestRoutingKey;
+
     /*
      * The RabbitMQ connection factory
      */
@@ -345,6 +353,11 @@ public class RabbitConfig
         messageClasses.add(CreateProtectionDomainRequestMessage.class);
         messageClasses.add(CreateProtectionDomainResponseMessage.class);
 
+        messageClasses.add(CollectComponentVersions.class);
+
+        messageClasses.add(ConfigureRacadmFirmwareListCatalogRequestMessage.class);
+        messageClasses.add(ConfigureRacadmFirmwareListCatalogResponseMessage.class);
+
         MessageAnnotationProcessor messageAnnotationProcessor = new MessageAnnotationProcessor();
         messageAnnotationProcessor.process(classMappings::put, messageClasses);
         
@@ -398,6 +411,18 @@ public class RabbitConfig
     public Binding essBinding()
     {
         return BindingBuilder.bind(essResponseQueue()).to(essResponseExchange()).with(essRespRoutingKeyPrefix + ".#");
+    }
+
+    @Bean (name="rcmRequestExchange")
+    public String rcmRequestExchange()
+    {
+        return rcmRequestExchangeName;
+    }
+
+    @Bean (name="rcmRequestRoutingKey")
+    public String rcmRequestRoutingKey()
+    {
+        return rcmRequestRoutingKey;
     }
 
 }

@@ -49,4 +49,11 @@ public class NodeInventoryParsingUtilTest
         DiscoveredNodeInfo discoveredNodeInfo = NodeInventoryParsingUtil.parseDiscoveredNodeInfo("not a json string", "123456789abc");
         Assert.assertNull(discoveredNodeInfo);
     }
+
+    @Test
+    public void testParseToFetchMacAddress()  {
+        String macAddress = NodeInventoryParsingUtil.parseToFetchMacAddress(jsonString);
+        Assert.assertNotNull(macAddress);
+        Assert.assertTrue("F8:BC:12:1A:66:90".equalsIgnoreCase(macAddress));
+    }
 }

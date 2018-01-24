@@ -28,6 +28,7 @@ public class DelegateConstants
     public static final String HOST_PCI_DEVICE_ID        = "HostPCIDeviceId";
     public static final String IOCTL_INI_GUI_STR         = "IoctlIniGuidStr";
     public static final String VIRTUAL_MACHINE_NAME      = "VirtualMachineName";
+    public static final String EVALUATION_RESULTS        = "EvaluationResults";
 
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
@@ -94,6 +95,8 @@ public class DelegateConstants
     public static final String ADD_NODES_TO_SYSTEM_DEFINITION_MESSAGE_ID      = "receiveAddNodesToSystemDefinitionMsgId";
     public static final String ADD_NODES_TO_SYSTEM_DEFINITION_ACTIVITY_ID     = "receiveAddNodesToSystemDefinition";
     public static final String MARK_NODE_DETAIL_COMPLETED_FAILED              = "Mark-Node-Detail-Completed-Failed";
+    public static final String RCM_EVALUATION_FAILED                          = "RCM-Evaluation-Failed";
+    public static final String RACADM_FIRMWARE_LIST_CATALOG_FAILED            = "Racadm-Firmware-List-Catalog-Failed";
 
     public static final String FAILED      = "Failed";
     public static final String IN_PROGRESS = "In Progress";

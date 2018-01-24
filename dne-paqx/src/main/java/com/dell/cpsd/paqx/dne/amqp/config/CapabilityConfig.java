@@ -5,6 +5,7 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -25,6 +26,11 @@ import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityMatcher;
 import com.dell.cpsd.hdp.capability.registry.client.binder.rpc.AmqpRpcCapabilityBindingService;
 import com.dell.cpsd.hdp.capability.registry.client.lookup.config.CapabilityRegistryLookupManagerConfig;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * <p>
@@ -138,7 +144,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("scaleio-create-storage-pool"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("scaleio-create-protection-domain")
+                        .withProfile("scaleio-create-protection-domain"),
+                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("rackhd-racadm-firmware-list-catalog")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");
@@ -156,6 +164,11 @@ public class CapabilityConfig
             {
                 capabilityBinder.bind();
                 LOGGER.info("found list of capablities with size {} after bind", capabilityBinder.getCurrentCapabilities().size());
+                StringJoiner joiner = new StringJoiner(", ");
+                capabilityBinder.getCurrentCapabilities().stream().filter(Objects::nonNull).forEach(capabilityData -> joiner.add(capabilityData
+                        .getCapability().getProfile()));
+
+                LOGGER.info("List of capabilities: " + joiner.toString());
             }
             catch (ServiceTimeoutException | CapabilityRegistryException e)
             {
