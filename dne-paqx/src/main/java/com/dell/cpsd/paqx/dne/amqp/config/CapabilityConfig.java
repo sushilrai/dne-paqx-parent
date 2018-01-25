@@ -138,7 +138,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("scaleio-create-storage-pool"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("scaleio-create-protection-domain")
+                        .withProfile("scaleio-create-protection-domain"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("rackhd-install-rhel")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

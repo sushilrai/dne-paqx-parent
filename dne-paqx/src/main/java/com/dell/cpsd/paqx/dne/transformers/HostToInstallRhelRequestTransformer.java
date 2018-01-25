@@ -159,7 +159,7 @@ public class HostToInstallRhelRequestTransformer
         final BondedNetworkDevice bondInterface = new BondedNetworkDevice();
         final BondVlanInterface bondVlanInterface = new BondVlanInterface();
         bondInterface.setNics(Arrays.asList("em2", "p1p2"));
-        bondInterface.setDevice("bond0");
+        bondInterface.setName("bond0");
 
         final BootImageNetworkAddressV4 bootImageNetworkAddressV4 = new BootImageNetworkAddressV4();
         bootImageNetworkAddressV4.setIpAddr(ipv4Configuration.getStorageOnlyManagementIpAddress());

@@ -284,6 +284,9 @@ public class RabbitConfig
         messageClasses.add(InstallESXiRequestMessage.class);
         messageClasses.add(InstallESXiResponseMessage.class);
 
+        messageClasses.add(InstallRHELRequestMessage.class);
+        messageClasses.add(InstallRHELResponseMessage.class);
+
         messageClasses.add(AddHostToDvSwitchRequestMessage.class);
         messageClasses.add(AddHostToDvSwitchResponseMessage.class);
 
