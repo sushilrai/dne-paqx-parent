@@ -3,8 +3,10 @@
  * Copyright &copy; 2017 Dell Inc. or its subsidiaries. All Rights Reserved. Dell EMC Confidential/Proprietary Information
  * </p>
  */
+
 package com.dell.cpsd.paqx.dne.service.delegates;
 
+import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -12,13 +14,16 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Amy_Reed on 8/15/2017.
  */
 public abstract class BaseWorkflowDelegate implements JavaDelegate
 {
 
-    private Logger logger;
+    private   Logger logger;
     protected String taskName;
 
     public BaseWorkflowDelegate(final Logger logger, final String taskName)
@@ -32,9 +37,11 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
     {
         final RepositoryService repositoryService = delegateExecution.getProcessEngineServices().getRepositoryService();
         final String processInstanceId = delegateExecution.getProcessInstanceId();
-        final String workflowName = repositoryService.createProcessDefinitionQuery().processDefinitionId(delegateExecution.getProcessDefinitionId()).singleResult().getName();
+        final String workflowName = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionId(delegateExecution.getProcessDefinitionId()).singleResult().getName();
         String jobId = delegateExecution.getProcessBusinessKey();
-        if (jobId == null) {
+        if (jobId == null)
+        {
             ExecutionEntity executionEntity = (ExecutionEntity) delegateExecution;
             ExecutionEntity processInstance = executionEntity.getProcessInstance();
             if (processInstance != null)
@@ -47,7 +54,8 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
             }
         }
 
-        logger.info("$$$$$$ Starting Execution on Job Id: " + jobId + " Process Instance Id: "+ processInstanceId + " Workflow: " + workflowName + " Step: " + taskName + " $$$$$$");
+        logger.info("$$$$$$ Starting Execution on Job Id: " + jobId + " Process Instance Id: " + processInstanceId + " Workflow: "
+                + workflowName + " Step: " + taskName + " $$$$$$");
         preExecute(delegateExecution);
         try
         {
@@ -68,7 +76,8 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
         finally
         {
             postExecute(delegateExecution);
-            logger.info("$$$$$$ Completing Execution on Job Id: " + jobId + " Process Instance Id: "+ processInstanceId + " Workflow: " + workflowName + " Step: " + taskName + " $$$$$$");            
+            logger.info("$$$$$$ Completing Execution on Job Id: " + jobId + " Process Instance Id: " + processInstanceId + " Workflow: "
+                    + workflowName + " Step: " + taskName + " $$$$$$");
         }
     }
 
@@ -76,28 +85,65 @@ public abstract class BaseWorkflowDelegate implements JavaDelegate
 
     /**
      * PreExecute functionality to allow for updating status information before execution.
+     *
      * @param delegateExecution
      */
-    public void preExecute(final DelegateExecution delegateExecution) {
+    public void preExecute(final DelegateExecution delegateExecution)
+    {
     }
 
     /**
      * PostExecute functionality to allow for updating status information after execution.
+     *
      * @param delegateExecution
      */
-    public void postExecute(final DelegateExecution delegateExecution) {
+    public void postExecute(final DelegateExecution delegateExecution)
+    {
     }
 
-    public void updateDelegateStatus(final String statusString) {
+    public void updateDelegateStatus(final String statusString)
+    {
         updateDelegateStatus(statusString, null);
     }
 
-    public void updateDelegateStatus(final String statusString, final Exception exception) {
-        if (exception != null) {
+    public void updateDelegateStatus(final String statusString, final Exception exception)
+    {
+        if (exception != null)
+        {
             logger.error(statusString, exception);
-        } else
+        }
+        else
         {
             logger.info(statusString);
         }
+    }
+
+    public void updateDelegateStatusWithWarning(final DelegateExecution delegateExecution, final String warningCode,
+            final String warningMessage)
+    {
+        updateDelegateStatusWithWarning(delegateExecution, warningCode, warningMessage, null);
+    }
+
+    public void updateDelegateStatusWithWarning(final DelegateExecution delegateExecution, final String warningCode,
+            final String warningMessage, final Exception exception)
+    {
+        if (exception != null)
+        {
+            logger.warn(warningMessage, exception);
+        }
+        else
+        {
+            logger.warn(warningMessage);
+        }
+
+        Map<String, String> warnings = (Map<String, String>) delegateExecution.getVariable(DelegateConstants.WORKFLOW_WARNING_MESSAGES);
+        if (warnings == null)
+        {
+            warnings = new HashMap<>();
+        }
+
+        warnings.put(warningCode, warningMessage);
+
+        delegateExecution.setVariable(DelegateConstants.WORKFLOW_WARNING_MESSAGES, warnings);
     }
 }

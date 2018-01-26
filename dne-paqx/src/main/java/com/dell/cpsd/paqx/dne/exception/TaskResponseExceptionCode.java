@@ -43,8 +43,9 @@ public enum TaskResponseExceptionCode
     CREATE_PROTECTION_DOMAIN(1024),
     CONFIGURE_PXE_BOOT(1025),
     INSTALL_ESXI(1026),
-    INSTALL_RHEL(1027);
-
+    RACADM_FIRMWARE_LIST_CATALOG(1027);
+    INSTALL_RHEL(1028);
+  
     private final int code;
 
     TaskResponseExceptionCode(final int code)

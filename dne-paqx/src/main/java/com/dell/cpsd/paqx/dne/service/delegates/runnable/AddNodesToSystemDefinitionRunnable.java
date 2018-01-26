@@ -36,6 +36,7 @@ public class AddNodesToSystemDefinitionRunnable implements Runnable
     private static final Logger LOGGER = LoggerFactory.getLogger(AddNodesToSystemDefinitionRunnable.class);
 
     private static final String COMPONENT_SERVER_TEMPLATE = "COMMON-DELL-POWEREDGE";
+    private static final String POWEREDGE = "POWEREDGE";
     private final String                processId;
     private final String                activityId;
     private final String                messageId;
@@ -132,11 +133,15 @@ public class AddNodesToSystemDefinitionRunnable implements Runnable
                 endpoints.add("RACKHD-EP");
                 newComponent.setUuid(nodeInfo.getSymphonyUuid());
                 newComponent.setIdentity(
-                        new Identity("SERVER", nodeInfo.getSymphonyUuid(), nodeInfo.getSymphonyUuid(), nodeInfo.getSerialNumber(), null));
+                        new Identity("SERVER", nodeDetail.getMacAddress(), nodeInfo.getSymphonyUuid(), nodeInfo.getSerialNumber(), null));
+
+                //TODO this has to be fixed in the RCM side, it should take what comes in from RackHD
+                String model = nodeInfo.getModel().split("\\s+")[0];
                 newComponent.setDefinition(
-                        new Definition(nodeInfo.getProductFamily(), nodeInfo.getProduct(), nodeInfo.getModelFamily(), nodeInfo.getModel()));
+                        new Definition(POWEREDGE, POWEREDGE, model.substring(1), model.toUpperCase()));
+
                 newComponent.setParentGroupUuids(this.mapGroupNamesToUUIDs(parentGroups, systemToBeUpdated.getGroups()));
-                newComponent.setEndpoints(new ArrayList<>());
+                newComponent.setEndpoints(endpoints);
                 List<Credential> newCredentials = this.sdkAMQPClient
                         .addComponentToConvergedSystem(systemToBeUpdated, newComponent, endpoints, COMPONENT_SERVER_TEMPLATE);
                 credentialAdditions.addAll(newCredentials);

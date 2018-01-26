@@ -377,6 +377,14 @@
             <artifactId>gson</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.dell.cpsd</groupId>
+            <artifactId>hal-orchestrator-service-api</artifactId>
+            <classifier>schemas</classifier>
+            <type>zip</type>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -431,6 +439,18 @@
                         <configuration>
                             <includeGroupIds>com.dell.cpsd</includeGroupIds>
                             <includeArtifactIds>discovered-nodes-capabilities-api</includeArtifactIds>
+                            <includes>**\/*.jsd</includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-json-schemas-hal-orchestrator</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.dell.cpsd</includeGroupIds>
+                            <includeArtifactIds>hal-orchestrator-service-api</includeArtifactIds>
                             <includes>**\/*.jsd</includes>
                         </configuration>
                     </execution>
@@ -549,6 +569,28 @@
                             <useCommonsLang3>true</useCommonsLang3>
                             <sourceSortOrder>FILES_FIRST</sourceSortOrder>
                             <includeAdditionalProperties>false</includeAdditionalProperties>
+                            <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
+                            <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-json-model-hal-orchestrator</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/dependency/hal-orchestrator-service-api/schema/json</sourceDirectory>
+                            <targetPackage>com.dell.cpsd.hal.service.api</targetPackage>
+                            <outputDirectory>${project.build.directory}/generated-sources/hal-orchestrator-service-api</outputDirectory>
+                            <removeOldOutput>false</removeOldOutput>
+                            <useLongIntegers>true</useLongIntegers>
+                            <generateBuilders>true</generateBuilders>
+                            <includeConstructors>true</includeConstructors>
+                            <includeAdditionalProperties>false</includeAdditionalProperties>
+                            <serializable>false</serializable>
+                            <useCommonsLang3>true</useCommonsLang3>
+                            <includeJsr303Annotations>false</includeJsr303Annotations>
                             <customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator</customAnnotator>
                             <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
                         </configuration>

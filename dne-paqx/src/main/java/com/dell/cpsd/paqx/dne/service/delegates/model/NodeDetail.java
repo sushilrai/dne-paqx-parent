@@ -51,9 +51,13 @@ public class NodeDetail implements Serializable
     private String vMotionManagementSubnetMask;
     private String protectionDomainName;
     private String protectionDomainId;
+    private String rcmVersion;
 
     @JsonIgnore
     private boolean completed;
+
+    @JsonIgnore
+    private String macAddress;
 
     public NodeDetail()
     {
@@ -437,5 +441,25 @@ public class NodeDetail implements Serializable
     public void setCompleted(final boolean completed)
     {
         this.completed = completed;
+    }
+
+    public String getMacAddress()
+    {
+        return macAddress;
+    }
+
+    public void setMacAddress(final String macAddress)
+    {
+        this.macAddress = macAddress;
+    }
+
+    public String getRcmVersion()
+    {
+        return rcmVersion;
+    }
+
+    public void setRcmVersion(final String rcmVersion)
+    {
+        this.rcmVersion = rcmVersion;
     }
 }

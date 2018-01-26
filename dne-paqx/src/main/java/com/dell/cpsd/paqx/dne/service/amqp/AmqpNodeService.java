@@ -12,6 +12,8 @@ import com.dell.cpsd.CompleteNodeAllocationResponseMessage;
 import com.dell.cpsd.ConfigurePxeBootError;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootResponseMessage;
+import com.dell.cpsd.ConfigureRacadmFirmwareListCatalogRequestMessage;
+import com.dell.cpsd.ConfigureRacadmFirmwareListCatalogResponseMessage;
 import com.dell.cpsd.FailNodeAllocationRequestMessage;
 import com.dell.cpsd.FailNodeAllocationResponseMessage;
 import com.dell.cpsd.ListNodes;
@@ -24,6 +26,7 @@ import com.dell.cpsd.SetObmSettingsResponseMessage;
 import com.dell.cpsd.StartNodeAllocationRequestMessage;
 import com.dell.cpsd.StartNodeAllocationResponseMessage;
 import com.dell.cpsd.common.logging.ILogger;
+import com.dell.cpsd.hal.service.api.CollectComponentVersions;
 import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
@@ -49,6 +52,7 @@ import com.dell.cpsd.paqx.dne.service.amqp.adapter.ChangeIdracCredentialsRespons
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ClustersListedResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CompleteNodeAllocationResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureObmSettingsResponseAdapter;
+import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureRacadmFirmwareListCatalogResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.ConfigureVmNetworkSettingsResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateProtectionDomainResponseAdapter;
 import com.dell.cpsd.paqx.dne.service.amqp.adapter.CreateStoragePoolAdapter;
@@ -193,6 +197,7 @@ import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.INSTALL
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_ESXI_DEFAULT_CREDENTIALS;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_SCALEIO_COMPONENTS;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.LIST_VCENTER_COMPONENTS;
+import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.RACADM_FIRMWARE_LIST_CATALOG;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REBOOT_HOST;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.REMOTE_COMMAND_EXECUTION;
 import static com.dell.cpsd.paqx.dne.exception.TaskResponseExceptionCode.UPDATE_SDC_PERFORMANCE_PROFILE;
@@ -318,6 +323,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         this.consumer.addAdapter(new SioSdcUpdatePerformanceProfileResponseAdapter(this));
         this.consumer.addAdapter(new CreateStoragePoolAdapter(this));
         this.consumer.addAdapter(new CreateProtectionDomainResponseAdapter(this));
+        this.consumer.addAdapter(new ConfigureRacadmFirmwareListCatalogResponseAdapter(this));
     }
 
     /**
@@ -2344,5 +2350,77 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     public ComponentEndpointIds getComponentEndpointIds(String componentType)
     {
         return repository.getComponentEndpointIds(componentType);
+    }
+
+    public void triggerRCMCollectionsJob()
+    {
+        com.dell.cpsd.hal.service.api.MessageProperties messageProperties = new com.dell.cpsd.hal.service.api.MessageProperties();
+        messageProperties.setCorrelationId(UUID.randomUUID().toString());
+        messageProperties.setTimestamp(Calendar.getInstance().getTime());
+//        messageProperties.setReplyTo(replyTo);
+
+        CollectComponentVersions request = new CollectComponentVersions();
+        request.setMessageProperties(messageProperties);
+
+        // RCM does not send back response based on replyTo from producer, rather it sends the message back
+        // on a generic queue.
+        producer.publishTriggerRcmCollectComponents(request);
+
+    }
+
+    @Override
+    public String postRacadmFirmwareListCatalogService(String uuid, String macAddress) throws TaskResponseFailureException
+    {
+        try
+        {
+            com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setTimestamp(Calendar.getInstance().getTime());
+            messageProperties.setReplyTo(replyTo);
+
+            ConfigureRacadmFirmwareListCatalogRequestMessage requestMessage = new ConfigureRacadmFirmwareListCatalogRequestMessage();
+
+            requestMessage.setMessageProperties(messageProperties);
+            requestMessage.setComponentUuid(uuid);
+            requestMessage.setMacAddress(macAddress);
+
+            ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+            {
+                @Override
+                public String getRequestId()
+                {
+                    return messageProperties.getCorrelationId();
+                }
+
+                @Override
+                public void executeRequest(String requestId) throws Exception
+                {
+                    producer.publishRacadmFirmwareListCatalogService(requestMessage);
+                }
+            });
+
+            final ConfigureRacadmFirmwareListCatalogResponseMessage responseMessage = processResponse(response,
+                    ConfigureRacadmFirmwareListCatalogResponseMessage.class);
+
+            if (responseMessage == null)
+            {
+                final String error = "ConfigureRacadmFirmwareListCatalogResponseMessage is null";
+                LOGGER.error(error);
+                throw new TaskResponseFailureException(RACADM_FIRMWARE_LIST_CATALOG.getCode(), error);
+            }
+
+            if (responseMessage.getStatus().equals(ConfigureRacadmFirmwareListCatalogResponseMessage.Status.FAILED))
+            {
+                LOGGER.error(responseMessage.getMessage());
+                throw new TaskResponseFailureException(RACADM_FIRMWARE_LIST_CATALOG.getCode(), responseMessage.getMessage());
+            }
+
+            return responseMessage.getSystemDefUuid();
+        }
+        catch (ServiceTimeoutException | ServiceExecutionException e)
+        {
+            LOGGER.error("Exception occurred", e);
+            throw new TaskResponseFailureException(RACADM_FIRMWARE_LIST_CATALOG.getCode(), e.getMessage());
+        }
     }
 }

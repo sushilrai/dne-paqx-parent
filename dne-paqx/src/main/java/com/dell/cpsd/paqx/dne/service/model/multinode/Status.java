@@ -37,6 +37,7 @@ public class Status
     private List<Activity> currentActivities;
     private List<Activity> completedSteps = new ArrayList<>();
     private List<Error> errors = new ArrayList<>();
+    private List<Warning> warnings = new ArrayList<>();
     private List<Status> subProcesses = new ArrayList<>();
     private Map<String, Object> additionalProperties;
 
@@ -99,6 +100,16 @@ public class Status
     public void setErrors(final List<Error> errors)
     {
         this.errors = errors;
+    }
+
+    public List<Warning> getWarnings()
+    {
+        return warnings;
+    }
+
+    public void setWarnings(final List<Warning> warnings)
+    {
+        this.warnings = warnings;
     }
 
     public Map<String, Object> getAdditionalProperties()

@@ -6,6 +6,7 @@
 package com.dell.cpsd.paqx.dne.service.delegates.request;
 
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
+import com.dell.cpsd.paqx.dne.service.NodeService;
 import com.dell.cpsd.paqx.dne.service.delegates.model.NodeDetail;
 import com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants;
 import com.dell.cpsd.sdk.AMQPClient;
@@ -54,15 +55,19 @@ public class SendAddNodesToSystemDefinitionTest
     @Mock
     private DelegateExecution delegateExecution;
 
+    @Mock
+    private NodeService                    nodeService;
+
     private SendAddNodesToSystemDefinition sendAddNodesToSystemDefinition;
     private NodeDetail                     nodeDetail;
     private List<NodeDetail>               completedNodeDetails;
+
 
     @Before
     public void setUp() throws Exception
     {
         sendAddNodesToSystemDefinition = new SendAddNodesToSystemDefinition(runtimeService, sdkAMQPClient, repository,
-                dneTaskExecutorService);
+                dneTaskExecutorService, nodeService);
 
         nodeDetail = new NodeDetail();
         nodeDetail.setServiceTag("abc");

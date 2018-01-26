@@ -6,6 +6,8 @@
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
 import com.dell.cpsd.*;
+import com.dell.cpsd.hal.service.api.CollectComponentVersions;
+import com.dell.cpsd.paqx.dne.exception.TaskResponseFailureException;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
@@ -307,4 +309,18 @@ public interface DneProducer
      * @param requestMessage
      */
     void publishFailedNodeAllocation(FailNodeAllocationRequestMessage requestMessage);
+
+    /**
+     * Triggers RCM collect components job.
+     *
+     * @param requestMessage
+     */
+    void publishTriggerRcmCollectComponents(CollectComponentVersions requestMessage);
+
+    /**
+     * Posts racadm-firmware-list-catalog service to Rackhd.
+     *
+     * @param requestMessage
+     */
+    void publishRacadmFirmwareListCatalogService(ConfigureRacadmFirmwareListCatalogRequestMessage requestMessage);
 }

@@ -18,16 +18,17 @@ package com.dell.cpsd.paqx.dne.service.delegates.utils;
 public class DelegateConstants
 {
 
-    public static final String NODE_DETAILS            = "NodeDetails";
-    public static final String NODE_DETAIL             = "NodeDetail";
-    public static final String FAILED_NODE_DETAILS     = "FailedNodeDetails";
-    public static final String COMPLETED_NODE_DETAILS  = "CompletedNodeDetails";
-    public static final String ESXI_CREDENTIAL_DETAILS = "ESXiCredentialDetails";
-    public static final String HOSTNAME                = "Hostname";
-    public static final String DATASTORE_NAME          = "DatastoreName";
-    public static final String HOST_PCI_DEVICE_ID      = "HostPCIDeviceId";
-    public static final String IOCTL_INI_GUI_STR       = "IoctlIniGuidStr";
-    public static final String VIRTUAL_MACHINE_NAME    = "VirtualMachineName";
+    public static final String NODE_DETAILS              = "NodeDetails";
+    public static final String NODE_DETAIL               = "NodeDetail";
+    public static final String WORKFLOW_WARNING_MESSAGES = "WorkflowWarningMessages";
+    public static final String COMPLETED_NODE_DETAILS    = "CompletedNodeDetails";
+    public static final String ESXI_CREDENTIAL_DETAILS   = "ESXiCredentialDetails";
+    public static final String HOSTNAME                  = "Hostname";
+    public static final String DATASTORE_NAME            = "DatastoreName";
+    public static final String HOST_PCI_DEVICE_ID        = "HostPCIDeviceId";
+    public static final String IOCTL_INI_GUI_STR         = "IoctlIniGuidStr";
+    public static final String VIRTUAL_MACHINE_NAME      = "VirtualMachineName";
+    public static final String EVALUATION_RESULTS        = "EvaluationResults";
 
     //Message IDs
     public static final String CONFIGURE_BOOT_DEVICE_MESSAGE_ID = "configureBootDeviceResponseReceived";
@@ -97,6 +98,8 @@ public class DelegateConstants
     public static final String ADD_NODES_TO_SYSTEM_DEFINITION_MESSAGE_ID      = "receiveAddNodesToSystemDefinitionMsgId";
     public static final String ADD_NODES_TO_SYSTEM_DEFINITION_ACTIVITY_ID     = "receiveAddNodesToSystemDefinition";
     public static final String MARK_NODE_DETAIL_COMPLETED_FAILED              = "Mark-Node-Detail-Completed-Failed";
+    public static final String RCM_EVALUATION_FAILED                          = "RCM-Evaluation-Failed";
+    public static final String RACADM_FIRMWARE_LIST_CATALOG_FAILED            = "Racadm-Firmware-List-Catalog-Failed";
 
     public static final String FAILED      = "Failed";
     public static final String IN_PROGRESS = "In Progress";

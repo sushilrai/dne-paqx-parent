@@ -413,4 +413,22 @@ public interface NodeService
      */
     List<Host> findVcenterHosts() throws NoResultException;
 
+    /**
+     * Triggers RCM Collections job
+     *
+     * @return List of <code>Host</code>
+     * @throws NoResultException
+     */
+    void triggerRCMCollectionsJob();
+
+    /**
+     * Posts racadm-firmware-list-catalog service to rackhd for that node
+     *
+     * @param uuid node discovery uuid of the node
+     * @param macAddress mac address of the node
+     * @return List of <code>Host</code>
+     * @throws NoResultException
+     */
+    String postRacadmFirmwareListCatalogService(String uuid, String macAddress) throws TaskResponseFailureException;
+
 }

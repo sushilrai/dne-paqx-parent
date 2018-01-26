@@ -1,0 +1,109 @@
+{
+  "rcmEvaluationResults": [
+    {
+      "elementUuid": "17266285-9b82-4b33-aa21-45f7b53e6898",
+      "evaluationMessage": "The firmware version [2.2.5] was not found in [2.4.3]",
+      "actualValue": "2.2.5",
+      "expectedValues": [
+        "2.4.3"
+      ],
+      "evaluationResult": "mismatch",
+      "evaluatedRcmDatum": {
+        "rcmUuid": "eb4c415e-2551-4cef-b41e-e019b35f24d1",
+        "category": "Base",
+        "component": "Dell BIOS Firmware",
+        "type": "Compute - Dell (R630/R730)",
+        "subType": "Base Software",
+        "rcmTrain": "3.2",
+        "rcmVersion": "3.2.3",
+        "systemProductFamily": "VxRack",
+        "systemModelFamily": "1000 FLEX",
+        "vendor": "DELL",
+        "productFamily": "POWEREDGE",
+        "product": "POWEREDGE",
+        "modelFamily": "x30",
+        "model": "Ax30aa",
+        "versions": [
+          "2.4.3"
+        ],
+        "rcmComponentUuid": "fcb3f402-8566-4b02-83fc-1bd5628a5503"
+      },
+      "evaluatedVersionDatum": {
+        "componentUuid": "17266285-9b82-4b33-aa21-45f7b53e6898",
+        "deviceUuid": "2d2ff24e-b1f1-3055-9a61-66300c79649a",
+        "identity": {
+          "elementType": "BIOS",
+          "identifier": "BIOS",
+          "serialNumber": "BIOS.Setup.1-1",
+          "networkIdentity": {}
+        },
+        "definition": {
+          "productFamily": "POWEREDGE",
+          "product": "POWEREDGE",
+          "modelFamily": "630",
+          "model": "R630"
+        },
+        "versions": [
+          {
+            "type": "FIRMWARE",
+            "version": "2.2.5"
+          }
+        ],
+        "groups": []
+      }
+    },
+    {
+      "elementUuid": "0ae921fd-0dc4-493c-a8d9-48a670f4b802",
+      "evaluationMessage": "The firmware version [2.40.40.40] was found in [2.40.40.40]",
+      "actualValue": "2.40.40.40",
+      "expectedValues": [
+        "2.40.40.40"
+      ],
+      "evaluationResult": "match",
+      "evaluatedRcmDatum": {
+        "rcmUuid": "eb4c415e-2551-4cef-b41e-e019b35f24d1",
+        "category": "Base",
+        "component": "Dell iDRAC / Lifecycle Controller Firmware",
+        "type": "Compute - Dell (R630/R730)",
+        "subType": "Base Software",
+        "rcmTrain": "3.2",
+        "rcmVersion": "3.2.3",
+        "systemProductFamily": "VxRack",
+        "systemModelFamily": "1000 FLEX",
+        "vendor": "DELL",
+        "productFamily": "POWEREDGE",
+        "product": "POWEREDGE",
+        "modelFamily": "x30",
+        "model": "Ax30aa",
+        "versions": [
+          "2.40.40.40"
+        ],
+        "rcmComponentUuid": "81eff0c0-c6ea-4a97-8307-f15e4a7addfb"
+      },
+      "evaluatedVersionDatum": {
+        "componentUuid": "0ae921fd-0dc4-493c-a8d9-48a670f4b802",
+        "deviceUuid": "2d2ff24e-b1f1-3055-9a61-66300c79649a",
+        "identity": {
+          "elementType": "iDRAC",
+          "identifier": "Integrated Remote Access Controller",
+          "serialNumber": "iDRAC.Embedded.1-1",
+          "networkIdentity": {}
+        },
+        "definition": {
+          "productFamily": "POWEREDGE",
+          "product": "POWEREDGE",
+          "modelFamily": "630",
+          "model": "R630"
+        },
+        "versions": [
+          {
+            "type": "FIRMWARE",
+            "version": "2.40.40.40"
+          }
+        ],
+        "groups": []
+      }
+    }
+  ],
+  "message": null
+}
